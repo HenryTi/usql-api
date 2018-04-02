@@ -1,0 +1,57 @@
+{
+    "center": "http://localhost:3000/tv",
+    "port": 3013,
+    "debugUser": -99,
+    "debugUnit": -99,
+    "secret": "dddd-wwww",
+    "appSecret": "335#56-H699,m",
+    "sqlType": "mysql",
+    "uploadPath": "../uploads/",
+    "connection.do": {
+        "host": "do.thplay.cn",
+        "user": "root",
+        "password": "MySql688283^&&&((",
+        "multipleStatements": true
+    },
+    "connection": {
+        "host": "101.200.46.56",
+        "user": "root",
+        "password": "wpmKMPS2xwlG3ZC",
+        "multipleStatements": true
+    },
+    "connection1": {
+        "name":"default",
+        "port":9933
+    },
+    "bull": {
+        "name": "job", 
+        "connection": {
+            "redis": {
+                "port": "6379",
+                "host": "127.0.0.1"
+            }
+        }
+    },
+    "projects1": {
+        "first": {
+            "db": "tonva_首个测试",
+            "sourcePath": "first"
+        },
+        "sci_article": {
+            "db": "sci_article",
+            "sourcePath": "sci/article"
+        },
+        "sci_customer": {
+            "db": "sci_customer",
+            "sourcePath": "sci/customer"
+        },
+        "仓储物流": {
+            "db": "仓储物流",
+            "sourcePath": "仓储物流"
+        },
+        "货主": {
+            "db": "货主",
+            "sourcePath": "货主"
+        }
+    }
+}

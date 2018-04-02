@@ -1,0 +1,12 @@
+APP SCI_Customer version='1.01' author='henry';
+
+ACCESS acc (customer);
+
+TUID Customer (
+    id,
+    main name char(50) not null,
+    discription text,
+    contact char(30),
+    unique (name),
+    search (name, discription),
+);

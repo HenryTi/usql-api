@@ -1,0 +1,64 @@
+TUID Customer (
+    id,
+    main name char(50) not null,
+    discription text,
+    d2 dec,
+    unique (name),
+    search (name, discription),
+);
+
+TUID Article (
+    id,
+    main name char(50) not null,
+    discription text,
+    casNO char(10),
+    extra text,
+    tryNotNull char(100) not null,
+    unique (name),
+    search (name, discription),
+);
+
+TUID BArticle extends Article (
+    id,
+    main aci char(20),
+);
+
+SHEET Order (
+    客户 id Customer,
+    Arr articles (
+        article id Article,
+        price dec(12,2),
+        quantity int,
+        amount dec(12,2),
+    )
+)
+Action 批准订单 {
+    state to 备货;
+    bus bus1.complex1 set a1=1, c3=2, bbba37='a37';
+}
+Action 不批准 {
+    state to delete;
+}
+State 备货 {
+    Action 发货 {
+        foreach articles {
+            history customerArticleHistory of (客户, article)
+                set price=price, quantity=quantity, amount=amount;
+        }
+        state to end;
+    }
+};
+
+History customerArticleHistory (
+    date,
+    key customer id Customer,
+    key article id Article,
+    price dec(12,2),
+    quantity int,
+    amount dec(12,2),
+    type,
+    sheet s1,
+    row s2,
+    user,
+    unit,
+);

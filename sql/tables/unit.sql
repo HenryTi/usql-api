@@ -1,0 +1,9 @@
+CREATE TABLE `unit` (
+	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`name` TINYTEXT NOT NULL,
+	PRIMARY KEY (`id`)
+)
+COMMENT='创建app的单位'
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+;

@@ -1,0 +1,8 @@
+// item exchange data structure
+// "discription": "t2v sample",
+// "author": "henry",
+// "date": "2017-10-20",
+// 最简方式 ["a1", "#a2", "@a3"]
+{
+    "": ["a1", "#a2", "@a3"]
+}

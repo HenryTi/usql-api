@@ -1,0 +1,43 @@
+{
+    // 使用 IntelliSense 以学习相关的 Node.js 调试属性。
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "启动程序",
+            "cwd": "${workspaceRoot}",
+            "stopOnEntry": false,        
+            "runtimeExecutable": null,
+            "windows": {
+                "runtimeExecutable": "npm.cmd"
+            },
+            "runtimeArgs": [
+                "run-script", "debug"
+            ],
+            "restart": true,
+            /*
+            "runtimeArgs": [
+                "--nolazy"
+            ],*/
+            "env": {
+                /*"NODE_ENV": "development"*/
+                "NODE_ENV": "stage"
+            },
+            "port": 5858,
+            "program": "${workspaceRoot}/out/index.js",
+            //"program": "${workspaceRoot}/node_modules/nodemon/bin/nodemon.js",
+            /*
+            "args": [
+                "${workspaceRoot}/out/index.js"
+            ],*/
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceRoot}/out/**/*.js"
+            ],
+            "protocol": "legacy"
+        }
+    ]
+}
