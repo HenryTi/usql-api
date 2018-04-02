@@ -61,6 +61,7 @@ app.use('/usql/hello', (req:Request, res:Response) => {
 
 (app as any).ws('/usql', wsOnConnected);
 
+/*
 const uploadPath = config.get<string>("uploadPath");
 var upload = multer({ dest: uploadPath });
 async function readFileAsync(filename?:string, code?:string) {
@@ -90,6 +91,7 @@ app.use('/upload', (req:Request, res:Response) => {
         res.json({'hello': 'ok'});
     });
 });
+*/
 
 let port = config.get<number>('port');
 app.listen(port, async ()=>{

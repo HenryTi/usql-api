@@ -9,10 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
-const fs = require("fs");
 const bodyParser = require("body-parser");
 const config = require("config");
-const multer = require("multer");
 const tv_1 = require("./tv");
 const unitx_1 = require("./tv/unitx");
 const ws_1 = require("./ws");
@@ -62,44 +60,37 @@ app.use('/usql/hello', (req, res) => {
     res.json({ "hello": 'usql-api - 中文测试' });
 });
 app.ws('/usql', ws_1.wsOnConnected);
-const uploadPath = config.get("uploadPath");
+/*
+const uploadPath = config.get<string>("uploadPath");
 var upload = multer({ dest: uploadPath });
-function readFileAsync(filename, code) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(function (resolve, reject) {
-            try {
-                fs.readFile(filename, code, function (err, buffer) {
-                    if (err)
-                        reject(err);
-                    else
-                        resolve(buffer);
-                });
-            }
-            catch (err) {
-                reject(err);
-            }
-        });
-    });
-}
-;
-app.use('/upload', (req, res) => {
-    upload.any()(req, res, function (err) {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (err) {
-                res.json({ 'error': 'error' });
-                return;
-            }
-            let files = req.files;
-            for (let f of files) {
-                let filename = uploadPath + f.filename;
-                let text = yield readFileAsync(filename, 'utf8');
-                console.log(text);
-                fs.unlinkSync(filename);
-            }
-            res.json({ 'hello': 'ok' });
-        });
+async function readFileAsync(filename?:string, code?:string) {
+  return new Promise<string>(function (resolve, reject) {
+      try {
+          fs.readFile(filename, code, function(err, buffer){
+              if (err) reject(err); else resolve(buffer);
+          });
+      } catch (err) {
+          reject(err);
+      }
+  });
+};
+app.use('/upload', (req:Request, res:Response) => {
+    upload.any()(req, res, async function(err) {
+        if (err) {
+          res.json({'error': 'error'});
+          return;
+        }
+        let files = req.files;
+        for (let f of files as Express.Multer.File[]) {
+          let filename = uploadPath + f.filename;
+          let text = await readFileAsync(filename, 'utf8');
+          console.log(text);
+          fs.unlinkSync(filename);
+        }
+        res.json({'hello': 'ok'});
     });
 });
+*/
 let port = config.get('port');
 app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
     console.log('listening on port ' + port);

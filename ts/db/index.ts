@@ -58,16 +58,23 @@ export function dbNameFromProject(projectName:string) {
 }
 */
 
+const dbCollection:{[name:string]:string} = (function () {
+    const dbColl = "db";
+    if (!config.has(dbColl)) return {};
+    return config.get<any>("db");
+})();
+
 export function getDb(name:string):Db {
     let db = dbs[name];
     if (db !== undefined) return db;
+    let dbName = dbCollection[name];
+    if (dbName === undefined) dbName = name;
     //let dbName = dbNameFromProject(name);
     //if (dbName === undefined) return;
     // 开发用户定义usqldb之后，直接用usqldb的dbname，所以，dbname不能有符号什么的，因为会通过url上传
     //if (dbName === undefined) 
     //let dbName = name;
     if (dbServer === undefined) dbServer = createDbServer();
-    //dbs[name] = db = new Db(dbName);
-    dbs[name] = db = new Db(name);
+    dbs[name] = db = new Db(dbName);
     return db;
 }
