@@ -59,7 +59,7 @@ app.use('/usql/:db/tv', [authCheck, tv_1.default]);
 // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
 app.use('/usql/:db/debug', [authDebug, tv_1.default]);
 app.use('/usql/hello', (req, res) => {
-    res.json({ "hello": '中文' });
+    res.json({ "hello": 'usql-api - 中文测试' });
 });
 app.ws('/usql', ws_1.wsOnConnected);
 const uploadPath = config.get("uploadPath");
