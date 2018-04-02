@@ -4,7 +4,7 @@ import {MsDbServer} from './ms';
 import {MyDbServer} from './my';
 
 function createDbServer() {
-    let sqlType = config.get<string>('');
+    let sqlType = config.get<string>('sqlType');
     let dbConfig = config.get<any>('connection');
     switch (sqlType) {
         case 'mysql': return new MyDbServer(dbConfig);
@@ -49,21 +49,25 @@ export class Db {
 const dbs:{[name:string]:Db} = {
 }
 
+/*
 const projects = config.get<any>("projects");
 
 export function dbNameFromProject(projectName:string) {
     let proj = projects[projectName];
     return proj && proj.db;
 }
+*/
 
 export function getDb(name:string):Db {
     let db = dbs[name];
     if (db !== undefined) return db;
-    let dbName = dbNameFromProject(name);
+    //let dbName = dbNameFromProject(name);
     //if (dbName === undefined) return;
     // 开发用户定义usqldb之后，直接用usqldb的dbname，所以，dbname不能有符号什么的，因为会通过url上传
-    if (dbName === undefined) dbName = name;
+    //if (dbName === undefined) 
+    //let dbName = name;
     if (dbServer === undefined) dbServer = createDbServer();
-    dbs[name] = db = new Db(dbName);
+    //dbs[name] = db = new Db(dbName);
+    dbs[name] = db = new Db(name);
     return db;
 }
