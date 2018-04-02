@@ -56,7 +56,7 @@ app.use('/usql/:db/tv', [authCheck, tv]);
 app.use('/usql/:db/debug', [authDebug, tv]);
 
 app.use('/usql/hello', (req:Request, res:Response) => {
-  res.json({"hello": '中文'});
+  res.json({"hello": 'usql-api - 中文测试'});
 });
 
 (app as any).ws('/usql', wsOnConnected);
