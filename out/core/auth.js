@@ -4,8 +4,6 @@ const jwt = require("jsonwebtoken");
 const config = require("config");
 const debugUser = config.get('debugUser');
 const debugUnit = config.get('debugUnit');
-let env = config.util.getEnv("NODE_ENV");
-let a = config.get('connection');
 class Auth {
     constructor(roles) {
         if (roles === undefined) {
