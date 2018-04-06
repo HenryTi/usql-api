@@ -5,9 +5,6 @@ import * as config from 'config';
 const debugUser = config.get<number>('debugUser');
 const debugUnit = config.get<number>('debugUnit');
 
-let env = config.util.getEnv("NODE_ENV");
-let a = config.get('connection');
-
 export default class Auth {
     private roles: string[];
     private anyRole: boolean;
