@@ -32,11 +32,18 @@ router.get('/access', (req, res) => __awaiter(this, void 0, void 0, function* ()
     let user = req.user;
     let { name } = req.params;
     let { acc } = req.query;
+    let accArr;
+    if (acc === undefined || acc.trim().length === 0) {
+        accArr = undefined;
+    }
+    else {
+        accArr = acc.split('|');
+    }
     let db = user.db;
     let runner = yield checkRunner(db, res);
     if (runner === undefined)
         return;
-    let access = yield runner.getAccesses(acc && acc.split('|'));
+    let access = yield runner.getAccesses(accArr);
     res.json({
         ok: true,
         res: access,

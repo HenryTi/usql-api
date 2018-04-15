@@ -30,10 +30,17 @@ router.get('/access', async (req:Request, res:Response) => {
     let user:User = (req as any).user;
     let {name} = req.params;
     let {acc} = (req as any).query;
+    let accArr:string[];
+    if (acc === undefined || (acc as string).trim().length === 0) {
+        accArr = undefined;
+    }
+    else {
+        accArr = (acc as string).split('|');
+    }
     let db = user.db;
     let runner = await checkRunner(db, res);
     if (runner === undefined) return;
-    let access = await runner.getAccesses(acc && (acc as string).split('|'));
+    let access = await runner.getAccesses(accArr);
     res.json({
         ok: true,
         res: access,
