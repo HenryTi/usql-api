@@ -3,7 +3,7 @@
     "port": 3015,
     "debugUser": -99,
     "debugUnit": -99,
-    "secret": "dddd-wwww",
+    "secret": "xxx-yyy-zzz-00110",
     "sqlType": "mysql",
     "connection": {
         "host": "0.0.0.0",
