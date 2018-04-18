@@ -5,7 +5,7 @@
     "debugUnit": -99,
     "sqlType": "mysql",
     "connection": {
-        "host": "000.111.22.33",
+        "host": "0.0.0.0",
         "user": "usr",
         "password": "pwd",
         "multipleStatements": true
