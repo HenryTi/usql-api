@@ -90,6 +90,11 @@ class CenterApi extends Fetch {
             return yield this.get('/open/unitx', { unit: unit });
         });
     }
+    usqlDb(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.get('/open/usqldb', { name: name });
+        });
+    }
 }
 exports.centerApi = new CenterApi();
 class UnitxApi extends Fetch {

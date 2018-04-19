@@ -81,6 +81,10 @@ class CenterApi extends Fetch {
     async unitx(unit:number):Promise<any> {
         return await this.get('/open/unitx', {unit:unit});
     }
+
+    async usqlDb(name:string):Promise<any> {
+        return await this.get('/open/usqldb', {name:name});
+    }
 }
 
 export const centerApi = new CenterApi();

@@ -1,0 +1,8 @@
+{
+    "connection": {
+        "host": "101.200.46.56",
+        "user": "root",
+        "password": "wpmKMPS2xwlG3ZC",
+        "multipleStatements": true
+    }
+}
