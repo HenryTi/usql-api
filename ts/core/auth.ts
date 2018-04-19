@@ -46,6 +46,7 @@ export default class Auth {
             return;
         }
         let secret = config.get<string>('secret'); // .appSecret;
+        console.log('auth check: secret=%s, token=%s', secret, token);
         jwt.verify(token, secret, 
             (err, decoded:{
                     db: string,
@@ -54,6 +55,7 @@ export default class Auth {
                     roles: string,
                     }) => 
         {
+            console.log('auth check: err=%s', JSON.stringify(err));
             if (err === null) {
                 decoded.db = req.params.db;
                 (req as any).user = decoded;
