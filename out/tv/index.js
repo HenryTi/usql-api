@@ -173,7 +173,10 @@ router.post('/tuids/:name', (req, res) => __awaiter(this, void 0, void 0, functi
         let rows = result[0];
         res.json({
             ok: true,
-            res: rows,
+            res: {
+                more: more,
+                rows: rows,
+            }
         });
     }
     catch (err) {

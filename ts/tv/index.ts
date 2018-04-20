@@ -167,7 +167,10 @@ router.post('/tuids/:name', async (req:Request, res:Response) => {
         let rows = result[0];
         res.json({
             ok: true,
-            res: rows,
+            res: {
+                more: more,
+                rows: rows,
+            }
         });
     }
     catch(err) {
