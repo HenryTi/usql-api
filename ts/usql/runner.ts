@@ -231,13 +231,16 @@ export class Runner {
                 }
             }
         }
+        console.log('access: %s', JSON.stringify(this.access, undefined, ""));
     }
 
     async getAccesses(acc:string[]):Promise<any> {
         await this.initSchemas();
         let ret = {} as any;
         if (acc === undefined) {
-            for (let a in this.access) _.merge(ret, this.access[a]);
+            for (let a in this.access) {
+                _.merge(ret, this.access[a]);
+            }
         }
         else {
             for (let a of acc) _.merge(ret, this.access[a]);

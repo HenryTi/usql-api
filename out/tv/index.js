@@ -33,7 +33,7 @@ router.get('/access', (req, res) => __awaiter(this, void 0, void 0, function* ()
     let { name } = req.params;
     let { acc } = req.query;
     let accArr;
-    if (acc === undefined || acc.trim().length === 0) {
+    if (acc === undefined || acc.trim().length === 0 || acc === '*') {
         accArr = undefined;
     }
     else {

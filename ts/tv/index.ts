@@ -31,7 +31,7 @@ router.get('/access', async (req:Request, res:Response) => {
     let {name} = req.params;
     let {acc} = (req as any).query;
     let accArr:string[];
-    if (acc === undefined || (acc as string).trim().length === 0) {
+    if (acc === undefined || (acc as string).trim().length === 0 || acc === '*') {
         accArr = undefined;
     }
     else {

@@ -247,14 +247,16 @@ class Runner {
                 }
             }
         }
+        console.log('access: %s', JSON.stringify(this.access, undefined, ""));
     }
     getAccesses(acc) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.initSchemas();
             let ret = {};
             if (acc === undefined) {
-                for (let a in this.access)
+                for (let a in this.access) {
                     _.merge(ret, this.access[a]);
+                }
             }
             else {
                 for (let a of acc)
