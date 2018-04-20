@@ -180,6 +180,7 @@ export class Runner {
                 this.buses[url] = schema;
             }
         }
+        console.log('schema: %s', JSON.stringify(this.schemas, undefined, ''));
         this.buildAccesses();
     }
 
