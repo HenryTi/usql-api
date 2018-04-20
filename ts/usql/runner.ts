@@ -164,6 +164,7 @@ export class Runner {
     async initSchemas() {
         if (this.schemas !== undefined) return;
         let rows = await this.loadSchemas();
+        console.log('schema raw rows: %s', JSON.stringify(rows));
         this.schemas = {};
         this.buses = {};
         for (let row of rows) {
@@ -180,7 +181,7 @@ export class Runner {
                 this.buses[url] = schema;
             }
         }
-        console.log('schema: %s', JSON.stringify(this.schemas, undefined, ''));
+        console.log('schema: %s', JSON.stringify(this.schemas));
         this.buildAccesses();
     }
 
@@ -232,7 +233,7 @@ export class Runner {
                 }
             }
         }
-        console.log('access: %s', JSON.stringify(this.access, undefined, ""));
+        console.log('access: %s', JSON.stringify(this.access));
     }
 
     async getAccesses(acc:string[]):Promise<any> {

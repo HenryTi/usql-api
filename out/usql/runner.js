@@ -179,6 +179,7 @@ class Runner {
             if (this.schemas !== undefined)
                 return;
             let rows = yield this.loadSchemas();
+            console.log('schema raw rows: %s', JSON.stringify(rows));
             this.schemas = {};
             this.buses = {};
             for (let row of rows) {
@@ -195,7 +196,7 @@ class Runner {
                     this.buses[url] = schema;
                 }
             }
-            console.log('schema: %s', JSON.stringify(this.schemas, undefined, ''));
+            console.log('schema: %s', JSON.stringify(this.schemas));
             this.buildAccesses();
         });
     }
@@ -248,7 +249,7 @@ class Runner {
                 }
             }
         }
-        console.log('access: %s', JSON.stringify(this.access, undefined, ""));
+        console.log('access: %s', JSON.stringify(this.access));
     }
     getAccesses(acc) {
         return __awaiter(this, void 0, void 0, function* () {
