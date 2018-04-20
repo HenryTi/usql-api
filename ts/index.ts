@@ -74,7 +74,10 @@ import { Request, Response, NextFunction } from 'express';
 
     let port = config.get<number>('port');
     app.listen(port, async ()=>{
-        console.log('listening on port ' + port);
+        console.log('USQL-API listening on port ' + port);
+        console.log('process.env.NODE_ENV: %s, connection: %s',
+            process.env.NODE_ENV,
+            JSON.stringify(config.get<any>("connection")));
         // await startupUsqlApp((text:string) => console.log(text || ''));
     });
 

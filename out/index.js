@@ -72,7 +72,8 @@ const core_1 = require("./core");
     app.ws('/usql', ws_1.wsOnConnected);
     let port = config.get('port');
     app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
-        console.log('listening on port ' + port);
+        console.log('USQL-API listening on port ' + port);
+        console.log('process.env.NODE_ENV: %s, connection: %s', process.env.NODE_ENV, JSON.stringify(config.get("connection")));
         // await startupUsqlApp((text:string) => console.log(text || ''));
     }));
     tv_1.queue.add({ job: undefined })
