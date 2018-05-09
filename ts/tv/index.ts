@@ -105,6 +105,30 @@ router.get('/tuid/:name/:id', async (req:Request, res:Response) => {
     }
 });
 
+router.get('/tuid-proxy/:name/:type/:id', async (req:Request, res:Response) => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {id, type, name} = req.params;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined) return unknownEntity(res, name);
+        let schemaCall = schema.call;
+        if (validEntity(res, schemaCall, 'tuid') === false) return;
+        let result = await runner.tuidProxyGet(name, user.unit, user.id, id, type);
+        let row = result[0];
+        res.json({
+            ok: true,
+            res: row,
+        });
+    }
+    catch(err) {
+        res.json({error: err});
+        return;
+    }
+});
+
 router.post('/tuid/:name', async (req:Request, res:Response) => {
     try {
         let user:User = (req as any).user;
@@ -163,14 +187,15 @@ router.post('/tuids/:name', async (req:Request, res:Response) => {
         let body = (req as any).body;
         let values = [user.unit, user.id, body.key, body.pageStart, body.pageSize];
         let result = await runner.tuidSeach(name, user.unit, user.id, body.key||'', body.pageStart, body.pageSize);
-        let more = false;
+        //let more = false;
         let rows = result[0];
         res.json({
             ok: true,
-            res: {
-                more: more,
-                rows: rows,
-            }
+            res: rows,
+            //res: {
+            //    more: more,
+            //    rows: rows,
+            //}
         });
     }
     catch(err) {

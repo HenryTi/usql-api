@@ -94,6 +94,9 @@ export class Runner {
     tuidGet(tuid:string, unit:number, user:number, id:number): Promise<any> {
         return this.db.call('tv' + tuid, [unit, user, id]);
     }
+    tuidProxyGet(tuid:string, unit:number, user:number, id:number, type:string): Promise<any> {
+        return this.db.call('tv' + tuid + '_proxy', [unit, user, id, type]);
+    }
     tuidIds(tuid:string, unit:number, user:number, ids:string): Promise<any> {
         return this.db.call('tv' + tuid + '_ids', [unit, user, ids]);
     }
@@ -200,7 +203,7 @@ export class Runner {
                 let id = entity && entity.id;
                 switch (len) {
                     case 1:
-                        acc[i0] = type + '|' + id;
+                        acc[i0] = type + '|' + id + this.tuidProxies(entity);
                         break;
                     case 2:
                         a2 = acc[i0];
@@ -234,6 +237,18 @@ export class Runner {
             }
         }
         console.log('access: %s', JSON.stringify(this.access));
+    }
+
+    private tuidProxies(tuid:any) {
+        let ret = '';
+        if (tuid === undefined) return ret;
+        if (tuid.type !== 'tuid') return ret;
+        let proxies = tuid.proxies;
+        if (proxies === undefined) return ret;
+        for (let i in proxies) {
+            ret += '|' + i;
+        }
+        return ret;
     }
 
     async getAccesses(acc:string[]):Promise<any> {

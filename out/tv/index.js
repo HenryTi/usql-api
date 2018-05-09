@@ -108,6 +108,32 @@ router.get('/tuid/:name/:id', (req, res) => __awaiter(this, void 0, void 0, func
         return;
     }
 }));
+router.get('/tuid-proxy/:name/:type/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        let user = req.user;
+        let db = user.db;
+        let { id, type, name } = req.params;
+        let runner = yield checkRunner(db, res);
+        if (runner === undefined)
+            return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined)
+            return unknownEntity(res, name);
+        let schemaCall = schema.call;
+        if (validEntity(res, schemaCall, 'tuid') === false)
+            return;
+        let result = yield runner.tuidProxyGet(name, user.unit, user.id, id, type);
+        let row = result[0];
+        res.json({
+            ok: true,
+            res: row,
+        });
+    }
+    catch (err) {
+        res.json({ error: err });
+        return;
+    }
+}));
 router.post('/tuid/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         let user = req.user;
@@ -169,14 +195,11 @@ router.post('/tuids/:name', (req, res) => __awaiter(this, void 0, void 0, functi
         let body = req.body;
         let values = [user.unit, user.id, body.key, body.pageStart, body.pageSize];
         let result = yield runner.tuidSeach(name, user.unit, user.id, body.key || '', body.pageStart, body.pageSize);
-        let more = false;
+        //let more = false;
         let rows = result[0];
         res.json({
             ok: true,
-            res: {
-                more: more,
-                rows: rows,
-            }
+            res: rows,
         });
     }
     catch (err) {

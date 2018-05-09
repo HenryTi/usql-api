@@ -103,6 +103,9 @@ class Runner {
     tuidGet(tuid, unit, user, id) {
         return this.db.call('tv' + tuid, [unit, user, id]);
     }
+    tuidProxyGet(tuid, unit, user, id, type) {
+        return this.db.call('tv' + tuid + '_proxy', [unit, user, id, type]);
+    }
     tuidIds(tuid, unit, user, ids) {
         return this.db.call('tv' + tuid + '_ids', [unit, user, ids]);
     }
@@ -216,7 +219,7 @@ class Runner {
                 let id = entity && entity.id;
                 switch (len) {
                     case 1:
-                        acc[i0] = type + '|' + id;
+                        acc[i0] = type + '|' + id + this.tuidProxies(entity);
                         break;
                     case 2:
                         a2 = acc[i0];
@@ -250,6 +253,20 @@ class Runner {
             }
         }
         console.log('access: %s', JSON.stringify(this.access));
+    }
+    tuidProxies(tuid) {
+        let ret = '';
+        if (tuid === undefined)
+            return ret;
+        if (tuid.type !== 'tuid')
+            return ret;
+        let proxies = tuid.proxies;
+        if (proxies === undefined)
+            return ret;
+        for (let i in proxies) {
+            ret += '|' + i;
+        }
+        return ret;
     }
     getAccesses(acc) {
         return __awaiter(this, void 0, void 0, function* () {

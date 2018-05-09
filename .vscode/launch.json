@@ -26,7 +26,7 @@
                 /*"NODE_ENV": "development"*/
                 "NODE_ENV": "stage"
             },
-            "port": 5858,
+            "port": 5857,
             "program": "${workspaceRoot}/out/index.js",
             //"program": "${workspaceRoot}/node_modules/nodemon/bin/nodemon.js",
             /*
