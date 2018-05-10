@@ -65,7 +65,9 @@ class Runner {
         return this.db.call('tv$start', [unit, user]);
     }
     set(unit, name, num, str) {
-        return this.db.call('tv$set', [unit, name, num, str]);
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.call('tv$set', [unit, name, num, str]);
+        });
     }
     getStr(unit, name) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -270,6 +272,11 @@ class Runner {
     }
     getAccesses(acc) {
         return __awaiter(this, void 0, void 0, function* () {
+            let reload = yield this.getNum(0, 'reloadSchemas');
+            if (reload === 1) {
+                this.schemas = undefined;
+                this.set(0, 'reloadSchemas', 0, null);
+            }
             yield this.initSchemas();
             let ret = {};
             if (acc === undefined) {

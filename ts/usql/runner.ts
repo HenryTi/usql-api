@@ -59,8 +59,8 @@ export class Runner {
         return this.db.call('tv$start', [unit, user]);
     }
 
-    set(unit:number, name: string, num: number, str: string): Promise<void> {
-        return this.db.call('tv$set', [unit, name, num, str]);
+    async set(unit:number, name: string, num: number, str: string): Promise<void> {
+        await this.db.call('tv$set', [unit, name, num, str]);
     }
 
     async getStr(unit:number, name: string):Promise<string> {
@@ -252,6 +252,11 @@ export class Runner {
     }
 
     async getAccesses(acc:string[]):Promise<any> {
+        let reload = await this.getNum(0, 'reloadSchemas');
+        if (reload === 1) {
+            this.schemas = undefined;
+            await this.set(0, 'reloadSchemas', 0, null);
+        }
         await this.initSchemas();
         let ret = {} as any;
         if (acc === undefined) {

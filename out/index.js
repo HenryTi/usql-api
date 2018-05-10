@@ -78,8 +78,13 @@ const core_1 = require("./core");
     }));
     tv_1.queue.add({ job: undefined })
         .then(job => {
-        console.log('redis server ok!');
-        return job.remove();
+        try {
+            console.log('redis server ok!');
+            return job.remove();
+        }
+        catch (err) {
+            console.log('redis server job.remove error: ' + err);
+        }
     })
         .catch(reason => {
         console.log('redis server error: ', reason);
