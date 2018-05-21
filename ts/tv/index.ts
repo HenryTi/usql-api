@@ -185,7 +185,7 @@ router.post('/tuids/:name', async (req:Request, res:Response) => {
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
         let body = (req as any).body;
-        let values = [user.unit, user.id, body.key, body.pageStart, body.pageSize];
+        //let values = [user.unit, user.id, body.key, body.pageStart, body.pageSize];
         let result = await runner.tuidSeach(name, user.unit, user.id, body.key||'', body.pageStart, body.pageSize);
         //let more = false;
         let rows = result[0];
@@ -196,6 +196,58 @@ router.post('/tuids/:name', async (req:Request, res:Response) => {
             //    more: more,
             //    rows: rows,
             //}
+        });
+    }
+    catch(err) {
+        res.json({error: err});
+    };
+});
+
+router.post('/tuid-slave/:name/:slave', async (req:Request, res:Response) => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {name, slave} = req.params;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let schema = runner.getSchema(slave);
+        if (schema === undefined) return unknownEntity(res, slave);
+        let schemaCall = schema.call;
+        if (validEntity(res, schemaCall, 'tuid') === false) return;
+        let body = (req as any).body;
+        let {$id, $master, $first} = body;
+        let params:any[] = [$master, $first, $id];
+        let fields = schemaCall.fields;
+        let len = fields.length;
+        for (let i=0; i<len; i++) {
+            params.push(body[fields[i].name]);
+        }
+        let result = await runner.tuidSlaveSave(name, slave, user.unit, user.id, params);
+        let row = result[0];
+        res.json({
+            ok: true,
+            res: row,
+        });
+    }
+    catch(err) {
+        res.json({error: err});
+        return;
+    }
+});
+
+router.get('/tuid-slaves/:name', async (req:Request, res:Response) => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {name} = req.params;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let {slave, masterId, pageStart, pageSize} = (req as any).query;
+        let result = await runner.tuidSlaves(name, user.unit, user.id, slave, masterId, pageStart, pageSize);
+        let rows = result[0];
+        res.json({
+            ok: true,
+            res: rows,
         });
     }
     catch(err) {

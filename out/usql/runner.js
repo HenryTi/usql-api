@@ -115,14 +115,28 @@ class Runner {
         return this.db.call('tv' + tuid + '_main', [unit, user, id]);
     }
     tuidSave(tuid, unit, user, params) {
-        return this.db.call('tv' + tuid + '_save', [unit, user, ...params]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + tuid + '_save', [unit, user, ...params]);
+        });
     }
     tuidSeach(tuid, unit, user, key, pageStart, pageSize) {
-        return this.db.tablesFromProc('tv' + tuid + '_search', [unit, user, key, pageStart, pageSize]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.tablesFromProc('tv' + tuid + '_search', [unit, user, key, pageStart, pageSize]);
+        });
     }
     sheetSave(sheet, unit, user, discription, data) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.call('tv$sheet_save', [unit, user, sheet, discription, data]);
+        });
+    }
+    tuidSlaveSave(tuid, slave, unit, user, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + tuid + '_' + slave + '_save', [unit, user, ...params]);
+        });
+    }
+    tuidSlaves(tuid, unit, user, slave, masterId, pageStart, pageSize) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.tablesFromProc('tv' + tuid + '_' + slave + '_ids', [unit, user, masterId, pageStart, pageSize]);
         });
     }
     sheetProcessing(sheetId) {
@@ -275,7 +289,7 @@ class Runner {
             let reload = yield this.getNum(0, 'reloadSchemas');
             if (reload === 1) {
                 this.schemas = undefined;
-                this.set(0, 'reloadSchemas', 0, null);
+                yield this.set(0, 'reloadSchemas', 0, null);
             }
             yield this.initSchemas();
             let ret = {};

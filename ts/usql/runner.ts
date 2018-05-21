@@ -103,14 +103,20 @@ export class Runner {
     tuidMain(tuid:string, unit:number, user:number, id:number): Promise<any> {
         return this.db.call('tv' + tuid + '_main', [unit, user, id]);
     }
-    tuidSave(tuid:string, unit:number, user:number, params:any[]): Promise<any> {
-        return this.db.call('tv' + tuid + '_save', [unit, user, ...params]);
+    async tuidSave(tuid:string, unit:number, user:number, params:any[]): Promise<any> {
+        return await this.db.call('tv' + tuid + '_save', [unit, user, ...params]);
     }
-    tuidSeach(tuid:string, unit:number, user:number, key:string, pageStart:number, pageSize:number): Promise<any> {
-        return this.db.tablesFromProc('tv' + tuid + '_search', [unit, user, key, pageStart, pageSize]);
+    async tuidSeach(tuid:string, unit:number, user:number, key:string, pageStart:number, pageSize:number): Promise<any> {
+        return await this.db.tablesFromProc('tv' + tuid + '_search', [unit, user, key, pageStart, pageSize]);
     }
     async sheetSave(sheet:string, unit:number, user:number, discription:string, data:string): Promise<{}> {
         return await this.db.call('tv$sheet_save', [unit, user, sheet, discription, data]);
+    }
+    async tuidSlaveSave(tuid:string, slave:string, unit:number, user:number, params:any[]): Promise<any> {
+        return await this.db.call('tv' + tuid + '_' + slave + '_save', [unit, user, ...params]);
+    }
+    async tuidSlaves(tuid:string, unit:number, user:number, slave:string, masterId:number, pageStart:number, pageSize:number): Promise<any> {
+        return await this.db.tablesFromProc('tv' + tuid + '_' + slave + '_ids', [unit, user, masterId, pageStart, pageSize]);
     }
     async sheetProcessing(sheetId:number):Promise<void> {
         await this.db.call('tv$sheet_processing', [sheetId]);
