@@ -108,6 +108,31 @@ router.get('/tuid/:name/:id', (req, res) => __awaiter(this, void 0, void 0, func
         return;
     }
 }));
+router.get('/tuid-all/:name/', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        let user = req.user;
+        let db = user.db;
+        let { name } = req.params;
+        let runner = yield checkRunner(db, res);
+        if (runner === undefined)
+            return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined)
+            return unknownEntity(res, name);
+        let schemaCall = schema.call;
+        if (validEntity(res, schemaCall, 'tuid') === false)
+            return;
+        let result = yield runner.tuidGetAll(name, user.unit, user.id);
+        res.json({
+            ok: true,
+            res: result,
+        });
+    }
+    catch (err) {
+        res.json({ error: err });
+        return;
+    }
+}));
 router.get('/tuid-proxy/:name/:type/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         let user = req.user;
@@ -169,20 +194,24 @@ router.post('/tuid/:name', (req, res) => __awaiter(this, void 0, void 0, functio
     }
 }));
 router.post('/tuidids/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
-    let user = req.user;
-    let db = user.db;
-    let { name } = req.params;
-    let runner = yield checkRunner(db, res);
-    if (runner === undefined)
-        return;
-    let body = req.body;
-    let ids = body.join(',');
-    runner.tuidIds(name, user.unit, user.id, ids).then(result => {
+    try {
+        let user = req.user;
+        let db = user.db;
+        let { name } = req.params;
+        let runner = yield checkRunner(db, res);
+        if (runner === undefined)
+            return;
+        let body = req.body;
+        let ids = body.join(',');
+        let result = yield runner.tuidIds(name, user.unit, user.id, ids);
         res.json({
             ok: true,
             res: result
         });
-    });
+    }
+    catch (err) {
+        res.json({ error: err });
+    }
 }));
 router.post('/tuids/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {

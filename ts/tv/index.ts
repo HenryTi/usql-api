@@ -105,6 +105,29 @@ router.get('/tuid/:name/:id', async (req:Request, res:Response) => {
     }
 });
 
+router.get('/tuid-all/:name/', async (req:Request, res:Response) => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {name} = req.params;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined) return unknownEntity(res, name);
+        let schemaCall = schema.call;
+        if (validEntity(res, schemaCall, 'tuid') === false) return;
+        let result = await runner.tuidGetAll(name, user.unit, user.id);
+        res.json({
+            ok: true,
+            res: result,
+        });
+    }
+    catch(err) {
+        res.json({error: err});
+        return;
+    }
+});
+
 router.get('/tuid-proxy/:name/:type/:id', async (req:Request, res:Response) => {
     try {
         let user:User = (req as any).user;
@@ -162,19 +185,23 @@ router.post('/tuid/:name', async (req:Request, res:Response) => {
 });
 
 router.post('/tuidids/:name', async (req:Request, res:Response) => {
-    let user:User = (req as any).user;
-    let db = user.db;
-    let {name} = req.params;
-    let runner = await checkRunner(db, res);
-    if (runner === undefined) return;
-    let body = (req as any).body;
-    let ids = (body as number[]).join(',');
-    runner.tuidIds(name, user.unit, user.id, ids).then(result => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {name} = req.params;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let body = (req as any).body;
+        let ids = (body as number[]).join(',');
+        let result = await runner.tuidIds(name, user.unit, user.id, ids);
         res.json({
             ok: true,
             res: result
         });
-    });
+    }
+    catch (err) {
+        res.json({error: err});
+    }
 });
 
 router.post('/tuids/:name', async (req:Request, res:Response) => {

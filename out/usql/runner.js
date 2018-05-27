@@ -59,10 +59,14 @@ class Runner {
         return this.db.createDatabase();
     }
     init(unit, user) {
-        return this.db.call('tv$init', [unit, user]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv$init', [unit, user]);
+        });
     }
     start(unit, user) {
-        return this.db.call('tv$start', [unit, user]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv$start', [unit, user]);
+        });
     }
     set(unit, name, num, str) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -91,28 +95,49 @@ class Runner {
         });
     }
     saveSchema(unit, user, id, name, type, schema, run) {
-        return this.db.call('tv$schema', [unit, user, id, name, type, schema, run]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv$schema', [unit, user, id, name, type, schema, run]);
+        });
     }
     loadConstStrs() {
-        return this.db.call('tv$const_strs', undefined);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv$const_strs', undefined);
+        });
     }
     saveConstStr(type) {
-        return this.db.call('tv$const_str', [type]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv$const_str', [type]);
+        });
     }
     loadSchemaVersion(name, version) {
-        return this.db.call('tv$schema_version', [name, version]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv$schema_version', [name, version]);
+        });
     }
     tuidGet(tuid, unit, user, id) {
-        return this.db.call('tv' + tuid, [unit, user, id]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + tuid, [unit, user, id]);
+        });
+    }
+    tuidGetAll(tuid, unit, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + tuid + '_all', [unit, user]);
+        });
     }
     tuidProxyGet(tuid, unit, user, id, type) {
-        return this.db.call('tv' + tuid + '_proxy', [unit, user, id, type]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + tuid + '_proxy', [unit, user, id, type]);
+        });
     }
     tuidIds(tuid, unit, user, ids) {
-        return this.db.call('tv' + tuid + '_ids', [unit, user, ids]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + tuid + '_ids', [unit, user, ids]);
+        });
     }
     tuidMain(tuid, unit, user, id) {
-        return this.db.call('tv' + tuid + '_main', [unit, user, id]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + tuid + '_main', [unit, user, id]);
+        });
     }
     tuidSave(tuid, unit, user, params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -153,24 +178,34 @@ class Runner {
         });
     }
     sheetStates(sheet, state, unit, user, pageStart, pageSize) {
-        let sql = 'tv$sheet_state';
-        return this.db.call(sql, [unit, user, sheet, state, pageStart, pageSize]);
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = 'tv$sheet_state';
+            return yield this.db.call(sql, [unit, user, sheet, state, pageStart, pageSize]);
+        });
     }
     sheetStateCount(sheet, unit, user) {
-        let sql = 'tv$sheet_state_count';
-        return this.db.call(sql, [unit, user, sheet]);
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = 'tv$sheet_state_count';
+            return yield this.db.call(sql, [unit, user, sheet]);
+        });
     }
     getSheet(sheet, unit, user, id) {
-        let sql = 'tv$sheet_id';
-        return this.db.call(sql, [unit, user, sheet, id]);
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = 'tv$sheet_id';
+            return yield this.db.call(sql, [unit, user, sheet, id]);
+        });
     }
     sheetArchives(sheet, unit, user, pageStart, pageSize) {
-        let sql = 'tv$archives';
-        return this.db.call(sql, [unit, user, sheet, pageStart, pageSize]);
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = 'tv$archives';
+            return yield this.db.call(sql, [unit, user, sheet, pageStart, pageSize]);
+        });
     }
     sheetArchive(unit, user, sheet, id) {
-        let sql = 'tv$archive_id';
-        return this.db.call(sql, [unit, user, sheet, id]);
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = 'tv$archive_id';
+            return yield this.db.call(sql, [unit, user, sheet, id]);
+        });
     }
     action(action, unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -181,7 +216,9 @@ class Runner {
         });
     }
     query(query, unit, user, params) {
-        return this.db.call('tv' + query, [unit, user, ...params]);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + query, [unit, user, ...params]);
+        });
     }
     unitxPost(msg) {
         return __awaiter(this, void 0, void 0, function* () {

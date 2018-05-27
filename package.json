@@ -21,7 +21,7 @@
     "@types/node-fetch": "^1.6.7",
     "@types/ws": "^3.2.0",
     "nodemon": "^1.11.0",
-    "typescript": "^2.8.1"
+    "typescript": "^2.8.3"
   },
   "dependencies": {
     "bluebird": "^3.5.1",

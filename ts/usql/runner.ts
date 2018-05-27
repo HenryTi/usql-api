@@ -52,11 +52,11 @@ export class Runner {
         return this.db.createDatabase();
     }
 
-    init(unit:number, user:number): Promise<void> {
-        return this.db.call('tv$init', [unit, user]);
+    async init(unit:number, user:number): Promise<void> {
+        return await this.db.call('tv$init', [unit, user]);
     }
-    start(unit:number, user:number): Promise<void> {
-        return this.db.call('tv$start', [unit, user]);
+    async start(unit:number, user:number): Promise<void> {
+        return await this.db.call('tv$start', [unit, user]);
     }
 
     async set(unit:number, name: string, num: number, str: string): Promise<void> {
@@ -78,30 +78,33 @@ export class Runner {
     async loadSchemas(): Promise<{id:number, name:string, type:number, version:number, schema:string, run:string}[]> {
         return await this.db.call('tv$schemas', undefined);
     }
-    saveSchema(unit:number, user:number, id:number, name:string, type:number, schema:string, run:string):Promise<any> {
-        return this.db.call('tv$schema', [unit, user, id, name, type, schema, run]);
+    async saveSchema(unit:number, user:number, id:number, name:string, type:number, schema:string, run:string):Promise<any> {
+        return await this.db.call('tv$schema', [unit, user, id, name, type, schema, run]);
     }
-    loadConstStrs(): Promise<{[name:string]:number}[]> {
-        return this.db.call('tv$const_strs', undefined);
+    async loadConstStrs(): Promise<{[name:string]:number}[]> {
+        return await this.db.call('tv$const_strs', undefined);
     }
-    saveConstStr(type:string): Promise<number> {
-        return this.db.call('tv$const_str', [type]);
+    async saveConstStr(type:string): Promise<number> {
+        return await this.db.call('tv$const_str', [type]);
     }
-    loadSchemaVersion(name:string, version:string): Promise<string> {
-        return this.db.call('tv$schema_version', [name, version]);
+    async loadSchemaVersion(name:string, version:string): Promise<string> {
+        return await this.db.call('tv$schema_version', [name, version]);
     } 
 
-    tuidGet(tuid:string, unit:number, user:number, id:number): Promise<any> {
-        return this.db.call('tv' + tuid, [unit, user, id]);
+    async tuidGet(tuid:string, unit:number, user:number, id:number): Promise<any> {
+        return await this.db.call('tv' + tuid, [unit, user, id]);
     }
-    tuidProxyGet(tuid:string, unit:number, user:number, id:number, type:string): Promise<any> {
-        return this.db.call('tv' + tuid + '_proxy', [unit, user, id, type]);
+    async tuidGetAll(tuid:string, unit:number, user:number): Promise<any> {
+        return await this.db.call('tv' + tuid + '_all', [unit, user]);
     }
-    tuidIds(tuid:string, unit:number, user:number, ids:string): Promise<any> {
-        return this.db.call('tv' + tuid + '_ids', [unit, user, ids]);
+    async tuidProxyGet(tuid:string, unit:number, user:number, id:number, type:string): Promise<any> {
+        return await this.db.call('tv' + tuid + '_proxy', [unit, user, id, type]);
     }
-    tuidMain(tuid:string, unit:number, user:number, id:number): Promise<any> {
-        return this.db.call('tv' + tuid + '_main', [unit, user, id]);
+    async tuidIds(tuid:string, unit:number, user:number, ids:string): Promise<any> {
+        return await this.db.call('tv' + tuid + '_ids', [unit, user, ids]);
+    }
+    async tuidMain(tuid:string, unit:number, user:number, id:number): Promise<any> {
+        return await this.db.call('tv' + tuid + '_main', [unit, user, id]);
     }
     async tuidSave(tuid:string, unit:number, user:number, params:any[]): Promise<any> {
         return await this.db.call('tv' + tuid + '_save', [unit, user, ...params]);
@@ -127,28 +130,28 @@ export class Runner {
             'tv' + sheet + '_' + state + '_' + action;
         return await this.db.call(sql, [unit, user, id, flow, action]);
     }
-    sheetStates(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
+    async sheetStates(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
         let sql = 'tv$sheet_state';
-        return this.db.call(sql, [unit, user, sheet, state, pageStart, pageSize]);
+        return await this.db.call(sql, [unit, user, sheet, state, pageStart, pageSize]);
     }
-    sheetStateCount(sheet:string, unit:number, user:number) {
+    async sheetStateCount(sheet:string, unit:number, user:number) {
         let sql = 'tv$sheet_state_count';
-        return this.db.call(sql, [unit, user, sheet]);
+        return await this.db.call(sql, [unit, user, sheet]);
     }
 
-    getSheet(sheet:string, unit:number, user:number, id:number) {
+    async getSheet(sheet:string, unit:number, user:number, id:number) {
         let sql = 'tv$sheet_id';
-        return this.db.call(sql, [unit, user, sheet, id]);
+        return await this.db.call(sql, [unit, user, sheet, id]);
     }
 
-    sheetArchives(sheet:string, unit:number, user:number, pageStart:number, pageSize:number) {
+    async sheetArchives(sheet:string, unit:number, user:number, pageStart:number, pageSize:number) {
         let sql = 'tv$archives';
-        return this.db.call(sql, [unit, user, sheet, pageStart, pageSize]);
+        return await this.db.call(sql, [unit, user, sheet, pageStart, pageSize]);
     }
 
-    sheetArchive(unit:number, user:number, sheet:string, id:number) {
+    async sheetArchive(unit:number, user:number, sheet:string, id:number) {
         let sql = 'tv$archive_id';
-        return this.db.call(sql, [unit, user, sheet, id]);
+        return await this.db.call(sql, [unit, user, sheet, id]);
     }
 
     async action(action:string, unit:number, user:number, data:string): Promise<any> {
@@ -158,8 +161,8 @@ export class Runner {
         return result;
     }
 
-    query(query:string, unit:number, user:number, params:any[]): Promise<any> {
-        return this.db.call('tv' + query, [unit, user, ...params]);
+    async query(query:string, unit:number, user:number, params:any[]): Promise<any> {
+        return await this.db.call('tv' + query, [unit, user, ...params]);
     }
 
     async unitxPost(msg:any):Promise<void> {
