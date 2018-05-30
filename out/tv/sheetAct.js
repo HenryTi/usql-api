@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ws_1 = require("../ws");
 const runner_1 = require("../usql/runner");
 const afterAction_1 = require("./afterAction");
+const util_1 = require("util");
 function sheetAct(jobData) {
     return __awaiter(this, void 0, void 0, function* () {
         let { db, sheet, state, action, unit, user, id, flow } = jobData;
@@ -49,9 +50,19 @@ function sheetAct(jobData) {
                 console.error('job queue sheet action error: run %s.%s.%s is unknow', sheet, state, action);
                 return;
             }
-            let actionReturn = yield afterAction_1.afterAction(runner, unit, actionSchema.returns, actionRun, result);
-            ws_1.wsSendMessage(user, {
+            let hasSend, busFaces;
+            if (util_1.isArray(actionRun) === true) {
+                hasSend = false;
+                busFaces = actionRun;
+            }
+            else {
+                hasSend = actionRun.hasSend;
+                busFaces = actionRun.busFaces;
+            }
+            let actionReturn = yield afterAction_1.afterAction(db, runner, unit, actionSchema.returns, hasSend, busFaces, result);
+            ws_1.wsSendMessage(db, unit, user, {
                 type: 'sheetAct',
+                unit: unit,
                 data: actionReturn
             });
         }

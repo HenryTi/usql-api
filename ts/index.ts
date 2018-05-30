@@ -7,7 +7,7 @@ import * as multer from 'multer';
 import tv,{queue} from './tv';
 import {unitxRouter} from './tv/unitx';
 import {wsOnConnected} from './ws';
-import {Auth} from './core';
+import {Auth, authCheck, authDebug, authUnitx} from './core';
 import { Request, Response, NextFunction } from 'express';
 
 (function() {
@@ -19,10 +19,6 @@ import { Request, Response, NextFunction } from 'express';
     var cors = require('cors')
     let app = express();
     let expressWs = require('express-ws')(app);
-
-    let authCheck = new Auth(['*']).middleware();
-    let authDebug = new Auth(['*']).middlewareDebug();
-    let authUnitx = new Auth(['*']).middlewareUnitx();
 
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
@@ -70,7 +66,7 @@ import { Request, Response, NextFunction } from 'express';
         res.json({"hello": 'usql-api: hello, it\'s good'});
     });
 
-    (app as any).ws('/usql', wsOnConnected);
+    (app as any).ws('/usql/:db', wsOnConnected);
 
     let port = config.get<number>('port');
     app.listen(port, async ()=>{

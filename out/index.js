@@ -24,9 +24,6 @@ const core_1 = require("./core");
     var cors = require('cors');
     let app = express();
     let expressWs = require('express-ws')(app);
-    let authCheck = new core_1.Auth(['*']).middleware();
-    let authDebug = new core_1.Auth(['*']).middlewareDebug();
-    let authUnitx = new core_1.Auth(['*']).middlewareUnitx();
     app.use(function (err, req, res, next) {
         res.status(err.status || 500);
         //res.send(err)
@@ -58,10 +55,10 @@ const core_1 = require("./core");
     //app.use('/api', routers);
     //app.use('/tuid', tuid);
     // 正常的tonva usql接口
-    app.use('/usql/:db/tv/unitx', [authUnitx, unitx_1.unitxRouter]);
-    app.use('/usql/:db/tv', [authCheck, tv_1.default]);
+    app.use('/usql/:db/tv/unitx', [core_1.authUnitx, unitx_1.unitxRouter]);
+    app.use('/usql/:db/tv', [core_1.authCheck, tv_1.default]);
     // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
-    app.use('/usql/:db/debug', [authDebug, tv_1.default]);
+    app.use('/usql/:db/debug', [core_1.authDebug, tv_1.default]);
     app.use('/usql/:db/hello', (req, res) => {
         let db = req.params.db;
         res.json({ "hello": 'usql-api: hello, db is ' + db });
@@ -69,7 +66,7 @@ const core_1 = require("./core");
     app.use('/usql/hello', (req, res) => {
         res.json({ "hello": 'usql-api: hello, it\'s good' });
     });
-    app.ws('/usql', ws_1.wsOnConnected);
+    app.ws('/usql/:db', ws_1.wsOnConnected);
     let port = config.get('port');
     app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
         console.log('USQL-API listening on port ' + port);

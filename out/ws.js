@@ -1,48 +1,68 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const userWss = {};
+const core_1 = require("./core");
+const wss = {};
+//const userWss:{[user:number]: object | object[]} = {};
 function wsOnConnected(ws, req) {
-    let user = req.user;
-    if (user === undefined) {
-        // for debug use
-        user = {
-            id: -99,
-        };
-        //return;
-    }
-    let userId = user.id;
-    ws.id = userId;
-    let wsGroup = userWss[userId];
-    if (wsGroup === undefined)
-        userWss[userId] = ws;
-    else if (Array.isArray(wsGroup)) {
-        wsGroup.push(ws);
-    }
-    else {
-        userWss[userId] = [wsGroup, ws];
-    }
-    console.log('webSocket tv connected id=%s', userId);
-    ws.on('message', wsOnMessage);
-    ws.on('close', (a, b) => wsOnClose(ws, a, b));
+    core_1.authCheck(req, undefined, () => {
+        let user = req.user;
+        if (user === undefined) {
+            user = {
+                id: core_1.debugUser,
+                unit: core_1.debugUnit,
+                db: req.params.db,
+            };
+        }
+        ws.user = user;
+        let { db, unit, id } = user;
+        let unitWss = wss[db];
+        if (unitWss === undefined)
+            unitWss = wss[db] = {};
+        let userWss = unitWss[unit];
+        if (userWss === undefined)
+            userWss = unitWss[unit] = {};
+        let wsGroup = userWss[id];
+        if (wsGroup === undefined)
+            userWss[id] = ws;
+        else if (Array.isArray(wsGroup)) {
+            wsGroup.push(ws);
+        }
+        else {
+            userWss[id] = [wsGroup, ws];
+        }
+        console.log('webSocket tv connected id=%s', id);
+        ws.db = db;
+        ws.on('message', wsOnMessage);
+        ws.on('close', (a, b) => wsOnClose(ws, a, b));
+    });
 }
 exports.wsOnConnected = wsOnConnected;
 function wsOnClose(ws, a, b) {
-    let wsId = ws.id;
-    let wsGroup = userWss[wsId];
+    let user = ws.user;
+    if (user === undefined)
+        return;
+    let { db, id, unit } = user;
+    let unitWss = wss[db];
+    if (unitWss === undefined)
+        return;
+    let userWss = unitWss[unit];
+    if (userWss === undefined)
+        return;
+    let wsGroup = userWss[id];
     if (Array.isArray(wsGroup)) {
         let wsArr = wsGroup;
         switch (wsArr.length) {
             case 0:
             case 1:
-                delete userWss[wsId];
+                delete userWss[id];
                 break;
             case 2:
                 if (ws === wsArr[0]) {
-                    userWss[wsId] = wsArr[1];
+                    userWss[id] = wsArr[1];
                     break;
                 }
                 if (ws === wsArr[1]) {
-                    userWss[wsId] = wsArr[0];
+                    userWss[id] = wsArr[0];
                     break;
                 }
                 break;
@@ -54,15 +74,21 @@ function wsOnClose(ws, a, b) {
         }
     }
     else {
-        delete userWss[wsId];
+        delete userWss[id];
     }
     ws.close();
-    console.log('webSocket close id=%s', wsId);
+    console.log('webSocket close id=%s', id);
 }
 function wsOnMessage(msg) {
     console.log(new Date(), " ws receive: ", msg);
 }
-function wsSendMessage(user, msg) {
+function wsSendMessage(db, unit, user, msg) {
+    let unitWss = wss[db];
+    if (unitWss === undefined)
+        return;
+    let userWss = unitWss[unit];
+    if (userWss === undefined)
+        return;
     let wsGroup = userWss[user];
     if (wsGroup === undefined)
         return;

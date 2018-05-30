@@ -2,6 +2,7 @@ import {Runner} from '../usql/runner';
 import {SchemaBusFace} from '../usql/schemaBusFace';
 import {queue} from './queue';
 import { packBus } from '../core/packReturn';
+import { wsSendMessage } from '../ws';
 
 // 2018-02-25
 // Bus face 数据保全的说明：
@@ -10,9 +11,21 @@ import { packBus } from '../core/packReturn';
 // 在job queue里面，读数据，然后发送到unitx，然后再从数据库删除。这样保证不会丢失信息。
 // 当下为了快速写出程序，暂时先简单处理。数据库操作返回数据，直接发送unitx，可能会有数据丢失。
 
-export async function afterAction(runner: Runner, unit:number, returns:any[], busFaces:SchemaBusFace[], result:any):Promise<any> {
+export async function afterAction(db:string, runner: Runner, unit:number, returns:any[], hasSend, busFaces:SchemaBusFace[], result:any):Promise<any> {
     let nFaceCount:number = 0;
     let resArrs = result as any[][];
+    if (hasSend === true) {
+        // 处理发送信息
+        let messages = resArrs.shift();
+        for (let row of messages) {
+            let {to, msg} = row;
+            wsSendMessage(db, unit, to, {
+                type: 'msg',
+                unit: unit,
+                data: msg
+            });
+        }
+    }
     if (busFaces === undefined || busFaces.length === 0) {
         return result[0];
     }

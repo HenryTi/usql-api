@@ -10,16 +10,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const queue_1 = require("./queue");
 const packReturn_1 = require("../core/packReturn");
+const ws_1 = require("../ws");
 // 2018-02-25
 // Bus face 数据保全的说明：
 // bus数据的产生，应该跟action或者sheetAction构成事务。
 // 所以，应该把bus face 信息在事务内写数据库。
 // 在job queue里面，读数据，然后发送到unitx，然后再从数据库删除。这样保证不会丢失信息。
 // 当下为了快速写出程序，暂时先简单处理。数据库操作返回数据，直接发送unitx，可能会有数据丢失。
-function afterAction(runner, unit, returns, busFaces, result) {
+function afterAction(db, runner, unit, returns, hasSend, busFaces, result) {
     return __awaiter(this, void 0, void 0, function* () {
         let nFaceCount = 0;
         let resArrs = result;
+        if (hasSend === true) {
+            // 处理发送信息
+            let messages = resArrs.shift();
+            for (let row of messages) {
+                let { to, msg } = row;
+                ws_1.wsSendMessage(db, unit, to, {
+                    type: 'msg',
+                    unit: unit,
+                    data: msg
+                });
+            }
+        }
         if (busFaces === undefined || busFaces.length === 0) {
             return result[0];
         }

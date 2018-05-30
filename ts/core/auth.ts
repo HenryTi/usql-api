@@ -2,8 +2,14 @@ import {Router, Request, Response, NextFunction} from 'express';
 import * as jwt from 'jsonwebtoken';
 import * as config from 'config';
 
-const debugUser = config.get<number>('debugUser');
-const debugUnit = config.get<number>('debugUnit');
+export const debugUser = config.get<number>('debugUser');
+export const debugUnit = config.get<number>('debugUnit');
+export interface AuthUser {
+    db: string,
+    id: number,
+    unit: number,
+    roles?: string,
+}
 
 export default class Auth {
     private roles: string[];
@@ -32,7 +38,7 @@ export default class Auth {
     }
     check(req:Request, res:Response, next:NextFunction) {
         if (this.noUser === true) {
-            next();
+            if (next !== undefined) next();
             return;
         }
         let token = req.header('Authorization');
@@ -42,37 +48,34 @@ export default class Auth {
         if (token === undefined) {
             let err = 'not authorized request';
             console.log(err);
-            res.end(err);
+            if (res !== undefined) res.end(err);
             return;
         }
         let secret = config.get<string>('secret'); // .appSecret;
         console.log('auth check: secret=%s, token=%s', secret, token);
         jwt.verify(token, secret, 
-            (err, decoded:{
-                    db: string,
-                    id: number,
-                    unit: number,
-                    roles: string,
-                    }) => 
+            (err, decoded:AuthUser) => 
         {
             console.log('auth check: err=%s', JSON.stringify(err));
             if (err === null) {
                 decoded.db = req.params.db;
                 (req as any).user = decoded;
                 if (this.hasRole(decoded.roles) === true) {
-                    next();
+                    if (next !== undefined) next();
                     return;
                 }
             }
-            res.status(401);
-            res.json(
-                {
-                    error: {
-                        unauthorized: true,
-                        message: 'Unauthorized'
-                    }
-                });
-            //next();
+            if (res !== undefined) {
+                res.status(401);
+                res.json(
+                    {
+                        error: {
+                            unauthorized: true,
+                            message: 'Unauthorized'
+                        }
+                    });
+                // if (next !== undefined) next();
+            }
         });
     }
     middleware() {
@@ -103,3 +106,7 @@ export default class Auth {
         }
     }
 }
+
+export const authCheck = new Auth(['*']).middleware();
+export const authDebug = new Auth(['*']).middlewareDebug();
+export const authUnitx = new Auth(['*']).middlewareUnitx();

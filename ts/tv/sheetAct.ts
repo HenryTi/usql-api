@@ -1,6 +1,7 @@
 import {wsSendMessage} from '../ws';
 import {getRunner, Runner, resetRunner} from '../usql/runner';
 import {afterAction} from './afterAction';
+import { isArray } from 'util';
 
 export async function sheetAct(jobData:any):Promise<void> {
     let {db, sheet, state, action, unit, user, id, flow} = jobData;
@@ -39,9 +40,19 @@ export async function sheetAct(jobData:any):Promise<void> {
             console.error('job queue sheet action error: run %s.%s.%s is unknow', sheet, state, action);
             return;
         }
-        let actionReturn = await afterAction(runner, unit, actionSchema.returns, actionRun, result);
-        wsSendMessage(user, {
+        let hasSend, busFaces;
+        if (isArray(actionRun) === true) {
+            hasSend = false;
+            busFaces = actionRun;
+        }
+        else {
+            hasSend = actionRun.hasSend;
+            busFaces = actionRun.busFaces;
+        }
+        let actionReturn = await afterAction(db, runner, unit, actionSchema.returns, hasSend, busFaces, result);
+        wsSendMessage(db, unit, user, {
             type: 'sheetAct',
+            unit: unit,
             data: actionReturn
         });
     }
@@ -49,4 +60,3 @@ export async function sheetAct(jobData:any):Promise<void> {
         console.log('sheet Act error: ', err);
     };
 }
-

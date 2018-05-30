@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = require("jsonwebtoken");
 const config = require("config");
-const debugUser = config.get('debugUser');
-const debugUnit = config.get('debugUnit');
+exports.debugUser = config.get('debugUser');
+exports.debugUnit = config.get('debugUnit');
 class Auth {
     constructor(roles) {
         if (roles === undefined) {
@@ -31,7 +31,8 @@ class Auth {
     }
     check(req, res, next) {
         if (this.noUser === true) {
-            next();
+            if (next !== undefined)
+                next();
             return;
         }
         let token = req.header('Authorization');
@@ -41,7 +42,8 @@ class Auth {
         if (token === undefined) {
             let err = 'not authorized request';
             console.log(err);
-            res.end(err);
+            if (res !== undefined)
+                res.end(err);
             return;
         }
         let secret = config.get('secret'); // .appSecret;
@@ -52,18 +54,21 @@ class Auth {
                 decoded.db = req.params.db;
                 req.user = decoded;
                 if (this.hasRole(decoded.roles) === true) {
-                    next();
+                    if (next !== undefined)
+                        next();
                     return;
                 }
             }
-            res.status(401);
-            res.json({
-                error: {
-                    unauthorized: true,
-                    message: 'Unauthorized'
-                }
-            });
-            //next();
+            if (res !== undefined) {
+                res.status(401);
+                res.json({
+                    error: {
+                        unauthorized: true,
+                        message: 'Unauthorized'
+                    }
+                });
+                // if (next !== undefined) next();
+            }
         });
     }
     middleware() {
@@ -77,8 +82,8 @@ class Auth {
         return function (req, res, next) {
             req.user = {
                 db: req.params.db,
-                id: debugUser,
-                unit: debugUnit,
+                id: exports.debugUser,
+                unit: exports.debugUnit,
                 roles: undefined,
             };
             next();
@@ -95,4 +100,7 @@ class Auth {
     }
 }
 exports.default = Auth;
+exports.authCheck = new Auth(['*']).middleware();
+exports.authDebug = new Auth(['*']).middlewareDebug();
+exports.authUnitx = new Auth(['*']).middlewareUnitx();
 //# sourceMappingURL=auth.js.map
