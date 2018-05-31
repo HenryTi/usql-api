@@ -6,7 +6,7 @@ interface Arr {
     name:string;
     fields: Field[];
 }
-
+const timezoneOffset = new Date().getTimezoneOffset()*60000;
 const tab = '\t';
 const ln = '\n';
 export function pack(schema:any, data:any):string {
@@ -59,7 +59,7 @@ export function escape(d:any):any {
     if (d === null) return '\b';
     switch (typeof d) {
         default:
-            if (d instanceof Date) return (d as Date).getTime();
+            if (d instanceof Date) return (d as Date).getTime()-timezoneOffset;
             return d;
         case 'string':
             let len = d.length;

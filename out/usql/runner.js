@@ -234,6 +234,11 @@ class Runner {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.schemas !== undefined)
                 return;
+            this.app = yield this.getStr(0, 'app');
+            this.author = yield this.getStr(0, 'author');
+            this.version = yield this.getStr(0, 'version');
+            this.isSysChat = (this.app === '$chat' || this.app === 'chat')
+                && this.author === 'henry';
             let rows = yield this.loadSchemas();
             console.log('schema raw rows: %s', JSON.stringify(rows));
             this.schemas = {};

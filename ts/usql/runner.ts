@@ -37,6 +37,10 @@ export class Runner {
     private types: {[tyep:string]: number};
     private schemas: {[entity:string]: {call:any; run:any;}};
     private buses:{[url:string]:any}; // 直接查找bus
+    isSysChat:boolean;
+    app: string;
+    author: string;
+    version: string;
 
     constructor(db:Db) {
         this.db = db;
@@ -175,6 +179,11 @@ export class Runner {
 
     async initSchemas() {
         if (this.schemas !== undefined) return;
+        this.app = await this.getStr(0, 'app');
+        this.author = await this.getStr(0, 'author');
+        this.version = await this.getStr(0, 'version');
+        this.isSysChat = (this.app === '$chat' || this.app === 'chat') 
+            && this.author === 'henry';
         let rows = await this.loadSchemas();
         console.log('schema raw rows: %s', JSON.stringify(rows));
         this.schemas = {};

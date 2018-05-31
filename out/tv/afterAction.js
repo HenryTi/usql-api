@@ -24,7 +24,9 @@ function afterAction(db, runner, unit, returns, hasSend, busFaces, result) {
         if (hasSend === true) {
             // 处理发送信息
             let messages = resArrs.shift();
-            for (let row of messages) {
+            let proc = runner.isSysChat === true ? sendToChat : mailToChat;
+            function sendToChat(row) {
+                // 通过websocket送回界面
                 let { to, msg } = row;
                 ws_1.wsSendMessage(db, unit, to, {
                     type: 'msg',
@@ -32,6 +34,11 @@ function afterAction(db, runner, unit, returns, hasSend, busFaces, result) {
                     data: msg
                 });
             }
+            function mailToChat(row) {
+                // 通过face邮件发送到chat服务器
+            }
+            for (let row of messages)
+                proc(row);
         }
         if (busFaces === undefined || busFaces.length === 0) {
             return result[0];

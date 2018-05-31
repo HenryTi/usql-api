@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const timezoneOffset = new Date().getTimezoneOffset() * 60000;
 const tab = '\t';
 const ln = '\n';
 function pack(schema, data) {
@@ -52,7 +53,7 @@ function escape(d) {
     switch (typeof d) {
         default:
             if (d instanceof Date)
-                return d.getTime();
+                return d.getTime() - timezoneOffset;
             return d;
         case 'string':
             let len = d.length;
