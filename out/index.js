@@ -57,6 +57,7 @@ const core_1 = require("./core");
     // 正常的tonva usql接口
     app.use('/usql/:db/tv/unitx', [core_1.authUnitx, unitx_1.unitxRouter]);
     app.use('/usql/:db/tv', [core_1.authCheck, tv_1.default]);
+    app.use('/usql/:db/log', ws_1.getWsLogs);
     // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
     app.use('/usql/:db/debug', [core_1.authDebug, tv_1.default]);
     app.use('/usql/:db/hello', (req, res) => {

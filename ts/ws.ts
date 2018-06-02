@@ -84,16 +84,41 @@ function wsOnMessage(msg:any) {
     console.log(new Date(), " ws receive: ", msg);
 }
 
+const wsLogs:string[] = [];
+function logws(log:string) {
+    wsLogs.push(log);
+}
 export function wsSendMessage(db:string, unit:number, user:number, msg: any) {
     let unitWss = wss[db];
-    if (unitWss === undefined) return;
+    if (unitWss === undefined) {
+        logws('no ws for db ' + db);
+        return;
+    }
     let userWss = unitWss[unit];
-    if (userWss === undefined) return;
+    if (userWss === undefined) {
+        logws('db=' + db + ' no ws for unit ' + unit);
+        return;
+    }
     let wsGroup = userWss[user];
-    if (wsGroup === undefined) return;
+    if (wsGroup === undefined) {
+        logws('db=' + db + ', unit=' + unit + ', no ws for user ' + user);
+        return;
+    }
     let json = JSON.stringify(msg);
     if (Array.isArray(wsGroup))
-        for (let ws of wsGroup) (ws as any).send(json);
-    else
+        for (let ws of wsGroup) {
+            logws('db=' + db + ', unit=' + unit + ', user=' + user + ', json=' + json);
+            (ws as any).send(json);
+        }
+    else {
+        logws('db=' + db + ', unit=' + unit + ', user=' + user + ', json=' + json);
         (wsGroup as any).send(json);
+    }
 }
+
+export const getWsLogs: Router = Router();
+getWsLogs.get('/ws', async (req:Request, res:Response) => {
+    res.send('<html><body>');
+    res.send(wsLogs.join('<br/>'));
+    res.send('</body></html>');
+});

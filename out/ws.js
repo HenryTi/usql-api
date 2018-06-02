@@ -1,5 +1,14 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
 const core_1 = require("./core");
 const wss = {};
 //const userWss:{[user:number]: object | object[]} = {};
@@ -82,22 +91,42 @@ function wsOnClose(ws, a, b) {
 function wsOnMessage(msg) {
     console.log(new Date(), " ws receive: ", msg);
 }
+const wsLogs = [];
+function logws(log) {
+    wsLogs.push(log);
+}
 function wsSendMessage(db, unit, user, msg) {
     let unitWss = wss[db];
-    if (unitWss === undefined)
+    if (unitWss === undefined) {
+        logws('no ws for db ' + db);
         return;
+    }
     let userWss = unitWss[unit];
-    if (userWss === undefined)
+    if (userWss === undefined) {
+        logws('db=' + db + ' no ws for unit ' + unit);
         return;
+    }
     let wsGroup = userWss[user];
-    if (wsGroup === undefined)
+    if (wsGroup === undefined) {
+        logws('db=' + db + ', unit=' + unit + ', no ws for user ' + user);
         return;
+    }
     let json = JSON.stringify(msg);
     if (Array.isArray(wsGroup))
-        for (let ws of wsGroup)
+        for (let ws of wsGroup) {
+            logws('db=' + db + ', unit=' + unit + ', user=' + user + ', json=' + json);
             ws.send(json);
-    else
+        }
+    else {
+        logws('db=' + db + ', unit=' + unit + ', user=' + user + ', json=' + json);
         wsGroup.send(json);
+    }
 }
 exports.wsSendMessage = wsSendMessage;
+exports.getWsLogs = express_1.Router();
+exports.getWsLogs.get('/ws', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    res.send('<html><body>');
+    res.send(wsLogs.join('<br/>'));
+    res.send('</body></html>');
+}));
 //# sourceMappingURL=ws.js.map
