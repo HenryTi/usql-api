@@ -125,9 +125,9 @@ function wsSendMessage(db, unit, user, msg) {
 exports.wsSendMessage = wsSendMessage;
 exports.getWsLogs = express_1.Router();
 exports.getWsLogs.get('/ws', (req, res) => __awaiter(this, void 0, void 0, function* () {
-    res.send('<html><body>');
-    res.send(wsLogs.join('<br/>'));
-    res.send('</body></html>');
+    res.write('<html><head><title>websocket log</title></head><body>');
+    res.write(wsLogs.join('<br/>'));
+    res.write('</body></html>');
     res.end();
 }));
 //# sourceMappingURL=ws.js.map
