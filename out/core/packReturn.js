@@ -53,7 +53,7 @@ function escape(d) {
     switch (typeof d) {
         default:
             if (d instanceof Date)
-                return d.getTime() - timezoneOffset;
+                return d.getTime(); //-timezoneOffset-timezoneOffset;
             return d;
         case 'string':
             let len = d.length;

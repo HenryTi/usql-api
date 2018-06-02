@@ -217,7 +217,6 @@ router.post('/tuids/:name', (req, res) => __awaiter(this, void 0, void 0, functi
         if (runner === undefined)
             return;
         let body = req.body;
-        let values = [user.unit, user.id, body.key, body.pageStart, body.pageSize];
         let result = yield runner.tuidSeach(name, user.unit, user.id, body.key || '', body.pageStart, body.pageSize);
         //let more = false;
         let rows = result[0];
@@ -238,7 +237,6 @@ router.post('/action/:name', (req, res) => __awaiter(this, void 0, void 0, funct
         let { name } = req.params;
         let body = req.body;
         let { data } = body;
-        let values = [unit, id, data];
         let runner = yield checkRunner(db, res);
         if (runner === undefined)
             return;
@@ -259,13 +257,45 @@ router.post('/action/:name', (req, res) => __awaiter(this, void 0, void 0, funct
     }
     ;
 }));
+router.post('/query/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        let user = req.user;
+        let db = user.db;
+        let { name } = req.params;
+        let body = req.body;
+        let runner = yield checkRunner(db, res);
+        if (runner === undefined)
+            return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined)
+            return unknownEntity(res, name);
+        let callSchema = schema.call;
+        if (validEntity(res, callSchema, 'query') === false)
+            return;
+        let params = [];
+        let fields = callSchema.fields;
+        let len = fields.length;
+        for (let i = 0; i < len; i++) {
+            params.push(body[fields[i].name]);
+        }
+        let result = yield runner.query(name, user.unit, user.id, params);
+        let data = packReturn_1.pack(callSchema, result);
+        res.json({
+            ok: true,
+            res: data,
+        });
+    }
+    catch (err) {
+        res.json({ error: err });
+    }
+    ;
+}));
 router.post('/page/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         let user = req.user;
         let db = user.db;
         let { name } = req.params;
         let body = req.body;
-        let values = [user.unit, user.id, body.data];
         let runner = yield checkRunner(db, res);
         if (runner === undefined)
             return;
@@ -315,7 +345,6 @@ router.post('/history/:name', (req, res) => __awaiter(this, void 0, void 0, func
         let db = user.db;
         let { name } = req.params;
         let body = req.body;
-        let values = [user.unit, user.id, body.data];
         let runner = yield checkRunner(db, res);
         if (runner === undefined)
             return;
@@ -353,7 +382,6 @@ router.post('/book/:name', (req, res) => __awaiter(this, void 0, void 0, functio
         let db = user.db;
         let { name } = req.params;
         let body = req.body;
-        let values = [user.unit, user.id, body.data];
         let runner = yield checkRunner(db, res);
         if (runner === undefined)
             return;
@@ -388,7 +416,6 @@ router.post('/sheet/:name', (req, res) => __awaiter(this, void 0, void 0, functi
         let db = user.db;
         let { name } = req.params;
         let body = req.body;
-        let values = [user.unit, user.id, body.data];
         let runner = yield checkRunner(db, res);
         if (runner === undefined)
             return;
@@ -407,7 +434,6 @@ router.put('/sheet/:name', (req, res) => __awaiter(this, void 0, void 0, functio
     let db = user.db;
     let { name } = req.params;
     let body = req.body;
-    let values = [user.unit, user.id, body.data];
     let runner = yield checkRunner(db, res);
     if (runner === undefined)
         return;

@@ -59,7 +59,7 @@ export function escape(d:any):any {
     if (d === null) return '\b';
     switch (typeof d) {
         default:
-            if (d instanceof Date) return (d as Date).getTime()-timezoneOffset;
+            if (d instanceof Date) return (d as Date).getTime(); //-timezoneOffset-timezoneOffset;
             return d;
         case 'string':
             let len = d.length;

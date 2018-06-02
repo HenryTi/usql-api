@@ -208,7 +208,6 @@ router.post('/tuids/:name', async (req:Request, res:Response) => {
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
         let body = (req as any).body;
-        let values = [user.unit, user.id, body.key, body.pageStart, body.pageSize];
         let result = await runner.tuidSeach(name, user.unit, user.id, body.key||'', body.pageStart, body.pageSize);
         //let more = false;
         let rows = result[0];
@@ -229,7 +228,6 @@ router.post('/action/:name', async (req:Request, res:Response) => {
         let {name} = req.params;
         let body = (req as any).body;
         let {data} = body;
-        let values = [unit, id, data];
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
         let result = await runner.action(name, unit, id, data);
@@ -249,13 +247,42 @@ router.post('/action/:name', async (req:Request, res:Response) => {
     };
 });
 
+router.post('/query/:name', async (req:Request, res:Response) => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {name} = req.params;
+        let body = (req as any).body;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined) return unknownEntity(res, name);
+        let callSchema = schema.call;
+        if (validEntity(res, callSchema, 'query') === false) return;
+        let params:any[] = [];
+        let fields = callSchema.fields;
+        let len = fields.length;
+        for (let i=0; i<len; i++) {
+            params.push(body[fields[i].name]);
+        }
+        let result = await runner.query(name, user.unit, user.id, params);
+        let data = pack(callSchema, result);
+        res.json({
+            ok: true,
+            res: data,
+        });
+    }
+    catch(err) {
+        res.json({error: err});
+    };
+});
+
 router.post('/page/:name', async (req:Request, res:Response) => {
     try {
         let user:User = (req as any).user;
         let db = user.db;
         let {name} = req.params;
         let body = (req as any).body;
-        let values = [user.unit, user.id, body.data];
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
         let schema = runner.getSchema(name);
@@ -300,7 +327,6 @@ router.post('/history/:name', async (req:Request, res:Response) => {
         let db = user.db;
         let {name} = req.params;
         let body = (req as any).body;
-        let values = [user.unit, user.id, body.data];
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
         let schema = runner.getSchema(name);
@@ -335,7 +361,6 @@ router.post('/book/:name', async (req:Request, res:Response) => {
         let db = user.db;
         let {name} = req.params;
         let body = (req as any).body;
-        let values = [user.unit, user.id, body.data];
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
         let schema = runner.getSchema(name);
@@ -367,7 +392,6 @@ router.post('/sheet/:name', async (req:Request, res:Response) => {
         let db = user.db;
         let {name} = req.params;
         let body = (req as any).body;
-        let values = [user.unit, user.id, body.data];
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
         let result = await runner.sheetSave(name, user.unit, user.id, body.discription, body.data);
@@ -386,7 +410,6 @@ router.put('/sheet/:name', async (req:Request, res:Response) => {
     let db = user.db;
     let {name} = req.params;
     let body = (req as any).body;
-    let values = [user.unit, user.id, body.data];
     let runner = await checkRunner(db, res);
     if (runner === undefined) return;
     await runner.sheetProcessing(body.id);

@@ -13,6 +13,7 @@ const dbServer_1 = require("./dbServer");
 class MyDbServer extends dbServer_1.DbServer {
     constructor(dbConfig) {
         super();
+        dbConfig.typeCast = castField;
         this.pool = mysql_1.createPool(dbConfig);
     }
     exec(sql, values) {
@@ -102,4 +103,27 @@ class MyDbServer extends dbServer_1.DbServer {
     }
 }
 exports.MyDbServer = MyDbServer;
+function castField(field, next) {
+    switch (field.type) {
+        default: return next();
+        case 'DATETIME': return castDate(field);
+    }
+    /*
+    if (( field.type === "BIT" ) && ( field.length === 1 ) ) {
+        var bytes = field.buffer();
+        // A Buffer in Node represents a collection of 8-bit unsigned integers.
+        // Therefore, our single "bit field" comes back as the bits '0000 0001',
+        // which is equivalent to the number 1.
+        return( bytes[ 0 ] === 1 );
+    }
+    return next();
+    */
+}
+// 确保服务器里面保存的时间是UTC时间
+const timezoneOffset = new Date().getTimezoneOffset() * 60000;
+function castDate(field) {
+    // 这个地方也许有某种方法加速吧
+    let d = new Date(new Date(field.string()).getTime() - timezoneOffset);
+    return d;
+}
 //# sourceMappingURL=my.js.map

@@ -77,4 +77,6 @@ function afterAction(db, runner, unit, returns, hasSend, busFaces, result) {
     });
 }
 exports.afterAction = afterAction;
+function processMessage() {
+}
 //# sourceMappingURL=afterAction.js.map
