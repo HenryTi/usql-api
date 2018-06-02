@@ -121,4 +121,5 @@ getWsLogs.get('/ws', async (req:Request, res:Response) => {
     res.send('<html><body>');
     res.send(wsLogs.join('<br/>'));
     res.send('</body></html>');
+    res.end();
 });

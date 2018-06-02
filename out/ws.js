@@ -128,5 +128,6 @@ exports.getWsLogs.get('/ws', (req, res) => __awaiter(this, void 0, void 0, funct
     res.send('<html><body>');
     res.send(wsLogs.join('<br/>'));
     res.send('</body></html>');
+    res.end();
 }));
 //# sourceMappingURL=ws.js.map
