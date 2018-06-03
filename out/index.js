@@ -67,7 +67,7 @@ const core_1 = require("./core");
     app.use('/usql/hello', (req, res) => {
         res.json({ "hello": 'usql-api: hello, it\'s good' });
     });
-    app.ws('/usql/:db', ws_1.wsOnConnected);
+    //(app as any).ws('/usql/:db', wsOnConnected);
     let port = config.get('port');
     app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
         console.log('USQL-API listening on port ' + port);

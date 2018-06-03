@@ -1,5 +1,5 @@
 import {Router, Request, Response, NextFunction} from 'express';
-import {Auth, authCheck, AuthUser, debugUnit, debugUser} from './core';
+import {Auth, authCheck, AuthUser, debugUnit, debugUser, centerApi} from './core';
 
 
 interface UserWss {
@@ -88,7 +88,10 @@ const wsLogs:string[] = [];
 function logws(log:string) {
     wsLogs.push(log);
 }
-export function wsSendMessage(db:string, unit:number, user:number, msg: any) {
+export async function wsSendMessage(db:string, unit:number, user:number, msg: any) {
+    await centerApi.pushTo(user, msg);
+    let s = null;
+/*
     let unitWss = wss[db];
     if (unitWss === undefined) {
         logws('no ws for db ' + db);
@@ -114,6 +117,7 @@ export function wsSendMessage(db:string, unit:number, user:number, msg: any) {
         logws('db=' + db + ', unit=' + unit + ', user=' + user + ', json=' + json);
         (wsGroup as any).send(json);
     }
+*/
 }
 
 export const getWsLogs: Router = Router();

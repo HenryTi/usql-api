@@ -18,19 +18,20 @@ export async function afterAction(db:string, runner: Runner, unit:number, return
         // 处理发送信息
         let messages = resArrs.shift();
         let proc = runner.isSysChat === true? sendToChat : mailToChat;
-        function sendToChat(row:any) {
+        async function sendToChat(row:any) {
             // 通过websocket送回界面
-            let {to, msg} = row;
-            wsSendMessage(db, unit, to, {
-                type: 'msg',
-                unit: unit,
-                data: msg
+            let {to, msg:id} = row;
+            await wsSendMessage(db, unit, to, {
+                $type: 'msg',
+                $user: to,
+                $unit: unit,
+                id: id,
             });
         }
-        function mailToChat(row:any) {
+        async function mailToChat(row:any) {
             // 通过face邮件发送到chat服务器
         }
-        for (let row of messages) proc(row);
+        for (let row of messages) await proc(row);
     }
     if (busFaces === undefined || busFaces.length === 0) {
         return result[0];

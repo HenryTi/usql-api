@@ -60,11 +60,17 @@ function sheetAct(jobData) {
                 busFaces = actionRun.busFaces;
             }
             let actionReturn = yield afterAction_1.afterAction(db, runner, unit, actionSchema.returns, hasSend, busFaces, result);
-            ws_1.wsSendMessage(db, unit, user, {
-                type: 'sheetAct',
-                unit: unit,
-                data: actionReturn
-            });
+            let msg = {
+                $type: 'sheetAct',
+                $user: user,
+                $unit: unit,
+            };
+            let ar = actionReturn;
+            if (ar !== undefined) {
+                for (let i in ar)
+                    msg[i] = ar[i];
+            }
+            yield ws_1.wsSendMessage(db, unit, user, msg);
         }
         catch (err) {
             console.log('sheet Act error: ', err);

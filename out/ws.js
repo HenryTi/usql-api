@@ -96,31 +96,37 @@ function logws(log) {
     wsLogs.push(log);
 }
 function wsSendMessage(db, unit, user, msg) {
-    let unitWss = wss[db];
-    if (unitWss === undefined) {
-        logws('no ws for db ' + db);
-        return;
-    }
-    let userWss = unitWss[unit];
-    if (userWss === undefined) {
-        logws('db=' + db + ' no ws for unit ' + unit);
-        return;
-    }
-    let wsGroup = userWss[user];
-    if (wsGroup === undefined) {
-        logws('db=' + db + ', unit=' + unit + ', no ws for user ' + user);
-        return;
-    }
-    let json = JSON.stringify(msg);
-    if (Array.isArray(wsGroup))
-        for (let ws of wsGroup) {
-            logws('db=' + db + ', unit=' + unit + ', user=' + user + ', json=' + json);
-            ws.send(json);
-        }
-    else {
-        logws('db=' + db + ', unit=' + unit + ', user=' + user + ', json=' + json);
-        wsGroup.send(json);
-    }
+    return __awaiter(this, void 0, void 0, function* () {
+        yield core_1.centerApi.pushTo(user, msg);
+        let s = null;
+        /*
+            let unitWss = wss[db];
+            if (unitWss === undefined) {
+                logws('no ws for db ' + db);
+                return;
+            }
+            let userWss = unitWss[unit];
+            if (userWss === undefined) {
+                logws('db=' + db + ' no ws for unit ' + unit);
+                return;
+            }
+            let wsGroup = userWss[user];
+            if (wsGroup === undefined) {
+                logws('db=' + db + ', unit=' + unit + ', no ws for user ' + user);
+                return;
+            }
+            let json = JSON.stringify(msg);
+            if (Array.isArray(wsGroup))
+                for (let ws of wsGroup) {
+                    logws('db=' + db + ', unit=' + unit + ', user=' + user + ', json=' + json);
+                    (ws as any).send(json);
+                }
+            else {
+                logws('db=' + db + ', unit=' + unit + ', user=' + user + ', json=' + json);
+                (wsGroup as any).send(json);
+            }
+        */
+    });
 }
 exports.wsSendMessage = wsSendMessage;
 exports.getWsLogs = express_1.Router();

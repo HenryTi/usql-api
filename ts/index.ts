@@ -67,7 +67,7 @@ import { Request, Response, NextFunction } from 'express';
         res.json({"hello": 'usql-api: hello, it\'s good'});
     });
 
-    (app as any).ws('/usql/:db', wsOnConnected);
+    //(app as any).ws('/usql/:db', wsOnConnected);
 
     let port = config.get<number>('port');
     app.listen(port, async ()=>{

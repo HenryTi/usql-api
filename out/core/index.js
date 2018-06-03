@@ -10,4 +10,6 @@ exports.authUnitx = auth_1.authUnitx;
 var rolesRouter_1 = require("./rolesRouter");
 exports.RolesRouter = rolesRouter_1.RolesRouter;
 exports.IdParam = rolesRouter_1.IdParam;
+var centerApi_1 = require("./centerApi");
+exports.centerApi = centerApi_1.centerApi;
 //# sourceMappingURL=index.js.map

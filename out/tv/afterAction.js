@@ -26,19 +26,24 @@ function afterAction(db, runner, unit, returns, hasSend, busFaces, result) {
             let messages = resArrs.shift();
             let proc = runner.isSysChat === true ? sendToChat : mailToChat;
             function sendToChat(row) {
-                // 通过websocket送回界面
-                let { to, msg } = row;
-                ws_1.wsSendMessage(db, unit, to, {
-                    type: 'msg',
-                    unit: unit,
-                    data: msg
+                return __awaiter(this, void 0, void 0, function* () {
+                    // 通过websocket送回界面
+                    let { to, msg: id } = row;
+                    yield ws_1.wsSendMessage(db, unit, to, {
+                        $type: 'msg',
+                        $user: to,
+                        $unit: unit,
+                        id: id,
+                    });
                 });
             }
             function mailToChat(row) {
-                // 通过face邮件发送到chat服务器
+                return __awaiter(this, void 0, void 0, function* () {
+                    // 通过face邮件发送到chat服务器
+                });
             }
             for (let row of messages)
-                proc(row);
+                yield proc(row);
         }
         if (busFaces === undefined || busFaces.length === 0) {
             return result[0];

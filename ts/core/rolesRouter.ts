@@ -1,6 +1,5 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import {QueryError, RowDataPacket, FieldPacket} from 'mysql';
-import * as jwt from 'jsonwebtoken';
 import Auth from './auth';
 
 export enum IdParam {

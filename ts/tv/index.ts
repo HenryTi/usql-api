@@ -1,6 +1,4 @@
 import {Router, Request, Response, NextFunction} from 'express';
-//import * as fs from 'fs';
-import * as jwt from 'jsonwebtoken';
 import * as config from 'config';
 import * as multer from 'multer'; 
 import {UsqlApp} from '../usql';
