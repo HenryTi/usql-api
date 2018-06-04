@@ -265,47 +265,52 @@ class Runner {
         this.access = {};
         //let accesses = this.app.accesses;
         for (let a in this.schemas) {
-            let access = this.schemas[a].call;
+            let la = a.toLowerCase();
+            let access = this.schemas[la].call;
             if (access.type !== 'access')
                 continue;
-            let acc = this.access[a] = {};
+            let acc = this.access[la] = {};
             for (let item of access.list) {
                 let len = item.length;
-                let i0 = item[0], i1, a2, a3;
-                let entity = this.schemas[i0].call;
+                let i0 = item[0], i1, li1, a2, a3;
+                let li0 = i0.toLowerCase();
+                let entity = this.schemas[li0].call;
                 let type = entity && entity.type;
                 let id = entity && entity.id;
                 switch (len) {
                     case 1:
-                        acc[i0] = type + '|' + id + this.tuidProxies(entity);
+                        acc[li0] = type + '|' + id + this.tuidProxies(entity);
                         break;
                     case 2:
-                        a2 = acc[i0];
+                        a2 = acc[li0];
                         if (a2 === undefined) {
-                            a2 = acc[i0] = { '$': type, id: id };
+                            a2 = acc[li0] = { '$': type, id: id };
                         }
                         else if (typeof a2 !== 'object') {
-                            a2 = acc[i0] = { '$': type, '#': true, id: id };
-                        }
-                        a2[item[1]] = true;
-                        break;
-                    case 3:
-                        a2 = acc[i0];
-                        if (a2 === undefined) {
-                            a2 = acc[i0] = { '$': type, id: id };
-                        }
-                        else if (typeof a2 !== 'object') {
-                            a2 = acc[i0] = { '$': type, '#': true, id: id };
+                            a2 = acc[li0] = { '$': type, '#': true, id: id };
                         }
                         i1 = item[1];
-                        a3 = a2[i1];
+                        li1 = i1.toLowerCase();
+                        a2[li1] = true;
+                        break;
+                    case 3:
+                        a2 = acc[li0];
+                        if (a2 === undefined) {
+                            a2 = acc[li0] = { '$': type, id: id };
+                        }
+                        else if (typeof a2 !== 'object') {
+                            a2 = acc[li0] = { '$': type, '#': true, id: id };
+                        }
+                        i1 = item[1];
+                        li1 = i1.toLowerCase();
+                        a3 = a2[li1];
                         if (a3 === undefined) {
-                            a3 = a2[i1] = {};
+                            a3 = a2[li1] = {};
                         }
                         else if (a3 === true) {
-                            a3 = a2[i1] = { '#': true };
+                            a3 = a2[li1] = { '#': true };
                         }
-                        a3[item[2]] = true;
+                        a3[item[2].toLowerCase] = true;
                         break;
                 }
             }
@@ -348,7 +353,7 @@ class Runner {
         });
     }
     getSchema(name) {
-        return this.schemas[name];
+        return this.schemas[name.toLowerCase()];
     }
 }
 exports.Runner = Runner;
