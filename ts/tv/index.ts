@@ -61,9 +61,10 @@ router.get('/schema/:name', async (req:Request, res:Response) => {
     let runner = await checkRunner(db, res);
     let schema = runner.getSchema(name);
     if (schema === undefined) return unknownEntity(res, name);
+    let call = schema.call;
     res.json({
         ok: true,
-        res: schema.call,
+        res: call,
     });
 });
 

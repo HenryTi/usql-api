@@ -65,9 +65,10 @@ router.get('/schema/:name', (req, res) => __awaiter(this, void 0, void 0, functi
     let schema = runner.getSchema(name);
     if (schema === undefined)
         return unknownEntity(res, name);
+    let call = schema.call;
     res.json({
         ok: true,
-        res: schema.call,
+        res: call,
     });
 }));
 router.get('/schema/:name/:version', (req, res) => __awaiter(this, void 0, void 0, function* () {

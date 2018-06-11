@@ -28,12 +28,14 @@ function afterAction(db, runner, unit, returns, hasSend, busFaces, result) {
             function sendToChat(row) {
                 return __awaiter(this, void 0, void 0, function* () {
                     // 通过websocket送回界面
-                    let { to, msg: id } = row;
+                    let { to, msg, action, data } = row;
                     yield ws_1.wsSendMessage(db, unit, to, {
                         $type: 'msg',
                         $user: to,
                         $unit: unit,
-                        id: id,
+                        msg: msg,
+                        action: action,
+                        data: data,
                     });
                 });
             }

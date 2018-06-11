@@ -257,9 +257,129 @@ class Runner {
                     this.buses[url] = schema;
                 }
             }
-            console.log('schema: %s', JSON.stringify(this.schemas));
+            for (let i in this.schemas) {
+                let schema = this.schemas[i];
+                let { call } = schema;
+                let { type } = call;
+                let tuids;
+                switch (type) {
+                    default: continue;
+                    case 'tuid':
+                        tuids = this.tuidRefTuids(call);
+                        break;
+                    case 'action':
+                        tuids = this.actionRefTuids(call);
+                        break;
+                    case 'sheet':
+                        tuids = this.sheetRefTuids(call);
+                        break;
+                    case 'query':
+                        tuids = this.queryRefTuids(call);
+                        break;
+                    case 'book':
+                        tuids = this.bookRefTuids(call);
+                        break;
+                }
+                if (tuids.length === 0)
+                    continue;
+                call.tuids = tuids;
+            }
+            for (let i in this.schemas) {
+                let schema = this.schemas[i];
+                let { call } = schema;
+                if (call === undefined)
+                    continue;
+                let circular = false;
+                let arr = [call];
+                let text = JSON.stringify(call, (key, value) => {
+                    if (key !== 'tuids')
+                        return value;
+                    let ret = [];
+                    for (let v of value) {
+                        if (arr.findIndex(a => a === v) >= 0) {
+                            circular = true;
+                        }
+                        else {
+                            arr.push(v);
+                            ret.push(v);
+                        }
+                    }
+                    return ret.length > 0 ? ret : undefined;
+                });
+                if (circular) {
+                    let newCall = JSON.parse(text);
+                    schema.call = newCall;
+                }
+            }
+            //console.log('schema: %s', JSON.stringify(this.schemas));
             this.buildAccesses();
         });
+    }
+    fieldsTuids(fields, tuids) {
+        if (fields === undefined)
+            return;
+        for (let f of fields) {
+            let { tuid } = f;
+            if (tuid === undefined)
+                continue;
+            tuids.push(this.schemas[tuid.toLowerCase()].call);
+        }
+    }
+    arrsTuids(arrs, tuids) {
+        if (arrs === undefined)
+            return;
+        for (let arr of arrs) {
+            this.fieldsTuids(arr.fields, tuids);
+        }
+    }
+    returnsTuids(returns, tuids) {
+        if (returns === undefined)
+            return;
+        for (let ret of returns) {
+            this.fieldsTuids(ret.fields, tuids);
+        }
+    }
+    // 建立tuid, action, sheet, query, book里面引用到的tuids
+    tuidRefTuids(schema) {
+        let tuids = [];
+        this.fieldsTuids(schema.fields, tuids);
+        return tuids;
+    }
+    actionRefTuids(schema) {
+        let tuids = [];
+        this.fieldsTuids(schema.fields, tuids);
+        this.arrsTuids(schema.arrs, tuids);
+        this.returnsTuids(schema.returns, tuids);
+        return tuids;
+    }
+    sheetRefTuids(schema) {
+        let tuids = [];
+        this.fieldsTuids(schema.fields, tuids);
+        this.arrsTuids(schema.arrs, tuids);
+        let { states } = schema;
+        if (states !== undefined) {
+            for (let state of states) {
+                let { actions } = state;
+                if (actions === undefined)
+                    continue;
+                for (let action of actions) {
+                    this.returnsTuids(action.returns, tuids);
+                }
+            }
+        }
+        return tuids;
+    }
+    queryRefTuids(schema) {
+        let tuids = [];
+        this.fieldsTuids(schema.fields, tuids);
+        this.returnsTuids(schema.returns, tuids);
+        return tuids;
+    }
+    bookRefTuids(schema) {
+        let tuids = [];
+        this.fieldsTuids(schema.fields, tuids);
+        this.returnsTuids(schema.returns, tuids);
+        return tuids;
     }
     buildAccesses() {
         this.access = {};
@@ -315,7 +435,7 @@ class Runner {
                 }
             }
         }
-        console.log('access: %s', JSON.stringify(this.access));
+        //console.log('access: %s', JSON.stringify(this.access));
     }
     tuidProxies(tuid) {
         let ret = '';

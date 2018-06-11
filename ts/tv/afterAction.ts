@@ -20,12 +20,14 @@ export async function afterAction(db:string, runner: Runner, unit:number, return
         let proc = runner.isSysChat === true? sendToChat : mailToChat;
         async function sendToChat(row:any) {
             // 通过websocket送回界面
-            let {to, msg:id} = row;
+            let {to, msg, action, data} = row;
             await wsSendMessage(db, unit, to, {
                 $type: 'msg',
                 $user: to,
                 $unit: unit,
-                id: id,
+                msg: msg,
+                action: action,
+                data: data,
             });
         }
         async function mailToChat(row:any) {
