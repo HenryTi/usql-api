@@ -13,7 +13,7 @@ const bodyParser = require("body-parser");
 const config = require("config");
 const tv_1 = require("./tv");
 const unitx_1 = require("./tv/unitx");
-const ws_1 = require("./ws");
+//import {wsOnConnected, getWsLogs} from './ws';
 const core_1 = require("./core");
 (function () {
     let connection = config.get("connection");
@@ -57,7 +57,7 @@ const core_1 = require("./core");
     // 正常的tonva usql接口
     app.use('/usql/:db/tv/unitx', [core_1.authUnitx, unitx_1.unitxRouter]);
     app.use('/usql/:db/tv', [core_1.authCheck, tv_1.default]);
-    app.use('/usql/:db/log', ws_1.getWsLogs);
+    //app.use('/usql/:db/log', getWsLogs);
     // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
     app.use('/usql/:db/debug', [core_1.authDebug, tv_1.default]);
     app.use('/usql/:db/hello', (req, res) => {
@@ -74,18 +74,24 @@ const core_1 = require("./core");
         console.log('process.env.NODE_ENV: %s, connection: %s', process.env.NODE_ENV, JSON.stringify(config.get("connection")));
         // await startupUsqlApp((text:string) => console.log(text || ''));
     }));
-    tv_1.queue.add({ job: undefined })
-        .then(job => {
-        try {
-            console.log('redis server ok!');
-            return job.remove();
-        }
-        catch (err) {
-            console.log('redis server job.remove error: ' + err);
-        }
-    })
-        .catch(reason => {
-        console.log('redis server error: ', reason);
-    });
+    function tryJobQueue() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let job = yield tv_1.queue.add({ job: undefined });
+                try {
+                    yield job.remove();
+                    console.log('redis server ok!');
+                }
+                catch (err) {
+                    console.log('redis server job.remove error: ' + err);
+                }
+            }
+            catch (reason) {
+                console.log('redis server error: ', reason);
+            }
+            ;
+        });
+    }
+    tryJobQueue();
 })();
 //# sourceMappingURL=index.js.map

@@ -119,7 +119,7 @@ export async function wsSendMessage(db:string, unit:number, user:number, msg: an
     }
 */
 }
-
+/*
 export const getWsLogs: Router = Router();
 getWsLogs.get('/ws', async (req:Request, res:Response) => {
     res.write('<html><head><title>websocket log</title></head><body>');
@@ -127,3 +127,4 @@ getWsLogs.get('/ws', async (req:Request, res:Response) => {
     res.write('</body></html>');
     res.end();
 });
+*/

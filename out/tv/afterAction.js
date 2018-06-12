@@ -29,14 +29,16 @@ function afterAction(db, runner, unit, returns, hasSend, busFaces, result) {
                 return __awaiter(this, void 0, void 0, function* () {
                     // 通过websocket送回界面
                     let { to, msg, action, data } = row;
-                    yield ws_1.wsSendMessage(db, unit, to, {
+                    let wsMsg = {
                         $type: 'msg',
                         $user: to,
                         $unit: unit,
                         msg: msg,
                         action: action,
                         data: data,
-                    });
+                    };
+                    yield ws_1.wsSendMessage(db, unit, to, wsMsg);
+                    console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
                 });
             }
             function mailToChat(row) {

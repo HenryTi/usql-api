@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
 const core_1 = require("./core");
 const wss = {};
 //const userWss:{[user:number]: object | object[]} = {};
@@ -129,11 +128,13 @@ function wsSendMessage(db, unit, user, msg) {
     });
 }
 exports.wsSendMessage = wsSendMessage;
-exports.getWsLogs = express_1.Router();
-exports.getWsLogs.get('/ws', (req, res) => __awaiter(this, void 0, void 0, function* () {
+/*
+export const getWsLogs: Router = Router();
+getWsLogs.get('/ws', async (req:Request, res:Response) => {
     res.write('<html><head><title>websocket log</title></head><body>');
     res.write(wsLogs.join('<br/>'));
     res.write('</body></html>');
     res.end();
-}));
+});
+*/
 //# sourceMappingURL=ws.js.map

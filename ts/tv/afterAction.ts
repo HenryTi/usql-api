@@ -21,14 +21,16 @@ export async function afterAction(db:string, runner: Runner, unit:number, return
         async function sendToChat(row:any) {
             // 通过websocket送回界面
             let {to, msg, action, data} = row;
-            await wsSendMessage(db, unit, to, {
+            let wsMsg = {
                 $type: 'msg',
                 $user: to,
                 $unit: unit,
                 msg: msg,
                 action: action,
                 data: data,
-            });
+            };
+            await wsSendMessage(db, unit, to, wsMsg);
+            console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
         }
         async function mailToChat(row:any) {
             // 通过face邮件发送到chat服务器

@@ -6,7 +6,7 @@ import * as config from 'config';
 import * as multer from 'multer'; 
 import tv,{queue} from './tv';
 import {unitxRouter} from './tv/unitx';
-import {wsOnConnected, getWsLogs} from './ws';
+//import {wsOnConnected, getWsLogs} from './ws';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
 import { Request, Response, NextFunction } from 'express';
 
@@ -54,7 +54,7 @@ import { Request, Response, NextFunction } from 'express';
     // 正常的tonva usql接口
     app.use('/usql/:db/tv/unitx', [authUnitx, unitxRouter]);
     app.use('/usql/:db/tv', [authCheck, tv]);
-    app.use('/usql/:db/log', getWsLogs);
+    //app.use('/usql/:db/log', getWsLogs);
     // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
     app.use('/usql/:db/debug', [authDebug, tv]);
 
@@ -78,17 +78,21 @@ import { Request, Response, NextFunction } from 'express';
         // await startupUsqlApp((text:string) => console.log(text || ''));
     });
 
-    queue.add({job: undefined})
-        .then(job => {
+    async function tryJobQueue() {
+        try {
+            let job = await queue.add({job: undefined});
             try {
+                await job.remove();
                 console.log('redis server ok!');
-                return job.remove();
             }
             catch (err) {
                 console.log('redis server job.remove error: ' + err);
             }
-    })
-    .catch(reason => {
-        console.log('redis server error: ', reason);
-    });
+        }
+        catch (reason) {
+            console.log('redis server error: ', reason);
+        };
+    }
+
+    tryJobQueue();
 })();
