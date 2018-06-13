@@ -254,7 +254,11 @@ export class Runner {
         for (let f of fields) {
             let {tuid} = f;
             if (tuid === undefined) continue;
-            tuids.push(this.schemas[tuid.toLowerCase()].call);
+            let schema = this.schemas[tuid.toLowerCase()];
+            if (schema === undefined) {
+                continue;
+            }
+            tuids.push(schema.call);
         }
     }
     private arrsTuids(arrs:any[], tuids:any[]) {
@@ -316,14 +320,18 @@ export class Runner {
         //let accesses = this.app.accesses;
         for (let a in this.schemas) {
             let la = a.toLowerCase();
-            let access = this.schemas[la].call;
+            let schema = this.schemas[la];
+            if (schema === undefined) continue;
+            let access = schema.call;
             if (access.type !== 'access') continue;
             let acc = this.access[la] = {};
             for (let item of access.list) {
                 let len = item.length;
                 let i0 = item[0], i1, li1, a2, a3;
                 let li0 = i0.toLowerCase();
-                let entity = this.schemas[li0].call;
+                schema = this.schemas[li0];
+                if (schema === undefined) continue;
+                let entity = schema.call;
                 let type = entity && entity.type;
                 let id = entity && entity.id;
                 switch (len) {
