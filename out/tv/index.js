@@ -71,6 +71,19 @@ router.get('/schema/:name', (req, res) => __awaiter(this, void 0, void 0, functi
         res: call,
     });
 }));
+router.post('/schema', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    let user = req.user;
+    let db = user.db;
+    let { body } = req;
+    let runner = yield checkRunner(db, res);
+    //let schema = runner.getSchema(name);
+    //if (schema === undefined) return unknownEntity(res, name);
+    //let call = schema.call;
+    res.json({
+        ok: true,
+        res: body.map(name => (runner.getSchema(name) || {}).call),
+    });
+}));
 router.get('/schema/:name/:version', (req, res) => __awaiter(this, void 0, void 0, function* () {
     let user = req.user;
     let db = user.db;

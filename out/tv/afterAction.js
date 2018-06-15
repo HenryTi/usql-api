@@ -28,16 +28,17 @@ function afterAction(db, runner, unit, returns, hasSend, busFaces, result) {
             function sendToChat(row) {
                 return __awaiter(this, void 0, void 0, function* () {
                     // 通过websocket送回界面
-                    let { to, msg, action, data } = row;
+                    let { to, msg, action, data, notify } = row;
                     let wsMsg = {
                         $type: 'msg',
                         $user: to,
                         $unit: unit,
+                        $io: notify,
                         msg: msg,
                         action: action,
                         data: data,
                     };
-                    yield ws_1.wsSendMessage(db, unit, to, wsMsg);
+                    yield ws_1.wsSendMessage(db, wsMsg);
                     console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
                 });
             }

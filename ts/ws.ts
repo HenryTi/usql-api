@@ -88,9 +88,14 @@ const wsLogs:string[] = [];
 function logws(log:string) {
     wsLogs.push(log);
 }
-export async function wsSendMessage(db:string, unit:number, user:number, msg: any) {
-    await centerApi.pushTo(user, msg);
-    let s = null;
+export async function wsSendMessage(db:string, msg:any) {
+    try {
+        await centerApi.pushTo(msg);
+        let s = null;
+    }
+    catch (e) {
+        console.error('ws send message to center: %s', e);
+    }
 /*
     let unitWss = wss[db];
     if (unitWss === undefined) {

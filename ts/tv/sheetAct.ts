@@ -59,7 +59,7 @@ export async function sheetAct(jobData:any):Promise<void> {
         if (ar !== undefined) {
             for (let i in ar) msg[i] = ar[i];
         }
-        await wsSendMessage(db, unit, user, msg);
+        await wsSendMessage(db, msg);
     }
     catch(err) {
         console.log('sheet Act error: ', err);

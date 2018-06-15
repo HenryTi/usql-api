@@ -94,10 +94,15 @@ const wsLogs = [];
 function logws(log) {
     wsLogs.push(log);
 }
-function wsSendMessage(db, unit, user, msg) {
+function wsSendMessage(db, msg) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield core_1.centerApi.pushTo(user, msg);
-        let s = null;
+        try {
+            yield core_1.centerApi.pushTo(msg);
+            let s = null;
+        }
+        catch (e) {
+            console.error('ws send message to center: %s', e);
+        }
         /*
             let unitWss = wss[db];
             if (unitWss === undefined) {

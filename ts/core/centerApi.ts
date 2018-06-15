@@ -86,8 +86,8 @@ class CenterApi extends Fetch {
         return await this.get('/open/usqldb', {name:name});
     }
 
-    async pushTo(user:number, msg:any):Promise<void> {
-        return await this.post('/push/' + user, msg);
+    async pushTo(msg:any):Promise<void> {
+        return await this.post('/push', msg);
     }
 }
 

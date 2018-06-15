@@ -70,7 +70,7 @@ function sheetAct(jobData) {
                 for (let i in ar)
                     msg[i] = ar[i];
             }
-            yield ws_1.wsSendMessage(db, unit, user, msg);
+            yield ws_1.wsSendMessage(db, msg);
         }
         catch (err) {
             console.log('sheet Act error: ', err);
