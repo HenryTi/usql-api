@@ -356,6 +356,55 @@ router.post('/tuids/:name', async (req:Request, res:Response) => {
     };
 });
 
+router.get('/tuid-slaves/:name', async (req:Request, res:Response) => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {name} = req.params;
+        let {slave, masterId, pageStart, pageSize} = (req as any).query;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined) return unknownEntity(res, name);
+        let schemaCall = schema.call;
+        if (validEntity(res, schemaCall, 'tuid') === false) return;
+        let result = await runner.tuidSlaves(name, user.unit, user.id, slave, masterId, pageStart, pageSize);
+        res.json({
+            ok: true,
+            res: result,
+        });
+    }
+    catch(err) {
+        res.json({error: err});
+        return;
+    }
+});
+
+router.post('/tuid-slave/:name/:slave', async (req:Request, res:Response) => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {name, slave} = req.params;
+        let body = (req as any).body;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined) return unknownEntity(res, name);
+        let schemaCall = schema.call;
+        if (validEntity(res, schemaCall, 'tuid') === false) return;
+        let result = await runner.tuidSlaveSave(name, slave, user.unit, user.id, body);
+        let row = result[0];
+        res.json({
+            ok: true,
+            res: row,
+        });
+    }
+    catch(err) {
+        res.json({error: err});
+        return;
+    }
+});
+
 router.post('/action/:name', async (req:Request, res:Response) => {
     try {
         let user:User = (req as any).user;
