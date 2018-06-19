@@ -57,6 +57,18 @@ function validEntity(res, schema, type) {
     res.json({ error: schema.name + ' is not ' + type });
     return false;
 }
+function validTuidArr(res, schema, arrName) {
+    let { name, type, arr } = schema;
+    if (type !== 'tuid') {
+        res.json({ error: name + ' is not tuid' });
+        return;
+    }
+    let schemaArr = arr[arrName];
+    if (schemaArr !== undefined)
+        return schemaArr;
+    res.json({ error: name + ' does not have arr ' + arrName });
+    return;
+}
 router.get('/schema/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
     let user = req.user;
     let db = user.db;
@@ -121,6 +133,32 @@ router.get('/tuid/:name/:id', (req, res) => __awaiter(this, void 0, void 0, func
         return;
     }
 }));
+router.get('/tuid-arr/:name/:owner/:arr/:id/', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        let user = req.user;
+        let db = user.db;
+        let { id, name, owner, arr } = req.params;
+        let runner = yield checkRunner(db, res);
+        if (runner === undefined)
+            return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined)
+            return unknownEntity(res, name);
+        let schemaArr = validTuidArr(res, schema.call, arr);
+        if (schemaArr === undefined)
+            return;
+        let result = yield runner.tuidArrGet(name, arr, user.unit, user.id, owner, id);
+        let row = result[0];
+        res.json({
+            ok: true,
+            res: row,
+        });
+    }
+    catch (err) {
+        res.json({ error: err });
+        return;
+    }
+}));
 router.get('/tuid-all/:name/', (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         let user = req.user;
@@ -136,6 +174,31 @@ router.get('/tuid-all/:name/', (req, res) => __awaiter(this, void 0, void 0, fun
         if (validEntity(res, schemaCall, 'tuid') === false)
             return;
         let result = yield runner.tuidGetAll(name, user.unit, user.id);
+        res.json({
+            ok: true,
+            res: result,
+        });
+    }
+    catch (err) {
+        res.json({ error: err });
+        return;
+    }
+}));
+router.get('/tuid-arr-all/:name/:owner/:arr/', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        let user = req.user;
+        let db = user.db;
+        let { name, owner, arr } = req.params;
+        let runner = yield checkRunner(db, res);
+        if (runner === undefined)
+            return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined)
+            return unknownEntity(res, name);
+        let schemaArr = validTuidArr(res, schema.call, arr);
+        if (schemaArr === undefined)
+            return;
+        let result = yield runner.tuidGetArrAll(name, arr, user.unit, user.id, owner);
         res.json({
             ok: true,
             res: result,
@@ -199,6 +262,73 @@ router.post('/tuid/:name', (req, res) => __awaiter(this, void 0, void 0, functio
         res.json({
             ok: true,
             res: row,
+        });
+    }
+    catch (err) {
+        res.json({ error: err });
+        return;
+    }
+}));
+router.post('/tuid-arr/:name/:owner/:arr/', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        let user = req.user;
+        let db = user.db;
+        let { name, owner, arr } = req.params;
+        let runner = yield checkRunner(db, res);
+        if (runner === undefined)
+            return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined)
+            return unknownEntity(res, name);
+        let schemaArr = validTuidArr(res, schema.call, arr);
+        if (schemaArr === undefined)
+            return;
+        let body = req.body;
+        let id = body["$id"];
+        let params = [owner, id];
+        let fields = schemaArr.fields;
+        let len = fields.length;
+        for (let i = 0; i < len; i++) {
+            params.push(body[fields[i].name]);
+        }
+        let result = yield runner.tuidArrSave(name, arr, user.unit, user.id, params);
+        let row = result[0];
+        res.json({
+            ok: true,
+            res: row,
+        });
+    }
+    catch (err) {
+        res.json({ error: err });
+        return;
+    }
+}));
+router.post('/tuid-arr-pos/:name/:owner/:arr/', (req, res) => __awaiter(this, void 0, void 0, function* () {
+    try {
+        let user = req.user;
+        let db = user.db;
+        let { name, owner, arr } = req.params;
+        let runner = yield checkRunner(db, res);
+        if (runner === undefined)
+            return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined)
+            return unknownEntity(res, name);
+        let schemaArr = validTuidArr(res, schema.call, arr);
+        if (schemaArr === undefined)
+            return;
+        let body = req.body;
+        let { $id, $order } = body;
+        let params = [owner, $id, $order];
+        //let fields = schemaArr.fields;
+        //let len = fields.length;
+        //for (let i=0; i<len; i++) {
+        //    params.push(body[fields[i].name]);
+        //}
+        let result = yield runner.tuidArrPos(name, arr, user.unit, user.id, params);
+        //let row = result[0];
+        res.json({
+            ok: true,
         });
     }
     catch (err) {

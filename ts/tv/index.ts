@@ -53,6 +53,17 @@ function validEntity(res:Response, schema:any, type:string):boolean {
     res.json({error: schema.name + ' is not ' + type});
     return false;
 }
+function validTuidArr(res:Response, schema:any, arrName:string):any {
+    let {name, type, arr} = schema;
+    if (type !== 'tuid') {
+        res.json({error: name + ' is not tuid'});
+        return;
+    }
+    let schemaArr = arr[arrName];
+    if (schemaArr !== undefined) return schemaArr;
+    res.json({error: name + ' does not have arr ' + arrName });
+    return;
+}
 
 router.get('/schema/:name', async (req:Request, res:Response) => {
     let user:User = (req as any).user;
@@ -118,6 +129,31 @@ router.get('/tuid/:name/:id', async (req:Request, res:Response) => {
     }
 });
 
+
+router.get('/tuid-arr/:name/:owner/:arr/:id/', async (req:Request, res:Response) => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {id, name, owner, arr} = req.params;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined) return unknownEntity(res, name);
+        let schemaArr = validTuidArr(res, schema.call, arr);
+        if (schemaArr === undefined) return;
+        let result = await runner.tuidArrGet(name, arr, user.unit, user.id, owner, id);
+        let row = result[0];
+        res.json({
+            ok: true,
+            res: row,
+        });
+    }
+    catch(err) {
+        res.json({error: err});
+        return;
+    }
+});
+
 router.get('/tuid-all/:name/', async (req:Request, res:Response) => {
     try {
         let user:User = (req as any).user;
@@ -130,6 +166,29 @@ router.get('/tuid-all/:name/', async (req:Request, res:Response) => {
         let schemaCall = schema.call;
         if (validEntity(res, schemaCall, 'tuid') === false) return;
         let result = await runner.tuidGetAll(name, user.unit, user.id);
+        res.json({
+            ok: true,
+            res: result,
+        });
+    }
+    catch(err) {
+        res.json({error: err});
+        return;
+    }
+});
+
+router.get('/tuid-arr-all/:name/:owner/:arr/', async (req:Request, res:Response) => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {name, owner, arr} = req.params;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined) return unknownEntity(res, name);
+        let schemaArr = validTuidArr(res, schema.call, arr);
+        if (schemaArr === undefined) return;
+        let result = await runner.tuidGetArrAll(name, arr, user.unit, user.id, owner);
         res.json({
             ok: true,
             res: result,
@@ -189,6 +248,69 @@ router.post('/tuid/:name', async (req:Request, res:Response) => {
         res.json({
             ok: true,
             res: row,
+        });
+    }
+    catch(err) {
+        res.json({error: err});
+        return;
+    }
+});
+
+router.post('/tuid-arr/:name/:owner/:arr/', async (req:Request, res:Response) => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {name, owner, arr} = req.params;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined) return unknownEntity(res, name);
+        let schemaArr = validTuidArr(res, schema.call, arr);
+        if (schemaArr === undefined) return;
+        let body = (req as any).body;
+        let id = body["$id"];
+        let params:any[] = [owner, id];
+        let fields = schemaArr.fields;
+        let len = fields.length;
+        for (let i=0; i<len; i++) {
+            params.push(body[fields[i].name]);
+        }
+        let result = await runner.tuidArrSave(name, arr, user.unit, user.id, params);
+        let row = result[0];
+        res.json({
+            ok: true,
+            res: row,
+        });
+    }
+    catch(err) {
+        res.json({error: err});
+        return;
+    }
+});
+router.post('/tuid-arr-pos/:name/:owner/:arr/', async (req:Request, res:Response) => {
+    try {
+        let user:User = (req as any).user;
+        let db = user.db;
+        let {name, owner, arr} = req.params;
+        let runner = await checkRunner(db, res);
+        if (runner === undefined) return;
+        let schema = runner.getSchema(name);
+        if (schema === undefined) return unknownEntity(res, name);
+        let schemaArr = validTuidArr(res, schema.call, arr);
+        if (schemaArr === undefined) return;
+        let body = (req as any).body;
+        let {$id, $order} = body;
+        let params:any[] = [owner, $id, $order];
+        //let fields = schemaArr.fields;
+        //let len = fields.length;
+        //for (let i=0; i<len; i++) {
+        //    params.push(body[fields[i].name]);
+        //}
+        let result = await runner.tuidArrPos(name, arr, user.unit, user.id, params);
+        //let row = result[0];
+        res.json({
+            ok: true,
+            //res: row,
         });
     }
     catch(err) {

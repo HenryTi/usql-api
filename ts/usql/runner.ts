@@ -98,8 +98,14 @@ export class Runner {
     async tuidGet(tuid:string, unit:number, user:number, id:number): Promise<any> {
         return await this.db.call('tv' + tuid, [unit, user, id]);
     }
+    async tuidArrGet(tuid:string, arr:string, unit:number, user:number, owner:number, id:number): Promise<any> {
+        return await this.db.call('tv' + tuid + '_' + arr + '_id', [unit, user, owner, id]);
+    }
     async tuidGetAll(tuid:string, unit:number, user:number): Promise<any> {
         return await this.db.call('tv' + tuid + '_all', [unit, user]);
+    }
+    async tuidGetArrAll(tuid:string, arr:string, unit:number, user:number, owner:number): Promise<any> {
+        return await this.db.call('tv' + tuid + '_' + arr + '_all', [unit, user, owner]);
     }
     async tuidProxyGet(tuid:string, unit:number, user:number, id:number, type:string): Promise<any> {
         return await this.db.call('tv' + tuid + '_proxy', [unit, user, id, type]);
@@ -112,6 +118,12 @@ export class Runner {
     }
     async tuidSave(tuid:string, unit:number, user:number, params:any[]): Promise<any> {
         return await this.db.call('tv' + tuid + '_save', [unit, user, ...params]);
+    }
+    async tuidArrSave(tuid:string, arr:string, unit:number, user:number, params:any[]): Promise<any> {
+        return await this.db.call('tv' + tuid + '_' + arr + '_save', [unit, user, ...params]);
+    }
+    async tuidArrPos(tuid:string, arr:string, unit:number, user:number, params:any[]): Promise<any> {
+        return await this.db.call('tv' + tuid + '_' + arr + '_pos', [unit, user, ...params]);
     }
     async tuidSeach(tuid:string, unit:number, user:number, key:string, pageStart:number, pageSize:number): Promise<any> {
         return await this.db.tablesFromProc('tv' + tuid + '_search', [unit, user, key, pageStart, pageSize]);

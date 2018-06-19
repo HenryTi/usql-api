@@ -119,9 +119,19 @@ class Runner {
             return yield this.db.call('tv' + tuid, [unit, user, id]);
         });
     }
+    tuidArrGet(tuid, arr, unit, user, owner, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + tuid + '_' + arr + '_id', [unit, user, owner, id]);
+        });
+    }
     tuidGetAll(tuid, unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.call('tv' + tuid + '_all', [unit, user]);
+        });
+    }
+    tuidGetArrAll(tuid, arr, unit, user, owner) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + tuid + '_' + arr + '_all', [unit, user, owner]);
         });
     }
     tuidProxyGet(tuid, unit, user, id, type) {
@@ -142,6 +152,16 @@ class Runner {
     tuidSave(tuid, unit, user, params) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.call('tv' + tuid + '_save', [unit, user, ...params]);
+        });
+    }
+    tuidArrSave(tuid, arr, unit, user, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + tuid + '_' + arr + '_save', [unit, user, ...params]);
+        });
+    }
+    tuidArrPos(tuid, arr, unit, user, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv' + tuid + '_' + arr + '_pos', [unit, user, ...params]);
         });
     }
     tuidSeach(tuid, unit, user, key, pageStart, pageSize) {
