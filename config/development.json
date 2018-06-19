@@ -1,11 +1,11 @@
 {
-    "connection": {
+    "connection-ali": {
         "host": "101.200.46.56",
         "user": "root",
         "password": "wpmKMPS2xwlG3ZC",
         "multipleStatements": true
     },
-    "connection-ligsh": {
+    "connection": {
         "host": "47.92.87.6",
         "user": "henry",
         "password": "jk@20180402!@#",

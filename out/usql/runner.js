@@ -181,7 +181,7 @@ class Runner {
     }
     tuidSlaves(tuid, unit, user, slave, masterId, pageStart, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.tablesFromProc('tv' + tuid + '_' + slave + '_ids', [unit, user, masterId, pageStart, pageSize]);
+            return yield this.db.call('tv' + tuid + '_' + slave + '_ids', [unit, user, masterId, pageStart, pageSize]);
         });
     }
     sheetProcessing(sheetId) {

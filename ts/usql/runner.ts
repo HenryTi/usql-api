@@ -135,7 +135,7 @@ export class Runner {
         return await this.db.call('tv' + tuid + '_' + slave + '_save', [unit, user, ...params]);
     }
     async tuidSlaves(tuid:string, unit:number, user:number, slave:string, masterId:number, pageStart:number, pageSize:number): Promise<any> {
-        return await this.db.tablesFromProc('tv' + tuid + '_' + slave + '_ids', [unit, user, masterId, pageStart, pageSize]);
+        return await this.db.call('tv' + tuid + '_' + slave + '_ids', [unit, user, masterId, pageStart, pageSize]);
     }
     async sheetProcessing(sheetId:number):Promise<void> {
         await this.db.call('tv$sheet_processing', [sheetId]);

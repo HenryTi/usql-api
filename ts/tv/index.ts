@@ -327,11 +327,10 @@ router.post('/tuidids/:name', async (req:Request, res:Response) => {
     if (runner === undefined) return;
     let body = (req as any).body;
     let ids = (body as number[]).join(',');
-    runner.tuidIds(name, user.unit, user.id, ids).then(result => {
-        res.json({
-            ok: true,
-            res: result
-        });
+    let result = await runner.tuidIds(name, user.unit, user.id, ids);
+    res.json({
+        ok: true,
+        res: result
     });
 });
 
@@ -388,11 +387,18 @@ router.post('/tuid-slave/:name/:slave', async (req:Request, res:Response) => {
         let body = (req as any).body;
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
-        let schema = runner.getSchema(name);
-        if (schema === undefined) return unknownEntity(res, name);
+        let schema = runner.getSchema(slave);
+        if (schema === undefined) return unknownEntity(res, slave);
         let schemaCall = schema.call;
         if (validEntity(res, schemaCall, 'tuid') === false) return;
-        let result = await runner.tuidSlaveSave(name, slave, user.unit, user.id, body);
+        let {$master, $first, $id} = body;
+        let params:any[] = [$master, $first, $id];
+        let fields = schemaCall.fields;
+        let len = fields.length;
+        for (let i=0; i<len; i++) {
+            params.push(body[fields[i].name]);
+        }
+        let result = await runner.tuidSlaveSave(name, slave, user.unit, user.id, params);
         let row = result[0];
         res.json({
             ok: true,
