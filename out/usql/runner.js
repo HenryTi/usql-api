@@ -16,17 +16,17 @@ function getRunner(name) {
         let runner = runners[name];
         if (runner === null)
             return;
-        if (runner !== undefined)
-            return runner;
-        let db = db_1.getDb(name);
-        let isExists = yield db.exists();
-        if (isExists === false) {
-            runners[name] = null;
-            return;
+        if (runner === undefined) {
+            let db = db_1.getDb(name);
+            let isExists = yield db.exists();
+            if (isExists === false) {
+                runners[name] = null;
+                return;
+            }
+            runner = new Runner(db);
         }
-        runner = runners[name] = new Runner(db);
         yield runner.initSchemas();
-        return runner;
+        return runners[name] = runner;
     });
 }
 exports.getRunner = getRunner;
@@ -60,22 +60,22 @@ class Runner {
     }
     init(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv$init', [unit, user]);
+            return yield this.db.call('tv_$init', [unit, user]);
         });
     }
     start(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv$start', [unit, user]);
+            return yield this.db.call('tv_$start', [unit, user]);
         });
     }
     set(unit, name, num, str) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.call('tv$set', [unit, name, num, str]);
+            yield this.db.call('tv_$set', [unit, name, num, str]);
         });
     }
     getStr(unit, name) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.db.tableFromProc('tv$get_str', [unit, name]);
+            let ret = yield this.db.tableFromProc('tv_$get_str', [unit, name]);
             if (ret.length === 0)
                 return undefined;
             return ret[0].str;
@@ -83,7 +83,7 @@ class Runner {
     }
     getNum(unit, name) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.db.tableFromProc('tv$get_num', [unit, name]);
+            let ret = yield this.db.tableFromProc('tv_$get_num', [unit, name]);
             if (ret.length === 0)
                 return undefined;
             return ret[0].num;
@@ -91,102 +91,102 @@ class Runner {
     }
     loadSchemas() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv$schemas', undefined);
+            return yield this.db.call('tv_$schemas', undefined);
         });
     }
     saveSchema(unit, user, id, name, type, schema, run) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv$schema', [unit, user, id, name, type, schema, run]);
+            return yield this.db.call('tv_$schema', [unit, user, id, name, type, schema, run]);
         });
     }
     loadConstStrs() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv$const_strs', undefined);
+            return yield this.db.call('tv_$const_strs', undefined);
         });
     }
     saveConstStr(type) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv$const_str', [type]);
+            return yield this.db.call('tv_$const_str', [type]);
         });
     }
     loadSchemaVersion(name, version) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv$schema_version', [name, version]);
+            return yield this.db.call('tv_$schema_version', [name, version]);
         });
     }
     tuidGet(tuid, unit, user, id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid, [unit, user, id]);
+            return yield this.db.call('tv_' + tuid, [unit, user, id]);
         });
     }
     tuidArrGet(tuid, arr, unit, user, owner, id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid + '_' + arr + '_id', [unit, user, owner, id]);
+            return yield this.db.call('tv_' + tuid + '_' + arr + '$id', [unit, user, owner, id]);
         });
     }
     tuidGetAll(tuid, unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid + '_all', [unit, user]);
+            return yield this.db.call('tv_' + tuid + '$all', [unit, user]);
         });
     }
     tuidGetArrAll(tuid, arr, unit, user, owner) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid + '_' + arr + '_all', [unit, user, owner]);
+            return yield this.db.call('tv_' + tuid + '_' + arr + '$all', [unit, user, owner]);
         });
     }
     tuidProxyGet(tuid, unit, user, id, type) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid + '_proxy', [unit, user, id, type]);
+            return yield this.db.call('tv_' + tuid + '$proxy', [unit, user, id, type]);
         });
     }
     tuidIds(tuid, unit, user, ids) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid + '_ids', [unit, user, ids]);
+            return yield this.db.call('tv_' + tuid + '$ids', [unit, user, ids]);
         });
     }
     tuidMain(tuid, unit, user, id) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid + '_main', [unit, user, id]);
+            return yield this.db.call('tv_' + tuid + '$main', [unit, user, id]);
         });
     }
     tuidSave(tuid, unit, user, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid + '_save', [unit, user, ...params]);
+            return yield this.db.call('tv_' + tuid + '$save', [unit, user, ...params]);
         });
     }
     tuidArrSave(tuid, arr, unit, user, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid + '_' + arr + '_save', [unit, user, ...params]);
+            return yield this.db.call('tv_' + tuid + '_' + arr + '$save', [unit, user, ...params]);
         });
     }
     tuidArrPos(tuid, arr, unit, user, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid + '_' + arr + '_pos', [unit, user, ...params]);
+            return yield this.db.call('tv_' + tuid + '_' + arr + '$pos', [unit, user, ...params]);
         });
     }
     tuidSeach(tuid, unit, user, key, pageStart, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.tablesFromProc('tv' + tuid + '_search', [unit, user, key, pageStart, pageSize]);
+            return yield this.db.tablesFromProc('tv_' + tuid + '$search', [unit, user, key, pageStart, pageSize]);
         });
     }
     sheetSave(sheet, unit, user, discription, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv$sheet_save', [unit, user, sheet, discription, data]);
+            return yield this.db.call('tv_$sheet_save', [unit, user, sheet, discription, data]);
         });
     }
-    tuidSlaveSave(tuid, slave, unit, user, params) {
+    tuidBindSlaveSave(tuid, slave, unit, user, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid + '_' + slave + '_save', [unit, user, ...params]);
+            return yield this.db.call('tv_' + tuid + '_' + slave + '$save', [unit, user, ...params]);
         });
     }
-    tuidSlaves(tuid, unit, user, slave, masterId, pageStart, pageSize) {
+    tuidBindSlaves(tuid, unit, user, slave, masterId, pageStart, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + tuid + '_' + slave + '_ids', [unit, user, masterId, pageStart, pageSize]);
+            return yield this.db.call('tv_' + tuid + '_' + slave + '$ids', [unit, user, masterId, pageStart, pageSize]);
         });
     }
     sheetProcessing(sheetId) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.call('tv$sheet_processing', [sheetId]);
+            yield this.db.call('tv_$sheet_processing', [sheetId]);
         });
     }
     sheetAct(sheet, state, action, unit, user, id, flow) {
@@ -199,45 +199,45 @@ class Runner {
     }
     sheetStates(sheet, state, unit, user, pageStart, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = 'tv$sheet_state';
+            let sql = 'tv_$sheet_state';
             return yield this.db.call(sql, [unit, user, sheet, state, pageStart, pageSize]);
         });
     }
     sheetStateCount(sheet, unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = 'tv$sheet_state_count';
+            let sql = 'tv_$sheet_state_count';
             return yield this.db.call(sql, [unit, user, sheet]);
         });
     }
     getSheet(sheet, unit, user, id) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = 'tv$sheet_id';
+            let sql = 'tv_$sheet_id';
             return yield this.db.call(sql, [unit, user, sheet, id]);
         });
     }
     sheetArchives(sheet, unit, user, pageStart, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = 'tv$archives';
+            let sql = 'tv_$archives';
             return yield this.db.call(sql, [unit, user, sheet, pageStart, pageSize]);
         });
     }
     sheetArchive(unit, user, sheet, id) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = 'tv$archive_id';
+            let sql = 'tv_$archive_id';
             return yield this.db.call(sql, [unit, user, sheet, id]);
         });
     }
     action(action, unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
             //let schema = await this.getSchema(action);
-            let result = yield this.db.callEx('tv' + action, [unit, user, data]);
+            let result = yield this.db.callEx('tv_' + action, [unit, user, data]);
             //this.actionRun(schema, result);
             return result;
         });
     }
     query(query, unit, user, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv' + query, [unit, user, ...params]);
+            return yield this.db.call('tv_' + query, [unit, user, ...params]);
         });
     }
     unitxPost(msg) {
@@ -286,6 +286,7 @@ class Runner {
                     default: continue;
                     case 'tuid':
                         tuids = this.tuidRefTuids(call);
+                        this.tuidSlaves(call);
                         break;
                     case 'action':
                         tuids = this.actionRefTuids(call);
@@ -312,19 +313,26 @@ class Runner {
                 let circular = false;
                 let arr = [call];
                 let text = JSON.stringify(call, (key, value) => {
-                    if (key !== 'tuids')
-                        return value;
-                    let ret = [];
-                    for (let v of value) {
-                        if (arr.findIndex(a => a === v) >= 0) {
-                            circular = true;
+                    if (key === 'tuids') {
+                        let ret = [];
+                        for (let v of value) {
+                            if (arr.findIndex(a => a === v) >= 0) {
+                                circular = true;
+                            }
+                            else {
+                                arr.push(v);
+                                ret.push(v);
+                            }
                         }
-                        else {
-                            arr.push(v);
-                            ret.push(v);
-                        }
+                        return ret.length > 0 ? ret : undefined;
                     }
-                    return ret.length > 0 ? ret : undefined;
+                    else if (key !== '' && value === call) {
+                        // slave in tuid
+                        circular = true;
+                        return undefined;
+                    }
+                    else
+                        return value;
                 });
                 if (circular) {
                     let newCall = JSON.parse(text);
@@ -334,6 +342,33 @@ class Runner {
             //console.log('schema: %s', JSON.stringify(this.schemas));
             this.buildAccesses();
         });
+    }
+    tuidSlaves(schema) {
+        let { slaves } = schema;
+        if (slaves === undefined)
+            return;
+        let ret = {};
+        function getCall(s) {
+            let c = this.schemas[s];
+            if (c === undefined)
+                return;
+            return c.call;
+        }
+        ;
+        let call = getCall.bind(this);
+        for (let slave of slaves) {
+            let book = call(slave);
+            ret[slave] = {
+                tuid: call(book.slave),
+                book: book,
+                page: call(slave + '$page$'),
+                pageSlave: call(slave + '$page$slave$'),
+                all: call(slave + '$all$'),
+                add: call(slave + '$add$'),
+                del: call(slave + '$del$'),
+            };
+        }
+        schema.slaves = ret;
     }
     fieldsTuids(fields, tuids) {
         if (fields === undefined)
@@ -430,6 +465,8 @@ class Runner {
                 switch (len) {
                     case 1:
                         acc[li0] = type + '|' + id + this.tuidProxies(entity);
+                        if (type === 'tuid')
+                            this.addSlavesAccess(acc, entity);
                         break;
                     case 2:
                         a2 = acc[li0];
@@ -467,6 +504,31 @@ class Runner {
         }
         //console.log('access: %s', JSON.stringify(this.access));
     }
+    addSlavesAccess(acc, entity) {
+        let { slaves } = entity;
+        if (slaves === undefined)
+            return;
+        for (let i in slaves) {
+            /*tuid: call(book.slave),
+            book: book,
+            page: call(slave+'$page$'),
+            all: call(slave+'$all$'),
+            add: call(slave+'$add$'),
+            del: call(slave+'$del$'),*/
+            let { tuid, book, page, pageSlave, all, add, del } = slaves[i];
+            this.addEntityAccess(acc, tuid);
+            this.addEntityAccess(acc, book);
+            this.addEntityAccess(acc, page);
+            this.addEntityAccess(acc, pageSlave);
+            this.addEntityAccess(acc, all);
+            this.addEntityAccess(acc, add);
+            this.addEntityAccess(acc, del);
+        }
+    }
+    addEntityAccess(acc, entity) {
+        let { name, type, id } = entity;
+        acc[name.toLowerCase()] = type + '|' + id + this.tuidProxies(entity);
+    }
     tuidProxies(tuid) {
         let ret = '';
         if (tuid === undefined)
@@ -488,7 +550,7 @@ class Runner {
                 this.schemas = undefined;
                 yield this.set(0, 'reloadSchemas', 0, null);
             }
-            yield this.initSchemas();
+            //await this.initSchemas();
             let ret = {};
             if (acc === undefined) {
                 for (let a in this.access) {

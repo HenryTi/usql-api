@@ -1,21 +1,23 @@
 import * as _ from 'lodash';
 import {getDb, Db} from '../db';
+import { debug } from 'util';
 
 let runners: {[name:string]: Runner} = {};
 
 export async function getRunner(name:string):Promise<Runner> {
     let runner = runners[name];
     if (runner === null) return;
-    if (runner !== undefined) return runner;
-    let db = getDb(name);
-    let isExists = await db.exists();
-    if (isExists === false) {
-        runners[name] = null;
-        return;
+    if (runner === undefined) {
+        let db = getDb(name);
+        let isExists = await db.exists();
+        if (isExists === false) {
+            runners[name] = null;
+            return;
+        }
+        runner = new Runner(db);
     }
-    runner = runners[name] = new Runner(db);
     await runner.initSchemas();
-    return runner;
+    return runners[name] = runner;
 }
 
 export function resetRunner(name:string) {
@@ -57,88 +59,88 @@ export class Runner {
     }
 
     async init(unit:number, user:number): Promise<void> {
-        return await this.db.call('tv$init', [unit, user]);
+        return await this.db.call('tv_$init', [unit, user]);
     }
     async start(unit:number, user:number): Promise<void> {
-        return await this.db.call('tv$start', [unit, user]);
+        return await this.db.call('tv_$start', [unit, user]);
     }
 
     async set(unit:number, name: string, num: number, str: string): Promise<void> {
-        await this.db.call('tv$set', [unit, name, num, str]);
+        await this.db.call('tv_$set', [unit, name, num, str]);
     }
 
     async getStr(unit:number, name: string):Promise<string> {
-        let ret = await this.db.tableFromProc('tv$get_str', [unit, name]);
+        let ret = await this.db.tableFromProc('tv_$get_str', [unit, name]);
         if (ret.length===0) return undefined;
         return ret[0].str;
     }
 
     async getNum(unit:number, name: string):Promise<number> {
-        let ret = await this.db.tableFromProc('tv$get_num', [unit, name]);
+        let ret = await this.db.tableFromProc('tv_$get_num', [unit, name]);
         if (ret.length===0) return undefined;
         return ret[0].num;
     }
 
     async loadSchemas(): Promise<{id:number, name:string, type:number, version:number, schema:string, run:string}[]> {
-        return await this.db.call('tv$schemas', undefined);
+        return await this.db.call('tv_$schemas', undefined);
     }
     async saveSchema(unit:number, user:number, id:number, name:string, type:number, schema:string, run:string):Promise<any> {
-        return await this.db.call('tv$schema', [unit, user, id, name, type, schema, run]);
+        return await this.db.call('tv_$schema', [unit, user, id, name, type, schema, run]);
     }
     async loadConstStrs(): Promise<{[name:string]:number}[]> {
-        return await this.db.call('tv$const_strs', undefined);
+        return await this.db.call('tv_$const_strs', undefined);
     }
     async saveConstStr(type:string): Promise<number> {
-        return await this.db.call('tv$const_str', [type]);
+        return await this.db.call('tv_$const_str', [type]);
     }
     async loadSchemaVersion(name:string, version:string): Promise<string> {
-        return await this.db.call('tv$schema_version', [name, version]);
+        return await this.db.call('tv_$schema_version', [name, version]);
     } 
 
     async tuidGet(tuid:string, unit:number, user:number, id:number): Promise<any> {
-        return await this.db.call('tv' + tuid, [unit, user, id]);
+        return await this.db.call('tv_' + tuid, [unit, user, id]);
     }
     async tuidArrGet(tuid:string, arr:string, unit:number, user:number, owner:number, id:number): Promise<any> {
-        return await this.db.call('tv' + tuid + '_' + arr + '_id', [unit, user, owner, id]);
+        return await this.db.call('tv_' + tuid + '_' + arr + '$id', [unit, user, owner, id]);
     }
     async tuidGetAll(tuid:string, unit:number, user:number): Promise<any> {
-        return await this.db.call('tv' + tuid + '_all', [unit, user]);
+        return await this.db.call('tv_' + tuid + '$all', [unit, user]);
     }
     async tuidGetArrAll(tuid:string, arr:string, unit:number, user:number, owner:number): Promise<any> {
-        return await this.db.call('tv' + tuid + '_' + arr + '_all', [unit, user, owner]);
+        return await this.db.call('tv_' + tuid + '_' + arr + '$all', [unit, user, owner]);
     }
     async tuidProxyGet(tuid:string, unit:number, user:number, id:number, type:string): Promise<any> {
-        return await this.db.call('tv' + tuid + '_proxy', [unit, user, id, type]);
+        return await this.db.call('tv_' + tuid + '$proxy', [unit, user, id, type]);
     }
     async tuidIds(tuid:string, unit:number, user:number, ids:string): Promise<any> {
-        return await this.db.call('tv' + tuid + '_ids', [unit, user, ids]);
+        return await this.db.call('tv_' + tuid + '$ids', [unit, user, ids]);
     }
     async tuidMain(tuid:string, unit:number, user:number, id:number): Promise<any> {
-        return await this.db.call('tv' + tuid + '_main', [unit, user, id]);
+        return await this.db.call('tv_' + tuid + '$main', [unit, user, id]);
     }
     async tuidSave(tuid:string, unit:number, user:number, params:any[]): Promise<any> {
-        return await this.db.call('tv' + tuid + '_save', [unit, user, ...params]);
+        return await this.db.call('tv_' + tuid + '$save', [unit, user, ...params]);
     }
     async tuidArrSave(tuid:string, arr:string, unit:number, user:number, params:any[]): Promise<any> {
-        return await this.db.call('tv' + tuid + '_' + arr + '_save', [unit, user, ...params]);
+        return await this.db.call('tv_' + tuid + '_' + arr + '$save', [unit, user, ...params]);
     }
     async tuidArrPos(tuid:string, arr:string, unit:number, user:number, params:any[]): Promise<any> {
-        return await this.db.call('tv' + tuid + '_' + arr + '_pos', [unit, user, ...params]);
+        return await this.db.call('tv_' + tuid + '_' + arr + '$pos', [unit, user, ...params]);
     }
     async tuidSeach(tuid:string, unit:number, user:number, key:string, pageStart:number, pageSize:number): Promise<any> {
-        return await this.db.tablesFromProc('tv' + tuid + '_search', [unit, user, key, pageStart, pageSize]);
+        return await this.db.tablesFromProc('tv_' + tuid + '$search', [unit, user, key, pageStart, pageSize]);
     }
     async sheetSave(sheet:string, unit:number, user:number, discription:string, data:string): Promise<{}> {
-        return await this.db.call('tv$sheet_save', [unit, user, sheet, discription, data]);
+        return await this.db.call('tv_$sheet_save', [unit, user, sheet, discription, data]);
     }
-    async tuidSlaveSave(tuid:string, slave:string, unit:number, user:number, params:any[]): Promise<any> {
-        return await this.db.call('tv' + tuid + '_' + slave + '_save', [unit, user, ...params]);
+    async tuidBindSlaveSave(tuid:string, slave:string, unit:number, user:number, params:any[]): Promise<any> {
+        return await this.db.call('tv_' + tuid + '_' + slave + '$save', [unit, user, ...params]);
     }
-    async tuidSlaves(tuid:string, unit:number, user:number, slave:string, masterId:number, pageStart:number, pageSize:number): Promise<any> {
-        return await this.db.call('tv' + tuid + '_' + slave + '_ids', [unit, user, masterId, pageStart, pageSize]);
+    async tuidBindSlaves(tuid:string, unit:number, user:number, slave:string, masterId:number, pageStart:number, pageSize:number): Promise<any> {
+        return await this.db.call('tv_' + tuid + '_' + slave + '$ids', [unit, user, masterId, pageStart, pageSize]);
     }
     async sheetProcessing(sheetId:number):Promise<void> {
-        await this.db.call('tv$sheet_processing', [sheetId]);
+        await this.db.call('tv_$sheet_processing', [sheetId]);
     }
     async sheetAct(sheet:string, state:string, action:string, unit:number, user:number, id:number, flow:number): Promise<any[]> {
         let sql = state === '$'?
@@ -147,38 +149,38 @@ export class Runner {
         return await this.db.call(sql, [unit, user, id, flow, action]);
     }
     async sheetStates(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
-        let sql = 'tv$sheet_state';
+        let sql = 'tv_$sheet_state';
         return await this.db.call(sql, [unit, user, sheet, state, pageStart, pageSize]);
     }
     async sheetStateCount(sheet:string, unit:number, user:number) {
-        let sql = 'tv$sheet_state_count';
+        let sql = 'tv_$sheet_state_count';
         return await this.db.call(sql, [unit, user, sheet]);
     }
 
     async getSheet(sheet:string, unit:number, user:number, id:number) {
-        let sql = 'tv$sheet_id';
+        let sql = 'tv_$sheet_id';
         return await this.db.call(sql, [unit, user, sheet, id]);
     }
 
     async sheetArchives(sheet:string, unit:number, user:number, pageStart:number, pageSize:number) {
-        let sql = 'tv$archives';
+        let sql = 'tv_$archives';
         return await this.db.call(sql, [unit, user, sheet, pageStart, pageSize]);
     }
 
     async sheetArchive(unit:number, user:number, sheet:string, id:number) {
-        let sql = 'tv$archive_id';
+        let sql = 'tv_$archive_id';
         return await this.db.call(sql, [unit, user, sheet, id]);
     }
 
     async action(action:string, unit:number, user:number, data:string): Promise<any> {
         //let schema = await this.getSchema(action);
-        let result = await this.db.callEx('tv' + action, [unit, user, data]);
+        let result = await this.db.callEx('tv_' + action, [unit, user, data]);
         //this.actionRun(schema, result);
         return result;
     }
 
     async query(query:string, unit:number, user:number, params:any[]): Promise<any> {
-        return await this.db.call('tv' + query, [unit, user, ...params]);
+        return await this.db.call('tv_' + query, [unit, user, ...params]);
     }
 
     async unitxPost(msg:any):Promise<void> {
@@ -221,7 +223,10 @@ export class Runner {
             let tuids:any[];
             switch (type) {
                 default: continue;
-                case 'tuid': tuids = this.tuidRefTuids(call); break;
+                case 'tuid': 
+                    tuids = this.tuidRefTuids(call);
+                    this.tuidSlaves(call);
+                    break;
                 case 'action': tuids = this.actionRefTuids(call); break;
                 case 'sheet': tuids = this.sheetRefTuids(call); break;
                 case 'query': tuids = this.queryRefTuids(call); break;
@@ -237,19 +242,27 @@ export class Runner {
             if (call === undefined) continue;
             let circular = false;
             let arr:any[] = [call];
+
             let text = JSON.stringify(call, (key:string, value:any) => {
-                if (key !== 'tuids') return value;
-                let ret:any[] = [];
-                for (let v of value) {
-                    if (arr.findIndex(a => a === v) >= 0) {
-                        circular = true;
+                if (key === 'tuids') {
+                    let ret:any[] = [];
+                    for (let v of value) {
+                        if (arr.findIndex(a => a === v) >= 0) {
+                            circular = true;
+                        }
+                        else {
+                            arr.push(v);
+                            ret.push(v);
+                        }
                     }
-                    else {
-                        arr.push(v);
-                        ret.push(v);
-                    }
+                    return ret.length > 0? ret : undefined;
                 }
-                return ret.length > 0? ret : undefined;
+                else if (key !== '' && value === call) {
+                    // slave in tuid
+                    circular = true;
+                    return undefined;
+                }
+                else return value;
             });
             if (circular) {
                 let newCall = JSON.parse(text);
@@ -259,6 +272,31 @@ export class Runner {
 
         //console.log('schema: %s', JSON.stringify(this.schemas));
         this.buildAccesses();
+    }
+
+    private tuidSlaves(schema: any) {
+        let {slaves} = schema;
+        if (slaves === undefined) return;
+        let ret = {} as any;
+        function getCall(s:string) {
+            let c = this.schemas[s];
+            if (c === undefined) return;
+            return c.call;
+        };
+        let call = getCall.bind(this);
+        for (let slave of slaves) {
+            let book = call(slave);
+            ret[slave] = {
+                tuid: call(book.slave),
+                book: book,
+                page: call(slave+'$page$'),
+                pageSlave: call(slave+'$page$slave$'),
+                all: call(slave+'$all$'),
+                add: call(slave+'$add$'),
+                del: call(slave+'$del$'),
+            }
+        }
+        schema.slaves = ret;
     }
 
     private fieldsTuids(fields:any[], tuids:any[]) {
@@ -349,6 +387,7 @@ export class Runner {
                 switch (len) {
                     case 1:
                         acc[li0] = type + '|' + id + this.tuidProxies(entity);
+                        if (type === 'tuid') this.addSlavesAccess(acc, entity);
                         break;
                     case 2:
                         a2 = acc[li0];
@@ -387,6 +426,32 @@ export class Runner {
         //console.log('access: %s', JSON.stringify(this.access));
     }
 
+    private addSlavesAccess(acc:any, entity:any) {
+        let {slaves} = entity;
+        if (slaves === undefined) return;
+        for (let i in slaves) {
+            /*tuid: call(book.slave),
+            book: book,
+            page: call(slave+'$page$'),
+            all: call(slave+'$all$'),
+            add: call(slave+'$add$'),
+            del: call(slave+'$del$'),*/
+            let {tuid, book, page, pageSlave, all, add, del} = slaves[i];
+            this.addEntityAccess(acc, tuid);
+            this.addEntityAccess(acc, book);
+            this.addEntityAccess(acc, page);
+            this.addEntityAccess(acc, pageSlave);
+            this.addEntityAccess(acc, all);
+            this.addEntityAccess(acc, add);
+            this.addEntityAccess(acc, del);
+        }
+    }
+
+    private addEntityAccess(acc:any, entity:any) {
+        let {name, type, id} = entity;
+        acc[name.toLowerCase()] = type + '|' + id + this.tuidProxies(entity);
+    } 
+
     private tuidProxies(tuid:any) {
         let ret = '';
         if (tuid === undefined) return ret;
@@ -405,7 +470,7 @@ export class Runner {
             this.schemas = undefined;
             await this.set(0, 'reloadSchemas', 0, null);
         }
-        await this.initSchemas();
+        //await this.initSchemas();
         let ret = {} as any;
         if (acc === undefined) {
             for (let a in this.access) {

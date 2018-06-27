@@ -8,6 +8,7 @@ import {pack} from '../core/packReturn';
 import {queue} from './queue';
 import {afterAction} from './afterAction';
 import { centerApi } from '../core/centerApi';
+import {apiErrors} from './apiErrors';
 
 interface User {
     db: string;
@@ -22,7 +23,10 @@ async function checkRunner(db:string, res:Response):Promise<Runner> {
     let runner = await getRunner(db);
     if (runner !== undefined) return runner;
     res.json({
-        error: 'Database ' + db + ' 不存在'
+        error: {
+            no: apiErrors.databaseNotExists,
+            message: 'Database ' + db + ' 不存在'
+        }
     });
 }
 
@@ -355,7 +359,7 @@ router.post('/tuids/:name', async (req:Request, res:Response) => {
     };
 });
 
-router.get('/tuid-slaves/:name', async (req:Request, res:Response) => {
+router.get('/tuid-bindSlaves/:name', async (req:Request, res:Response) => {
     try {
         let user:User = (req as any).user;
         let db = user.db;
@@ -367,7 +371,7 @@ router.get('/tuid-slaves/:name', async (req:Request, res:Response) => {
         if (schema === undefined) return unknownEntity(res, name);
         let schemaCall = schema.call;
         if (validEntity(res, schemaCall, 'tuid') === false) return;
-        let result = await runner.tuidSlaves(name, user.unit, user.id, slave, masterId, pageStart, pageSize);
+        let result = await runner.tuidBindSlaves(name, user.unit, user.id, slave, masterId, pageStart, pageSize);
         res.json({
             ok: true,
             res: result,
@@ -379,7 +383,7 @@ router.get('/tuid-slaves/:name', async (req:Request, res:Response) => {
     }
 });
 
-router.post('/tuid-slave/:name/:slave', async (req:Request, res:Response) => {
+router.post('/tuid-bindSlave/:name/:slave', async (req:Request, res:Response) => {
     try {
         let user:User = (req as any).user;
         let db = user.db;
@@ -398,7 +402,7 @@ router.post('/tuid-slave/:name/:slave', async (req:Request, res:Response) => {
         for (let i=0; i<len; i++) {
             params.push(body[fields[i].name]);
         }
-        let result = await runner.tuidSlaveSave(name, slave, user.unit, user.id, params);
+        let result = await runner.tuidBindSlaveSave(name, slave, user.unit, user.id, params);
         let row = result[0];
         res.json({
             ok: true,

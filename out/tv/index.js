@@ -16,6 +16,7 @@ const runner_1 = require("../usql/runner");
 const packReturn_1 = require("../core/packReturn");
 const queue_1 = require("./queue");
 const afterAction_1 = require("./afterAction");
+const apiErrors_1 = require("./apiErrors");
 ;
 const router = express_1.Router();
 function checkRunner(db, res) {
@@ -24,7 +25,10 @@ function checkRunner(db, res) {
         if (runner !== undefined)
             return runner;
         res.json({
-            error: 'Database ' + db + ' 不存在'
+            error: {
+                no: apiErrors_1.apiErrors.databaseNotExists,
+                message: 'Database ' + db + ' 不存在'
+            }
         });
     });
 }
@@ -373,7 +377,7 @@ router.post('/tuids/:name', (req, res) => __awaiter(this, void 0, void 0, functi
     }
     ;
 }));
-router.get('/tuid-slaves/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
+router.get('/tuid-bindSlaves/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         let user = req.user;
         let db = user.db;
@@ -388,7 +392,7 @@ router.get('/tuid-slaves/:name', (req, res) => __awaiter(this, void 0, void 0, f
         let schemaCall = schema.call;
         if (validEntity(res, schemaCall, 'tuid') === false)
             return;
-        let result = yield runner.tuidSlaves(name, user.unit, user.id, slave, masterId, pageStart, pageSize);
+        let result = yield runner.tuidBindSlaves(name, user.unit, user.id, slave, masterId, pageStart, pageSize);
         res.json({
             ok: true,
             res: result,
@@ -399,7 +403,7 @@ router.get('/tuid-slaves/:name', (req, res) => __awaiter(this, void 0, void 0, f
         return;
     }
 }));
-router.post('/tuid-slave/:name/:slave', (req, res) => __awaiter(this, void 0, void 0, function* () {
+router.post('/tuid-bindSlave/:name/:slave', (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
         let user = req.user;
         let db = user.db;
@@ -421,7 +425,7 @@ router.post('/tuid-slave/:name/:slave', (req, res) => __awaiter(this, void 0, vo
         for (let i = 0; i < len; i++) {
             params.push(body[fields[i].name]);
         }
-        let result = yield runner.tuidSlaveSave(name, slave, user.unit, user.id, params);
+        let result = yield runner.tuidBindSlaveSave(name, slave, user.unit, user.id, params);
         let row = result[0];
         res.json({
             ok: true,
