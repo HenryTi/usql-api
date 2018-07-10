@@ -192,8 +192,8 @@ class Runner {
     sheetAct(sheet, state, action, unit, user, id, flow) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = state === '$' ?
-                'tv' + sheet + '_' + action :
-                'tv' + sheet + '_' + state + '_' + action;
+                'tv_' + sheet + '_' + action :
+                'tv_' + sheet + '_' + state + '_' + action;
             return yield this.db.call(sql, [unit, user, id, flow, action]);
         });
     }
@@ -246,7 +246,7 @@ class Runner {
             let schema = this.buses[busOwner + '/' + bus];
             if (schema === undefined)
                 return;
-            let sql = 'tv' + schema.name + '_' + face;
+            let sql = 'tv_' + schema.name + '_' + face;
             return yield this.db.call(sql, [unit, 0, data]);
         });
     }

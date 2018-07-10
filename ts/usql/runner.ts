@@ -144,8 +144,8 @@ export class Runner {
     }
     async sheetAct(sheet:string, state:string, action:string, unit:number, user:number, id:number, flow:number): Promise<any[]> {
         let sql = state === '$'?
-            'tv' + sheet + '_' + action :
-            'tv' + sheet + '_' + state + '_' + action;
+            'tv_' + sheet + '_' + action :
+            'tv_' + sheet + '_' + state + '_' + action;
         return await this.db.call(sql, [unit, user, id, flow, action]);
     }
     async sheetStates(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
@@ -187,7 +187,7 @@ export class Runner {
         let {service, unit, busOwner, bus, face, data} = msg;
         let schema = this.buses[busOwner + '/' + bus];
         if (schema === undefined) return;
-        let sql = 'tv' + schema.name + '_' + face;
+        let sql = 'tv_' + schema.name + '_' + face;
         return await this.db.call(sql, [unit, 0, data]);
     }
 
