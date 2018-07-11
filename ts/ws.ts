@@ -92,6 +92,7 @@ export async function wsSendMessage(db:string, msg:any) {
     try {
         await centerApi.pushTo(msg);
         let s = null;
+        console.log('message push to center: %s', msg);
     }
     catch (e) {
         console.error('ws send message to center: %s', e);

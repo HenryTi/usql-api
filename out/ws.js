@@ -99,6 +99,7 @@ function wsSendMessage(db, msg) {
         try {
             yield core_1.centerApi.pushTo(msg);
             let s = null;
+            console.log('message push to center: %s', msg);
         }
         catch (e) {
             console.error('ws send message to center: %s', e);

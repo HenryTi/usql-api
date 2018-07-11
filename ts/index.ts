@@ -56,7 +56,8 @@ import { Request, Response, NextFunction } from 'express';
     app.use('/usql/:db/tv', [authCheck, tv]);
     //app.use('/usql/:db/log', getWsLogs);
     // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
-    app.use('/usql/:db/debug', [authDebug, tv]);
+    //app.use('/usql/:db/debug', [authDebug, tv]);
+    app.use('/usql/:db/debug', [authCheck, tv]);
 
     app.use('/usql/:db/hello', (req:Request, res:Response) => {
         let db = req.params.db;
