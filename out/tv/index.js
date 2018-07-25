@@ -12,9 +12,9 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const runner_1 = require("../usql/runner");
-const packReturn_1 = require("../core/packReturn");
-const queue_1 = require("./queue");
+const runner_1 = require("./runner");
+const core_1 = require("../core");
+const sheetQueue_1 = require("./sheetQueue");
 const afterAction_1 = require("./afterAction");
 const apiErrors_1 = require("./apiErrors");
 ;
@@ -451,7 +451,7 @@ router.post('/action/:name', (req, res) => __awaiter(this, void 0, void 0, funct
         let schema = runner.getSchema(name);
         let returns = schema.call.returns;
         let { hasSend, busFaces } = schema.run;
-        let actionReturn = yield afterAction_1.afterAction(db, runner, unit, returns, hasSend, busFaces, result);
+        let actionReturn = yield afterAction_1.sendMessagesAfterAction(db, runner, unit, returns, hasSend, busFaces, result);
         res.json({
             ok: true,
             res: actionReturn
@@ -486,7 +486,7 @@ router.post('/query/:name', (req, res) => __awaiter(this, void 0, void 0, functi
             params.push(body[fields[i].name]);
         }
         let result = yield runner.query(name, user.unit, user.id, params);
-        let data = packReturn_1.pack(callSchema, result);
+        let data = core_1.pack(callSchema, result);
         res.json({
             ok: true,
             res: data,
@@ -535,7 +535,7 @@ router.post('/page/:name', (req, res) => __awaiter(this, void 0, void 0, functio
             params.push(body[fields[i].name]);
         }
         let result = yield runner.query(name, user.unit, user.id, params);
-        let data = packReturn_1.pack(callSchema, result);
+        let data = core_1.pack(callSchema, result);
         res.json({
             ok: true,
             res: data,
@@ -572,7 +572,7 @@ router.post('/history/:name', (req, res) => __awaiter(this, void 0, void 0, func
             params.push(body[fields[i].name]);
         }
         let result = yield runner.query(name, user.unit, user.id, params);
-        let data = packReturn_1.pack(callSchema, result);
+        let data = core_1.pack(callSchema, result);
         res.json({
             ok: true,
             res: data,
@@ -606,7 +606,7 @@ router.post('/book/:name', (req, res) => __awaiter(this, void 0, void 0, functio
             params.push(body[fields[i].name]);
         }
         let result = yield runner.query(name, user.unit, user.id, params);
-        let data = packReturn_1.pack(callSchema, result);
+        let data = core_1.pack(callSchema, result);
         res.json({
             ok: true,
             res: data,
@@ -645,7 +645,7 @@ router.put('/sheet/:name', (req, res) => __awaiter(this, void 0, void 0, functio
     if (runner === undefined)
         return;
     yield runner.sheetProcessing(body.id);
-    yield queue_1.queue.add({
+    yield sheetQueue_1.addUnitxSheetQueue({
         job: 'sheetAct',
         db: db,
         sheet: name,
@@ -660,15 +660,6 @@ router.put('/sheet/:name', (req, res) => __awaiter(this, void 0, void 0, functio
         ok: true,
         res: { msg: 'add to queue' }
     });
-    /*
-    runner.sheetAct(name, body.state, body.action, user.hao, user.id, body.id).then(result => {
-        res.json({
-            ok: true,
-            res: result[0]
-        });
-    }).catch(err => {
-        res.json({error: err});
-    })*/
 }));
 router.post('/sheet/:name/states', (req, res) => __awaiter(this, void 0, void 0, function* () {
     let user = req.user;
@@ -763,5 +754,5 @@ router.get('/sheet/:name/archive/:id', (req, res) => __awaiter(this, void 0, voi
     }
 }));
 exports.default = router;
-__export(require("./queue"));
+__export(require("./outQueue"));
 //# sourceMappingURL=index.js.map

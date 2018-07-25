@@ -1,14 +1,11 @@
 import * as express from 'express';
-import * as fs from 'fs';
-import * as http from 'http';
+import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import * as multer from 'multer'; 
-import tv,{queue} from './tv';
-import {unitxRouter} from './tv/unitx';
-//import {wsOnConnected, getWsLogs} from './ws';
+import tv, { tryUnitxOutQueue } from './tv';
+//import {sendToBusRouter} from './tv/toUnitx';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
-import { Request, Response, NextFunction } from 'express';
+import { unitxRouter } from './unitx-server';
 
 (function() {
     let connection = config.get<any>("connection");
@@ -22,10 +19,9 @@ import { Request, Response, NextFunction } from 'express';
 
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
-        //res.send(err)
         res.render('error', {
-        message: err.message,
-        error: err
+            message: err.message,
+            error: err
         });
     });
     app.use(bodyParser.json());
@@ -48,12 +44,11 @@ import { Request, Response, NextFunction } from 'express';
         }
     });
 
-    //app.use('/api', routers);
-    //app.use('/tuid', tuid);
-
     // 正常的tonva usql接口
-    app.use('/usql/:db/tv/unitx', [authUnitx, unitxRouter]);
-    app.use('/usql/:db/tv', [authCheck, tv]);
+    //app.use('/usql/:db/bus/', [authUnitx, sendToBusRouter]);
+    app.use('/usql/:db/unitx/', [authUnitx, unitxRouter]);
+    app.use('/usql/:db/tv/', [authCheck, tv]);
+
     //app.use('/usql/:db/log', getWsLogs);
     // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
     //app.use('/usql/:db/debug', [authDebug, tv]);
@@ -68,32 +63,15 @@ import { Request, Response, NextFunction } from 'express';
         res.json({"hello": 'usql-api: hello, it\'s good'});
     });
 
-    //(app as any).ws('/usql/:db', wsOnConnected);
-
     let port = config.get<number>('port');
     app.listen(port, async ()=>{
         console.log('USQL-API listening on port ' + port);
-        console.log('process.env.NODE_ENV: %s, connection: %s',
+        let connection = config.get<any>("connection");
+        let {host, user} = connection;
+        console.log('process.env.NODE_ENV: %s, host: %s, user: %s',
             process.env.NODE_ENV,
-            JSON.stringify(config.get<any>("connection")));
-        // await startupUsqlApp((text:string) => console.log(text || ''));
+            host,
+            user);
+        await tryUnitxOutQueue();
     });
-
-    async function tryJobQueue() {
-        try {
-            let job = await queue.add({job: undefined});
-            try {
-                await job.remove();
-                console.log('redis server ok!');
-            }
-            catch (err) {
-                console.log('redis server job.remove error: ' + err);
-            }
-        }
-        catch (reason) {
-            console.log('redis server error: ', reason);
-        };
-    }
-
-    tryJobQueue();
 })();

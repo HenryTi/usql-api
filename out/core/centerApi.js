@@ -100,12 +100,17 @@ class CenterApi extends Fetch {
             return yield this.post('/push', msg);
         });
     }
+    unitxBuses(unit, busOwner, bus, face) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.get('open/unitx-buses', { unit: unit, busOwner: busOwner, bus: bus, face: face });
+        });
+    }
 }
 exports.centerApi = new CenterApi();
 class UnitxApi extends Fetch {
     send(jobData) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.post('/post', jobData);
+            yield this.post('unitx', jobData);
         });
     }
 }

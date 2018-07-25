@@ -89,12 +89,16 @@ class CenterApi extends Fetch {
     async pushTo(msg:any):Promise<void> {
         return await this.post('/push', msg);
     }
+
+    async unitxBuses(unit:number, busOwner:string, bus:string, face:string):Promise<any[]> {
+        return await this.get('open/unitx-buses', {unit:unit, busOwner:busOwner, bus:bus, face:face});
+    }
 }
 
 export const centerApi = new CenterApi();
 
 export class UnitxApi extends Fetch {
     async send(jobData: {unit:number, bus:string, face:string, data:any[]}):Promise<void> {
-        await this.post('/post', jobData);
+        await this.post('unitx', jobData);
     }
 }

@@ -52,11 +52,10 @@ export default class Auth {
             return;
         }
         let secret = config.get<string>('secret'); // .appSecret;
-        console.log('auth check: secret=%s, token=%s', secret, token);
+        //console.log('auth check: secret=%s, token=%s', secret, token);
         jwt.verify(token, secret, 
             (err, decoded:AuthUser) => 
         {
-            console.log('auth check: err=%s', JSON.stringify(err));
             if (err === null) {
                 decoded.db = req.params.db;
                 (req as any).user = decoded;

@@ -1,19 +1,14 @@
 import {Router, Request, Response, NextFunction} from 'express';
-import * as config from 'config';
-import * as multer from 'multer'; 
-import {UsqlApp} from '../usql';
-import * as il from '../usql';
-import {getRunner, Runner, resetRunner, createRunner} from '../usql/runner';
-import {pack} from '../core/packReturn';
-import {queue} from './queue';
-import {afterAction} from './afterAction';
-import { centerApi } from '../core/centerApi';
+import {getRunner, Runner} from './runner';
+import {pack} from '../core';
+import {addUnitxSheetQueue} from './sheetQueue';
+import {sendMessagesAfterAction} from './afterAction';
 import {apiErrors} from './apiErrors';
 
 interface User {
     db: string;
     id: number;
-    unit: number; //unit: number,
+    unit: number;
     roles: string;
 };
 
@@ -428,7 +423,7 @@ router.post('/action/:name', async (req:Request, res:Response) => {
         let schema = runner.getSchema(name);
         let returns = schema.call.returns;
         let {hasSend, busFaces} = schema.run;
-        let actionReturn = await afterAction(db, runner, unit, returns, hasSend, busFaces, result);
+        let actionReturn = await sendMessagesAfterAction(db, runner, unit, returns, hasSend, busFaces, result);
         res.json({
             ok: true,
             res: actionReturn
@@ -607,7 +602,7 @@ router.put('/sheet/:name', async (req:Request, res:Response) => {
     let runner = await checkRunner(db, res);
     if (runner === undefined) return;
     await runner.sheetProcessing(body.id);
-    await queue.add({
+    await addUnitxSheetQueue({
         job: 'sheetAct',
         db: db,
         sheet: name,
@@ -622,15 +617,6 @@ router.put('/sheet/:name', async (req:Request, res:Response) => {
         ok: true,
         res: {msg: 'add to queue'}
     })
-    /*
-    runner.sheetAct(name, body.state, body.action, user.hao, user.id, body.id).then(result => {
-        res.json({
-            ok: true,
-            res: result[0]
-        });
-    }).catch(err => {
-        res.json({error: err});
-    })*/
 });
 
 router.post('/sheet/:name/states', async (req:Request, res:Response) => {
@@ -727,4 +713,4 @@ router.get('/sheet/:name/archive/:id', async (req:Request, res:Response) => {
 
 export default router;
 
-export * from './queue';
+export * from './outQueue';

@@ -8,51 +8,73 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const queue_1 = require("./queue");
-const packReturn_1 = require("../core/packReturn");
-const ws_1 = require("../ws");
+const _ = require("lodash");
+const outQueue_1 = require("./outQueue");
+const core_1 = require("../core");
+const core_2 = require("../core");
 // 2018-02-25
 // Bus face 数据保全的说明：
 // bus数据的产生，应该跟action或者sheetAction构成事务。
 // 所以，应该把bus face 信息在事务内写数据库。
 // 在job queue里面，读数据，然后发送到unitx，然后再从数据库删除。这样保证不会丢失信息。
 // 当下为了快速写出程序，暂时先简单处理。数据库操作返回数据，直接发送unitx，可能会有数据丢失。
-function afterAction(db, runner, unit, returns, hasSend, busFaces, result) {
+function sendMessagesAfterAction(db, runner, unit, returns, hasMessage, busFaces, result) {
     return __awaiter(this, void 0, void 0, function* () {
         let nFaceCount = 0;
         let resArrs = result;
-        if (hasSend === true) {
+        if (hasMessage === true) {
             // 处理发送信息
             let messages = resArrs.shift();
-            let proc = runner.isSysChat === true ? sendToChat : mailToChat;
-            function sendToChat(row) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    // 通过websocket送回界面
-                    let { to, msg, action, data, notify } = row;
-                    let wsMsg = {
-                        $type: 'msg',
-                        $user: to,
-                        $unit: unit,
-                        $io: notify,
-                        msg: msg,
-                        action: action,
-                        data: data,
-                    };
-                    yield ws_1.wsSendMessage(db, wsMsg);
-                    console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
-                });
+            //let proc = runner.isSysChat === true? sendToChat : mailToChat;
+            /*
+            async function sendToChat(row:any) {
+                // 通过websocket送回界面
+                let {to, msg, action, data, notify} = row;
+                let wsMsg = {
+                    $type: 'msg',
+                    $user: to,
+                    $unit: unit,
+                    $io: notify,
+                    msg: msg,
+                    action: action,
+                    data: data,
+                };
+                await wsSendMessage(db, wsMsg);
+                console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
             }
-            function mailToChat(row) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    // 通过face邮件发送到chat服务器
-                });
+            async function mailToChat(row:any) {
+                // 通过face邮件发送到chat服务器
             }
-            for (let row of messages)
-                yield proc(row);
+            */
+            // 将执行操作action，或者sheetAction产生的消息，发送给最终用户的客户端
+            for (let row of messages) {
+                //await proc(row);
+                let { to, msg, action, data, notify } = row;
+                let wsMsg = {
+                    $type: 'msg',
+                    $user: to,
+                    $unit: unit,
+                    $io: notify,
+                    msg: msg,
+                    action: action,
+                    data: data,
+                };
+                yield core_2.wsSendMessage(db, wsMsg);
+                console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
+            }
+        }
+        let sheetArr = resArrs[resArrs.length - 1];
+        let sheet = sheetArr[0];
+        if (sheet !== undefined) {
+            yield outQueue_1.addUnitxOutQueue(_.merge({
+                $job: 'sheet',
+                $unit: unit,
+            }, sheet));
         }
         if (busFaces === undefined || busFaces.length === 0) {
             return result[0];
         }
+        // 发送face消息，子系统间的数据交换
         for (let i in busFaces) {
             let { name: busName, owner, bus, faces } = busFaces[i];
             let schema = runner.getSchema(busName);
@@ -71,11 +93,10 @@ function afterAction(db, runner, unit, returns, hasSend, busFaces, result) {
                     }
                 }
                 let busSchema = schema.call.schema[name];
-                let packedBusData = packReturn_1.packBus(busSchema, main);
-                //await runBusFace(unit, bus, name, main);
-                yield queue_1.queue.add({
-                    job: 'unitx',
-                    unit: unit,
+                let packedBusData = core_1.packBus(busSchema, main);
+                yield outQueue_1.addUnitxOutQueue({
+                    $job: 'bus',
+                    $unit: unit,
                     busOwner: owner,
                     bus: bus,
                     face: name,
@@ -86,7 +107,5 @@ function afterAction(db, runner, unit, returns, hasSend, busFaces, result) {
         return result[0][0];
     });
 }
-exports.afterAction = afterAction;
-function processMessage() {
-}
+exports.sendMessagesAfterAction = sendMessagesAfterAction;
 //# sourceMappingURL=afterAction.js.map
