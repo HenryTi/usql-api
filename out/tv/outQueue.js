@@ -24,7 +24,15 @@ unitxOutQueue.process(function (job, done) {
         try {
             let data = job.data;
             if (data !== undefined) {
-                yield toUnitx(data);
+                let { $job, $unit } = data;
+                switch ($job) {
+                    case 'sheet':
+                        yield sheetToUnitx($unit, data);
+                        break;
+                    case 'bus':
+                        yield busToDest($unit, data);
+                        break;
+                }
             }
             done();
         }
@@ -33,21 +41,19 @@ unitxOutQueue.process(function (job, done) {
         }
     });
 });
-function toUnitx(msg) {
+function sheetToUnitx(unit, msg) {
     return __awaiter(this, void 0, void 0, function* () {
         //let {unit, busOwner, bus, face, data} = jobData;
-        let { $unit } = msg;
-        let unitxUrl = yield getUnitxUrl($unit);
+        let unitxUrl = yield getUnitxUrl(unit);
         if (unitxUrl === null) {
-            console.log('unit %s not have unitx', $unit);
+            console.log('unit %s not have unitx', unit);
             return;
         }
         let unitx = new core_1.UnitxApi(unitxUrl);
         yield unitx.send(msg);
-        console.log('toUnitx', msg);
+        console.log('sheet to unitx', msg);
     });
 }
-exports.toUnitx = toUnitx;
 function getUnitxUrl(unit) {
     return __awaiter(this, void 0, void 0, function* () {
         let unitxUrl = unitxColl[unit];
@@ -69,6 +75,23 @@ function getUnitxUrl(unit) {
             }
         }
         return unitxColl[unit] = url;
+    });
+}
+function busToDest(unit, msg) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            let { busOwner, bus, face } = msg;
+            let ret = yield core_1.centerApi.unitxBuses(unit, busOwner, bus, face);
+            for (let service of ret) {
+                let { url } = service;
+                let usqlApi = new core_1.UnitxApi(url);
+                yield usqlApi.send(msg);
+                console.log('bus to ', url, msg);
+            }
+        }
+        catch (e) {
+            console.error(e);
+        }
     });
 }
 function addUnitxOutQueue(msg) {

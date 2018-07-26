@@ -67,27 +67,27 @@ class CenterApi extends Fetch {
     }
 
     async busSchema(owner:string, bus:string):Promise<string> {
-        let ret = await this.get('/open/bus', {owner: owner, bus: bus});
+        let ret = await this.get('open/bus', {owner: owner, bus: bus});
         return ret.schema;
     }
 
     async serviceBus(serviceUID:string, serviceBuses:string):Promise<void> {
-        await this.post('/open/save-service-bus', {
+        await this.post('open/save-service-bus', {
             service: serviceUID,
             bus: serviceBuses,
         });
     }
 
     async unitx(unit:number):Promise<any> {
-        return await this.get('/open/unitx', {unit:unit});
+        return await this.get('open/unitx', {unit:unit});
     }
 
     async usqlDb(name:string):Promise<any> {
-        return await this.get('/open/usqldb', {name:name});
+        return await this.get('open/usqldb', {name:name});
     }
 
     async pushTo(msg:any):Promise<void> {
-        return await this.post('/push', msg);
+        return await this.post('push', msg);
     }
 
     async unitxBuses(unit:number, busOwner:string, bus:string, face:string):Promise<any[]> {
@@ -98,7 +98,7 @@ class CenterApi extends Fetch {
 export const centerApi = new CenterApi();
 
 export class UnitxApi extends Fetch {
-    async send(jobData: {unit:number, bus:string, face:string, data:any[]}):Promise<void> {
+    async send(jobData: {$unit:number, bus:string, face:string, data:any}):Promise<void> {
         await this.post('unitx', jobData);
     }
 }

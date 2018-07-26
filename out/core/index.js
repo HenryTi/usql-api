@@ -13,6 +13,6 @@ exports.UnitxApi = centerApi_1.UnitxApi;
 var ws_1 = require("./ws");
 exports.wsSendMessage = ws_1.wsSendMessage;
 var packReturn_1 = require("./packReturn");
-exports.pack = packReturn_1.pack;
+exports.packReturn = packReturn_1.packReturn;
 exports.packBus = packReturn_1.packBus;
 //# sourceMappingURL=index.js.map

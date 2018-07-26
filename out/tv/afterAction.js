@@ -69,6 +69,23 @@ function sendMessagesAfterAction(db, runner, unit, returns, hasMessage, busFaces
             yield outQueue_1.addUnitxOutQueue(_.merge({
                 $job: 'sheet',
                 $unit: unit,
+                data: {
+                    type: 'sheet',
+                    subject: '单据',
+                    discription: '发送过来的单据',
+                    content: '{a:1, b:2}',
+                    meName: 'henry',
+                    meNick: 'henry-nick',
+                    meIcon: undefined,
+                    to: [
+                        { toUser: 4 },
+                        { toUser: 3 },
+                    ],
+                    cc: [
+                        { ccUser: 1 },
+                        { ccUser: 2 },
+                    ],
+                }
             }, sheet));
         }
         if (busFaces === undefined || busFaces.length === 0) {

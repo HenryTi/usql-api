@@ -1,6 +1,6 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import {getRunner, Runner} from './runner';
-import {pack} from '../core';
+import {packReturn} from '../core';
 import {addUnitxSheetQueue} from './sheetQueue';
 import {sendMessagesAfterAction} from './afterAction';
 import {apiErrors} from './apiErrors';
@@ -455,7 +455,7 @@ router.post('/query/:name', async (req:Request, res:Response) => {
             params.push(body[fields[i].name]);
         }
         let result = await runner.query(name, user.unit, user.id, params);
-        let data = pack(callSchema, result);
+        let data = packReturn(callSchema, result);
         res.json({
             ok: true,
             res: data,
@@ -499,7 +499,7 @@ router.post('/page/:name', async (req:Request, res:Response) => {
             params.push(body[fields[i].name]);
         }
         let result = await runner.query(name, user.unit, user.id, params);
-        let data = pack(callSchema, result);
+        let data = packReturn(callSchema, result);
         res.json({
             ok: true,
             res: data,
@@ -533,7 +533,7 @@ router.post('/history/:name', async (req:Request, res:Response) => {
             params.push(body[fields[i].name]);
         }
         let result = await runner.query(name, user.unit, user.id, params);
-        let data = pack(callSchema, result);
+        let data = packReturn(callSchema, result);
         res.json({
             ok: true,
             res: data,
@@ -564,7 +564,7 @@ router.post('/book/:name', async (req:Request, res:Response) => {
             params.push(body[fields[i].name]);
         }
         let result = await runner.query(name, user.unit, user.id, params);
-        let data = pack(callSchema, result);
+        let data = packReturn(callSchema, result);
         res.json({
             ok: true,
             res: data,

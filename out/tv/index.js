@@ -486,7 +486,7 @@ router.post('/query/:name', (req, res) => __awaiter(this, void 0, void 0, functi
             params.push(body[fields[i].name]);
         }
         let result = yield runner.query(name, user.unit, user.id, params);
-        let data = core_1.pack(callSchema, result);
+        let data = core_1.packReturn(callSchema, result);
         res.json({
             ok: true,
             res: data,
@@ -535,7 +535,7 @@ router.post('/page/:name', (req, res) => __awaiter(this, void 0, void 0, functio
             params.push(body[fields[i].name]);
         }
         let result = yield runner.query(name, user.unit, user.id, params);
-        let data = core_1.pack(callSchema, result);
+        let data = core_1.packReturn(callSchema, result);
         res.json({
             ok: true,
             res: data,
@@ -572,7 +572,7 @@ router.post('/history/:name', (req, res) => __awaiter(this, void 0, void 0, func
             params.push(body[fields[i].name]);
         }
         let result = yield runner.query(name, user.unit, user.id, params);
-        let data = core_1.pack(callSchema, result);
+        let data = core_1.packReturn(callSchema, result);
         res.json({
             ok: true,
             res: data,
@@ -606,7 +606,7 @@ router.post('/book/:name', (req, res) => __awaiter(this, void 0, void 0, functio
             params.push(body[fields[i].name]);
         }
         let result = yield runner.query(name, user.unit, user.id, params);
-        let data = core_1.pack(callSchema, result);
+        let data = core_1.packReturn(callSchema, result);
         res.json({
             ok: true,
             res: data,

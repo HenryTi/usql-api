@@ -9,7 +9,7 @@ interface Arr {
 const timezoneOffset = new Date().getTimezoneOffset()*60000;
 const tab = '\t';
 const ln = '\n';
-export function pack(schema:any, data:any):string {
+export function packReturn(schema:any, data:any):string {
     let ret:string[] = [];
     if (schema === undefined || data === undefined) return;
     //let fields = schema.fields;

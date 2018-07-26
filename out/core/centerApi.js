@@ -73,13 +73,13 @@ class CenterApi extends Fetch {
     }
     busSchema(owner, bus) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.get('/open/bus', { owner: owner, bus: bus });
+            let ret = yield this.get('open/bus', { owner: owner, bus: bus });
             return ret.schema;
         });
     }
     serviceBus(serviceUID, serviceBuses) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.post('/open/save-service-bus', {
+            yield this.post('open/save-service-bus', {
                 service: serviceUID,
                 bus: serviceBuses,
             });
@@ -87,17 +87,17 @@ class CenterApi extends Fetch {
     }
     unitx(unit) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.get('/open/unitx', { unit: unit });
+            return yield this.get('open/unitx', { unit: unit });
         });
     }
     usqlDb(name) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.get('/open/usqldb', { name: name });
+            return yield this.get('open/usqldb', { name: name });
         });
     }
     pushTo(msg) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.post('/push', msg);
+            return yield this.post('push', msg);
         });
     }
     unitxBuses(unit, busOwner, bus, face) {

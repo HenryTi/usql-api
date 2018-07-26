@@ -10,7 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const bull = require("bull");
 const config = require("config");
-const core_1 = require("../core");
+const runner_1 = require("../tv/runner");
+const afterAction_1 = require("../tv/afterAction");
+const packParam_1 = require("../core/packParam");
 let unitxQueueName = 'unitx-in-queue';
 let redis = config.get("redis");
 const unitxInQueue = bull(unitxQueueName, redis);
@@ -22,30 +24,38 @@ unitxInQueue.process(function (job, done) {
         try {
             let { data } = job;
             console.log('accept message: ', data);
-            //sendToDest(data);
+            if (data !== undefined) {
+                let { $job, $unit } = data;
+                switch ($job) {
+                    case 'sheet':
+                        yield saveSheetMessage($unit, data);
+                        break;
+                }
+            }
+            done();
         }
         catch (err) {
             console.error(err);
-        }
-        finally {
-            done();
+            done(new Error(err));
         }
     });
 });
-function sendToDest(msg) {
+const $unitDb = '$unitx';
+const newMessage = 'newMessage';
+function saveSheetMessage(unit, sheetMessage) {
     return __awaiter(this, void 0, void 0, function* () {
-        try {
-            let { unit, busOwner, bus, face } = msg;
-            let ret = yield core_1.centerApi.unitxBuses(unit, busOwner, bus, face);
-            for (let service of ret) {
-                let usqlApi = new core_1.UnitxApi(service.url);
-                yield usqlApi.send(msg);
-            }
-            let s = null;
-        }
-        catch (e) {
-            console.error(e);
-        }
+        let { data } = sheetMessage;
+        let runner = yield runner_1.getRunner($unitDb);
+        //let ret = await runner.action('newMessage', unit, 1, JSON.stringify(data));
+        let toUser = 1;
+        let schema = runner.getSchema(newMessage);
+        let msg = packParam_1.packParam(schema.call, data);
+        let result = yield runner.action(newMessage, unit, toUser, msg);
+        let returns = schema.call.returns;
+        let { hasSend, busFaces } = schema.run;
+        let actionReturn = yield afterAction_1.sendMessagesAfterAction($unitDb, runner, unit, returns, hasSend, busFaces, result);
+        console.log('save sheet message ', data);
+        return;
     });
 }
 function addUnitxInQueue(msg) {

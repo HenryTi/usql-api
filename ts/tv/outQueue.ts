@@ -18,7 +18,15 @@ unitxOutQueue.process(async function(job, done) {
     try {
         let data = job.data;
         if (data !== undefined) {
-            await toUnitx(data);
+            let {$job, $unit}  = data;
+            switch ($job) {
+                case 'sheet':
+                    await sheetToUnitx($unit, data);
+                    break;
+                case 'bus':
+                    await busToDest($unit, data);
+                    break;
+            }
         }
         done();
     }
@@ -27,17 +35,16 @@ unitxOutQueue.process(async function(job, done) {
     }
 });
 
-export async function toUnitx(msg:any): Promise<void> {
+async function sheetToUnitx(unit:number, msg:any): Promise<void> {
     //let {unit, busOwner, bus, face, data} = jobData;
-    let {$unit} = msg;
-    let unitxUrl = await getUnitxUrl($unit);
+    let unitxUrl = await getUnitxUrl(unit);
     if (unitxUrl === null) {
-        console.log('unit %s not have unitx', $unit);
+        console.log('unit %s not have unitx', unit);
         return;
     }
     let unitx = new UnitxApi(unitxUrl);
     await unitx.send(msg);
-    console.log('toUnitx', msg);
+    console.log('sheet to unitx', msg);
 }
 
 async function getUnitxUrl(unit:number):Promise<string> {
@@ -57,6 +64,32 @@ async function getUnitxUrl(unit:number):Promise<string> {
         }
     }
     return unitxColl[unit] = url;
+}
+
+
+export interface UnitxMessage {
+    service:string;
+    $unit:number;
+    busOwner:string;
+    bus:string;
+    face:string;
+    data:any[];
+}
+
+async function busToDest(unit:number, msg:UnitxMessage):Promise<void> {
+    try {
+        let {busOwner, bus, face} = msg;
+        let ret = await centerApi.unitxBuses(unit, busOwner, bus, face);
+        for (let service of ret) {
+            let {url} = service;
+            let usqlApi = new UnitxApi(url);
+            await usqlApi.send(msg);
+            console.log('bus to ', url, msg);
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
 }
 
 export async function addUnitxOutQueue(msg:any):Promise<bull.Job> {

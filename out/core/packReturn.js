@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const timezoneOffset = new Date().getTimezoneOffset() * 60000;
 const tab = '\t';
 const ln = '\n';
-function pack(schema, data) {
+function packReturn(schema, data) {
     let ret = [];
     if (schema === undefined || data === undefined)
         return;
@@ -24,7 +24,7 @@ function pack(schema, data) {
     }
     return ret.join('');
 }
-exports.pack = pack;
+exports.packReturn = packReturn;
 //const bus
 function packBus(schema, data) {
     let result = [];
