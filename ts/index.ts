@@ -2,7 +2,7 @@ import * as express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import tv, { tryUnitxOutQueue } from './tv';
+import tv, { tryoutQueue } from './tv';
 //import {sendToBusRouter} from './tv/toUnitx';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
 import { unitxRouter } from './unitx-server';
@@ -72,6 +72,6 @@ import { unitxRouter } from './unitx-server';
             process.env.NODE_ENV,
             host,
             user);
-        await tryUnitxOutQueue();
+        await tryoutQueue();
     });
 })();

@@ -1,8 +1,8 @@
 import * as bull from 'bull';
 import * as config from 'config';
 import { getRunner } from '../tv/runner';
-import { sendMessagesAfterAction } from '../tv/afterAction';
-import { packReturn } from '../core';
+import { afterAction } from '../tv/afterAction';
+import { packReturn, wsSendMessage } from '../core';
 import { packParam } from '../core/packParam';
 
 let unitxQueueName = 'unitx-in-queue';
@@ -20,9 +20,12 @@ unitxInQueue.process(async function(job, done) {
         if (data !== undefined) {
             let {$job, $unit} = data;
             switch ($job) {
-                case 'sheet':
-                    await saveSheetMessage($unit, data);
+                case 'sheetMsg':
+                    await processSheetMessage($unit, data);
                     break;
+                //case 'sheetMsgDone':
+                //    await removeSheetMessage($unit, data);
+                //    break;
             }
         }
         done();
@@ -34,20 +37,47 @@ unitxInQueue.process(async function(job, done) {
 });
 
 const $unitDb = '$unitx';
-const newMessage = 'newMessage';
-async function saveSheetMessage(unit:number, sheetMessage:any): Promise<void> {
-    let {data} = sheetMessage;
+const usqlSheetMessage = 'sheetMessage';
+const usqlSheetDoneMessage = 'sheetDoneMessage';
+async function processSheetMessage(unit:number, sheetMessage:any): Promise<void> {
     let runner = await getRunner($unitDb);
-    //let ret = await runner.action('newMessage', unit, 1, JSON.stringify(data));
+    let {no, discription, to, api, id:sheet, state, user} = sheetMessage;
+    let toUsers = await getToUsers(to); 
+    if (toUsers.length === 0) toUsers.push({toUser: user});
+    let data = {
+        //type: 'sheetMsg',
+        subject: discription,
+        discription: no,
+        content: JSON.stringify(sheetMessage),
+        //meName: 'henry',
+        //meNick: 'henry-nick',
+        //meIcon: undefined,
+        api: api,
+        sheet: sheet,
+        state: state,
+        to: toUsers,
+    };
     let toUser = 1;
-    let schema = runner.getSchema(newMessage);
+    let schema = runner.getSchema(usqlSheetMessage);
     let msg = packParam(schema.call, data);
-    let result = await runner.action(newMessage, unit, toUser, msg);
+    let result = await runner.action(usqlSheetMessage, unit, toUser, msg);
     let returns = schema.call.returns;
     let {hasSend, busFaces} = schema.run;
-    let actionReturn = await sendMessagesAfterAction($unitDb, runner, unit, returns, hasSend, busFaces, result);
+    let actionReturn = await afterAction($unitDb, runner, unit, returns, hasSend, busFaces, result);
     console.log('save sheet message ', data);
     return;
+}
+
+async function getToUsers(toText:string):Promise<{toUser:number}[]> {
+    let ret:{toUser:number}[] = [];
+    let toArr:any[] = JSON.parse(toText);
+    for (let to of toArr) {
+        switch (typeof to) {
+            case 'number': ret.push({toUser: to}); break;
+            case 'string': break;
+        }
+    }
+    return ret;
 }
 
 export async function addUnitxInQueue(msg:any):Promise<bull.Job> {

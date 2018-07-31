@@ -85,7 +85,12 @@ class MyDbServer extends dbServer_1.DbServer {
     }
     callEx(db, proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.execProc(db, proc, params);
+            //return await this.execProc(db, proc, params);
+            let result = yield this.execProc(db, proc, params);
+            if (Array.isArray(result) === false)
+                return [];
+            result.pop();
+            return result;
         });
     }
     createDatabase(db) {

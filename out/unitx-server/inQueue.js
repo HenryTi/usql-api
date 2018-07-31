@@ -27,9 +27,12 @@ unitxInQueue.process(function (job, done) {
             if (data !== undefined) {
                 let { $job, $unit } = data;
                 switch ($job) {
-                    case 'sheet':
-                        yield saveSheetMessage($unit, data);
+                    case 'sheetMsg':
+                        yield processSheetMessage($unit, data);
                         break;
+                    //case 'sheetMsgDone':
+                    //    await removeSheetMessage($unit, data);
+                    //    break;
                 }
             }
             done();
@@ -41,21 +44,50 @@ unitxInQueue.process(function (job, done) {
     });
 });
 const $unitDb = '$unitx';
-const newMessage = 'newMessage';
-function saveSheetMessage(unit, sheetMessage) {
+const usqlSheetMessage = 'sheetMessage';
+const usqlSheetDoneMessage = 'sheetDoneMessage';
+function processSheetMessage(unit, sheetMessage) {
     return __awaiter(this, void 0, void 0, function* () {
-        let { data } = sheetMessage;
         let runner = yield runner_1.getRunner($unitDb);
-        //let ret = await runner.action('newMessage', unit, 1, JSON.stringify(data));
+        let { no, discription, to, api, id: sheet, state } = sheetMessage;
+        let toUsers = yield getToUsers(to);
+        let data = {
+            //type: 'sheetMsg',
+            subject: discription,
+            discription: no,
+            content: JSON.stringify(sheetMessage),
+            //meName: 'henry',
+            //meNick: 'henry-nick',
+            //meIcon: undefined,
+            api: api,
+            sheet: sheet,
+            state: state,
+            to: toUsers,
+        };
         let toUser = 1;
-        let schema = runner.getSchema(newMessage);
+        let schema = runner.getSchema(usqlSheetMessage);
         let msg = packParam_1.packParam(schema.call, data);
-        let result = yield runner.action(newMessage, unit, toUser, msg);
+        let result = yield runner.action(usqlSheetMessage, unit, toUser, msg);
         let returns = schema.call.returns;
         let { hasSend, busFaces } = schema.run;
-        let actionReturn = yield afterAction_1.sendMessagesAfterAction($unitDb, runner, unit, returns, hasSend, busFaces, result);
+        let actionReturn = yield afterAction_1.afterAction($unitDb, runner, unit, returns, hasSend, busFaces, result);
         console.log('save sheet message ', data);
         return;
+    });
+}
+function getToUsers(toText) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let ret = [];
+        let toArr = JSON.parse(toText);
+        for (let to of toArr) {
+            switch (typeof to) {
+                case 'number':
+                    ret.push({ toUser: to });
+                    break;
+                case 'string': break;
+            }
+        }
+        return ret;
     });
 }
 function addUnitxInQueue(msg) {

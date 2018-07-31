@@ -130,8 +130,8 @@ export class Runner {
     async tuidSeach(tuid:string, unit:number, user:number, key:string, pageStart:number, pageSize:number): Promise<any> {
         return await this.db.tablesFromProc('tv_' + tuid + '$search', [unit, user, key, pageStart, pageSize]);
     }
-    async sheetSave(sheet:string, unit:number, user:number, discription:string, data:string): Promise<{}> {
-        return await this.db.call('tv_$sheet_save', [unit, user, sheet, discription, data]);
+    async sheetSave(sheet:string, unit:number, user:number, app:number, api:number, discription:string, data:string): Promise<{}> {
+        return await this.db.call('tv_$sheet_save', [unit, user, sheet, app, api, discription, data]);
     }
     async tuidBindSlaveSave(tuid:string, slave:string, unit:number, user:number, params:any[]): Promise<any> {
         return await this.db.call('tv_' + tuid + '_' + slave + '$save', [unit, user, ...params]);
@@ -146,7 +146,7 @@ export class Runner {
         let sql = state === '$'?
             'tv_' + sheet + '_' + action :
             'tv_' + sheet + '_' + state + '_' + action;
-        return await this.db.call(sql, [unit, user, id, flow, action]);
+        return await this.db.callEx(sql, [unit, user, id, flow, action]);
     }
     async sheetStates(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
         let sql = 'tv_$sheet_state';
@@ -173,9 +173,7 @@ export class Runner {
     }
 
     async action(action:string, unit:number, user:number, data:string): Promise<any> {
-        //let schema = await this.getSchema(action);
         let result = await this.db.callEx('tv_' + action, [unit, user, data]);
-        //this.actionRun(schema, result);
         return result;
     }
 

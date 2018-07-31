@@ -5,22 +5,22 @@ import { centerApi, UnitxApi } from "../core";
 
 const unitxColl: {[id:number]: string} = {};
 
-const outQueueName = 'unitx-out-queue';
+const outQueueName = 'out-queue';
 let redis = config.get<any>('redis');
 
-const unitxOutQueue = bull(outQueueName, redis);
+const outQueue = bull(outQueueName, redis);
 
-unitxOutQueue.on("error", (error: Error) => {
+outQueue.on("error", (error: Error) => {
     console.log('queue server: ', error);
 });
 
-unitxOutQueue.process(async function(job, done) {
+outQueue.process(async function(job, done) {
     try {
         let data = job.data;
         if (data !== undefined) {
             let {$job, $unit}  = data;
             switch ($job) {
-                case 'sheet':
+                case 'sheetMsg':
                     await sheetToUnitx($unit, data);
                     break;
                 case 'bus':
@@ -92,14 +92,14 @@ async function busToDest(unit:number, msg:UnitxMessage):Promise<void> {
     }
 }
 
-export async function addUnitxOutQueue(msg:any):Promise<bull.Job> {
-    return await unitxOutQueue.add(msg);
+export async function addOutQueue(msg:any):Promise<bull.Job> {
+    return await outQueue.add(msg);
 }
 
 // 试试redis server，报告是否工作
-export async function tryUnitxOutQueue() {
+export async function tryoutQueue() {
     try {
-        let job = await unitxOutQueue.add({job: undefined});
+        let job = await outQueue.add({job: undefined});
         try {
             await job.remove();
             console.log('redis server ok!');

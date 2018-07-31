@@ -13,20 +13,20 @@ const config = require("config");
 const node_fetch_1 = require("node-fetch");
 const core_1 = require("../core");
 const unitxColl = {};
-const outQueueName = 'unitx-out-queue';
+const outQueueName = 'out-queue';
 let redis = config.get('redis');
-const unitxOutQueue = bull(outQueueName, redis);
-unitxOutQueue.on("error", (error) => {
+const outQueue = bull(outQueueName, redis);
+outQueue.on("error", (error) => {
     console.log('queue server: ', error);
 });
-unitxOutQueue.process(function (job, done) {
+outQueue.process(function (job, done) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let data = job.data;
             if (data !== undefined) {
                 let { $job, $unit } = data;
                 switch ($job) {
-                    case 'sheet':
+                    case 'sheetMsg':
                         yield sheetToUnitx($unit, data);
                         break;
                     case 'bus':
@@ -94,17 +94,17 @@ function busToDest(unit, msg) {
         }
     });
 }
-function addUnitxOutQueue(msg) {
+function addOutQueue(msg) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield unitxOutQueue.add(msg);
+        return yield outQueue.add(msg);
     });
 }
-exports.addUnitxOutQueue = addUnitxOutQueue;
+exports.addOutQueue = addOutQueue;
 // 试试redis server，报告是否工作
-function tryUnitxOutQueue() {
+function tryoutQueue() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            let job = yield unitxOutQueue.add({ job: undefined });
+            let job = yield outQueue.add({ job: undefined });
             try {
                 yield job.remove();
                 console.log('redis server ok!');
@@ -119,5 +119,5 @@ function tryUnitxOutQueue() {
         ;
     });
 }
-exports.tryUnitxOutQueue = tryUnitxOutQueue;
+exports.tryoutQueue = tryoutQueue;
 //# sourceMappingURL=outQueue.js.map

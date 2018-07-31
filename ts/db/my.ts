@@ -58,7 +58,11 @@ export class MyDbServer extends DbServer {
         return result;
     }
     async callEx(db:string, proc:string, params:any[]): Promise<any> {
-        return await this.execProc(db, proc, params);
+        //return await this.execProc(db, proc, params);
+        let result:any[][] = await this.execProc(db, proc, params);
+        if (Array.isArray(result) === false) return [];
+        result.pop();
+        return result;
     }
     async createDatabase(db:string): Promise<void> {
         let sql = 'CREATE DATABASE IF NOT EXISTS `'+db+'` default CHARACTER SET utf8 COLLATE utf8_unicode_ci';

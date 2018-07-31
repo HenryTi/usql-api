@@ -72,7 +72,7 @@ const unitx_server_1 = require("./unitx-server");
         let connection = config.get("connection");
         let { host, user } = connection;
         console.log('process.env.NODE_ENV: %s, host: %s, user: %s', process.env.NODE_ENV, host, user);
-        yield tv_1.tryUnitxOutQueue();
+        yield tv_1.tryoutQueue();
     }));
 })();
 //# sourceMappingURL=index.js.map

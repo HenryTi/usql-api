@@ -1,9 +1,11 @@
 import {Router, Request, Response, NextFunction} from 'express';
+import * as _ from 'lodash';
 import {getRunner, Runner} from './runner';
 import {packReturn} from '../core';
-import {addUnitxSheetQueue} from './sheetQueue';
-import {sendMessagesAfterAction} from './afterAction';
+import {addSheetQueue} from './sheetQueue';
+import {afterAction} from './afterAction';
 import {apiErrors} from './apiErrors';
+import { addOutQueue } from './outQueue';
 
 interface User {
     db: string;
@@ -423,7 +425,7 @@ router.post('/action/:name', async (req:Request, res:Response) => {
         let schema = runner.getSchema(name);
         let returns = schema.call.returns;
         let {hasSend, busFaces} = schema.run;
-        let actionReturn = await sendMessagesAfterAction(db, runner, unit, returns, hasSend, busFaces, result);
+        let actionReturn = await afterAction(db, runner, unit, returns, hasSend, busFaces, result);
         res.json({
             ok: true,
             res: actionReturn
@@ -577,16 +579,24 @@ router.post('/book/:name', async (req:Request, res:Response) => {
 
 router.post('/sheet/:name', async (req:Request, res:Response) => {
     try {
-        let user:User = (req as any).user;
-        let db = user.db;
+        let userToken:User = (req as any).user;
+        let {db, id, unit} = userToken;
         let {name} = req.params;
         let body = (req as any).body;
+        let {app, api, discription, data} = body;
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
-        let result = await runner.sheetSave(name, user.unit, user.id, body.discription, body.data);
+        let result = await runner.sheetSave(name, unit, id, app, api, discription, data);
+        let sheetRet = result[0];
+        if (sheetRet !== undefined) {
+            await addOutQueue(_.merge({
+                $job: 'sheetMsg',
+                $unit: unit,
+            }, sheetRet));
+        }
         res.json({
             ok: true,
-            res: result[0]
+            res: sheetRet
         });
     }
     catch (err) {
@@ -602,16 +612,17 @@ router.put('/sheet/:name', async (req:Request, res:Response) => {
     let runner = await checkRunner(db, res);
     if (runner === undefined) return;
     await runner.sheetProcessing(body.id);
-    await addUnitxSheetQueue({
+    let {state, action, id, flow} = body;
+    await addSheetQueue({
         job: 'sheetAct',
         db: db,
         sheet: name,
-        state: body.state,
-        action: body.action,
+        state: state,
+        action: action,
         unit: user.unit,
         user: user.id,
-        id: body.id,
-        flow: body.flow,
+        id: id,
+        flow: flow,
     });
     await res.json({
         ok: true,

@@ -169,9 +169,9 @@ class Runner {
             return yield this.db.tablesFromProc('tv_' + tuid + '$search', [unit, user, key, pageStart, pageSize]);
         });
     }
-    sheetSave(sheet, unit, user, discription, data) {
+    sheetSave(sheet, unit, user, app, api, discription, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv_$sheet_save', [unit, user, sheet, discription, data]);
+            return yield this.db.call('tv_$sheet_save', [unit, user, sheet, app, api, discription, data]);
         });
     }
     tuidBindSlaveSave(tuid, slave, unit, user, params) {
@@ -194,7 +194,7 @@ class Runner {
             let sql = state === '$' ?
                 'tv_' + sheet + '_' + action :
                 'tv_' + sheet + '_' + state + '_' + action;
-            return yield this.db.call(sql, [unit, user, id, flow, action]);
+            return yield this.db.callEx(sql, [unit, user, id, flow, action]);
         });
     }
     sheetStates(sheet, state, unit, user, pageStart, pageSize) {
@@ -229,9 +229,7 @@ class Runner {
     }
     action(action, unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            //let schema = await this.getSchema(action);
             let result = yield this.db.callEx('tv_' + action, [unit, user, data]);
-            //this.actionRun(schema, result);
             return result;
         });
     }

@@ -12,11 +12,13 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
+const _ = require("lodash");
 const runner_1 = require("./runner");
 const core_1 = require("../core");
 const sheetQueue_1 = require("./sheetQueue");
 const afterAction_1 = require("./afterAction");
 const apiErrors_1 = require("./apiErrors");
+const outQueue_1 = require("./outQueue");
 ;
 const router = express_1.Router();
 function checkRunner(db, res) {
@@ -451,7 +453,7 @@ router.post('/action/:name', (req, res) => __awaiter(this, void 0, void 0, funct
         let schema = runner.getSchema(name);
         let returns = schema.call.returns;
         let { hasSend, busFaces } = schema.run;
-        let actionReturn = yield afterAction_1.sendMessagesAfterAction(db, runner, unit, returns, hasSend, busFaces, result);
+        let actionReturn = yield afterAction_1.afterAction(db, runner, unit, returns, hasSend, busFaces, result);
         res.json({
             ok: true,
             res: actionReturn
@@ -619,17 +621,25 @@ router.post('/book/:name', (req, res) => __awaiter(this, void 0, void 0, functio
 }));
 router.post('/sheet/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {
-        let user = req.user;
-        let db = user.db;
+        let userToken = req.user;
+        let { db, id, unit } = userToken;
         let { name } = req.params;
         let body = req.body;
+        let { app, api, discription, data } = body;
         let runner = yield checkRunner(db, res);
         if (runner === undefined)
             return;
-        let result = yield runner.sheetSave(name, user.unit, user.id, body.discription, body.data);
+        let result = yield runner.sheetSave(name, unit, id, app, api, discription, data);
+        let sheetRet = result[0];
+        if (sheetRet !== undefined) {
+            yield outQueue_1.addOutQueue(_.merge({
+                $job: 'sheetMsg',
+                $unit: unit,
+            }, sheetRet));
+        }
         res.json({
             ok: true,
-            res: result[0]
+            res: sheetRet
         });
     }
     catch (err) {
@@ -645,16 +655,17 @@ router.put('/sheet/:name', (req, res) => __awaiter(this, void 0, void 0, functio
     if (runner === undefined)
         return;
     yield runner.sheetProcessing(body.id);
-    yield sheetQueue_1.addUnitxSheetQueue({
+    let { state, action, id, flow } = body;
+    yield sheetQueue_1.addSheetQueue({
         job: 'sheetAct',
         db: db,
         sheet: name,
-        state: body.state,
-        action: body.action,
+        state: state,
+        action: action,
         unit: user.unit,
         user: user.id,
-        id: body.id,
-        flow: body.flow,
+        id: id,
+        flow: flow,
     });
     yield res.json({
         ok: true,
