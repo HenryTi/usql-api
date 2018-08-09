@@ -118,10 +118,21 @@ router.get('/tuid/:name/:id', async (req:Request, res:Response) => {
         let schemaCall = schema.call;
         if (validEntity(res, schemaCall, 'tuid') === false) return;
         let result = await runner.tuidGet(name, user.unit, user.id, id);
-        let row = result[0];
+        let arr0 = result[0];
+        let value = undefined;
+        if (arr0.length > 0) {
+            value = arr0[0]; 
+            let {arrs} = schemaCall;
+            if (arrs !== undefined) {
+                let len = arrs.length;
+                for (let i=0;i<len;i++) {
+                    value[arrs[i].name] = result[i+1];
+                }
+            }
+        }
         res.json({
             ok: true,
-            res: row,
+            res: value,
         });
     }
     catch(err) {
@@ -228,7 +239,7 @@ router.get('/tuid-proxy/:name/:type/:id', async (req:Request, res:Response) => {
 router.post('/tuid/:name', async (req:Request, res:Response) => {
     try {
         let user:User = (req as any).user;
-        let db = user.db;
+        let {id:userId, unit, db} = user;
         let {name} = req.params;
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
@@ -244,8 +255,28 @@ router.post('/tuid/:name', async (req:Request, res:Response) => {
         for (let i=0; i<len; i++) {
             params.push(body[fields[i].name]);
         }
-        let result = await runner.tuidSave(name, user.unit, user.id, params);
+        let result = await runner.tuidSave(name, unit, userId, params);
         let row = result[0];
+        id = row.id;
+        if (id>0) {
+            let {arrs} = schemaCall;
+            if (arrs !== undefined) {
+                for (let arr of arrs) {
+                    let arrName = arr.name;
+                    let fields = arr.fields;
+                    let arrValues = body[arrName];
+                    if (arrValues === undefined) continue;
+                    for (let arrValue of arrValues) {
+                        let arrParams:any[] = [id, arrValue[arr.id.name]];
+                        let len = fields.length;
+                        for (let i=0;i<len;i++) {
+                            arrParams.push(arrValue[fields[i].name]);
+                        }
+                        await runner.tuidArrSave(name, arrName, unit, userId, arrParams);
+                    }
+                }
+            }
+        }
         res.json({
             ok: true,
             res: row,
@@ -338,12 +369,12 @@ router.post('/tuidids/:name', async (req:Request, res:Response) => {
 router.post('/tuids/:name', async (req:Request, res:Response) => {
     try {
         let user:User = (req as any).user;
-        let db = user.db;
+        let {unit, id, db} = user;
         let {name} = req.params;
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
-        let body = (req as any).body;
-        let result = await runner.tuidSeach(name, user.unit, user.id, body.key||'', body.pageStart, body.pageSize);
+        let {arr, key, pageStart, pageSize} = (req as any).body;
+        let result = await runner.tuidSeach(name, unit, id, arr, key, pageStart, pageSize);
         //let more = false;
         let rows = result[0];
         res.json({

@@ -42,8 +42,7 @@ const usqlSheetDoneMessage = 'sheetDoneMessage';
 async function processSheetMessage(unit:number, sheetMessage:any): Promise<void> {
     let runner = await getRunner($unitDb);
     let {no, discription, to, api, id:sheet, state, user} = sheetMessage;
-    let toUsers = await getToUsers(to); 
-    if (toUsers.length === 0) toUsers.push({toUser: user});
+    let toUsers = await getToUsers(to, user); 
     let data = {
         //type: 'sheetMsg',
         subject: discription,
@@ -68,9 +67,12 @@ async function processSheetMessage(unit:number, sheetMessage:any): Promise<void>
     return;
 }
 
-async function getToUsers(toText:string):Promise<{toUser:number}[]> {
+async function getToUsers(toText:string, toUser:number):Promise<{toUser:number}[]> {
     let ret:{toUser:number}[] = [];
     let toArr:any[] = JSON.parse(toText);
+    if (!toArr) {
+        return [{toUser: toUser}];
+    }
     for (let to of toArr) {
         switch (typeof to) {
             case 'number': ret.push({toUser: to}); break;

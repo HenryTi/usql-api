@@ -8,6 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "启动程序",
+            "protocol": "inspector",
             "cwd": "${workspaceRoot}",
             "stopOnEntry": false,        
             "runtimeExecutable": null,
@@ -36,8 +37,7 @@
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceRoot}/out/**/*.js"
-            ],
-            "protocol": "legacy"
+            ]
         }
     ]
 }

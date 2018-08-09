@@ -49,8 +49,8 @@ const usqlSheetDoneMessage = 'sheetDoneMessage';
 function processSheetMessage(unit, sheetMessage) {
     return __awaiter(this, void 0, void 0, function* () {
         let runner = yield runner_1.getRunner($unitDb);
-        let { no, discription, to, api, id: sheet, state } = sheetMessage;
-        let toUsers = yield getToUsers(to);
+        let { no, discription, to, api, id: sheet, state, user } = sheetMessage;
+        let toUsers = yield getToUsers(to, user);
         let data = {
             //type: 'sheetMsg',
             subject: discription,
@@ -75,10 +75,13 @@ function processSheetMessage(unit, sheetMessage) {
         return;
     });
 }
-function getToUsers(toText) {
+function getToUsers(toText, toUser) {
     return __awaiter(this, void 0, void 0, function* () {
         let ret = [];
         let toArr = JSON.parse(toText);
+        if (!toArr) {
+            return [{ toUser: toUser }];
+        }
         for (let to of toArr) {
             switch (typeof to) {
                 case 'number':

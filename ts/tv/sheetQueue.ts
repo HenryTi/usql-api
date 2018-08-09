@@ -84,15 +84,15 @@ async function sheetAct(jobData:any):Promise<void> {
             busFaces = actionRun.busFaces;
         }
         let actionReturn = await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
-        let msg = {
+        let msg = _.merge({
             $type: 'sheetAct',
             $user: user,
             $unit: unit,
-        };
-        let ar = actionReturn;
-        if (ar !== undefined) {
-            for (let i in ar) msg[i] = ar[i];
-        }
+        }, sheetRet);
+        //let ar = actionReturn;
+        //if (ar !== undefined) {
+        //    for (let i in ar) msg[i] = ar[i];
+        //}
         await wsSendMessage(db, msg);
         //await sheetDoneMessage(unit, id);
     }

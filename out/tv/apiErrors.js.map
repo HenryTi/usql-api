@@ -1,1 +1,1 @@
-{"version":3,"file":"apiErrors.js","sourceRoot":"C:/Users/Henry/Projects/tonva-server/usql-api/ts/","sources":["tv/apiErrors.ts"],"names":[],"mappings":";;AACa,QAAA,SAAS,GAAG;IACrB,iBAAiB,EAAE,CAAC,CAAC;CACxB,CAAA"}
+{"version":3,"file":"apiErrors.js","sourceRoot":"C:/Users/Henry/Projects/usql-api/ts/","sources":["tv/apiErrors.ts"],"names":[],"mappings":";;AACa,QAAA,SAAS,GAAG;IACrB,iBAAiB,EAAE,CAAC,CAAC;CACxB,CAAA"}
