@@ -351,15 +351,15 @@ router.post('/tuid-arr-pos/:name/:owner/:arr/', async (req:Request, res:Response
     }
 });
 
-router.post('/tuidids/:name', async (req:Request, res:Response) => {
+router.post('/tuidids/:name/:arr', async (req:Request, res:Response) => {
     let user:User = (req as any).user;
     let db = user.db;
-    let {name} = req.params;
+    let {name, arr} = req.params;
     let runner = await checkRunner(db, res);
     if (runner === undefined) return;
     let body = (req as any).body;
     let ids = (body as number[]).join(',');
-    let result = await runner.tuidIds(name, user.unit, user.id, ids);
+    let result = await runner.tuidIds(name, arr, user.unit, user.id, ids);
     res.json({
         ok: true,
         res: result

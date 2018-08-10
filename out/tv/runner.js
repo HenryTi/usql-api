@@ -139,9 +139,13 @@ class Runner {
             return yield this.db.call('tv_' + tuid + '$proxy', [unit, user, id, type]);
         });
     }
-    tuidIds(tuid, unit, user, ids) {
+    tuidIds(tuid, arr, unit, user, ids) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv_' + tuid + '$ids', [unit, user, ids]);
+            let proc = 'tv_' + tuid;
+            if (arr !== '$')
+                proc += '_' + arr;
+            proc += '$ids';
+            return yield this.db.call(proc, [unit, user, ids]);
         });
     }
     tuidMain(tuid, unit, user, id) {
@@ -167,10 +171,15 @@ class Runner {
     tuidSeach(tuid, unit, user, arr, key, pageStart, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
             let proc = 'tv_' + tuid;
-            if (arr !== undefined)
+            if (arr === undefined) {
+                proc += '$search';
+                return yield this.db.tablesFromProc(proc, [unit, user, key || '', pageStart, pageSize]);
+            }
+            else {
                 proc += '_' + arr;
-            proc += '$search';
-            return yield this.db.tablesFromProc(proc, [unit, user, key || '', pageStart, pageSize]);
+                proc += '$all';
+                return yield this.db.tablesFromProc(proc, [unit, user, key]);
+            }
         });
     }
     sheetSave(sheet, unit, user, app, api, discription, data) {

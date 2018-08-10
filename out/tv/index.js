@@ -374,16 +374,16 @@ router.post('/tuid-arr-pos/:name/:owner/:arr/', (req, res) => __awaiter(this, vo
         return;
     }
 }));
-router.post('/tuidids/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
+router.post('/tuidids/:name/:arr', (req, res) => __awaiter(this, void 0, void 0, function* () {
     let user = req.user;
     let db = user.db;
-    let { name } = req.params;
+    let { name, arr } = req.params;
     let runner = yield checkRunner(db, res);
     if (runner === undefined)
         return;
     let body = req.body;
     let ids = body.join(',');
-    let result = yield runner.tuidIds(name, user.unit, user.id, ids);
+    let result = yield runner.tuidIds(name, arr, user.unit, user.id, ids);
     res.json({
         ok: true,
         res: result

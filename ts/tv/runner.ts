@@ -113,8 +113,11 @@ export class Runner {
     async tuidProxyGet(tuid:string, unit:number, user:number, id:number, type:string): Promise<any> {
         return await this.db.call('tv_' + tuid + '$proxy', [unit, user, id, type]);
     }
-    async tuidIds(tuid:string, unit:number, user:number, ids:string): Promise<any> {
-        return await this.db.call('tv_' + tuid + '$ids', [unit, user, ids]);
+    async tuidIds(tuid:string, arr:string, unit:number, user:number, ids:string): Promise<any> {
+        let proc = 'tv_' + tuid;
+        if (arr !== '$') proc += '_' + arr;
+        proc += '$ids';
+        return await this.db.call(proc, [unit, user, ids]);
     }
     async tuidMain(tuid:string, unit:number, user:number, id:number): Promise<any> {
         return await this.db.call('tv_' + tuid + '$main', [unit, user, id]);
@@ -130,9 +133,15 @@ export class Runner {
     }
     async tuidSeach(tuid:string, unit:number, user:number, arr:string, key:string, pageStart:number, pageSize:number): Promise<any> {
         let proc = 'tv_' + tuid;
-        if (arr !== undefined) proc += '_' + arr;
-        proc += '$search';
-        return await this.db.tablesFromProc(proc, [unit, user, key||'', pageStart, pageSize]);
+        if (arr === undefined) {
+            proc += '$search';
+            return await this.db.tablesFromProc(proc, [unit, user, key||'', pageStart, pageSize]);
+        }
+        else {
+            proc += '_' + arr;
+            proc += '$all';
+            return await this.db.tablesFromProc(proc, [unit, user, key]);
+        }
     }
     async sheetSave(sheet:string, unit:number, user:number, app:number, api:number, discription:string, data:string): Promise<{}> {
         return await this.db.call('tv_$sheet_save', [unit, user, sheet, app, api, discription, data]);
