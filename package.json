@@ -21,11 +21,9 @@
     "@types/node": "^7.0.18",
     "@types/node-fetch": "^1.6.7",
     "@types/ws": "^3.2.0",
-    "nodemon": "^1.11.0",
     "typescript": "^2.8.3"
   },
   "dependencies": {
-    "lodash": "^4.17.10",
     "bluebird": "^3.5.1",
     "bull": "^3.3.2",
     "config": "^1.27.0",
@@ -35,10 +33,9 @@
     "express-ws": "^3.0.0",
     "form-data": "^2.3.2",
     "jsonwebtoken": "^7.4.0",
+    "lodash": "^4.17.10",
     "multer": "^1.3.0",
     "mysql": "^2.14.1",
-    "node-fetch": "^2.0.0",
-    "sprintf-js": "^1.1.1",
-    "typescript": "^2.5.3"
+    "node-fetch": "^2.0.0"
   }
 }
