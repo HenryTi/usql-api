@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "bluebird": "^3.5.1",
+    "body-parser": "^1.18.3",
     "bull": "^3.3.2",
     "config": "^1.27.0",
     "cors": "^2.8.3",

@@ -91,12 +91,12 @@ class Runner {
     }
     loadSchemas(hasSource) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv_$schemas', [hasSource === true ? 1 : 0]);
+            return yield this.db.call('tv_$entitys', [hasSource === true ? 1 : 0]);
         });
     }
     saveSchema(unit, user, id, name, type, schema, run) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv_$schema', [unit, user, id, name, type, schema, run]);
+            return yield this.db.call('tv_$entity', [unit, user, id, name, type, schema, run]);
         });
     }
     loadConstStrs() {
@@ -111,7 +111,7 @@ class Runner {
     }
     loadSchemaVersion(name, version) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv_$schema_version', [name, version]);
+            return yield this.db.call('tv_$entity_version', [name, version]);
         });
     }
     tuidGet(tuid, unit, user, id) {
@@ -274,6 +274,7 @@ class Runner {
             //console.log('schema raw rows: %s', JSON.stringify(rows));
             console.log('init schemas: ', this.app, this.author, this.version);
             this.schemas = {};
+            this.accessSchemaArr = [];
             this.tuids = {};
             this.buses = {};
             for (let row of rows) {
@@ -288,6 +289,9 @@ class Runner {
                 };
                 let { type, url } = schemaObj;
                 switch (type) {
+                    case 'access':
+                        this.accessSchemaArr.push(schemaObj);
+                        break;
                     case 'bus':
                         this.buses[url] = schemaObj;
                         break;
@@ -503,37 +507,60 @@ class Runner {
     buildAccesses() {
         this.access = {};
         //let accesses = this.app.accesses;
-        for (let a in this.schemas) {
-            let la = a.toLowerCase();
-            let schema = this.schemas[la];
-            if (schema === undefined)
-                continue;
-            let access = schema.call;
-            if (access.type !== 'access')
-                continue;
-            let acc = this.access[la] = {};
+        //for (let a in this.schemas) {
+        for (let access of this.accessSchemaArr) {
+            //let la = a.toLowerCase();
+            //let schema = this.schemas[la];
+            //if (schema === undefined) continue;
+            //let access = schema.call;
+            //if (access.type !== 'access') continue;
+            let acc = this.access[access.name] = {};
             for (let item of access.list) {
-                let len = item.length;
-                let i0 = item[0], i1, li1, a2, a3;
-                let li0 = i0.toLowerCase();
-                schema = this.schemas[li0];
+                let it = item;
+                let pos = it.indexOf(':');
+                let name, ops;
+                if (pos > 0) {
+                    name = it.substring(0, pos);
+                    ops = it.substring(pos + 1);
+                }
+                else {
+                    name = it;
+                }
+                let schema = this.schemas[name];
                 if (schema === undefined)
                     continue;
                 let entity = schema.call;
-                let type = entity && entity.type;
-                let id = entity && entity.id;
+                if (entity === undefined)
+                    continue;
+                let { type, typeId } = entity;
+                acc[name] = ops === undefined ?
+                    type + '|' + typeId :
+                    {
+                        $: type,
+                        id: typeId,
+                        ops: ops.split('+')
+                    };
+                /*
+                let len = item.length;
+                let i0 = item[0], i1, li1, a2, a3;
+                let li0 = i0.toLowerCase();
+                let schema = this.schemas[li0];
+                if (schema === undefined) continue;
+                let entity = schema.call;
+                if (entity === undefined) continue;
+                let {type, typeId} = entity;
                 switch (len) {
                     case 1:
-                        acc[li0] = type + '|' + id; // + this.tuidProxies(entity);
+                        acc[li0] = type + '|' + typeId; // + this.tuidProxies(entity);
                         //if (type === 'tuid') this.addSlavesAccess(acc, entity);
                         break;
                     case 2:
                         a2 = acc[li0];
                         if (a2 === undefined) {
-                            a2 = acc[li0] = { '$': type, id: id };
+                            a2 = acc[li0] = {'$': type, id: typeId};
                         }
                         else if (typeof a2 !== 'object') {
-                            a2 = acc[li0] = { '$': type, '#': true, id: id };
+                            a2 = acc[li0] = {'$': type, '#': true, id: typeId};
                         }
                         i1 = item[1];
                         li1 = i1.toLowerCase();
@@ -542,10 +569,10 @@ class Runner {
                     case 3:
                         a2 = acc[li0];
                         if (a2 === undefined) {
-                            a2 = acc[li0] = { '$': type, id: id };
+                            a2 = acc[li0] = {'$': type, id: typeId};
                         }
                         else if (typeof a2 !== 'object') {
-                            a2 = acc[li0] = { '$': type, '#': true, id: id };
+                            a2 = acc[li0] = {'$': type, '#': true, id: typeId};
                         }
                         i1 = item[1];
                         li1 = i1.toLowerCase();
@@ -554,31 +581,16 @@ class Runner {
                             a3 = a2[li1] = {};
                         }
                         else if (a3 === true) {
-                            a3 = a2[li1] = { '#': true };
+                            a3 = a2[li1] = {'#': true};
                         }
                         a3[item[2].toLowerCase] = true;
-                        break;
+                    break;
                 }
+                */
             }
         }
-        //console.log('access: %s', JSON.stringify(this.access));
+        console.log('access: ', this.access);
     }
-    /*
-        private addSlavesAccess(acc:any, entity:any) {
-            let {slaves} = entity;
-            if (slaves === undefined) return;
-            for (let i in slaves) {
-                let {tuid, book, page, pageSlave, all, add, del} = slaves[i];
-                this.addEntityAccess(acc, tuid);
-                this.addEntityAccess(acc, book);
-                this.addEntityAccess(acc, page);
-                this.addEntityAccess(acc, pageSlave);
-                this.addEntityAccess(acc, all);
-                this.addEntityAccess(acc, add);
-                this.addEntityAccess(acc, del);
-            }
-        }
-    */
     addEntityAccess(acc, entity) {
         if (!entity)
             return;
@@ -607,14 +619,29 @@ class Runner {
             }
             //await this.initSchemas();
             let access = {};
+            function merge(src) {
+                for (let i in src) {
+                    let v = src[i];
+                    if (typeof v === 'string') {
+                        access[i] = v;
+                        continue;
+                    }
+                    let dst = access[i];
+                    if (dst === undefined) {
+                        access[i] = v;
+                        continue;
+                    }
+                    dst.ops = _.union(dst.ops, v.ops);
+                }
+            }
             if (acc === undefined) {
                 for (let a in this.access) {
-                    _.merge(access, this.access[a]);
+                    merge(this.access[a]);
                 }
             }
             else {
                 for (let a of acc)
-                    _.merge(access, this.access[a]);
+                    merge(this.access[a]);
             }
             return {
                 access: access,
