@@ -17,13 +17,12 @@ const outQueue_1 = require("./outQueue");
 const sheetQueueName = 'sheet-queue';
 let sheetQueue;
 function startSheetQueue(redis) {
-    console.log('start queue: ', sheetQueueName);
     sheetQueue = bull(sheetQueueName, redis);
     sheetQueue.isReady().then(q => {
-        console.log("queue: %s, redis: %s", sheetQueueName, JSON.stringify(redis));
+        console.log(sheetQueueName, ' is ready');
     });
     sheetQueue.on("error", (error) => {
-        console.log('queue server: ', error);
+        console.log(sheetQueueName, error);
     });
     sheetQueue.process(function (job, done) {
         return __awaiter(this, void 0, void 0, function* () {

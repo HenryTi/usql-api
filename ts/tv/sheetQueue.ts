@@ -10,14 +10,12 @@ const sheetQueueName = 'sheet-queue';
 let sheetQueue:bull.Queue;
 
 export function startSheetQueue(redis:any) {
-    console.log('start queue: ', sheetQueueName);
     sheetQueue = bull(sheetQueueName, redis);
     sheetQueue.isReady().then(q => {
-        console.log("queue: %s, redis: %s", sheetQueueName, JSON.stringify(redis));
+        console.log(sheetQueueName, ' is ready');
     });
-
     sheetQueue.on("error", (error: Error) => {
-        console.log('queue server: ', error);
+        console.log(sheetQueueName, error);
     });
 
     sheetQueue.process(async function(job, done) {

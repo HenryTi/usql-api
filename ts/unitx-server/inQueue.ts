@@ -9,10 +9,12 @@ const unitxQueueName = 'unitx-in-queue';
 let unitxInQueue:bull.Queue;
 
 export function startUnitxInQueue(redis:any) {
-    console.log('start queue: ', unitxQueueName);
     unitxInQueue = bull(unitxQueueName, redis);
     unitxInQueue.isReady().then(q => {
-        console.log("queue: %s, redis: %s", unitxQueueName, JSON.stringify(redis));
+        console.log(unitxQueueName, ' is ready');
+    });
+    unitxInQueue.on("error", (error: Error) => {
+        console.log(unitxQueueName, error);
     });
 
     unitxInQueue.process(async function(job, done) {

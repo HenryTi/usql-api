@@ -15,8 +15,10 @@ const unitxColl = {};
 const outQueueName = 'out-queue';
 let outQueue;
 function startOutQueue(redis) {
-    console.log('start queue: ', outQueueName);
     outQueue = bull(outQueueName, redis);
+    outQueue.isReady().then(q => {
+        console.log(outQueueName, ' is ready');
+    });
     outQueue.on("error", (error) => {
         console.log('queue server: ', error);
     });
