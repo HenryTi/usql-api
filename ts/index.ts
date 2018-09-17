@@ -15,7 +15,7 @@ import { unitxRouter } from './unitx-server';
     }
     var cors = require('cors')
     let app = express();
-    let expressWs = require('express-ws')(app);
+    //let expressWs = require('express-ws')(app);
 
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);

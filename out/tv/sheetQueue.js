@@ -88,6 +88,7 @@ function sheetAct(jobData) {
             else {
                 hasMessage = actionRun.hasSend;
                 busFaces = actionRun.busFaces;
+                60;
             }
             let actionReturn = yield afterAction_1.afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
             let msg = _.merge({
@@ -99,7 +100,7 @@ function sheetAct(jobData) {
             //if (ar !== undefined) {
             //    for (let i in ar) msg[i] = ar[i];
             //}
-            yield core_1.wsSendMessage(db, msg);
+            yield core_1.pushToCenter(db, msg);
             //await sheetDoneMessage(unit, id);
         }
         catch (err) {

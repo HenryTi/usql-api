@@ -2,7 +2,7 @@ import * as bull from 'bull';
 import * as _ from 'lodash';
 import * as config from 'config';
 import { getRunner } from './runner';
-import { wsSendMessage } from '../core';
+import { pushToCenter } from '../core';
 import { afterAction } from './afterAction';
 import { addOutQueue } from './outQueue';
 
@@ -81,7 +81,7 @@ async function sheetAct(jobData:any):Promise<void> {
         }
         else {
             hasMessage = actionRun.hasSend;
-            busFaces = actionRun.busFaces;
+            busFaces = actionRun.busFaces;60
         }
         let actionReturn = await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
         let msg = _.merge({
@@ -93,7 +93,7 @@ async function sheetAct(jobData:any):Promise<void> {
         //if (ar !== undefined) {
         //    for (let i in ar) msg[i] = ar[i];
         //}
-        await wsSendMessage(db, msg);
+        await pushToCenter(db, msg);
         //await sheetDoneMessage(unit, id);
     }
     catch(err) {

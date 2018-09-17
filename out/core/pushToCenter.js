@@ -96,7 +96,7 @@ function logws(log:string) {
     wsLogs.push(log);
 }
 */
-function pushMessageToCenter(db, msg) {
+function pushToCenter(db, msg) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield _1.centerApi.pushTo(msg);
@@ -108,5 +108,5 @@ function pushMessageToCenter(db, msg) {
         }
     });
 }
-exports.pushMessageToCenter = pushMessageToCenter;
-//# sourceMappingURL=ws.js.map
+exports.pushToCenter = pushToCenter;
+//# sourceMappingURL=pushToCenter.js.map

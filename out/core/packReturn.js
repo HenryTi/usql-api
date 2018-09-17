@@ -28,9 +28,11 @@ exports.packReturn = packReturn;
 //const bus
 function packBus(schema, data) {
     let result = [];
-    let len = data.length;
-    for (let i = 0; i < len; i++)
-        packBusMain(result, schema, data[0]);
+    if (data !== undefined) {
+        let len = data.length;
+        for (let i = 0; i < len; i++)
+            packBusMain(result, schema, data[0]);
+    }
     return result.join('');
 }
 exports.packBus = packBus;

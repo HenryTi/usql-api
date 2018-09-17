@@ -373,9 +373,12 @@ router.post('/tuids/:name', async (req:Request, res:Response) => {
         let {name} = req.params;
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
-        let {arr, key, pageStart, pageSize} = (req as any).body;
-        let result = await runner.tuidSeach(name, unit, id, arr, key, pageStart, pageSize);
-        //let more = false;
+        let {arr, owner, key, pageStart, pageSize} = (req as any).body;
+        let result = arr === undefined?
+            await runner.tuidSeach(name, unit, id, arr, key, pageStart, pageSize)
+            :
+            await runner.tuidArrSeach(name, unit, id, arr, owner, key, pageStart, pageSize);
+
         let rows = result[0];
         res.json({
             ok: true,
@@ -614,10 +617,10 @@ router.post('/sheet/:name', async (req:Request, res:Response) => {
         let {db, id, unit} = userToken;
         let {name} = req.params;
         let body = (req as any).body;
-        let {app, api, discription, data} = body;
+        let {app, discription, data} = body;
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
-        let result = await runner.sheetSave(name, unit, id, app, api, discription, data);
+        let result = await runner.sheetSave(name, unit, id, app, discription, data);
         let sheetRet = result[0];
         if (sheetRet !== undefined) {
             await addOutQueue(_.merge({

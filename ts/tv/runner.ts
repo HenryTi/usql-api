@@ -1,8 +1,7 @@
 import * as _ from 'lodash';
 import {getDb, Db} from '../db';
-import { debug } from 'util';
 
-let runners: {[name:string]: Runner} = {};
+const runners: {[name:string]: Runner} = {};
 
 export async function getRunner(name:string):Promise<Runner> {
     let runner = runners[name];
@@ -15,9 +14,10 @@ export async function getRunner(name:string):Promise<Runner> {
             return;
         }
         runner = new Runner(db);
+        runners[name] = runner;
     }
-    await runner.initSchemas();
-    return runners[name] = runner;
+    await runner.init();
+    return runner;
 }
 
 export function resetRunner(name:string) {
@@ -40,13 +40,15 @@ export class Runner {
     private accessSchemaArr: any[];
     private tuids: {[name:string]: any};
     private buses:{[url:string]:any}; // 直接查找bus
-    //isSysChat:boolean;
+    private setting: {[name:string]: any};
+    private usqId: number;
     app: string;
     author: string;
     version: string;
 
     constructor(db:Db) {
         this.db = db;
+        this.setting = {};
     }
 
     //sysTableCount(db:Db): Promise<number> {
@@ -59,27 +61,30 @@ export class Runner {
         return this.db.createDatabase();
     }
 
-    async init(unit:number, user:number): Promise<void> {
-        return await this.db.call('tv_$init', [unit, user]);
+    async setTimezone(unit:number, user:number): Promise<void> {
+        return await this.db.call('tv_$set_timezone', [unit, user]);
     }
     async start(unit:number, user:number): Promise<void> {
         return await this.db.call('tv_$start', [unit, user]);
     }
 
-    async set(unit:number, name: string, num: number, str: string): Promise<void> {
-        await this.db.call('tv_$set', [unit, name, num, str]);
+    async setSetting(unit:number, name: string, value: string): Promise<void> {
+        await this.db.call('tv_$set_setting', [unit, name, value]);
+        if (unit === 0) {
+            let n = Number(value);
+            this.setting[name] = n === NaN? value : n;
+        }
     }
 
-    async getStr(unit:number, name: string):Promise<string> {
-        let ret = await this.db.tableFromProc('tv_$get_str', [unit, name]);
+    async getSetting(unit:number, name: string):Promise<any> {
+        let ret = await this.db.tableFromProc('tv_$get_setting', [unit, name]);
         if (ret.length===0) return undefined;
-        return ret[0].str;
-    }
-
-    async getNum(unit:number, name: string):Promise<number> {
-        let ret = await this.db.tableFromProc('tv_$get_num', [unit, name]);
-        if (ret.length===0) return undefined;
-        return ret[0].num;
+        let v = ret[0].value;
+        if (unit === 0) {
+            let n = Number(v);
+            v = this.setting[name] = isNaN(n)===true? v : n;
+        }
+        return v;
     }
 
     async loadSchemas(hasSource:boolean): Promise<{id:number, name:string, type:number, version:number, schema:string, run:string}[]> {
@@ -132,19 +137,15 @@ export class Runner {
         return await this.db.call('tv_' + tuid + '_' + arr + '$pos', [unit, user, ...params]);
     }
     async tuidSeach(tuid:string, unit:number, user:number, arr:string, key:string, pageStart:number, pageSize:number): Promise<any> {
-        let proc = 'tv_' + tuid;
-        if (arr === undefined) {
-            proc += '$search';
-            return await this.db.tablesFromProc(proc, [unit, user, key||'', pageStart, pageSize]);
-        }
-        else {
-            proc += '_' + arr;
-            proc += '$all';
-            return await this.db.tablesFromProc(proc, [unit, user, key]);
-        }
+        let proc = 'tv_' + tuid + '$search';
+        return await this.db.tablesFromProc(proc, [unit, user, key||'', pageStart, pageSize]);
     }
-    async sheetSave(sheet:string, unit:number, user:number, app:number, api:number, discription:string, data:string): Promise<{}> {
-        return await this.db.call('tv_$sheet_save', [unit, user, sheet, app, api, discription, data]);
+    async tuidArrSeach(tuid:string, unit:number, user:number, arr:string, ownerId:number, key:string, pageStart:number, pageSize:number): Promise<any> {
+        let proc = 'tv_' + tuid + '_' + arr + '$search';
+        return await this.db.tablesFromProc(proc, [unit, user, ownerId, key||'', pageStart, pageSize]);
+    }
+    async sheetSave(sheet:string, unit:number, user:number, app:number, discription:string, data:string): Promise<{}> {
+        return await this.db.call('tv_$sheet_save', [unit, user, sheet, app, discription, data]);
     }
     async tuidBindSlaveSave(tuid:string, slave:string, unit:number, user:number, params:any[]): Promise<any> {
         return await this.db.call('tv_' + tuid + '_' + slave + '$save', [unit, user, ...params]);
@@ -202,11 +203,15 @@ export class Runner {
         return await this.db.call(sql, [unit, 0, data]);
     }
 
-    async initSchemas() {
+    async init() {
         if (this.schemas !== undefined) return;
-        this.app = await this.getStr(0, 'app');
-        this.author = await this.getStr(0, 'author');
-        this.version = await this.getStr(0, 'version');
+        this.app = await this.getSetting(0, 'app');
+        this.author = await this.getSetting(0, 'author');
+        this.version = await this.getSetting(0, 'version');
+        
+        await this.getSetting(0, 'reloadSchemas');
+        this.usqId = await this.getSetting(0, 'usqId');
+
         //this.isSysChat = (this.app === '$unitx' || this.app === 'unitx') 
         //    && this.author === 'henry';
         let rows = await this.loadSchemas(false);
@@ -430,9 +435,9 @@ export class Runner {
     }
 
     private buildAccesses() {
-        this.access = {};
-        //let accesses = this.app.accesses;
-        //for (let a in this.schemas) {
+        this.access = {
+            usq: this.usqId
+        };
         for (let access of this.accessSchemaArr) {
             //let la = a.toLowerCase();
             //let schema = this.schemas[la];
@@ -535,10 +540,12 @@ export class Runner {
     }
     */
     async getAccesses(acc:string[]):Promise<any> {
-        let reload = await this.getNum(0, 'reloadSchemas');
+        let reload:number = await this.getSetting(0, 'reloadSchemas');
+
         if (reload === 1) {
             this.schemas = undefined;
-            await this.set(0, 'reloadSchemas', 0, null);
+            await this.init();
+            await this.setSetting(0, 'reloadSchemas', '0');
         }
         //await this.initSchemas();
         let access = {} as any;

@@ -2,7 +2,7 @@ import * as bull from 'bull';
 import * as config from 'config';
 import { getRunner } from '../tv/runner';
 import { afterAction } from '../tv/afterAction';
-import { packReturn, wsSendMessage } from '../core';
+import { packReturn, pushToCenter } from '../core';
 import { packParam } from '../core/packParam';
 
 let unitxQueueName = 'unitx-in-queue';
@@ -36,22 +36,34 @@ unitxInQueue.process(async function(job, done) {
     }
 });
 
-const $unitDb = '$unitx';
+const $unitx = '$unitx';
 const usqlSheetMessage = 'sheetMessage';
 const usqlSheetDoneMessage = 'sheetDoneMessage';
+const usqlGetSheetTo = 'getSheetTo';
 async function processSheetMessage(unit:number, sheetMessage:any): Promise<void> {
-    let runner = await getRunner($unitDb);
-    let {no, discription, to, api, id:sheet, state, user} = sheetMessage;
-    let toUsers = await getToUsers(to, user); 
+    let runner = await getRunner($unitx);
+    let {no, discription, /*to, */usq, id:sheet, state, user, name} = sheetMessage;
+    // 上句中的to removed，由下面调用unitx来计算
+    let sheetName = name;
+    let stateName = state;
+    let paramsGetSheetTo:any[] = [usq, sheetName, stateName];
+    let sheetTo:any[] = await runner.query(usqlGetSheetTo, unit, user, paramsGetSheetTo);
+    let toUsers:{toUser:number}[] = sheetTo.map(v => {
+        return {toUser: v.to}
+    });
+    if (toUsers.length === 0) toUsers = [
+        {toUser: user}
+    ];
+    //let toUsers = await getToUsers(user); 
     let data = {
         //type: 'sheetMsg',
         subject: discription,
-        discription: no,
+        discription: no + ' - ' + stateName,
         content: JSON.stringify(sheetMessage),
         //meName: 'henry',
         //meNick: 'henry-nick',
         //meIcon: undefined,
-        api: api,
+        usq: usq,
         sheet: sheet,
         state: state,
         to: toUsers,
@@ -62,14 +74,16 @@ async function processSheetMessage(unit:number, sheetMessage:any): Promise<void>
     let result = await runner.action(usqlSheetMessage, unit, toUser, msg);
     let returns = schema.call.returns;
     let {hasSend, busFaces} = schema.run;
-    let actionReturn = await afterAction($unitDb, runner, unit, returns, hasSend, busFaces, result);
+    let actionReturn = await afterAction($unitx, runner, unit, returns, hasSend, busFaces, result);
     console.log('save sheet message ', data);
     return;
 }
 
-async function getToUsers(toText:string, toUser:number):Promise<{toUser:number}[]> {
+async function getToUsers(toUser:number):Promise<{toUser:number}[]> {
+    // 调用组织结构来计算
     let ret:{toUser:number}[] = [];
-    let toArr:any[] = JSON.parse(toText);
+    //let toArr:any[] = JSON.parse(toText);
+    /*
     if (!toArr) {
         return [{toUser: toUser}];
     }
@@ -79,6 +93,7 @@ async function getToUsers(toText:string, toUser:number):Promise<{toUser:number}[
             case 'string': break;
         }
     }
+    */
     return ret;
 }
 

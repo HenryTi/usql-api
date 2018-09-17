@@ -3,7 +3,7 @@ import {Runner} from './runner';
 import {SchemaBusFace} from './schemaBusFace';
 import { addOutQueue } from './outQueue';
 import { packBus } from '../core';
-import { wsSendMessage } from '../core';
+import { pushToCenter } from '../core';
 
 // 2018-02-25
 // Bus face 数据保全的说明：
@@ -38,7 +38,7 @@ export async function afterAction(
                 action: action,
                 data: data,
             };
-            await wsSendMessage(db, wsMsg);
+            await pushToCenter(db, wsMsg);
             console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
         }
     }

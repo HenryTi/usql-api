@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
 const db_1 = require("../db");
-let runners = {};
+const runners = {};
 function getRunner(name) {
     return __awaiter(this, void 0, void 0, function* () {
         let runner = runners[name];
@@ -24,9 +24,10 @@ function getRunner(name) {
                 return;
             }
             runner = new Runner(db);
+            runners[name] = runner;
         }
-        yield runner.initSchemas();
-        return runners[name] = runner;
+        yield runner.init();
+        return runner;
     });
 }
 exports.getRunner = getRunner;
@@ -48,6 +49,7 @@ exports.createRunner = createRunner;
 class Runner {
     constructor(db) {
         this.db = db;
+        this.setting = {};
     }
     //sysTableCount(db:Db): Promise<number> {
     //    return this.db.call('tv$sysTableCount', undefined);
@@ -58,9 +60,9 @@ class Runner {
     createDatabase() {
         return this.db.createDatabase();
     }
-    init(unit, user) {
+    setTimezone(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv_$init', [unit, user]);
+            return yield this.db.call('tv_$set_timezone', [unit, user]);
         });
     }
     start(unit, user) {
@@ -68,25 +70,26 @@ class Runner {
             return yield this.db.call('tv_$start', [unit, user]);
         });
     }
-    set(unit, name, num, str) {
+    setSetting(unit, name, value) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.call('tv_$set', [unit, name, num, str]);
+            yield this.db.call('tv_$set_setting', [unit, name, value]);
+            if (unit === 0) {
+                let n = Number(value);
+                this.setting[name] = n === NaN ? value : n;
+            }
         });
     }
-    getStr(unit, name) {
+    getSetting(unit, name) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.db.tableFromProc('tv_$get_str', [unit, name]);
+            let ret = yield this.db.tableFromProc('tv_$get_setting', [unit, name]);
             if (ret.length === 0)
                 return undefined;
-            return ret[0].str;
-        });
-    }
-    getNum(unit, name) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.db.tableFromProc('tv_$get_num', [unit, name]);
-            if (ret.length === 0)
-                return undefined;
-            return ret[0].num;
+            let v = ret[0].value;
+            if (unit === 0) {
+                let n = Number(v);
+                v = this.setting[name] = isNaN(n) === true ? v : n;
+            }
+            return v;
         });
     }
     loadSchemas(hasSource) {
@@ -170,21 +173,19 @@ class Runner {
     }
     tuidSeach(tuid, unit, user, arr, key, pageStart, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
-            let proc = 'tv_' + tuid;
-            if (arr === undefined) {
-                proc += '$search';
-                return yield this.db.tablesFromProc(proc, [unit, user, key || '', pageStart, pageSize]);
-            }
-            else {
-                proc += '_' + arr;
-                proc += '$all';
-                return yield this.db.tablesFromProc(proc, [unit, user, key]);
-            }
+            let proc = 'tv_' + tuid + '$search';
+            return yield this.db.tablesFromProc(proc, [unit, user, key || '', pageStart, pageSize]);
         });
     }
-    sheetSave(sheet, unit, user, app, api, discription, data) {
+    tuidArrSeach(tuid, unit, user, arr, ownerId, key, pageStart, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv_$sheet_save', [unit, user, sheet, app, api, discription, data]);
+            let proc = 'tv_' + tuid + '_' + arr + '$search';
+            return yield this.db.tablesFromProc(proc, [unit, user, ownerId, key || '', pageStart, pageSize]);
+        });
+    }
+    sheetSave(sheet, unit, user, app, discription, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv_$sheet_save', [unit, user, sheet, app, discription, data]);
         });
     }
     tuidBindSlaveSave(tuid, slave, unit, user, params) {
@@ -261,13 +262,15 @@ class Runner {
             return yield this.db.call(sql, [unit, 0, data]);
         });
     }
-    initSchemas() {
+    init() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.schemas !== undefined)
                 return;
-            this.app = yield this.getStr(0, 'app');
-            this.author = yield this.getStr(0, 'author');
-            this.version = yield this.getStr(0, 'version');
+            this.app = yield this.getSetting(0, 'app');
+            this.author = yield this.getSetting(0, 'author');
+            this.version = yield this.getSetting(0, 'version');
+            yield this.getSetting(0, 'reloadSchemas');
+            this.usqId = yield this.getSetting(0, 'usqId');
             //this.isSysChat = (this.app === '$unitx' || this.app === 'unitx') 
             //    && this.author === 'henry';
             let rows = yield this.loadSchemas(false);
@@ -505,9 +508,9 @@ class Runner {
     */
     }
     buildAccesses() {
-        this.access = {};
-        //let accesses = this.app.accesses;
-        //for (let a in this.schemas) {
+        this.access = {
+            usq: this.usqId
+        };
         for (let access of this.accessSchemaArr) {
             //let la = a.toLowerCase();
             //let schema = this.schemas[la];
@@ -612,10 +615,11 @@ class Runner {
     */
     getAccesses(acc) {
         return __awaiter(this, void 0, void 0, function* () {
-            let reload = yield this.getNum(0, 'reloadSchemas');
+            let reload = yield this.getSetting(0, 'reloadSchemas');
             if (reload === 1) {
                 this.schemas = undefined;
-                yield this.set(0, 'reloadSchemas', 0, null);
+                yield this.init();
+                yield this.setSetting(0, 'reloadSchemas', '0');
             }
             //await this.initSchemas();
             let access = {};

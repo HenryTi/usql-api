@@ -1,7 +1,7 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import {Auth, authCheck, AuthUser, debugUnit, debugUser, centerApi} from '.';
 
-
+/*
 interface UserWss {
     [user:number]: object | object[];
 }
@@ -87,7 +87,8 @@ const wsLogs:string[] = [];
 function logws(log:string) {
     wsLogs.push(log);
 }
-export async function wsSendMessage(db:string, msg:any) {
+*/
+export async function pushToCenter(db:string, msg:any) {
     try {
         await centerApi.pushTo(msg);
         let s = null;

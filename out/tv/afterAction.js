@@ -36,7 +36,7 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
                     action: action,
                     data: data,
                 };
-                yield core_2.wsSendMessage(db, wsMsg);
+                yield core_2.pushToCenter(db, wsMsg);
                 console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
             }
         }

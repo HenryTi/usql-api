@@ -36,8 +36,10 @@ interface BusSchema {
 //const bus
 export function packBus(schema:BusSchema, data:any):string {
     let result:string[] = [];
-    let len = data.length;
-    for (let i=0;i<len;i++) packBusMain(result, schema, data[0]);
+    if (data !== undefined) {
+        let len = data.length;
+        for (let i=0;i<len;i++) packBusMain(result, schema, data[0]);
+    }
     return result.join('');
 }
 
