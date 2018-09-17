@@ -2,7 +2,7 @@ import * as express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import tv, { startOutQueue } from './tv';
+import tv, { startOutQueue, startSheetQueue } from './tv';
 //import {sendToBusRouter} from './tv/toUnitx';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
 import { unitxRouter, startUnitxInQueue } from './unitx-server';
@@ -68,6 +68,7 @@ import { unitxRouter, startUnitxInQueue } from './unitx-server';
     console.log('redis:', config.get<any>('redis'));
 
     //startOutQueue();
+    //startSheetQueue();
     //startUnitxInQueue();
 
     app.listen(port, async ()=>{

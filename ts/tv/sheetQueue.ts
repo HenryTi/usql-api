@@ -8,23 +8,26 @@ import { addOutQueue } from './outQueue';
 
 const sheetQueueName = 'sheet-queue';
 let redis = config.get<any>('redis');
+let sheetQueue = bull(sheetQueueName, redis);
 
-export const sheetQueue = bull(sheetQueueName, redis);
-sheetQueue.isReady().then(q => {
-    console.log("queue: %s, redis: %s", sheetQueueName, JSON.stringify(redis));
-});
+export function startSheetQueue() {
+    sheetQueue = bull(sheetQueueName, redis);
+    sheetQueue.isReady().then(q => {
+        console.log("queue: %s, redis: %s", sheetQueueName, JSON.stringify(redis));
+    });
 
-sheetQueue.on("error", (error: Error) => {
-    console.log('queue server: ', error);
-});
+    sheetQueue.on("error", (error: Error) => {
+        console.log('queue server: ', error);
+    });
 
-sheetQueue.process(async function(job, done) {
-    let {data} = job;
-    if (data !== undefined) {
-        await sheetAct(data);
-    } 
-    done();
-});
+    sheetQueue.process(async function(job, done) {
+        let {data} = job;
+        if (data !== undefined) {
+            await sheetAct(data);
+        } 
+        done();
+    });
+}
 
 async function sheetAct(jobData:any):Promise<void> {
     let {db, sheet, state, action, unit, user, id, flow} = jobData;

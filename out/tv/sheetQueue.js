@@ -17,22 +17,26 @@ const afterAction_1 = require("./afterAction");
 const outQueue_1 = require("./outQueue");
 const sheetQueueName = 'sheet-queue';
 let redis = config.get('redis');
-exports.sheetQueue = bull(sheetQueueName, redis);
-exports.sheetQueue.isReady().then(q => {
-    console.log("queue: %s, redis: %s", sheetQueueName, JSON.stringify(redis));
-});
-exports.sheetQueue.on("error", (error) => {
-    console.log('queue server: ', error);
-});
-exports.sheetQueue.process(function (job, done) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let { data } = job;
-        if (data !== undefined) {
-            yield sheetAct(data);
-        }
-        done();
+let sheetQueue = bull(sheetQueueName, redis);
+function startSheetQueue() {
+    sheetQueue = bull(sheetQueueName, redis);
+    sheetQueue.isReady().then(q => {
+        console.log("queue: %s, redis: %s", sheetQueueName, JSON.stringify(redis));
     });
-});
+    sheetQueue.on("error", (error) => {
+        console.log('queue server: ', error);
+    });
+    sheetQueue.process(function (job, done) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { data } = job;
+            if (data !== undefined) {
+                yield sheetAct(data);
+            }
+            done();
+        });
+    });
+}
+exports.startSheetQueue = startSheetQueue;
 function sheetAct(jobData) {
     return __awaiter(this, void 0, void 0, function* () {
         let { db, sheet, state, action, unit, user, id, flow } = jobData;
@@ -120,7 +124,7 @@ async function sheetDoneMessage(unit:number, sheetId:number) {
 */
 function addSheetQueue(msg) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield exports.sheetQueue.add(msg);
+        return yield sheetQueue.add(msg);
     });
 }
 exports.addSheetQueue = addSheetQueue;
