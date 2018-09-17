@@ -9,14 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const bull = require("bull");
-const config = require("config");
 const node_fetch_1 = require("node-fetch");
 const core_1 = require("../core");
 const unitxColl = {};
+const outQueueName = 'out-queue';
 let outQueue;
-function startOutQueue() {
-    const outQueueName = 'out-queue';
-    let redis = config.get('redis');
+function startOutQueue(redis) {
     outQueue = bull(outQueueName, redis);
     outQueue.on("error", (error) => {
         console.log('queue server: ', error);

@@ -4,12 +4,10 @@ import fetch from 'node-fetch';
 import { centerApi, UnitxApi } from "../core";
 
 const unitxColl: {[id:number]: string} = {};
+const outQueueName = 'out-queue';
 let outQueue: bull.Queue;
 
-export function startOutQueue() {
-    const outQueueName = 'out-queue';
-    let redis = config.get<any>('redis');
-
+export function startOutQueue(redis:any) {
     outQueue = bull(outQueueName, redis);
 
     outQueue.on("error", (error: Error) => {

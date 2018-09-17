@@ -5,11 +5,10 @@ import { afterAction } from '../tv/afterAction';
 import { packReturn, pushToCenter } from '../core';
 import { packParam } from '../core/packParam';
 
+const unitxQueueName = 'unitx-in-queue';
 let unitxInQueue:bull.Queue;
 
-export function startUnitxInQueue() {
-    let unitxQueueName = 'unitx-in-queue';
-    let redis = config.get<any>("redis");
+export function startUnitxInQueue(redis:any) {
     unitxInQueue = bull(unitxQueueName, redis);
     unitxInQueue.isReady().then(q => {
         console.log("queue: %s, redis: %s", unitxQueueName, JSON.stringify(redis));

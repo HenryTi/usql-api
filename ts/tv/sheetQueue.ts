@@ -7,10 +7,9 @@ import { afterAction } from './afterAction';
 import { addOutQueue } from './outQueue';
 
 const sheetQueueName = 'sheet-queue';
-let redis = config.get<any>('redis');
-let sheetQueue = bull(sheetQueueName, redis);
+let sheetQueue:bull.Queue;
 
-export function startSheetQueue() {
+export function startSheetQueue(redis:any) {
     sheetQueue = bull(sheetQueueName, redis);
     sheetQueue.isReady().then(q => {
         console.log("queue: %s, redis: %s", sheetQueueName, JSON.stringify(redis));

@@ -65,11 +65,13 @@ import { unitxRouter, startUnitxInQueue } from './unitx-server';
 
     let port = config.get<number>('port');
     console.log('port=', port);
-    console.log('redis:', config.get<any>('redis'));
 
-    startOutQueue();
-    //startSheetQueue();
-    //startUnitxInQueue();
+    let redis = config.get<any>('redis');
+    console.log('redis:', redis);
+
+    startOutQueue(redis);
+    //startSheetQueue(redis);
+    //startUnitxInQueue(redis);
 
     app.listen(port, async ()=>{
         console.log('USQL-API listening on port ' + port);

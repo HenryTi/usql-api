@@ -9,14 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const bull = require("bull");
-const config = require("config");
 const runner_1 = require("../tv/runner");
 const afterAction_1 = require("../tv/afterAction");
 const packParam_1 = require("../core/packParam");
+const unitxQueueName = 'unitx-in-queue';
 let unitxInQueue;
-function startUnitxInQueue() {
-    let unitxQueueName = 'unitx-in-queue';
-    let redis = config.get("redis");
+function startUnitxInQueue(redis) {
     unitxInQueue = bull(unitxQueueName, redis);
     unitxInQueue.isReady().then(q => {
         console.log("queue: %s, redis: %s", unitxQueueName, JSON.stringify(redis));

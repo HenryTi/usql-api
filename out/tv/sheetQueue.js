@@ -10,15 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const bull = require("bull");
 const _ = require("lodash");
-const config = require("config");
 const runner_1 = require("./runner");
 const core_1 = require("../core");
 const afterAction_1 = require("./afterAction");
 const outQueue_1 = require("./outQueue");
 const sheetQueueName = 'sheet-queue';
-let redis = config.get('redis');
-let sheetQueue = bull(sheetQueueName, redis);
-function startSheetQueue() {
+let sheetQueue;
+function startSheetQueue(redis) {
     sheetQueue = bull(sheetQueueName, redis);
     sheetQueue.isReady().then(q => {
         console.log("queue: %s, redis: %s", sheetQueueName, JSON.stringify(redis));
