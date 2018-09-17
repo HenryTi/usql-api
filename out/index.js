@@ -67,12 +67,19 @@ const unitx_server_1 = require("./unitx-server");
         res.json({ "hello": 'usql-api: hello, it\'s good' });
     });
     let port = config.get('port');
-    app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
+    console.log('port=', port);
+    console.log('redis:', config.get('redis'));
+    /*
+    app.listen(port, async ()=>{
         console.log('USQL-API listening on port ' + port);
-        let connection = config.get("connection");
-        let { host, user } = connection;
-        console.log('process.env.NODE_ENV: %s, host: %s, user: %s', process.env.NODE_ENV, host, user);
-        yield tv_1.tryoutQueue();
-    }));
+        let connection = config.get<any>("connection");
+        let {host, user} = connection;
+        console.log('process.env.NODE_ENV: %s, host: %s, user: %s',
+            process.env.NODE_ENV,
+            host,
+            user);
+        await tryoutQueue();
+    });
+    */
 })();
 //# sourceMappingURL=index.js.map

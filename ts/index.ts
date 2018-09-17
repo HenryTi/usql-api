@@ -64,6 +64,9 @@ import { unitxRouter } from './unitx-server';
     });
 
     let port = config.get<number>('port');
+    console.log('port=', port);
+    console.log('redis:', config.get<any>('redis'));
+    /*
     app.listen(port, async ()=>{
         console.log('USQL-API listening on port ' + port);
         let connection = config.get<any>("connection");
@@ -74,4 +77,5 @@ import { unitxRouter } from './unitx-server';
             user);
         await tryoutQueue();
     });
+    */
 })();
