@@ -5,36 +5,39 @@ import { afterAction } from '../tv/afterAction';
 import { packReturn, pushToCenter } from '../core';
 import { packParam } from '../core/packParam';
 
-let unitxQueueName = 'unitx-in-queue';
-let redis = config.get<any>("redis");
-const unitxInQueue = bull(unitxQueueName, redis);
+let unitxInQueue:bull.Queue;
 
-unitxInQueue.isReady().then(q => {
-    console.log("queue: %s, redis: %s", unitxQueueName, JSON.stringify(redis));
-});
+export function startUnitxInQueue() {
+    let unitxQueueName = 'unitx-in-queue';
+    let redis = config.get<any>("redis");
+    unitxInQueue = bull(unitxQueueName, redis);
+    unitxInQueue.isReady().then(q => {
+        console.log("queue: %s, redis: %s", unitxQueueName, JSON.stringify(redis));
+    });
 
-unitxInQueue.process(async function(job, done) {
-    try {
-        let {data} = job;
-        console.log('accept message: ', data);
-        if (data !== undefined) {
-            let {$job, $unit} = data;
-            switch ($job) {
-                case 'sheetMsg':
-                    await processSheetMessage($unit, data);
-                    break;
-                //case 'sheetMsgDone':
-                //    await removeSheetMessage($unit, data);
-                //    break;
+    unitxInQueue.process(async function(job, done) {
+        try {
+            let {data} = job;
+            console.log('accept message: ', data);
+            if (data !== undefined) {
+                let {$job, $unit} = data;
+                switch ($job) {
+                    case 'sheetMsg':
+                        await processSheetMessage($unit, data);
+                        break;
+                    //case 'sheetMsgDone':
+                    //    await removeSheetMessage($unit, data);
+                    //    break;
+                }
             }
+            done();
         }
-        done();
-    }
-    catch(err) {
-        console.error(err);
-        done(new Error(err));
-    }
-});
+        catch(err) {
+            console.error(err);
+            done(new Error(err));
+        }
+    });
+}
 
 const $unitx = '$unitx';
 const usqlSheetMessage = 'sheetMessage';

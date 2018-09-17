@@ -13,36 +13,40 @@ const config = require("config");
 const runner_1 = require("../tv/runner");
 const afterAction_1 = require("../tv/afterAction");
 const packParam_1 = require("../core/packParam");
-let unitxQueueName = 'unitx-in-queue';
-let redis = config.get("redis");
-const unitxInQueue = bull(unitxQueueName, redis);
-unitxInQueue.isReady().then(q => {
-    console.log("queue: %s, redis: %s", unitxQueueName, JSON.stringify(redis));
-});
-unitxInQueue.process(function (job, done) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            let { data } = job;
-            console.log('accept message: ', data);
-            if (data !== undefined) {
-                let { $job, $unit } = data;
-                switch ($job) {
-                    case 'sheetMsg':
-                        yield processSheetMessage($unit, data);
-                        break;
-                    //case 'sheetMsgDone':
-                    //    await removeSheetMessage($unit, data);
-                    //    break;
-                }
-            }
-            done();
-        }
-        catch (err) {
-            console.error(err);
-            done(new Error(err));
-        }
+let unitxInQueue;
+function startUnitxInQueue() {
+    let unitxQueueName = 'unitx-in-queue';
+    let redis = config.get("redis");
+    unitxInQueue = bull(unitxQueueName, redis);
+    unitxInQueue.isReady().then(q => {
+        console.log("queue: %s, redis: %s", unitxQueueName, JSON.stringify(redis));
     });
-});
+    unitxInQueue.process(function (job, done) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let { data } = job;
+                console.log('accept message: ', data);
+                if (data !== undefined) {
+                    let { $job, $unit } = data;
+                    switch ($job) {
+                        case 'sheetMsg':
+                            yield processSheetMessage($unit, data);
+                            break;
+                        //case 'sheetMsgDone':
+                        //    await removeSheetMessage($unit, data);
+                        //    break;
+                    }
+                }
+                done();
+            }
+            catch (err) {
+                console.error(err);
+                done(new Error(err));
+            }
+        });
+    });
+}
+exports.startUnitxInQueue = startUnitxInQueue;
 const $unitx = '$unitx';
 const usqlSheetMessage = 'sheetMessage';
 const usqlSheetDoneMessage = 'sheetDoneMessage';

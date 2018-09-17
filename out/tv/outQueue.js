@@ -13,34 +13,38 @@ const config = require("config");
 const node_fetch_1 = require("node-fetch");
 const core_1 = require("../core");
 const unitxColl = {};
-const outQueueName = 'out-queue';
-let redis = config.get('redis');
-const outQueue = bull(outQueueName, redis);
-outQueue.on("error", (error) => {
-    console.log('queue server: ', error);
-});
-outQueue.process(function (job, done) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            let data = job.data;
-            if (data !== undefined) {
-                let { $job, $unit } = data;
-                switch ($job) {
-                    case 'sheetMsg':
-                        yield sheetToUnitx($unit, data);
-                        break;
-                    case 'bus':
-                        yield busToDest($unit, data);
-                        break;
-                }
-            }
-            done();
-        }
-        catch (e) {
-            console.error(e);
-        }
+let outQueue;
+function startOutQueue() {
+    const outQueueName = 'out-queue';
+    let redis = config.get('redis');
+    outQueue = bull(outQueueName, redis);
+    outQueue.on("error", (error) => {
+        console.log('queue server: ', error);
     });
-});
+    outQueue.process(function (job, done) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let data = job.data;
+                if (data !== undefined) {
+                    let { $job, $unit } = data;
+                    switch ($job) {
+                        case 'sheetMsg':
+                            yield sheetToUnitx($unit, data);
+                            break;
+                        case 'bus':
+                            yield busToDest($unit, data);
+                            break;
+                    }
+                }
+                done();
+            }
+            catch (e) {
+                console.error(e);
+            }
+        });
+    });
+}
+exports.startOutQueue = startOutQueue;
 function sheetToUnitx(unit, msg) {
     return __awaiter(this, void 0, void 0, function* () {
         //let {unit, busOwner, bus, face, data} = jobData;

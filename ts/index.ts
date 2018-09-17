@@ -2,10 +2,10 @@ import * as express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import tv, { tryoutQueue } from './tv';
+import tv, { startOutQueue } from './tv';
 //import {sendToBusRouter} from './tv/toUnitx';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
-import { unitxRouter } from './unitx-server';
+import { unitxRouter, startUnitxInQueue } from './unitx-server';
 
 (function() {
     let connection = config.get<any>("connection");
@@ -66,7 +66,10 @@ import { unitxRouter } from './unitx-server';
     let port = config.get<number>('port');
     console.log('port=', port);
     console.log('redis:', config.get<any>('redis'));
-    /*
+
+    //startOutQueue();
+    //startUnitxInQueue();
+
     app.listen(port, async ()=>{
         console.log('USQL-API listening on port ' + port);
         let connection = config.get<any>("connection");
@@ -75,7 +78,6 @@ import { unitxRouter } from './unitx-server';
             process.env.NODE_ENV,
             host,
             user);
-        await tryoutQueue();
+        //await tryoutQueue();
     });
-    */
 })();

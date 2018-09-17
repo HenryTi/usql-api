@@ -4,36 +4,39 @@ import fetch from 'node-fetch';
 import { centerApi, UnitxApi } from "../core";
 
 const unitxColl: {[id:number]: string} = {};
+let outQueue: bull.Queue;
 
-const outQueueName = 'out-queue';
-let redis = config.get<any>('redis');
+export function startOutQueue() {
+    const outQueueName = 'out-queue';
+    let redis = config.get<any>('redis');
 
-const outQueue = bull(outQueueName, redis);
+    outQueue = bull(outQueueName, redis);
 
-outQueue.on("error", (error: Error) => {
-    console.log('queue server: ', error);
-});
+    outQueue.on("error", (error: Error) => {
+        console.log('queue server: ', error);
+    });
 
-outQueue.process(async function(job, done) {
-    try {
-        let data = job.data;
-        if (data !== undefined) {
-            let {$job, $unit}  = data;
-            switch ($job) {
-                case 'sheetMsg':
-                    await sheetToUnitx($unit, data);
-                    break;
-                case 'bus':
-                    await busToDest($unit, data);
-                    break;
+    outQueue.process(async function(job, done) {
+        try {
+            let data = job.data;
+            if (data !== undefined) {
+                let {$job, $unit}  = data;
+                switch ($job) {
+                    case 'sheetMsg':
+                        await sheetToUnitx($unit, data);
+                        break;
+                    case 'bus':
+                        await busToDest($unit, data);
+                        break;
+                }
             }
+            done();
         }
-        done();
-    }
-    catch (e) {
-        console.error(e);
-    }
-});
+        catch (e) {
+            console.error(e);
+        }
+    });
+}
 
 async function sheetToUnitx(unit:number, msg:any): Promise<void> {
     //let {unit, busOwner, bus, face, data} = jobData;
