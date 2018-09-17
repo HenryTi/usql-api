@@ -66,7 +66,8 @@ import { unitxRouter, startUnitxInQueue } from './unitx-server';
     let port = config.get<number>('port');
     console.log('port=', port);
 
-    let redis = config.get<any>('redis');
+    let redisConfig = config.get<any>('redis');
+    let redis = {redis: redisConfig};
     console.log('redis:', redis);
 
     startOutQueue(redis);
