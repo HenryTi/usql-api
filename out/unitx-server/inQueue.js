@@ -15,6 +15,7 @@ const packParam_1 = require("../core/packParam");
 const unitxQueueName = 'unitx-in-queue';
 let unitxInQueue;
 function startUnitxInQueue(redis) {
+    console.log('start queue: ', unitxQueueName);
     unitxInQueue = bull(unitxQueueName, redis);
     unitxInQueue.isReady().then(q => {
         console.log("queue: %s, redis: %s", unitxQueueName, JSON.stringify(redis));

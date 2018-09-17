@@ -17,6 +17,7 @@ const outQueue_1 = require("./outQueue");
 const sheetQueueName = 'sheet-queue';
 let sheetQueue;
 function startSheetQueue(redis) {
+    console.log('start queue: ', sheetQueueName);
     sheetQueue = bull(sheetQueueName, redis);
     sheetQueue.isReady().then(q => {
         console.log("queue: %s, redis: %s", sheetQueueName, JSON.stringify(redis));

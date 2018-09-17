@@ -8,6 +8,7 @@ const outQueueName = 'out-queue';
 let outQueue: bull.Queue;
 
 export function startOutQueue(redis:any) {
+    console.log('start queue: ', outQueueName);
     outQueue = bull(outQueueName, redis);
 
     outQueue.on("error", (error: Error) => {
