@@ -257,7 +257,7 @@ router.post('/tuid/:name', async (req:Request, res:Response) => {
         }
         let result = await runner.tuidSave(name, unit, userId, params);
         let row = result[0];
-        id = row.id;
+        if (!id) id = row.id;
         if (id>0) {
             let {arrs} = schemaCall;
             if (arrs !== undefined) {
@@ -267,7 +267,7 @@ router.post('/tuid/:name', async (req:Request, res:Response) => {
                     let arrValues = body[arrName];
                     if (arrValues === undefined) continue;
                     for (let arrValue of arrValues) {
-                        let arrParams:any[] = [id, arrValue[arr.id.name]];
+                        let arrParams:any[] = [id, arrValue[arr.id], arrValue[arr.order]];
                         let len = fields.length;
                         for (let i=0;i<len;i++) {
                             arrParams.push(arrValue[fields[i].name]);
@@ -301,7 +301,7 @@ router.post('/tuid-arr/:name/:owner/:arr/', async (req:Request, res:Response) =>
         if (schemaArr === undefined) return;
         let body = (req as any).body;
         let id = body["$id"];
-        let params:any[] = [owner, id];
+        let params:any[] = [owner, id, body['$order']];
         let fields = schemaArr.fields;
         let len = fields.length;
         for (let i=0; i<len; i++) {
@@ -390,61 +390,6 @@ router.post('/tuids/:name', async (req:Request, res:Response) => {
     };
 });
 
-router.get('/tuid-bindSlaves/:name', async (req:Request, res:Response) => {
-    try {
-        let user:User = (req as any).user;
-        let db = user.db;
-        let {name} = req.params;
-        let {slave, masterId, pageStart, pageSize} = (req as any).query;
-        let runner = await checkRunner(db, res);
-        if (runner === undefined) return;
-        let schema = runner.getSchema(name);
-        if (schema === undefined) return unknownEntity(res, name);
-        let schemaCall = schema.call;
-        if (validEntity(res, schemaCall, 'tuid') === false) return;
-        let result = await runner.tuidBindSlaves(name, user.unit, user.id, slave, masterId, pageStart, pageSize);
-        res.json({
-            ok: true,
-            res: result,
-        });
-    }
-    catch(err) {
-        res.json({error: err});
-        return;
-    }
-});
-
-router.post('/tuid-bindSlave/:name/:slave', async (req:Request, res:Response) => {
-    try {
-        let user:User = (req as any).user;
-        let db = user.db;
-        let {name, slave} = req.params;
-        let body = (req as any).body;
-        let runner = await checkRunner(db, res);
-        if (runner === undefined) return;
-        let schema = runner.getSchema(slave);
-        if (schema === undefined) return unknownEntity(res, slave);
-        let schemaCall = schema.call;
-        if (validEntity(res, schemaCall, 'tuid') === false) return;
-        let {$master, $first, $id} = body;
-        let params:any[] = [$master, $first, $id];
-        let fields = schemaCall.fields;
-        let len = fields.length;
-        for (let i=0; i<len; i++) {
-            params.push(body[fields[i].name]);
-        }
-        let result = await runner.tuidBindSlaveSave(name, slave, user.unit, user.id, params);
-        let row = result[0];
-        res.json({
-            ok: true,
-            res: row,
-        });
-    }
-    catch(err) {
-        res.json({error: err});
-        return;
-    }
-});
 
 router.post('/action/:name', async (req:Request, res:Response) => {
     try {

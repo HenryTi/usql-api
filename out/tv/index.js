@@ -276,7 +276,8 @@ router.post('/tuid/:name', (req, res) => __awaiter(this, void 0, void 0, functio
         }
         let result = yield runner.tuidSave(name, unit, userId, params);
         let row = result[0];
-        id = row.id;
+        if (!id)
+            id = row.id;
         if (id > 0) {
             let { arrs } = schemaCall;
             if (arrs !== undefined) {
@@ -287,7 +288,7 @@ router.post('/tuid/:name', (req, res) => __awaiter(this, void 0, void 0, functio
                     if (arrValues === undefined)
                         continue;
                     for (let arrValue of arrValues) {
-                        let arrParams = [id, arrValue[arr.id.name]];
+                        let arrParams = [id, arrValue[arr.id], arrValue[arr.order]];
                         let len = fields.length;
                         for (let i = 0; i < len; i++) {
                             arrParams.push(arrValue[fields[i].name]);
@@ -323,7 +324,7 @@ router.post('/tuid-arr/:name/:owner/:arr/', (req, res) => __awaiter(this, void 0
             return;
         let body = req.body;
         let id = body["$id"];
-        let params = [owner, id];
+        let params = [owner, id, body['$order']];
         let fields = schemaArr.fields;
         let len = fields.length;
         for (let i = 0; i < len; i++) {
@@ -412,66 +413,6 @@ router.post('/tuids/:name', (req, res) => __awaiter(this, void 0, void 0, functi
         res.json({ error: err });
     }
     ;
-}));
-router.get('/tuid-bindSlaves/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
-    try {
-        let user = req.user;
-        let db = user.db;
-        let { name } = req.params;
-        let { slave, masterId, pageStart, pageSize } = req.query;
-        let runner = yield checkRunner(db, res);
-        if (runner === undefined)
-            return;
-        let schema = runner.getSchema(name);
-        if (schema === undefined)
-            return unknownEntity(res, name);
-        let schemaCall = schema.call;
-        if (validEntity(res, schemaCall, 'tuid') === false)
-            return;
-        let result = yield runner.tuidBindSlaves(name, user.unit, user.id, slave, masterId, pageStart, pageSize);
-        res.json({
-            ok: true,
-            res: result,
-        });
-    }
-    catch (err) {
-        res.json({ error: err });
-        return;
-    }
-}));
-router.post('/tuid-bindSlave/:name/:slave', (req, res) => __awaiter(this, void 0, void 0, function* () {
-    try {
-        let user = req.user;
-        let db = user.db;
-        let { name, slave } = req.params;
-        let body = req.body;
-        let runner = yield checkRunner(db, res);
-        if (runner === undefined)
-            return;
-        let schema = runner.getSchema(slave);
-        if (schema === undefined)
-            return unknownEntity(res, slave);
-        let schemaCall = schema.call;
-        if (validEntity(res, schemaCall, 'tuid') === false)
-            return;
-        let { $master, $first, $id } = body;
-        let params = [$master, $first, $id];
-        let fields = schemaCall.fields;
-        let len = fields.length;
-        for (let i = 0; i < len; i++) {
-            params.push(body[fields[i].name]);
-        }
-        let result = yield runner.tuidBindSlaveSave(name, slave, user.unit, user.id, params);
-        let row = result[0];
-        res.json({
-            ok: true,
-            res: row,
-        });
-    }
-    catch (err) {
-        res.json({ error: err });
-        return;
-    }
 }));
 router.post('/action/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
     try {

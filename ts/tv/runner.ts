@@ -29,7 +29,6 @@ export function createRunner(name:string) { //, dbName:string) {
     if (runner === null) return;
     if (runner !== undefined) return runner;
     let db = getDb(name);
-    db.setExists();
     return runners[name] = new Runner(db);
 }
 
@@ -147,12 +146,6 @@ export class Runner {
     async sheetSave(sheet:string, unit:number, user:number, app:number, discription:string, data:string): Promise<{}> {
         return await this.db.call('tv_$sheet_save', [unit, user, sheet, app, discription, data]);
     }
-    async tuidBindSlaveSave(tuid:string, slave:string, unit:number, user:number, params:any[]): Promise<any> {
-        return await this.db.call('tv_' + tuid + '_' + slave + '$save', [unit, user, ...params]);
-    }
-    async tuidBindSlaves(tuid:string, unit:number, user:number, slave:string, masterId:number, pageStart:number, pageSize:number): Promise<any> {
-        return await this.db.call('tv_' + tuid + '_' + slave + '$ids', [unit, user, masterId, pageStart, pageSize]);
-    }
     async sheetProcessing(sheetId:number):Promise<void> {
         await this.db.call('tv_$sheet_processing', [sheetId]);
     }
@@ -247,28 +240,6 @@ export class Runner {
                     break;
             }
         }
-        /*
-        for (let i in this.schemas) {
-            let schema = this.schemas[i];
-            let {call} = schema;
-            let {name, type} = call;
-            let tuids:any[] = [];
-            switch (type) {
-                default: continue;
-                case 'tuid': 
-                    //this.tuidSlaves(call);
-                    this.tuidRefTuids(call, tuids);
-                    break;
-                case 'action': this.actionRefTuids(call, tuids); break;
-                case 'sheet': this.sheetRefTuids(call, tuids); break;
-                case 'query': this.queryRefTuids(call, tuids); break;
-                case 'book': this.bookRefTuids(call, tuids); break;
-                case 'map': this.mapRefTuids(call, tuids); break;
-            }
-            if (tuids.length === 0) continue;
-            call.tuids = tuids;
-        }
-        */
 
         for (let i in this.schemas) {
             let schema = this.schemas[i];
@@ -292,7 +263,6 @@ export class Runner {
                     return ret.length > 0? ret : undefined;
                 }
                 else if (key !== '' && value === call) {
-                    // slave in tuid
                     circular = true;
                     return undefined;
                 }
@@ -308,32 +278,6 @@ export class Runner {
         this.buildAccesses();
     }
 
-    private tuidSlaves(schema: any) {
-        let {slaves} = schema;
-        if (slaves === undefined) return;
-        let ret = {} as any;
-        function getCall(s:string) {
-            let c = this.schemas[s];
-            if (c === undefined) return;
-            return c.call;
-        };
-        let call = getCall.bind(this);
-        for (let sn of slaves) {
-            let slaveBook = call(sn);
-            let {master, slave} = slaveBook;
-            ret[sn] = {
-                master: call(master),
-                slave: call(slave),
-                book: slaveBook,
-                page: call(sn+'$page$'),
-                pageSlave: call(sn+'$page$slave$'),
-                all: call(sn+'$all$'),
-                add: call(sn+'$add$'),
-                del: call(sn+'$del$'),
-            }
-        }
-        schema.slaves = ret;
-    }
     private mapBorn(schema:any) {
         function getCall(s:string) {
             let c = this.schemas[s];
@@ -370,68 +314,8 @@ export class Runner {
             this.fieldsTuids(arr.fields, tuids);
         }
     }
-    private returnsTuids(returns:any[], tuids:any[]) {
-        if (returns === undefined) return;
-        for (let ret of returns) {
-            this.fieldsTuids(ret.fields, tuids);
-        }
-    }
     private tuidsPush(tuids:any[], tuid:any) {
         if (tuids.find(v => v === tuid) === undefined) tuids.push(tuid);
-    }
-    // 建立tuid, action, sheet, query, book里面引用到的tuids
-    private tuidRefTuids(schema: any, tuids:any[]):void {
-        this.fieldsTuids(schema.fields, tuids);
-        /*
-        let {slaves} = schema;
-        if (slaves !== undefined) {
-            for (let i in slaves) {
-                let slaveBook = slaves[i];
-                this.slaveRefTuids(slaveBook, tuids);
-            }
-        }*/
-    }
-    private actionRefTuids(schema: any, tuids:any[]):void {
-        this.fieldsTuids(schema.fields, tuids);
-        this.arrsTuids(schema.arrs, tuids);
-        this.returnsTuids(schema.returns, tuids);
-    }
-    private sheetRefTuids(schema: any, tuids:any[]):void {
-        this.fieldsTuids(schema.fields, tuids);
-        this.arrsTuids(schema.arrs, tuids);
-        let {states} = schema;
-        if (states !== undefined) {
-            for (let state of states) {
-                let {actions} = state;
-                if (actions === undefined) continue;
-                for (let action of actions) {
-                    this.returnsTuids(action.returns, tuids);
-                }
-            }
-        }
-    }
-    private queryRefTuids(schema: any, tuids:any[]):void {
-        this.fieldsTuids(schema.fields, tuids);
-        this.returnsTuids(schema.returns, tuids);
-    }
-    private bookRefTuids(schema: any, tuids:any[]):void {
-        this.fieldsTuids(schema.fields, tuids);
-        this.returnsTuids(schema.returns, tuids);
-    }
-    private mapRefTuids(schema: any, tuids:any[]):void {
-        let {fields, returns, master, slave, book, page, pageSlave, all, add, del} = schema;
-        this.fieldsTuids(fields, tuids);
-        this.returnsTuids(returns, tuids);
-        /*
-        this.tuidsPush(tuids, master);
-        this.tuidsPush(tuids, slave);
-        //book: slaveBook,
-        this.queryRefTuids(page, tuids);
-        this.queryRefTuids(pageSlave, tuids);
-        this.queryRefTuids(all, tuids);
-        this.actionRefTuids(add, tuids);
-        this.actionRefTuids(del, tuids);
-    */
     }
 
     private buildAccesses() {
@@ -469,76 +353,11 @@ export class Runner {
                         ops: ops.split('+')
                     };
 
-                /*
-                let len = item.length;
-                let i0 = item[0], i1, li1, a2, a3;
-                let li0 = i0.toLowerCase();
-                let schema = this.schemas[li0];
-                if (schema === undefined) continue;
-                let entity = schema.call;
-                if (entity === undefined) continue;
-                let {type, typeId} = entity;
-                switch (len) {
-                    case 1:
-                        acc[li0] = type + '|' + typeId; // + this.tuidProxies(entity);
-                        //if (type === 'tuid') this.addSlavesAccess(acc, entity);
-                        break;
-                    case 2:
-                        a2 = acc[li0];
-                        if (a2 === undefined) {
-                            a2 = acc[li0] = {'$': type, id: typeId};
-                        }
-                        else if (typeof a2 !== 'object') {
-                            a2 = acc[li0] = {'$': type, '#': true, id: typeId};
-                        }
-                        i1 = item[1];
-                        li1 = i1.toLowerCase();
-                        a2[li1] = true;
-                        break;
-                    case 3:
-                        a2 = acc[li0];
-                        if (a2 === undefined) {
-                            a2 = acc[li0] = {'$': type, id: typeId};
-                        }
-                        else if (typeof a2 !== 'object') {
-                            a2 = acc[li0] = {'$': type, '#': true, id: typeId};
-                        }
-                        i1 = item[1];
-                        li1 = i1.toLowerCase();
-                        a3 = a2[li1];
-                        if (a3 === undefined) {
-                            a3 = a2[li1] = {};
-                        }
-                        else if (a3 === true) {
-                            a3 = a2[li1] = {'#': true};
-                        }
-                        a3[item[2].toLowerCase] = true;
-                    break;
-                }
-                */
             }
         }
         console.log('access: ', this.access);
     }
 
-    private addEntityAccess(acc:any, entity:any) {
-        if (!entity) return;
-        let {name, type, id} = entity;
-        acc[name.toLowerCase()] = type + '|' + id; // + this.tuidProxies(entity);
-    } 
-    /*
-    private tuidProxies(tuid:any) {
-        let ret = '';
-        if (tuid === undefined) return ret;
-        if (tuid.type !== 'tuid') return ret;
-        let proxies = tuid.proxies;
-        if (proxies === undefined) return ret;
-        for (let i in proxies) {
-            ret += '|' + i;
-        }
-        return ret;
-    }
-    */
     async getAccesses(acc:string[]):Promise<any> {
         let reload:number = await this.getSetting(0, 'reloadSchemas');
 

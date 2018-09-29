@@ -25,12 +25,11 @@ class Db {
         this.dbName = dbName;
         this.isExists = false;
     }
-    setExists() { this.isExists = true; }
     exists() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.isExists === true)
                 return true;
-            return yield dbServer.existsDatabase(this.dbName);
+            return this.isExists = yield dbServer.existsDatabase(this.dbName);
         });
     }
     sql(sql, params) {

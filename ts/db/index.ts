@@ -21,10 +21,9 @@ export class Db {
         this.dbName = dbName;
         this.isExists = false;
     }
-    setExists() {this.isExists = true;}
     async exists(): Promise<boolean> {
         if (this.isExists === true) return true;
-        return await dbServer.existsDatabase(this.dbName);
+        return this.isExists = await dbServer.existsDatabase(this.dbName);
     }
     async sql(sql:string, params:any[]): Promise<any> {
         return await dbServer.sql(this.dbName, sql, params);
