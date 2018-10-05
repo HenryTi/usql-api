@@ -187,9 +187,9 @@ class Runner {
             return yield this.db.call('tv_$sheet_save', [unit, user, sheet, app, discription, data]);
         });
     }
-    sheetTo(unit, sheetId, toArr) {
+    sheetTo(unit, user, sheetId, toArr) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.call('tv_$sheet_to', [unit, sheetId, toArr.join(',')]);
+            yield this.db.call('tv_$sheet_to', [unit, user, sheetId, toArr.join(',')]);
         });
     }
     sheetProcessing(sheetId) {

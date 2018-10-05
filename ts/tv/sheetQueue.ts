@@ -72,6 +72,7 @@ async function sheetAct(jobData:any):Promise<void> {
             await addOutQueue(_.merge({
                 $job: 'sheetMsg',
                 $unit: unit,
+                $db: db,
             }, sheetRet));
         }
     

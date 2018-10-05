@@ -80,6 +80,7 @@ function sheetAct(jobData) {
                 yield outQueue_1.addOutQueue(_.merge({
                     $job: 'sheetMsg',
                     $unit: unit,
+                    $db: db,
                 }, sheetRet));
             }
             let hasMessage, busFaces;

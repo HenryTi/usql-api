@@ -610,6 +610,7 @@ router.post('/sheet/:name', (req, res) => __awaiter(this, void 0, void 0, functi
             yield outQueue_1.addOutQueue(_.merge({
                 $job: 'sheetMsg',
                 $unit: unit,
+                $db: db,
             }, sheetRet));
         }
         res.json({

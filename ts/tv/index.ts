@@ -571,6 +571,7 @@ router.post('/sheet/:name', async (req:Request, res:Response) => {
             await addOutQueue(_.merge({
                 $job: 'sheetMsg',
                 $unit: unit,
+                $db: db,
             }, sheetRet));
         }
         res.json({

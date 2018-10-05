@@ -15,7 +15,6 @@ const centerApi_1 = require("../core/centerApi");
 const runner_1 = require("./runner");
 const unitxColl = {};
 const outQueueName = 'out-queue';
-const $unitx = '$unitx';
 let outQueue;
 function startOutQueue(redis) {
     outQueue = bull(outQueueName, redis);
@@ -30,10 +29,10 @@ function startOutQueue(redis) {
             try {
                 let data = job.data;
                 if (data !== undefined) {
-                    let { $job, $unit } = data;
+                    let { $job, $unit, $db } = data;
                     switch ($job) {
                         case 'sheetMsg':
-                            yield sheetToUnitx($unit, data);
+                            yield sheetToUnitx($unit, $db, data);
                             break;
                         case 'bus':
                             yield busToDest($unit, data);
@@ -50,7 +49,7 @@ function startOutQueue(redis) {
     });
 }
 exports.startOutQueue = startOutQueue;
-function sheetToUnitx(unit, msg) {
+function sheetToUnitx(unit, db, msg) {
     return __awaiter(this, void 0, void 0, function* () {
         let unitxUrl = yield getUnitxUrl(unit);
         if (unitxUrl === null) {
@@ -59,11 +58,14 @@ function sheetToUnitx(unit, msg) {
         }
         let unitx = new core_1.UnitxApi(unitxUrl);
         let tos = yield unitx.send(msg);
-        let runner = yield runner_1.getRunner($unitx);
-        let sheetId = 0;
-        if (tos !== undefined && tos.length > 0) {
-            let toArr = tos.map(v => v.toUser);
-            yield runner.sheetTo(unit, sheetId, toArr);
+        let runner = yield runner_1.getRunner(db);
+        if (runner !== undefined) {
+            let sheetId = msg.id;
+            let user = undefined;
+            if (tos !== undefined && tos.length > 0) {
+                let toArr = tos.map(v => v.toUser);
+                yield runner.sheetTo(unit, user, sheetId, toArr);
+            }
         }
         console.log('sheet to unitx', msg);
     });

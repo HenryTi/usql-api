@@ -7,7 +7,6 @@ import { getRunner } from './runner';
 
 const unitxColl: {[id:number]: string} = {};
 const outQueueName = 'out-queue';
-const $unitx = '$unitx';
 let outQueue: bull.Queue;
 
 export function startOutQueue(redis:any) {
@@ -23,10 +22,10 @@ export function startOutQueue(redis:any) {
         try {
             let data = job.data;
             if (data !== undefined) {
-                let {$job, $unit}  = data;
+                let {$job, $unit, $db}  = data;
                 switch ($job) {
                     case 'sheetMsg':
-                        await sheetToUnitx($unit, data);
+                        await sheetToUnitx($unit, $db, data);
                         break;
                     case 'bus':
                         await busToDest($unit, data);
@@ -42,7 +41,7 @@ export function startOutQueue(redis:any) {
     });
 }
 
-async function sheetToUnitx(unit:number, msg:any): Promise<void> {
+async function sheetToUnitx(unit:number, db:string, msg:any): Promise<void> {
     let unitxUrl = await getUnitxUrl(unit);
     if (unitxUrl === null) {
         console.log('unit %s not have unitx', unit);
@@ -50,11 +49,14 @@ async function sheetToUnitx(unit:number, msg:any): Promise<void> {
     }
     let unitx = new UnitxApi(unitxUrl);
     let tos:{toUser:number}[] = await unitx.send(msg);
-    let runner = await getRunner($unitx);
-    let sheetId:number = 0;
-    if (tos !== undefined && tos.length > 0) {
-        let toArr:number[] = tos.map(v => v.toUser);
-        await runner.sheetTo(unit, sheetId, toArr);
+    let runner = await getRunner(db);
+    if (runner !== undefined) {
+        let sheetId:number = msg.id;
+        let user:number = undefined;
+        if (tos !== undefined && tos.length > 0) {
+            let toArr:number[] = tos.map(v => v.toUser);
+            await runner.sheetTo(unit, user, sheetId, toArr);
+        }
     }
     console.log('sheet to unitx', msg);
 }
