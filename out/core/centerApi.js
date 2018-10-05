@@ -10,7 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_fetch_1 = require("node-fetch");
 const config = require("config");
-const centerUrl = config.get('center');
+const centerHost = config.get('centerhost');
+const centerUrl = urlSetCenterHost(config.get('center'));
+function urlSetCenterHost(url) {
+    return url.replace('//centerhost:', '//' + centerHost + ':');
+}
+exports.urlSetCenterHost = urlSetCenterHost;
 class Fetch {
     constructor(baseUrl) {
         this.baseUrl = baseUrl;
@@ -110,7 +115,8 @@ exports.centerApi = new CenterApi();
 class UnitxApi extends Fetch {
     send(jobData) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.post('unitx', jobData);
+            let ret = yield this.post('unitx', jobData);
+            return ret;
         });
     }
 }

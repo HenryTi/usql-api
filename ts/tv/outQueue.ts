@@ -2,9 +2,12 @@ import * as bull from 'bull';
 import * as config from 'config';
 import fetch from 'node-fetch';
 import { centerApi, UnitxApi } from "../core";
+import { urlSetCenterHost } from '../core/centerApi';
+import { getRunner } from './runner';
 
 const unitxColl: {[id:number]: string} = {};
 const outQueueName = 'out-queue';
+const $unitx = '$unitx';
 let outQueue: bull.Queue;
 
 export function startOutQueue(redis:any) {
@@ -34,19 +37,25 @@ export function startOutQueue(redis:any) {
         }
         catch (e) {
             console.error(e);
+            done();
         }
     });
 }
 
 async function sheetToUnitx(unit:number, msg:any): Promise<void> {
-    //let {unit, busOwner, bus, face, data} = jobData;
     let unitxUrl = await getUnitxUrl(unit);
     if (unitxUrl === null) {
         console.log('unit %s not have unitx', unit);
         return;
     }
     let unitx = new UnitxApi(unitxUrl);
-    await unitx.send(msg);
+    let tos:{toUser:number}[] = await unitx.send(msg);
+    let runner = await getRunner($unitx);
+    let sheetId:number = 0;
+    if (tos !== undefined && tos.length > 0) {
+        let toArr:number[] = tos.map(v => v.toUser);
+        await runner.sheetTo(unit, sheetId, toArr);
+    }
     console.log('sheet to unitx', msg);
 }
 
@@ -58,6 +67,7 @@ async function getUnitxUrl(unit:number):Promise<string> {
     let {url, urlDebug} = unitx;
     if (urlDebug !== undefined) {
         try {
+            urlDebug = urlSetCenterHost(urlDebug);
             let ret = await fetch(urlDebug + 'hello');
             if (ret.status !== 200) throw 'not ok';
             let text = await ret.text();
@@ -85,8 +95,8 @@ async function busToDest(unit:number, msg:UnitxMessage):Promise<void> {
         let ret = await centerApi.unitxBuses(unit, busOwner, bus, face);
         for (let service of ret) {
             let {url} = service;
-            let usqlApi = new UnitxApi(url);
-            await usqlApi.send(msg);
+            let unitx = new UnitxApi(url);
+            await unitx.send(msg);
             console.log('bus to ', url, msg);
         }
     }

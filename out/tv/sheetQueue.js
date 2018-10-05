@@ -98,12 +98,7 @@ function sheetAct(jobData) {
                 $user: user,
                 $unit: unit,
             }, sheetRet);
-            //let ar = actionReturn;
-            //if (ar !== undefined) {
-            //    for (let i in ar) msg[i] = ar[i];
-            //}
             yield core_1.pushToCenter(db, msg);
-            //await sheetDoneMessage(unit, id);
         }
         catch (err) {
             console.log('sheet Act error: ', err);
@@ -111,15 +106,6 @@ function sheetAct(jobData) {
         ;
     });
 }
-/*
-async function sheetDoneMessage(unit:number, sheetId:number) {
-    await addOutQueue({
-        $job: 'sheetMsgDone',
-        $unit: unit,
-        sheet: sheetId,
-    });
-}
-*/
 function addSheetQueue(msg) {
     return __awaiter(this, void 0, void 0, function* () {
         return yield sheetQueue.add(msg);

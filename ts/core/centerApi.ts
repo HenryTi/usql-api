@@ -1,11 +1,17 @@
 import fetch, {Headers} from 'node-fetch';
 import * as config from 'config';
 
-const centerUrl = config.get<string>('center');
+const centerHost = config.get<string>('centerhost');
+const centerUrl = urlSetCenterHost(config.get<string>('center'));
+
+export function urlSetCenterHost(url:string):string {
+    return url.replace('//centerhost:', '//'+centerHost+':');
+}
 
 abstract class Fetch {
     private baseUrl:string;
     constructor(baseUrl:string) {
+
         this.baseUrl = baseUrl;
     }
     protected async get(url: string, params: any = undefined): Promise<any> {
@@ -98,7 +104,8 @@ class CenterApi extends Fetch {
 export const centerApi = new CenterApi();
 
 export class UnitxApi extends Fetch {
-    async send(jobData: {$unit:number, bus:string, face:string, data:any}):Promise<void> {
-        await this.post('unitx', jobData);
+    async send(jobData: {$unit:number, bus:string, face:string, data:any}):Promise<any> {
+        let ret = await this.post('unitx', jobData);
+        return ret;
     }
 }

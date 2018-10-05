@@ -90,26 +90,13 @@ async function sheetAct(jobData:any):Promise<void> {
             $user: user,
             $unit: unit,
         }, sheetRet);
-        //let ar = actionReturn;
-        //if (ar !== undefined) {
-        //    for (let i in ar) msg[i] = ar[i];
-        //}
         await pushToCenter(db, msg);
-        //await sheetDoneMessage(unit, id);
     }
     catch(err) {
         console.log('sheet Act error: ', err);
     };
 }
-/*
-async function sheetDoneMessage(unit:number, sheetId:number) {
-    await addOutQueue({
-        $job: 'sheetMsgDone',
-        $unit: unit,
-        sheet: sheetId,
-    });
-}
-*/
+
 export async function addSheetQueue(msg:any):Promise<bull.Job> {
     return await sheetQueue.add(msg);
 }

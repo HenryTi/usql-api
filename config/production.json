@@ -1,5 +1,5 @@
 {
-    "center": "http://101.200.46.56/tv/",
+    "centerhost": "101.200.46.56",
     "connection": {
         "host": "101.200.46.56",
         "user": "root",

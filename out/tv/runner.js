@@ -187,6 +187,11 @@ class Runner {
             return yield this.db.call('tv_$sheet_save', [unit, user, sheet, app, discription, data]);
         });
     }
+    sheetTo(unit, sheetId, toArr) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.call('tv_$sheet_to', [unit, sheetId, toArr.join(',')]);
+        });
+    }
     sheetProcessing(sheetId) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.db.call('tv_$sheet_processing', [sheetId]);

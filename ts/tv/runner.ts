@@ -146,6 +146,9 @@ export class Runner {
     async sheetSave(sheet:string, unit:number, user:number, app:number, discription:string, data:string): Promise<{}> {
         return await this.db.call('tv_$sheet_save', [unit, user, sheet, app, discription, data]);
     }
+    async sheetTo(unit:number, sheetId:number, toArr:number[]) {
+        await this.db.call('tv_$sheet_to', [unit, sheetId, toArr.join(',')]);
+    }
     async sheetProcessing(sheetId:number):Promise<void> {
         await this.db.call('tv_$sheet_processing', [sheetId]);
     }

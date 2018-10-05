@@ -11,8 +11,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const bull = require("bull");
 const node_fetch_1 = require("node-fetch");
 const core_1 = require("../core");
+const centerApi_1 = require("../core/centerApi");
+const runner_1 = require("./runner");
 const unitxColl = {};
 const outQueueName = 'out-queue';
+const $unitx = '$unitx';
 let outQueue;
 function startOutQueue(redis) {
     outQueue = bull(outQueueName, redis);
@@ -41,6 +44,7 @@ function startOutQueue(redis) {
             }
             catch (e) {
                 console.error(e);
+                done();
             }
         });
     });
@@ -48,14 +52,19 @@ function startOutQueue(redis) {
 exports.startOutQueue = startOutQueue;
 function sheetToUnitx(unit, msg) {
     return __awaiter(this, void 0, void 0, function* () {
-        //let {unit, busOwner, bus, face, data} = jobData;
         let unitxUrl = yield getUnitxUrl(unit);
         if (unitxUrl === null) {
             console.log('unit %s not have unitx', unit);
             return;
         }
         let unitx = new core_1.UnitxApi(unitxUrl);
-        yield unitx.send(msg);
+        let tos = yield unitx.send(msg);
+        let runner = yield runner_1.getRunner($unitx);
+        let sheetId = 0;
+        if (tos !== undefined && tos.length > 0) {
+            let toArr = tos.map(v => v.toUser);
+            yield runner.sheetTo(unit, sheetId, toArr);
+        }
         console.log('sheet to unitx', msg);
     });
 }
@@ -70,6 +79,7 @@ function getUnitxUrl(unit) {
         let { url, urlDebug } = unitx;
         if (urlDebug !== undefined) {
             try {
+                urlDebug = centerApi_1.urlSetCenterHost(urlDebug);
                 let ret = yield node_fetch_1.default(urlDebug + 'hello');
                 if (ret.status !== 200)
                     throw 'not ok';
@@ -89,8 +99,8 @@ function busToDest(unit, msg) {
             let ret = yield core_1.centerApi.unitxBuses(unit, busOwner, bus, face);
             for (let service of ret) {
                 let { url } = service;
-                let usqlApi = new core_1.UnitxApi(url);
-                yield usqlApi.send(msg);
+                let unitx = new core_1.UnitxApi(url);
+                yield unitx.send(msg);
                 console.log('bus to ', url, msg);
             }
         }
