@@ -13,7 +13,7 @@ const config = require("config");
 const centerHost = config.get('centerhost');
 const centerUrl = urlSetCenterHost(config.get('center'));
 function urlSetCenterHost(url) {
-    return url.replace('//centerhost:', '//' + centerHost + ':');
+    return url.replace('://centerhost/', '://' + centerHost + '/');
 }
 exports.urlSetCenterHost = urlSetCenterHost;
 class Fetch {

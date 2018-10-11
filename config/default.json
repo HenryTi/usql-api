@@ -1,6 +1,6 @@
 {
-    "centerhost": "localhost",
-    "center": "http://centerhost:3000/tv/",
+    "centerhost": "localhost:3000",
+    "center": "http://centerhost/tv/",
     "port": 3015,
     "debugUser": -99,
     "debugUnit": -99,

@@ -5,7 +5,7 @@ const centerHost = config.get<string>('centerhost');
 const centerUrl = urlSetCenterHost(config.get<string>('center'));
 
 export function urlSetCenterHost(url:string):string {
-    return url.replace('//centerhost:', '//'+centerHost+':');
+    return url.replace('://centerhost/', '://'+centerHost+'/');
 }
 
 abstract class Fetch {
