@@ -3,6 +3,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const timezoneOffset = new Date().getTimezoneOffset() * 60000;
 const tab = '\t';
 const ln = '\n';
+function packParam(schema, data) {
+    let { fields, arrs } = schema;
+    let ret = [];
+    if (fields !== undefined)
+        packRow(ret, fields, data);
+    if (arrs !== undefined) {
+        for (let arr of arrs) {
+            let arrFields = arr.fields;
+            packArr(ret, arrFields, data[arr.name]);
+        }
+    }
+    return ret.join('');
+}
+exports.packParam = packParam;
 function packReturn(schema, data) {
     let ret = [];
     if (schema === undefined || data === undefined)

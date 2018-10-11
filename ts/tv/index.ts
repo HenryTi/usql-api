@@ -6,6 +6,7 @@ import {addSheetQueue} from './sheetQueue';
 import {afterAction} from './afterAction';
 import {apiErrors} from './apiErrors';
 import { addOutQueue } from './outQueue';
+import { packParam } from '../core/packReturn';
 
 interface User {
     db: string;
@@ -258,6 +259,7 @@ router.post('/tuid/:name', async (req:Request, res:Response) => {
         let result = await runner.tuidSave(name, unit, userId, params);
         let row = result[0];
         if (!id) id = row.id;
+        if (id < 0) id = -id;
         if (id>0) {
             let {arrs} = schemaCall;
             if (arrs !== undefined) {
@@ -267,7 +269,8 @@ router.post('/tuid/:name', async (req:Request, res:Response) => {
                     let arrValues = body[arrName];
                     if (arrValues === undefined) continue;
                     for (let arrValue of arrValues) {
-                        let arrParams:any[] = [id, arrValue[arr.id], arrValue[arr.order]];
+                        //let arrParams:any[] = [id, arrValue[arr.id], arrValue[arr.order]];
+                        let arrParams:any[] = [id, arrValue[arr.id]];
                         let len = fields.length;
                         for (let i=0;i<len;i++) {
                             arrParams.push(arrValue[fields[i].name]);
@@ -400,9 +403,11 @@ router.post('/action/:name', async (req:Request, res:Response) => {
         let {data} = body;
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
-        let result = await runner.action(name, unit, id, data);
         let schema = runner.getSchema(name);
-        let returns = schema.call.returns;
+        let {call} = schema;
+        if (data === undefined) data = packParam(call, body);
+        let result = await runner.action(name, unit, id, data);
+        let returns = call.returns;
         let {hasSend, busFaces} = schema.run;
         let actionReturn = await afterAction(db, runner, unit, returns, hasSend, busFaces, result);
         res.json({

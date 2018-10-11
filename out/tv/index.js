@@ -19,6 +19,7 @@ const sheetQueue_1 = require("./sheetQueue");
 const afterAction_1 = require("./afterAction");
 const apiErrors_1 = require("./apiErrors");
 const outQueue_1 = require("./outQueue");
+const packReturn_1 = require("../core/packReturn");
 ;
 const router = express_1.Router();
 function checkRunner(db, res) {
@@ -278,6 +279,8 @@ router.post('/tuid/:name', (req, res) => __awaiter(this, void 0, void 0, functio
         let row = result[0];
         if (!id)
             id = row.id;
+        if (id < 0)
+            id = -id;
         if (id > 0) {
             let { arrs } = schemaCall;
             if (arrs !== undefined) {
@@ -288,7 +291,8 @@ router.post('/tuid/:name', (req, res) => __awaiter(this, void 0, void 0, functio
                     if (arrValues === undefined)
                         continue;
                     for (let arrValue of arrValues) {
-                        let arrParams = [id, arrValue[arr.id], arrValue[arr.order]];
+                        //let arrParams:any[] = [id, arrValue[arr.id], arrValue[arr.order]];
+                        let arrParams = [id, arrValue[arr.id]];
                         let len = fields.length;
                         for (let i = 0; i < len; i++) {
                             arrParams.push(arrValue[fields[i].name]);
@@ -424,9 +428,12 @@ router.post('/action/:name', (req, res) => __awaiter(this, void 0, void 0, funct
         let runner = yield checkRunner(db, res);
         if (runner === undefined)
             return;
-        let result = yield runner.action(name, unit, id, data);
         let schema = runner.getSchema(name);
-        let returns = schema.call.returns;
+        let { call } = schema;
+        if (data === undefined)
+            data = packReturn_1.packParam(call, body);
+        let result = yield runner.action(name, unit, id, data);
+        let returns = call.returns;
         let { hasSend, busFaces } = schema.run;
         let actionReturn = yield afterAction_1.afterAction(db, runner, unit, returns, hasSend, busFaces, result);
         res.json({

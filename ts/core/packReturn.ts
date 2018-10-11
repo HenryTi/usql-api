@@ -9,6 +9,19 @@ interface Arr {
 const timezoneOffset = new Date().getTimezoneOffset()*60000;
 const tab = '\t';
 const ln = '\n';
+export function packParam(schema:any, data:any):string {
+    let {fields, arrs} = schema;
+    let ret:string[] = [];
+    if (fields !== undefined) packRow(ret, fields, data);
+    if (arrs !== undefined) {
+        for (let arr of arrs) {
+            let arrFields = arr.fields;
+            packArr(ret, arrFields, data[arr.name]);
+        }
+    }
+    return ret.join('');
+}
+
 export function packReturn(schema:any, data:any):string {
     let ret:string[] = [];
     if (schema === undefined || data === undefined) return;
