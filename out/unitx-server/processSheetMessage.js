@@ -22,15 +22,14 @@ function processSheetMessage(unit, sheetMessage) {
         let sheetName = name;
         let stateName = state;
         let paramsGetSheetTo = [usq, sheetName, stateName];
-        let sheetTo = yield runner.query(usqlGetSheetTo, unit, user, paramsGetSheetTo);
-        let toUsers = sheetTo.map(v => {
-            return { toUser: v.to };
+        let tos = yield runner.query(usqlGetSheetTo, unit, user, paramsGetSheetTo);
+        /*
+        let toUsers:{toUser:number}[] = sheetTo.map(v => {
+            return {toUser: v.to}
         });
-        if (toUsers.length === 0)
-            toUsers = [
-                { toUser: user }
-            ];
-        //let toUsers = await getToUsers(user); 
+        */
+        if (tos.length === 0)
+            tos.push({ to: user });
         let data = {
             //type: 'sheetMsg',
             subject: discription,
@@ -42,7 +41,7 @@ function processSheetMessage(unit, sheetMessage) {
             usq: usq,
             sheet: sheet,
             state: state,
-            to: toUsers,
+            to: tos,
         };
         let toUser = 1;
         let schema = runner.getSchema(usqlSheetMessage);
@@ -52,7 +51,7 @@ function processSheetMessage(unit, sheetMessage) {
         let { hasSend, busFaces } = schema.run;
         let actionReturn = yield afterAction_1.afterAction($unitx, runner, unit, returns, hasSend, busFaces, result);
         console.log('save sheet message ', data);
-        return toUsers;
+        return tos;
     });
 }
 exports.processSheetMessage = processSheetMessage;

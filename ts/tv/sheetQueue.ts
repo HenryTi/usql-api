@@ -9,6 +9,10 @@ import { addOutQueue } from './outQueue';
 const sheetQueueName = 'sheet-queue';
 let sheetQueue:bull.Queue;
 
+export async function addSheetQueue(msg:any):Promise<bull.Job> {
+    return await sheetQueue.add(msg);
+}
+
 export function startSheetQueue(redis:any) {
     sheetQueue = bull(sheetQueueName, redis);
     sheetQueue.isReady().then(q => {
@@ -21,13 +25,13 @@ export function startSheetQueue(redis:any) {
     sheetQueue.process(async function(job, done) {
         let {data} = job;
         if (data !== undefined) {
-            await sheetAct(data);
+            await sheetQueueAct(data);
         } 
         done();
     });
 }
 
-async function sheetAct(jobData:any):Promise<void> {
+async function sheetQueueAct(jobData:any):Promise<void> {
     let {db, sheet, state, action, unit, user, id, flow} = jobData;
     let runner = await getRunner(db);
     if (runner === undefined) {
@@ -36,7 +40,7 @@ async function sheetAct(jobData:any):Promise<void> {
     }
     try {
         let result = await runner.sheetAct(sheet, state, action, unit, user, id, flow);
-        let schema = await runner.getSchema(sheet);
+        let schema = runner.getSchema(sheet);
         if (schema === undefined) {
             console.error('job queue sheet action error: schema %s is unknow', sheet);
             return;
@@ -96,8 +100,4 @@ async function sheetAct(jobData:any):Promise<void> {
     catch(err) {
         console.log('sheet Act error: ', err);
     };
-}
-
-export async function addSheetQueue(msg:any):Promise<bull.Job> {
-    return await sheetQueue.add(msg);
 }

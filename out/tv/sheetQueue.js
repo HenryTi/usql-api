@@ -16,6 +16,12 @@ const afterAction_1 = require("./afterAction");
 const outQueue_1 = require("./outQueue");
 const sheetQueueName = 'sheet-queue';
 let sheetQueue;
+function addSheetQueue(msg) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield sheetQueue.add(msg);
+    });
+}
+exports.addSheetQueue = addSheetQueue;
 function startSheetQueue(redis) {
     sheetQueue = bull(sheetQueueName, redis);
     sheetQueue.isReady().then(q => {
@@ -28,14 +34,14 @@ function startSheetQueue(redis) {
         return __awaiter(this, void 0, void 0, function* () {
             let { data } = job;
             if (data !== undefined) {
-                yield sheetAct(data);
+                yield sheetQueueAct(data);
             }
             done();
         });
     });
 }
 exports.startSheetQueue = startSheetQueue;
-function sheetAct(jobData) {
+function sheetQueueAct(jobData) {
     return __awaiter(this, void 0, void 0, function* () {
         let { db, sheet, state, action, unit, user, id, flow } = jobData;
         let runner = yield runner_1.getRunner(db);
@@ -45,7 +51,7 @@ function sheetAct(jobData) {
         }
         try {
             let result = yield runner.sheetAct(sheet, state, action, unit, user, id, flow);
-            let schema = yield runner.getSchema(sheet);
+            let schema = runner.getSchema(sheet);
             if (schema === undefined) {
                 console.error('job queue sheet action error: schema %s is unknow', sheet);
                 return;
@@ -107,10 +113,4 @@ function sheetAct(jobData) {
         ;
     });
 }
-function addSheetQueue(msg) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return yield sheetQueue.add(msg);
-    });
-}
-exports.addSheetQueue = addSheetQueue;
 //# sourceMappingURL=sheetQueue.js.map

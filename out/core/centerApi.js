@@ -15,7 +15,11 @@ const centerUrl = urlSetCenterHost(config.get('center'));
 function urlSetCenterHost(url) {
     return url.replace('://centerhost/', '://' + centerHost + '/');
 }
-exports.urlSetCenterHost = urlSetCenterHost;
+const unitxHost = config.get('unitxhost');
+function urlSetUnitxHost(url) {
+    return url.replace('://unitxhost/', '://' + unitxHost + '/');
+}
+exports.urlSetUnitxHost = urlSetUnitxHost;
 class Fetch {
     constructor(baseUrl) {
         this.baseUrl = baseUrl;

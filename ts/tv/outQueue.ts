@@ -2,7 +2,7 @@ import * as bull from 'bull';
 import * as config from 'config';
 import fetch from 'node-fetch';
 import { centerApi, UnitxApi } from "../core";
-import { urlSetCenterHost } from '../core/centerApi';
+import { urlSetUnitxHost } from '../core/centerApi';
 import { getRunner } from './runner';
 
 const unitxColl: {[id:number]: string} = {};
@@ -48,13 +48,13 @@ async function sheetToUnitx(unit:number, db:string, msg:any): Promise<void> {
         return;
     }
     let unitx = new UnitxApi(unitxUrl);
-    let tos:{toUser:number}[] = await unitx.send(msg);
+    let tos:{to:number}[] = await unitx.send(msg);
     let runner = await getRunner(db);
     if (runner !== undefined) {
         let sheetId:number = msg.id;
         let user:number = undefined;
         if (tos !== undefined && tos.length > 0) {
-            let toArr:number[] = tos.map(v => v.toUser);
+            let toArr:number[] = tos.map(v => v.to);
             await runner.sheetTo(unit, user, sheetId, toArr);
         }
     }
@@ -69,7 +69,7 @@ async function getUnitxUrl(unit:number):Promise<string> {
     let {url, urlDebug} = unitx;
     if (urlDebug !== undefined) {
         try {
-            urlDebug = urlSetCenterHost(urlDebug);
+            urlDebug = urlSetUnitxHost(urlDebug);
             let ret = await fetch(urlDebug + 'hello');
             if (ret.status !== 200) throw 'not ok';
             let text = await ret.text();

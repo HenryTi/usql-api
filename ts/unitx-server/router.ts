@@ -16,7 +16,7 @@ unitxRouter.post('/', async (req: Request, res: Response, next: NextFunction) =>
         //(msg as any).job = 'unitx';
         let {$job, $unit} = msg;
         if ($job === 'sheetMsg') {
-            let tos:{toUser:number}[] = await processSheetMessage($unit, msg);
+            let tos:{to:number}[] = await processSheetMessage($unit, msg);
             res.json({
                 ok: true,
                 res: tos,

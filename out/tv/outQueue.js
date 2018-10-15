@@ -63,7 +63,7 @@ function sheetToUnitx(unit, db, msg) {
             let sheetId = msg.id;
             let user = undefined;
             if (tos !== undefined && tos.length > 0) {
-                let toArr = tos.map(v => v.toUser);
+                let toArr = tos.map(v => v.to);
                 yield runner.sheetTo(unit, user, sheetId, toArr);
             }
         }
@@ -81,7 +81,7 @@ function getUnitxUrl(unit) {
         let { url, urlDebug } = unitx;
         if (urlDebug !== undefined) {
             try {
-                urlDebug = centerApi_1.urlSetCenterHost(urlDebug);
+                urlDebug = centerApi_1.urlSetUnitxHost(urlDebug);
                 let ret = yield node_fetch_1.default(urlDebug + 'hello');
                 if (ret.status !== 200)
                     throw 'not ok';

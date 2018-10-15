@@ -4,9 +4,15 @@ import * as config from 'config';
 const centerHost = config.get<string>('centerhost');
 const centerUrl = urlSetCenterHost(config.get<string>('center'));
 
-export function urlSetCenterHost(url:string):string {
+function urlSetCenterHost(url:string):string {
     return url.replace('://centerhost/', '://'+centerHost+'/');
 }
+
+const unitxHost = config.get<string>('unitxhost');
+export function urlSetUnitxHost(url:string):string {
+    return url.replace('://unitxhost/', '://'+unitxHost+'/');
+}
+
 
 abstract class Fetch {
     private baseUrl:string;
