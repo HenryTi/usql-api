@@ -11,7 +11,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const bull = require("bull");
 const _ = require("lodash");
 const runner_1 = require("./runner");
-const core_1 = require("../core");
 const afterAction_1 = require("./afterAction");
 const outQueue_1 = require("./outQueue");
 const sheetQueueName = 'sheet-queue';
@@ -100,12 +99,15 @@ function sheetQueueAct(jobData) {
                 60;
             }
             let actionReturn = yield afterAction_1.afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
+            /*
+            sheetAct消息不是在这里推送，而是在unitx里面推送。unitx知道推送给什么人
             let msg = _.merge({
                 $type: 'sheetAct',
                 $user: user,
                 $unit: unit,
             }, sheetRet);
-            yield core_1.pushToCenter(db, msg);
+            await pushToCenter(db, msg);
+            */
         }
         catch (err) {
             console.log('sheet Act error: ', err);

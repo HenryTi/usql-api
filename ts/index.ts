@@ -54,11 +54,12 @@ import { unitxRouter, startUnitxInQueue } from './unitx-server';
     //app.use('/usql/:db/debug', [authDebug, tv]);
     app.use('/usql/:db/debug', [authCheck, tv]);
 
-    app.use('/usql/:db/hello', (req:Request, res:Response) => {
+    function dbHello(req:Request, res:Response) {
         let db = req.params.db;
         res.json({"hello": 'usql-api: hello, db is ' + db});
-    });
-
+    }
+    app.use('/usql/:db/hello', dbHello);
+    app.use('/usql/:db/', dbHello);
     app.use('/usql/hello', (req:Request, res:Response) => {
         res.json({"hello": 'usql-api: hello, it\'s good'});
     });

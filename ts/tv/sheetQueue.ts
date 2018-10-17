@@ -90,12 +90,15 @@ async function sheetQueueAct(jobData:any):Promise<void> {
             busFaces = actionRun.busFaces;60
         }
         let actionReturn = await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
+        /*
+        sheetAct消息不是在这里推送，而是在unitx里面推送。unitx知道推送给什么人
         let msg = _.merge({
             $type: 'sheetAct',
             $user: user,
             $unit: unit,
         }, sheetRet);
         await pushToCenter(db, msg);
+        */
     }
     catch(err) {
         console.log('sheet Act error: ', err);

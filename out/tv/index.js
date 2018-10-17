@@ -292,7 +292,7 @@ router.post('/tuid/:name', (req, res) => __awaiter(this, void 0, void 0, functio
                         continue;
                     for (let arrValue of arrValues) {
                         //let arrParams:any[] = [id, arrValue[arr.id], arrValue[arr.order]];
-                        let arrParams = [id, arrValue[arr.id]];
+                        let arrParams = [id, arrValue[arr.id], arrValue[arr.order]];
                         let len = fields.length;
                         for (let i = 0; i < len; i++) {
                             arrParams.push(arrValue[fields[i].name]);

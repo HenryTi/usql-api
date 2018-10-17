@@ -26,10 +26,10 @@ function startUnitxInQueue(redis) {
                 let { data } = job;
                 console.log('accept message: ', data);
                 if (data !== undefined) {
-                    let { $job, $unit } = data;
+                    let { $job, $db, $unit } = data;
                     switch ($job) {
                         case 'sheetMsg':
-                            yield processSheetMessage_1.processSheetMessage($unit, data);
+                            yield processSheetMessage_1.processSheetMessage($unit, $db, data);
                             break;
                         //case 'sheetMsgDone':
                         //    await removeSheetMessage($unit, data);

@@ -22,9 +22,9 @@ exports.unitxRouter.post('/', (req, res, next) => __awaiter(this, void 0, void 0
         //debugger; // 应该在$unitx数据库中，建立一个action
         // 实际上不入库，只是加入queue
         //(msg as any).job = 'unitx';
-        let { $job, $unit } = msg;
+        let { $job, $db, $unit } = msg;
         if ($job === 'sheetMsg') {
-            let tos = yield processSheetMessage_1.processSheetMessage($unit, msg);
+            let tos = yield processSheetMessage_1.processSheetMessage($unit, $db, msg);
             res.json({
                 ok: true,
                 res: tos,

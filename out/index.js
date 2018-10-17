@@ -59,10 +59,12 @@ const unitx_server_1 = require("./unitx-server");
     // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
     //app.use('/usql/:db/debug', [authDebug, tv]);
     app.use('/usql/:db/debug', [core_1.authCheck, tv_1.default]);
-    app.use('/usql/:db/hello', (req, res) => {
+    function dbHello(req, res) {
         let db = req.params.db;
         res.json({ "hello": 'usql-api: hello, db is ' + db });
-    });
+    }
+    app.use('/usql/:db/hello', dbHello);
+    app.use('/usql/:db/', dbHello);
     app.use('/usql/hello', (req, res) => {
         res.json({ "hello": 'usql-api: hello, it\'s good' });
     });
