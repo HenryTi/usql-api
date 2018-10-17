@@ -269,8 +269,7 @@ router.post('/tuid/:name', async (req:Request, res:Response) => {
                     let arrValues = body[arrName];
                     if (arrValues === undefined) continue;
                     for (let arrValue of arrValues) {
-                        //let arrParams:any[] = [id, arrValue[arr.id], arrValue[arr.order]];
-                        let arrParams:any[] = [id, arrValue[arr.id], arrValue[arr.order]];
+                        let arrParams:any[] = [id, arrValue[arr.id]];
                         let len = fields.length;
                         for (let i=0;i<len;i++) {
                             arrParams.push(arrValue[fields[i].name]);
@@ -304,7 +303,7 @@ router.post('/tuid-arr/:name/:owner/:arr/', async (req:Request, res:Response) =>
         if (schemaArr === undefined) return;
         let body = (req as any).body;
         let id = body["$id"];
-        let params:any[] = [owner, id, body['$order']];
+        let params:any[] = [owner, id];
         let fields = schemaArr.fields;
         let len = fields.length;
         for (let i=0; i<len; i++) {
