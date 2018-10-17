@@ -15,10 +15,10 @@ const express_1 = require("express");
 const _ = require("lodash");
 const runner_1 = require("./runner");
 const core_1 = require("../core");
-const sheetQueue_1 = require("./sheetQueue");
+const sheetActQueue_1 = require("./sheetActQueue");
 const afterAction_1 = require("./afterAction");
 const apiErrors_1 = require("./apiErrors");
-const outQueue_1 = require("./outQueue");
+const toUnitxQueue_1 = require("./toUnitxQueue");
 const packReturn_1 = require("../core/packReturn");
 ;
 const router = express_1.Router();
@@ -613,8 +613,7 @@ router.post('/sheet/:name', (req, res) => __awaiter(this, void 0, void 0, functi
         let result = yield runner.sheetSave(name, unit, id, app, discription, data);
         let sheetRet = result[0];
         if (sheetRet !== undefined) {
-            yield outQueue_1.addOutQueue(_.merge({
-                $job: 'sheetMsg',
+            yield toUnitxQueue_1.queueSheetToUnitx(_.merge({
                 $unit: unit,
                 $db: db,
             }, sheetRet));
@@ -638,7 +637,7 @@ router.put('/sheet/:name', (req, res) => __awaiter(this, void 0, void 0, functio
         return;
     yield runner.sheetProcessing(body.id);
     let { state, action, id, flow } = body;
-    yield sheetQueue_1.addSheetQueue({
+    yield sheetActQueue_1.queueSheetAct({
         job: 'sheetAct',
         db: db,
         sheet: name,
@@ -747,6 +746,6 @@ router.get('/sheet/:name/archive/:id', (req, res) => __awaiter(this, void 0, voi
     }
 }));
 exports.default = router;
-__export(require("./outQueue"));
-__export(require("./sheetQueue"));
+__export(require("./toUnitxQueue"));
+__export(require("./sheetActQueue"));
 //# sourceMappingURL=index.js.map

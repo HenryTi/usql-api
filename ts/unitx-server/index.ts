@@ -1,2 +1,2 @@
 export { unitxRouter } from './router';
-export { startUnitxInQueue } from './inQueue';
+export { startUnitxQueue } from './unitxQueue';

@@ -2,10 +2,10 @@ import {Router, Request, Response, NextFunction} from 'express';
 import * as _ from 'lodash';
 import {getRunner, Runner} from './runner';
 import {packReturn} from '../core';
-import {addSheetQueue} from './sheetQueue';
+import {queueSheetAct} from './sheetActQueue';
 import {afterAction} from './afterAction';
 import {apiErrors} from './apiErrors';
-import { addOutQueue } from './outQueue';
+import { queueSheetToUnitx } from './toUnitxQueue';
 import { packParam } from '../core/packReturn';
 
 interface User {
@@ -572,8 +572,7 @@ router.post('/sheet/:name', async (req:Request, res:Response) => {
         let result = await runner.sheetSave(name, unit, id, app, discription, data);
         let sheetRet = result[0];
         if (sheetRet !== undefined) {
-            await addOutQueue(_.merge({
-                $job: 'sheetMsg',
+            await queueSheetToUnitx(_.merge({
                 $unit: unit,
                 $db: db,
             }, sheetRet));
@@ -597,7 +596,7 @@ router.put('/sheet/:name', async (req:Request, res:Response) => {
     if (runner === undefined) return;
     await runner.sheetProcessing(body.id);
     let {state, action, id, flow} = body;
-    await addSheetQueue({
+    await queueSheetAct({
         job: 'sheetAct',
         db: db,
         sheet: name,
@@ -708,5 +707,5 @@ router.get('/sheet/:name/archive/:id', async (req:Request, res:Response) => {
 
 export default router;
 
-export * from './outQueue';
-export * from './sheetQueue';
+export * from './toUnitxQueue';
+export * from './sheetActQueue';

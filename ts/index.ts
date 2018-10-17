@@ -2,12 +2,11 @@ import * as express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import tv, { startOutQueue, startSheetQueue } from './tv';
-//import {sendToBusRouter} from './tv/toUnitx';
+import tv, { startSheetToUnitxQueue, startBusToUnitxQueue, startSheetActQueue } from './tv';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
-import { unitxRouter, startUnitxInQueue } from './unitx-server';
+import { unitxRouter, startUnitxQueue } from './unitx-server';
 
-(function() {
+(async function () {
     let connection = config.get<any>("connection");
     if (connection === undefined || connection.host === '0.0.0.0') {
         console.log("mysql connection must defined in config/default.json or config/production.json");
@@ -71,18 +70,18 @@ import { unitxRouter, startUnitxInQueue } from './unitx-server';
     let redis = {redis: redisConfig};
     console.log('redis:', redis);
 
-    startOutQueue(redis);
-    startSheetQueue(redis);
-    startUnitxInQueue(redis);
+    await startBusToUnitxQueue(redis);
+    await startSheetToUnitxQueue(redis);
+    await startSheetActQueue(redis);
+    await startUnitxQueue(redis);
 
     app.listen(port, async ()=>{
         console.log('USQL-API listening on port ' + port);
         let connection = config.get<any>("connection");
         let {host, user} = connection;
-        console.log('process.env.NODE_ENV: %s, host: %s, user: %s',
+        console.log('process.env.NODE_ENV: %s\nDB host: %s, user: %s',
             process.env.NODE_ENV,
             host,
             user);
-        //await tryoutQueue();
     });
 })();

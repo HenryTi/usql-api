@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import {Runner} from './runner';
 import {SchemaBusFace} from './schemaBusFace';
-import { addOutQueue } from './outQueue';
+import { queueBusToUnitx } from './toUnitxQueue';
 import { packBus } from '../core';
 import { pushToCenter } from '../core';
 
@@ -38,7 +38,7 @@ export async function afterAction(
                 action: action,
                 data: data,
             };
-            await pushToCenter(db, wsMsg);
+            await pushToCenter(wsMsg);
             console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
         }
     }
@@ -64,8 +64,7 @@ export async function afterAction(
                 }
                 let busSchema = schema.call.schema[name]
                 let packedBusData = packBus(busSchema, main);
-                await addOutQueue({
-                    $job: 'bus',
+                await queueBusToUnitx({
                     $unit: unit,
                     busOwner: owner,
                     bus: bus,

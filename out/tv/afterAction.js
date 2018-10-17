@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const outQueue_1 = require("./outQueue");
+const toUnitxQueue_1 = require("./toUnitxQueue");
 const core_1 = require("../core");
 const core_2 = require("../core");
 // 2018-02-25
@@ -36,7 +36,7 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
                     action: action,
                     data: data,
                 };
-                yield core_2.pushToCenter(db, wsMsg);
+                yield core_2.pushToCenter(wsMsg);
                 console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
             }
         }
@@ -61,8 +61,7 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
                     }
                     let busSchema = schema.call.schema[name];
                     let packedBusData = core_1.packBus(busSchema, main);
-                    yield outQueue_1.addOutQueue({
-                        $job: 'bus',
+                    yield toUnitxQueue_1.queueBusToUnitx({
                         $unit: unit,
                         busOwner: owner,
                         bus: bus,

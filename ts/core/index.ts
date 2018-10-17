@@ -1,5 +1,6 @@
 
 export {default as Auth, AuthUser, debugUnit, debugUser, authCheck, authDebug, authUnitx} from './auth';
-export {centerApi, UnitxApi} from './centerApi';
+export {centerApi} from './centerApi';
+export {UnitxApi, urlSetUnitxHost} from '../tv/unitxApi';
 export {pushToCenter} from './pushToCenter';
 export {packReturn, packBus} from './packReturn';

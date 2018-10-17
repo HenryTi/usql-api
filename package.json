@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/bull": "^3.0.1",
+    "@types/bull": "^3.3.20",
     "@types/config": "0.0.33",
     "@types/express": "^4.0.39",
     "@types/form-data": "^2.2.1",
@@ -24,10 +24,9 @@
     "typescript": "^2.8.3"
   },
   "dependencies": {
-    "bluebird": "^3.5.1",
     "body-parser": "^1.18.3",
-    "bull": "^3.3.2",
-    "config": "^1.27.0",
+    "bull": "^3.4.8",
+    "config": "^1.31.0",
     "cors": "^2.8.3",
     "express": "^4.15.2",
     "express-jwt": "^5.3.0",

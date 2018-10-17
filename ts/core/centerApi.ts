@@ -1,76 +1,11 @@
-import fetch, {Headers} from 'node-fetch';
 import * as config from 'config';
+import {Fetch} from './fetch';
 
 const centerHost = config.get<string>('centerhost');
 const centerUrl = urlSetCenterHost(config.get<string>('center'));
 
 function urlSetCenterHost(url:string):string {
     return url.replace('://centerhost/', '://'+centerHost+'/');
-}
-
-const unitxHost = config.get<string>('unitxhost');
-export function urlSetUnitxHost(url:string):string {
-    return url.replace('://unitxhost/', '://'+unitxHost+'/');
-}
-
-
-abstract class Fetch {
-    private baseUrl:string;
-    constructor(baseUrl:string) {
-
-        this.baseUrl = baseUrl;
-    }
-    protected async get(url: string, params: any = undefined): Promise<any> {
-        if (params) {
-            let keys = Object.keys(params);
-            if (keys.length > 0) {
-                let c = '?';
-                for (let k of keys) {
-                    let v = params[k];
-                    if (v === undefined) continue;
-                    url += c + k + '=' + params[k];
-                    c = '&';
-                }
-            }
-        }
-        return await this.innerFetch(url, 'GET');
-    }
-
-    protected async post(url: string, params: any): Promise<any> {
-        return await this.innerFetch(url, 'POST', params);
-    }
-
-    private async innerFetch(url: string, method:string, body?:any): Promise<any> {
-        var headers = new Headers();
-        headers.append('Accept', 'application/json'); // This one is enough for GET requests
-        headers.append('Content-Type', 'application/json'); // This one sends body
-        let res = await fetch(
-            this.baseUrl + url, 
-            {
-                headers: {
-                    "Content-Type": 'application/json',
-                    "Accept": 'application/json',
-                    //"Authorization": 'this.apiToken',
-                    //"Access-Control-Allow-Origin": '*'
-                },
-                method: method,
-                body: JSON.stringify(body),
-            }
-        );
-        if (res.status !== 200) {
-            throw {
-                error: res.statusText,
-                code: res.status,
-            };
-            //console.log('statusCode=', response.statusCode);
-            //console.log('statusMessage=', response.statusMessage);
-        }
-        let json = await res.json();
-        if (json.ok !== true) {
-            throw json.error;
-        }
-        return json.res;
-    }
 }
 
 class CenterApi extends Fetch {
@@ -108,10 +43,3 @@ class CenterApi extends Fetch {
 }
 
 export const centerApi = new CenterApi();
-
-export class UnitxApi extends Fetch {
-    async send(jobData: {$unit:number, bus:string, face:string, data:any}):Promise<any> {
-        let ret = await this.post('unitx', jobData);
-        return ret;
-    }
-}

@@ -12,11 +12,11 @@ const _ = require("lodash");
 const runner_1 = require("../tv/runner");
 const packParam_1 = require("../core/packParam");
 const afterAction_1 = require("../tv/afterAction");
-const core_1 = require("../core");
+const unitxQueue_1 = require("./unitxQueue");
 const $unitx = '$unitx';
 const usqlSheetMessage = 'sheetMessage';
 const usqlGetSheetTo = 'getSheetTo';
-function processSheetMessage(unit, db, sheetMessage) {
+function processSheetMessage(unit, sheetMessage) {
     return __awaiter(this, void 0, void 0, function* () {
         let runner = yield runner_1.getRunner($unitx);
         let { no, discription, /*to, */ usq, id: sheet, state, user, name } = sheetMessage;
@@ -57,32 +57,27 @@ function processSheetMessage(unit, db, sheetMessage) {
         let actionReturn = yield afterAction_1.afterAction($unitx, runner, unit, returns, hasSend, busFaces, result);
         console.log('save sheet message ', data);
         // 之前设计，sheetAct消息不是usq里面推送。
+        let toArr;
         if (prePostSame === true) {
-            let sheetActMsg = _.merge({ $unit: unit }, sheetMessage);
-            sheetActMsg.$type = 'sheetAct';
-            sheetActMsg.$user = [user];
-            yield core_1.pushToCenter(db, sheetActMsg);
-            return;
+            toArr = [user];
+            yield queueToCenter('sheetAct', toArr, sheetMessage);
         }
-        let sheetActPreState = _.merge({ $unit: unit }, sheetMessage);
-        sheetActPreState.$type = 'sheetActPreState';
-        sheetActPreState.$user = [user];
-        yield core_1.pushToCenter(db, sheetActPreState);
-        let toArr = tos.map(v => v.to);
-        let sheetActState = _.merge({ $unit: unit }, sheetMessage);
-        sheetActState.$type = 'sheetActState';
-        sheetActState.$user = toArr;
-        yield core_1.pushToCenter(db, sheetActState);
-        /*
-        {
-            $type: 'sheetAct',
-            $user: tos.map(v=>v.to),
-            $unit: unit,
-        });
-        await pushToCenter(db, sheetActMsg);
-        */
-        return tos;
+        else {
+            yield queueToCenter('sheetActPreState', [user], sheetMessage);
+            toArr = tos.map(v => v.to);
+            yield queueToCenter('sheetActState', toArr, sheetMessage);
+        }
+        return toArr;
     });
 }
 exports.processSheetMessage = processSheetMessage;
+function queueToCenter(type, toArr, msg) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let m = _.clone(msg);
+        m.$type = type;
+        m.$user = toArr;
+        yield unitxQueue_1.queueUnitx(m);
+        //await pushToCenter(m);
+    });
+}
 //# sourceMappingURL=processSheetMessage.js.map
