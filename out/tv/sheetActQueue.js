@@ -22,24 +22,24 @@ function queueSheetAct(msg) {
 }
 exports.queueSheetAct = queueSheetAct;
 function startSheetActQueue(redis) {
-    return __awaiter(this, void 0, void 0, function* () {
-        sheetActQueue = bull(sheetActQueueName, redis);
-        sheetActQueue.on("error", (error) => {
-            console.log(sheetActQueueName, error);
-        });
-        sheetActQueue.process(function (job, done) {
-            return __awaiter(this, void 0, void 0, function* () {
-                let { data } = job;
-                if (data !== undefined) {
-                    yield sheetQueueAct(data);
-                }
-                done();
-            });
-        });
-        yield sheetActQueue.isReady();
-        console.log(sheetActQueueName, ' is ready');
-        return sheetActQueue;
+    sheetActQueue = bull(sheetActQueueName, redis);
+    sheetActQueue.on("error", (error) => {
+        console.log(sheetActQueueName, error);
     });
+    sheetActQueue.process(function (job, done) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { data } = job;
+            if (data !== undefined) {
+                yield sheetQueueAct(data);
+            }
+            done();
+        });
+    });
+    /*
+    await sheetActQueue.isReady();
+    console.log(sheetActQueueName, ' is ready');
+    return sheetActQueue;
+    */
 }
 exports.startSheetActQueue = startSheetActQueue;
 function sheetQueueAct(jobData) {

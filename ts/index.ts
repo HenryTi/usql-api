@@ -2,6 +2,7 @@ import * as express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
+import * as bull from 'bull';
 import tv, { startSheetToUnitxQueue, startBusToUnitxQueue, startSheetActQueue } from './tv';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
 import { unitxRouter, startUnitxQueue } from './unitx-server';
@@ -70,10 +71,10 @@ import { unitxRouter, startUnitxQueue } from './unitx-server';
     let redis = {redis: redisConfig};
     console.log('redis:', redis);
 
-    await startBusToUnitxQueue(redis);
-    await startSheetToUnitxQueue(redis);
-    await startSheetActQueue(redis);
-    await startUnitxQueue(redis);
+    startBusToUnitxQueue(redis);
+    startSheetToUnitxQueue(redis);
+    startSheetActQueue(redis);
+    startUnitxQueue(redis);
 
     app.listen(port, async ()=>{
         console.log('USQL-API listening on port ' + port);

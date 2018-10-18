@@ -30,60 +30,60 @@ function queueBusToUnitx(msg) {
 }
 exports.queueBusToUnitx = queueBusToUnitx;
 function startSheetToUnitxQueue(redis) {
-    return __awaiter(this, void 0, void 0, function* () {
-        sheetQueue = bull(sheetToUnitxQueueName, redis);
-        sheetQueue.on("error", (error) => {
-            console.log('queue server: ', error);
-        });
-        sheetQueue.process(function (job, done) {
-            return __awaiter(this, void 0, void 0, function* () {
-                try {
-                    let data = job.data;
-                    if (data !== undefined) {
-                        let { $unit, $db } = data;
-                        yield sheetToUnitx($unit, $db, data);
-                    }
-                    done();
-                }
-                catch (e) {
-                    console.error(e);
-                    done();
-                }
-            });
-        });
-        yield sheetQueue.isReady();
-        console.log(sheetToUnitxQueueName, ' is ready');
-        return sheetQueue;
+    sheetQueue = bull(sheetToUnitxQueueName, redis);
+    sheetQueue.on("error", (error) => {
+        console.log('queue server: ', error);
     });
+    sheetQueue.process(function (job, done) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let data = job.data;
+                if (data !== undefined) {
+                    let { $unit, $db } = data;
+                    yield sheetToUnitx($unit, $db, data);
+                }
+                done();
+            }
+            catch (e) {
+                console.error(e);
+                done();
+            }
+        });
+    });
+    /*
+    await sheetQueue.isReady();
+    console.log(sheetToUnitxQueueName, ' is ready');
+    return sheetQueue;
+    */
 }
 exports.startSheetToUnitxQueue = startSheetToUnitxQueue;
 ;
 function startBusToUnitxQueue(redis) {
-    return __awaiter(this, void 0, void 0, function* () {
-        busQueue = bull(busToUnitxQueueName, redis);
-        busQueue.on("error", (error) => {
-            console.log('queue server: ', error);
-        });
-        busQueue.process(function (job, done) {
-            return __awaiter(this, void 0, void 0, function* () {
-                try {
-                    let data = job.data;
-                    if (data !== undefined) {
-                        let { $unit, $db } = data;
-                        yield busToDest($unit, data);
-                    }
-                    done();
-                }
-                catch (e) {
-                    console.error(e);
-                    done();
-                }
-            });
-        });
-        yield busQueue.isReady();
-        console.log(busToUnitxQueueName, ' is ready');
-        return busQueue;
+    busQueue = bull(busToUnitxQueueName, redis);
+    busQueue.on("error", (error) => {
+        console.log('queue server: ', error);
     });
+    busQueue.process(function (job, done) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let data = job.data;
+                if (data !== undefined) {
+                    let { $unit, $db } = data;
+                    yield busToDest($unit, data);
+                }
+                done();
+            }
+            catch (e) {
+                console.error(e);
+                done();
+            }
+        });
+    });
+    /*
+    await busQueue.isReady();
+    console.log(busToUnitxQueueName, ' is ready');
+    return busQueue;
+    */
 }
 exports.startBusToUnitxQueue = startBusToUnitxQueue;
 function sheetToUnitx(unit, db, msg) {

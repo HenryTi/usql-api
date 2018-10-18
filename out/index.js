@@ -73,10 +73,10 @@ const unitx_server_1 = require("./unitx-server");
         let redisConfig = config.get('redis');
         let redis = { redis: redisConfig };
         console.log('redis:', redis);
-        yield tv_1.startBusToUnitxQueue(redis);
-        yield tv_1.startSheetToUnitxQueue(redis);
-        yield tv_1.startSheetActQueue(redis);
-        yield unitx_server_1.startUnitxQueue(redis);
+        tv_1.startBusToUnitxQueue(redis);
+        tv_1.startSheetToUnitxQueue(redis);
+        tv_1.startSheetActQueue(redis);
+        unitx_server_1.startUnitxQueue(redis);
         app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
             console.log('USQL-API listening on port ' + port);
             let connection = config.get("connection");

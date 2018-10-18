@@ -51,17 +51,17 @@ export async function processSheetMessage(unit:number, sheetMessage:any): Promis
     let toArr:number[];
     if (prePostSame === true) {
         toArr = [user];
-        await queueToCenter('sheetAct', toArr, sheetMessage);
+        await queueSheetToUnitx('sheetAct', toArr, sheetMessage);
     }
     else {
-        await queueToCenter('sheetActPreState', [user], sheetMessage);
+        await queueSheetToUnitx('sheetActPreState', [user], sheetMessage);
         toArr = tos.map(v=>v.to);
-        await queueToCenter('sheetActState', toArr, sheetMessage);
+        await queueSheetToUnitx('sheetActState', toArr, sheetMessage);
     }
     return toArr;
 }
 
-async function queueToCenter(type:string, toArr:number[], msg:any) {
+async function queueSheetToUnitx(type:string, toArr:number[], msg:any) {
     let m = _.clone(msg);
     m.$type = type;
     m.$user = toArr;

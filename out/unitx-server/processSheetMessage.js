@@ -60,18 +60,18 @@ function processSheetMessage(unit, sheetMessage) {
         let toArr;
         if (prePostSame === true) {
             toArr = [user];
-            yield queueToCenter('sheetAct', toArr, sheetMessage);
+            yield queueSheetToUnitx('sheetAct', toArr, sheetMessage);
         }
         else {
-            yield queueToCenter('sheetActPreState', [user], sheetMessage);
+            yield queueSheetToUnitx('sheetActPreState', [user], sheetMessage);
             toArr = tos.map(v => v.to);
-            yield queueToCenter('sheetActState', toArr, sheetMessage);
+            yield queueSheetToUnitx('sheetActState', toArr, sheetMessage);
         }
         return toArr;
     });
 }
 exports.processSheetMessage = processSheetMessage;
-function queueToCenter(type, toArr, msg) {
+function queueSheetToUnitx(type, toArr, msg) {
     return __awaiter(this, void 0, void 0, function* () {
         let m = _.clone(msg);
         m.$type = type;

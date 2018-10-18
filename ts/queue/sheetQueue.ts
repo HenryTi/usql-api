@@ -1,37 +1,33 @@
 import * as bull from 'bull';
 import * as _ from 'lodash';
-import { getRunner } from './runner';
 import { afterAction } from './afterAction';
-import { queueSheetToUnitx } from './toUnitxQueue';
+//import { queueSheetToUnitx } from './toUnitxQueue';
+import { SheetAct, SheetMessage } from './model';
+import { getRunner } from '../tv/runner';
+import { queueToUnitx } from './toUnitxQueue';
 
-const sheetActQueueName = 'sheet-act-queue';
-let sheetActQueue:bull.Queue;
+const sheetQueueName = 'sheet-queue';
+let sheetQueue:bull.Queue<SheetAct>;
 
-export async function queueSheetAct(msg:any):Promise<bull.Job> {
-    return await sheetActQueue.add(msg);
+export async function queueSheet(msg:SheetAct):Promise<bull.Job> {
+    return await sheetQueue.add(msg);
 }
 
-export function startSheetActQueue(redis:any) {
-    sheetActQueue = bull(sheetActQueueName, redis);
-    sheetActQueue.on("error", (error: Error) => {
-        console.log(sheetActQueueName, error);
+export function startSheetQueue(redis:any) {
+    sheetQueue = bull(sheetQueueName, redis);
+    sheetQueue.on("error", (error: Error) => {
+        console.log(sheetQueueName, error);
     });
-    sheetActQueue.process(async function(job, done) {
+    sheetQueue.process(async function(job, done) {
         let {data} = job;
-        if (data !== undefined) {
-            await sheetQueueAct(data);
-        } 
+        await doSheetAct(data);
         done();
     });
-    /*
-    await sheetActQueue.isReady();
-    console.log(sheetActQueueName, ' is ready');
-    return sheetActQueue;
-    */
 }
 
-async function sheetQueueAct(jobData:any):Promise<void> {
-    let {db, sheet, state, action, unit, user, id, flow} = jobData;
+async function doSheetAct(sheetAct:SheetAct):Promise<void> {
+    let {db, sheetHead} = sheetAct;
+    let {id, sheet, state, action, unit, user, flow} = sheetHead;
     let runner = await getRunner(db);
     if (runner === undefined) {
         console.log('sheetAct: ', db + ' is not valid');
@@ -72,12 +68,19 @@ async function sheetQueueAct(jobData:any):Promise<void> {
         let sheetArr = result.pop();
         let sheetRet = sheetArr[0];
         if (sheetRet !== undefined) {
-            await queueSheetToUnitx(_.merge({
-                $unit: unit,
-                $db: db,
-            }, sheetRet));
+            let sheetMsg:SheetMessage = {
+                type: 'sheet',
+                db: db,
+                id: id,
+                body: sheetRet,
+                to: undefined,
+            };
+            await queueToUnitx({
+                unit: unit,
+                message: sheetMsg,
+            });
         }
-    
+
         let hasMessage, busFaces;
         if (Array.isArray(actionRun) === true) {
             hasMessage = false;
@@ -87,7 +90,8 @@ async function sheetQueueAct(jobData:any):Promise<void> {
             hasMessage = actionRun.hasSend;
             busFaces = actionRun.busFaces;60
         }
-        let actionReturn = await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
+        //let actionReturn = 
+        await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
         /*
         sheetAct消息不是在这里推送，而是在unitx里面推送。unitx知道推送给什么人
         let msg = _.merge({

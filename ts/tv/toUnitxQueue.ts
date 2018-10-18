@@ -17,7 +17,7 @@ export async function queueBusToUnitx(msg:any):Promise<bull.Job> {
     return await busQueue.add(msg);
 }
 
-export async function startSheetToUnitxQueue(redis:any):Promise<bull.Queue> {
+export function startSheetToUnitxQueue(redis:any) {
     sheetQueue = bull(sheetToUnitxQueueName, redis);
     sheetQueue.on("error", (error: Error) => {
         console.log('queue server: ', error);
@@ -36,12 +36,14 @@ export async function startSheetToUnitxQueue(redis:any):Promise<bull.Queue> {
             done();
         }
     });
+    /*
     await sheetQueue.isReady();
     console.log(sheetToUnitxQueueName, ' is ready');
     return sheetQueue;
+    */
 };
 
-export async function startBusToUnitxQueue(redis:any):Promise<bull.Queue> {
+export function startBusToUnitxQueue(redis:any) {
     busQueue = bull(busToUnitxQueueName, redis);
     busQueue.on("error", (error: Error) => {
         console.log('queue server: ', error);
@@ -60,9 +62,11 @@ export async function startBusToUnitxQueue(redis:any):Promise<bull.Queue> {
             done();
         }
     });
+    /*
     await busQueue.isReady();
     console.log(busToUnitxQueueName, ' is ready');
     return busQueue;
+    */
 }
 
 async function sheetToUnitx(unit:number, db:string, msg:any): Promise<void> {

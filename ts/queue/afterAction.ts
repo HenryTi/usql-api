@@ -1,10 +1,10 @@
 import * as _ from 'lodash';
-import {Runner} from './runner';
-import {SchemaBusFace} from './schemaBusFace';
-import { queueBusToUnitx } from './toUnitxQueue';
 import { packBus } from '../core';
-import { pushToCenter } from '../core';
-import { queueUnitx } from '../unitx-server/unitxQueue';
+import { Runner } from '../tv/runner';
+import { SchemaBusFace } from '../tv/schemaBusFace';
+import { pushToClient } from './pushToClient';
+import { MsgMessage, BusMessage } from './model';
+import { queueToUnitx } from './toUnitxQueue';
 
 // 2018-02-25
 // Bus face 数据保全的说明：
@@ -30,18 +30,23 @@ export async function afterAction(
         // 将执行操作action，或者sheetAction产生的消息，发送给最终用户的客户端
         for (let row of messages) {
             let {to, msg, action, data, notify} = row;
-            let wsMsg = {
-                $type: 'msg',
-                $user: to,
-                $unit: unit,
-                $io: notify,
-                msg: msg,
-                action: action,
-                data: data,
+            let infoMsg:MsgMessage = {
+                type: 'msg',
+                to: to,
+                body: {
+                    $type: 'msg',
+                    $user: to,
+                    $unit: unit,
+                    $io: notify,
+                    msg: msg,
+                    action: action,
+                    data: data,
+                }
             };
+            await pushToClient(infoMsg);
             //await pushToCenter(wsMsg);
-            await queueUnitx(wsMsg);
-            console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
+            //await queueUnitx(wsMsg);
+            console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(infoMsg));
         }
     }
 
@@ -66,12 +71,28 @@ export async function afterAction(
                 }
                 let busSchema = schema.call.schema[name]
                 let packedBusData = packBus(busSchema, main);
+                /*                
                 await queueBusToUnitx({
                     $unit: unit,
                     busOwner: owner,
                     bus: bus,
                     face: name,
                     data: packedBusData
+                });
+                */
+                let busMsg: BusMessage = {
+                    type: 'bus',
+                    body: {
+                        $unit: unit,
+                        busOwner: owner,
+                        bus: bus,
+                        face: name,
+                        data: packedBusData
+                    }
+                }
+                await queueToUnitx({
+                    unit: unit,
+                    message: busMsg,
                 });
             }
         }

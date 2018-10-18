@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const toUnitxQueue_1 = require("./toUnitxQueue");
 const core_1 = require("../core");
-const core_2 = require("../core");
+const unitxQueue_1 = require("../unitx-server/unitxQueue");
 // 2018-02-25
 // Bus face 数据保全的说明：
 // bus数据的产生，应该跟action或者sheetAction构成事务。
@@ -36,7 +36,8 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
                     action: action,
                     data: data,
                 };
-                yield core_2.pushToCenter(wsMsg);
+                //await pushToCenter(wsMsg);
+                yield unitxQueue_1.queueUnitx(wsMsg);
                 console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(wsMsg));
             }
         }
