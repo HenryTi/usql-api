@@ -12,6 +12,7 @@ import { queueToUnitx } from './toUnitxQueue';
 // 所以，应该把bus face 信息在事务内写数据库。
 // 在job queue里面，读数据，然后发送到unitx，然后再从数据库删除。这样保证不会丢失信息。
 // 当下为了快速写出程序，暂时先简单处理。数据库操作返回数据，直接发送unitx，可能会有数据丢失。
+// git
 
 export async function afterAction(
     db:string,
