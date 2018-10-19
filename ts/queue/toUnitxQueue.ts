@@ -1,12 +1,12 @@
 import * as bull from 'bull';
-import { UnitxPack, Message, SheetMessage } from './model';
+import { Message, SheetMessage } from './model';
 import { sendToUnitx } from './sendToUnitx';
 import { getRunner } from '../tv/runner';
 
 const toUnitxQueueName = 'to-unitx-queue';
-let toUnitxQueue:bull.Queue<UnitxPack>;
+let toUnitxQueue:bull.Queue<Message>;
 
-export async function queueToUnitx(msg:UnitxPack):Promise<bull.Job> {
+export async function queueToUnitx(msg:Message):Promise<bull.Job> {
     return await toUnitxQueue.add(msg);
 }
 
@@ -18,8 +18,7 @@ export function startToUnitxQueue(redis:any) {
     toUnitxQueue.process(async function(job, done) {
         try {
             let {data} = job;
-            let {unit, message} = data;
-            await sendMsgToUnitx(unit, message);
+            await sendMsgToUnitx(data);
             done();
         }
         catch(err) {
@@ -27,9 +26,11 @@ export function startToUnitxQueue(redis:any) {
             done(new Error(err));
         }
     });
+    console.log('QUEUE: ' + toUnitxQueueName);
 }
 
-async function sendMsgToUnitx(unit:number, msg:Message): Promise<void> {
+async function sendMsgToUnitx(msg:Message): Promise<void> {
+    let {unit} = msg;
     let toArr = await sendToUnitx(unit, msg);
     let {type} = msg;
     if (type !== 'sheet') return;
@@ -38,9 +39,10 @@ async function sendMsgToUnitx(unit:number, msg:Message): Promise<void> {
     if (toArr === undefined) return;
     if (toArr.length === 0) return;
 
-    let {id, db} = sheetMsg;
+    let {db, body} = sheetMsg;
     let runner = await getRunner(db);
     if (runner === undefined) return;
+    let {id} = body;
     let user:number = 0; // 操作usq，必须有操作人，系统操作=0
     await runner.sheetTo(unit, user, id, toArr);
     console.log('sheet to unitx', msg);

@@ -1,10 +1,10 @@
 import * as bull from 'bull';
 import * as _ from 'lodash';
-import { afterAction } from './afterAction';
-//import { queueSheetToUnitx } from './toUnitxQueue';
-import { SheetAct, SheetMessage } from './model';
 import { getRunner } from '../tv/runner';
+import { afterAction } from './afterAction';
+import { SheetAct, SheetMessage } from './model';
 import { queueToUnitx } from './toUnitxQueue';
+import { format } from 'path';
 
 const sheetQueueName = 'sheet-queue';
 let sheetQueue:bull.Queue<SheetAct>;
@@ -23,10 +23,11 @@ export function startSheetQueue(redis:any) {
         await doSheetAct(data);
         done();
     });
+    console.log('QUEUE: ' + sheetQueueName);
 }
 
 async function doSheetAct(sheetAct:SheetAct):Promise<void> {
-    let {db, sheetHead} = sheetAct;
+    let {db, sheetHead, from} = sheetAct;
     let {id, sheet, state, action, unit, user, flow} = sheetHead;
     let runner = await getRunner(db);
     if (runner === undefined) {
@@ -69,16 +70,14 @@ async function doSheetAct(sheetAct:SheetAct):Promise<void> {
         let sheetRet = sheetArr[0];
         if (sheetRet !== undefined) {
             let sheetMsg:SheetMessage = {
+                unit: unit,
                 type: 'sheet',
+                from: from,
                 db: db,
-                id: id,
                 body: sheetRet,
                 to: undefined,
             };
-            await queueToUnitx({
-                unit: unit,
-                message: sheetMsg,
-            });
+            await queueToUnitx(sheetMsg);
         }
 
         let hasMessage, busFaces;
@@ -90,17 +89,7 @@ async function doSheetAct(sheetAct:SheetAct):Promise<void> {
             hasMessage = actionRun.hasSend;
             busFaces = actionRun.busFaces;60
         }
-        //let actionReturn = 
         await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
-        /*
-        sheetAct消息不是在这里推送，而是在unitx里面推送。unitx知道推送给什么人
-        let msg = _.merge({
-            $type: 'sheetAct',
-            $user: user,
-            $unit: unit,
-        }, sheetRet);
-        await pushToCenter(db, msg);
-        */
     }
     catch(err) {
         console.log('sheet Act error: ', err);

@@ -30,7 +30,7 @@ function startSheetActQueue(redis) {
         return __awaiter(this, void 0, void 0, function* () {
             let { data } = job;
             if (data !== undefined) {
-                yield sheetQueueAct(data);
+                yield doSheetAct(data);
             }
             done();
         });
@@ -42,9 +42,10 @@ function startSheetActQueue(redis) {
     */
 }
 exports.startSheetActQueue = startSheetActQueue;
-function sheetQueueAct(jobData) {
+function doSheetAct(sheetAct) {
     return __awaiter(this, void 0, void 0, function* () {
-        let { db, sheet, state, action, unit, user, id, flow } = jobData;
+        let { db, sheetHead } = sheetAct;
+        let { sheet, state, action, unit, user, id, flow } = sheetHead;
         let runner = yield runner_1.getRunner(db);
         if (runner === undefined) {
             console.log('sheetAct: ', db + ' is not valid');
@@ -99,7 +100,7 @@ function sheetQueueAct(jobData) {
                 busFaces = actionRun.busFaces;
                 60;
             }
-            let actionReturn = yield afterAction_1.afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
+            yield afterAction_1.afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
             /*
             sheetAct消息不是在这里推送，而是在unitx里面推送。unitx知道推送给什么人
             let msg = _.merge({

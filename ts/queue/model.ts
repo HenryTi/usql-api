@@ -11,33 +11,40 @@ export interface SheetHead {
 
 export interface SheetAct {
     db: string;
+    from: number;
     sheetHead: SheetHead;
 }
 
-export interface ClientMessage {
-    type: 'sheet'|'msg';
-    to: number[];
+export interface Message {
+    unit: number;
+    type: 'sheet'|'msg'|'bus';
     body: any;
+}
+
+export interface ClientMessage extends Message {
+    type: 'sheet' | 'msg';
+    from: number;               // 发送人
+    to: number[];               // 接收人
 }
 
 export interface SheetMessage extends ClientMessage{
     type: 'sheet';
     db: string;
-    id: number;
+    //id: number;
 }
 
 export interface MsgMessage extends ClientMessage {
     type: 'msg';
 }
 
-export interface BusMessage {
+export interface BusMessage extends Message {
     type: 'bus';
-    body: any;
 }
 
+/*
 export type Message = ClientMessage | BusMessage;
 
 export interface UnitxPack {
-    unit: number;
     message: Message;
 }
+*/

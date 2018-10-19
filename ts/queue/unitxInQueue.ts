@@ -19,8 +19,8 @@ export function startUnitxInQueue(redis:any) {
             let {data} = job;
             switch (data.type) {
                 case 'sheet':
-                case 'msg': await pushToClient(data); break;
-                case 'bus': await processBusMessage(data); break;
+                case 'msg': await pushToClient(data as ClientMessage); break;
+                case 'bus': await processBusMessage(data as BusMessage); break;
             }
             /*
             console.log('pushToCenter start');
@@ -48,11 +48,7 @@ export function startUnitxInQueue(redis:any) {
             done(new Error(err));
         }
     });
-    /*
-    await unitxQueue.isReady();
-    console.log(unitxQueueName, ' is ready');
-    return unitxQueue;
-    */
+    console.log('QUEUE: ' + unitxInQueueName);
 }
 
 async function processBusMessage(msg:BusMessage):Promise<void> {

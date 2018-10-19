@@ -30,9 +30,11 @@ export async function afterAction(
         let messages = resArrs.shift();
         // 将执行操作action，或者sheetAction产生的消息，发送给最终用户的客户端
         for (let row of messages) {
-            let {to, msg, action, data, notify} = row;
+            let {from, to, msg, action, data, notify} = row;
             let infoMsg:MsgMessage = {
+                unit: unit,
                 type: 'msg',
+                from: from,
                 to: to,
                 body: {
                     $type: 'msg',
@@ -82,6 +84,7 @@ export async function afterAction(
                 });
                 */
                 let busMsg: BusMessage = {
+                    unit: unit,
                     type: 'bus',
                     body: {
                         $unit: unit,
@@ -91,10 +94,7 @@ export async function afterAction(
                         data: packedBusData
                     }
                 }
-                await queueToUnitx({
-                    unit: unit,
-                    message: busMsg,
-                });
+                await queueToUnitx(busMsg);
             }
         }
     }

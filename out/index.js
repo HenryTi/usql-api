@@ -11,9 +11,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
 const bodyParser = require("body-parser");
 const config = require("config");
-const tv_1 = require("./tv");
+const router_1 = require("./router");
+//, { startSheetToUnitxQueue, startBusToUnitxQueue, startSheetActQueue } 
 const core_1 = require("./core");
-const unitx_server_1 = require("./unitx-server");
+//import { unitxRouter, startUnitxQueue } from './unitx-server';
+const queue_1 = require("./queue");
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
         let connection = config.get("connection");
@@ -53,12 +55,12 @@ const unitx_server_1 = require("./unitx-server");
         }));
         // 正常的tonva usql接口
         //app.use('/usql/:db/bus/', [authUnitx, sendToBusRouter]);
-        app.use('/usql/:db/unitx/', [core_1.authUnitx, unitx_server_1.unitxRouter]);
-        app.use('/usql/:db/tv/', [core_1.authCheck, tv_1.default]);
+        app.use('/usql/:db/unitx/', [core_1.authUnitx, queue_1.unitxRouter]);
+        app.use('/usql/:db/tv/', [core_1.authCheck, router_1.router]);
         //app.use('/usql/:db/log', getWsLogs);
         // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
         //app.use('/usql/:db/debug', [authDebug, tv]);
-        app.use('/usql/:db/debug', [core_1.authCheck, tv_1.default]);
+        app.use('/usql/:db/debug', [core_1.authCheck, router_1.router]);
         function dbHello(req, res) {
             let db = req.params.db;
             res.json({ "hello": 'usql-api: hello, db is ' + db });
@@ -72,11 +74,16 @@ const unitx_server_1 = require("./unitx-server");
         console.log('port=', port);
         let redisConfig = config.get('redis');
         let redis = { redis: redisConfig };
-        console.log('redis:', redis);
-        tv_1.startBusToUnitxQueue(redis);
-        tv_1.startSheetToUnitxQueue(redis);
-        tv_1.startSheetActQueue(redis);
-        unitx_server_1.startUnitxQueue(redis);
+        console.log('redis:', redisConfig);
+        /*
+        startBusToUnitxQueue(redis);
+        startSheetToUnitxQueue(redis);
+        startSheetActQueue(redis);
+        startUnitxQueue(redis);
+        */
+        queue_1.startSheetQueue(redis);
+        queue_1.startToUnitxQueue(redis);
+        queue_1.startUnitxInQueue(redis);
         app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
             console.log('USQL-API listening on port ' + port);
             let connection = config.get("connection");

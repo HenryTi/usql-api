@@ -17,4 +17,5 @@ exports.pushToCenter = pushToCenter_1.pushToCenter;
 var packReturn_1 = require("./packReturn");
 exports.packReturn = packReturn_1.packReturn;
 exports.packBus = packReturn_1.packBus;
+exports.packParam = packReturn_1.packParam;
 //# sourceMappingURL=index.js.map

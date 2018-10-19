@@ -3,11 +3,12 @@ import * as _ from 'lodash';
 import { getRunner } from './runner';
 import { afterAction } from './afterAction';
 import { queueSheetToUnitx } from './toUnitxQueue';
+import { SheetAct } from '../queue';
 
 const sheetActQueueName = 'sheet-act-queue';
-let sheetActQueue:bull.Queue;
+let sheetActQueue:bull.Queue<SheetAct>;
 
-export async function queueSheetAct(msg:any):Promise<bull.Job> {
+export async function queueSheetAct(msg:SheetAct):Promise<bull.Job> {
     return await sheetActQueue.add(msg);
 }
 
@@ -19,7 +20,7 @@ export function startSheetActQueue(redis:any) {
     sheetActQueue.process(async function(job, done) {
         let {data} = job;
         if (data !== undefined) {
-            await sheetQueueAct(data);
+            await doSheetAct(data);
         } 
         done();
     });
@@ -30,8 +31,10 @@ export function startSheetActQueue(redis:any) {
     */
 }
 
-async function sheetQueueAct(jobData:any):Promise<void> {
-    let {db, sheet, state, action, unit, user, id, flow} = jobData;
+async function doSheetAct(sheetAct:SheetAct):Promise<void> {
+    let {db, sheetHead} = sheetAct;
+    let {sheet, state, action, unit, user, id, flow} = sheetHead;
+
     let runner = await getRunner(db);
     if (runner === undefined) {
         console.log('sheetAct: ', db + ' is not valid');
@@ -87,7 +90,7 @@ async function sheetQueueAct(jobData:any):Promise<void> {
             hasMessage = actionRun.hasSend;
             busFaces = actionRun.busFaces;60
         }
-        let actionReturn = await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
+        await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
         /*
         sheetAct消息不是在这里推送，而是在unitx里面推送。unitx知道推送给什么人
         let msg = _.merge({

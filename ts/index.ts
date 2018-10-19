@@ -2,10 +2,11 @@ import * as express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import * as bull from 'bull';
-import tv, { startSheetToUnitxQueue, startBusToUnitxQueue, startSheetActQueue } from './tv';
+import {router} from './router';
+//, { startSheetToUnitxQueue, startBusToUnitxQueue, startSheetActQueue } 
 import {Auth, authCheck, authDebug, authUnitx} from './core';
-import { unitxRouter, startUnitxQueue } from './unitx-server';
+//import { unitxRouter, startUnitxQueue } from './unitx-server';
+import { unitxRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } from './queue';
 
 (async function () {
     let connection = config.get<any>("connection");
@@ -47,12 +48,12 @@ import { unitxRouter, startUnitxQueue } from './unitx-server';
     // 正常的tonva usql接口
     //app.use('/usql/:db/bus/', [authUnitx, sendToBusRouter]);
     app.use('/usql/:db/unitx/', [authUnitx, unitxRouter]);
-    app.use('/usql/:db/tv/', [authCheck, tv]);
+    app.use('/usql/:db/tv/', [authCheck, router]);
 
     //app.use('/usql/:db/log', getWsLogs);
     // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
     //app.use('/usql/:db/debug', [authDebug, tv]);
-    app.use('/usql/:db/debug', [authCheck, tv]);
+    app.use('/usql/:db/debug', [authCheck, router]);
 
     function dbHello(req:Request, res:Response) {
         let db = req.params.db;
@@ -69,12 +70,18 @@ import { unitxRouter, startUnitxQueue } from './unitx-server';
 
     let redisConfig = config.get<any>('redis');
     let redis = {redis: redisConfig};
-    console.log('redis:', redis);
+    console.log('redis:', redisConfig);
 
+    /*
     startBusToUnitxQueue(redis);
     startSheetToUnitxQueue(redis);
     startSheetActQueue(redis);
     startUnitxQueue(redis);
+    */
+
+    startSheetQueue(redis);
+    startToUnitxQueue(redis);
+    startUnitxInQueue(redis);
 
     app.listen(port, async ()=>{
         console.log('USQL-API listening on port ' + port);

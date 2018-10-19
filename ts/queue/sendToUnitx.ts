@@ -29,7 +29,8 @@ class UnitxApi extends Fetch {
 const unitxApis: {[unit:number]:UnitxApi} = {};
 async function getUnitxApi(unit:number):Promise<UnitxApi> {
     let unitxApi = unitxApis[unit];
-    if (unitxApi !== null) return unitxApi;
+    if (unitxApi === null) return null;
+    if (unitxApi !== undefined) return unitxApi;
     let unitx = await centerApi.unitx(unit);
     if (unitx === undefined) return unitxApis[unit] = null;
     let {url, urlDebug} = unitx;
