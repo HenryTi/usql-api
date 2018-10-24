@@ -1,0 +1,14 @@
+{
+    "centerhost": "101.200.46.56",
+    "connection": {
+        "host": "101.200.46.56",
+        "user": "root",
+        "password": "wpmKMPS2xwlG3ZC",
+        "multipleStatements": true
+    },
+    "redis": {
+        "port": "6379",
+        "host": "127.0.0.1",
+        "password": "123..com"
+    }
+}

@@ -1,0 +1,20 @@
+{
+    "centerhost": "localhost:3000",
+    "center": "http://centerhost/tv/",
+    "unitxhost": "localhost:3015",
+    "port": 3015,
+    "debugUser": -99,
+    "debugUnit": -99,
+    "secret": "xxx-yyy-zzz-00110",
+    "sqlType": "mysql",
+    "connection": {
+        "host": "0.0.0.0",
+        "user": "usr",
+        "password": "pwd",
+        "multipleStatements": true
+    },
+    "redis": {
+        "port": "6379",
+        "host": "127.0.0.1"
+    }
+}
