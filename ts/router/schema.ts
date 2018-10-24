@@ -7,7 +7,7 @@ import { Runner } from '../db';
 export default function(router:Router) {
     //router.get('/schema/:name', async (req:Request, res:Response) => {
     get(router, 'schema', '/:name',
-    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any) => {
         return schema;
     });
     /*

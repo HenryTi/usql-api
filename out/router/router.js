@@ -36,6 +36,8 @@ exports.unknownEntity = unknownEntity;
 function validEntity(res, schema, type) {
     if (schema.type === type)
         return true;
+    if (type === 'schema')
+        return true;
     res.json({ error: schema.name + ' is not ' + type });
     return false;
 }

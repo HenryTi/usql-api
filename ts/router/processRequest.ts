@@ -30,10 +30,14 @@ async function process(req:Request, res:Response, entityType:string, processer:P
         if (runner === undefined) return;
         let {params} = req;
         let {name} = params;
-        let schema = runner.getSchema(name);
-        if (schema === undefined) return unknownEntity(res, name);
-        let {call, run} = schema;
-        if (validEntity(res, call, entityType) === false) return;
+        let call, run;
+        if (name !== undefined) {
+            let schema = runner.getSchema(name);
+            if (schema === undefined) return unknownEntity(res, name);
+            call = schema.call;
+            run = schema.run;
+            if (validEntity(res, call, entityType) === false) return;
+        }
         let body = isGet === true? (req as any).query : (req as any).body;
         let result = await processer(unit, userId, name, db, params, runner, body, call, run);
         res.json({

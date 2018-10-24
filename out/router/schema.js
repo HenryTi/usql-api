@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const processRequest_1 = require("./processRequest");
 function default_1(router) {
     //router.get('/schema/:name', async (req:Request, res:Response) => {
-    processRequest_1.get(router, 'schema', '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    processRequest_1.get(router, 'schema', '/:name', (unit, user, name, db, urlParams, runner, body, schema, run) => __awaiter(this, void 0, void 0, function* () {
         return schema;
     }));
     /*

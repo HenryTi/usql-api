@@ -31,6 +31,7 @@ export function unknownEntity(res:Response, name:string) {
 
 export function validEntity(res:Response, schema:any, type:string):boolean {
     if (schema.type === type) return true;
+    if (type === 'schema') return true;
     res.json({error: schema.name + ' is not ' + type});
     return false;
 }

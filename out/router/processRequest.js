@@ -40,12 +40,16 @@ function process(req, res, entityType, processer, isGet) {
                 return;
             let { params } = req;
             let { name } = params;
-            let schema = runner.getSchema(name);
-            if (schema === undefined)
-                return router_1.unknownEntity(res, name);
-            let { call, run } = schema;
-            if (router_1.validEntity(res, call, entityType) === false)
-                return;
+            let call, run;
+            if (name !== undefined) {
+                let schema = runner.getSchema(name);
+                if (schema === undefined)
+                    return router_1.unknownEntity(res, name);
+                call = schema.call;
+                run = schema.run;
+                if (router_1.validEntity(res, call, entityType) === false)
+                    return;
+            }
             let body = isGet === true ? req.query : req.body;
             let result = yield processer(unit, userId, name, db, params, runner, body, call, run);
             res.json({
