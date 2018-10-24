@@ -16,9 +16,8 @@ function default_1(router) {
     processRequest_1.post(router, actionType, '/:name', processAction);
 }
 exports.default = default_1;
-function processAction(unit, user, db, runner, params, body, schema) {
+function processAction(unit, user, name, db, urlParams, runner, body, schema, run) {
     return __awaiter(this, void 0, void 0, function* () {
-        let { name } = params;
         let { data } = body;
         if (data === undefined)
             data = core_1.packParam(schema, body);

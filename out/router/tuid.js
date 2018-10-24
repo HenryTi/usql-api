@@ -12,8 +12,8 @@ const router_1 = require("./router");
 const processRequest_1 = require("./processRequest");
 const tuidType = 'tuid';
 function default_1(router) {
-    processRequest_1.get(router, tuidType, '/:name/:id', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { id, name } = params;
+    processRequest_1.get(router, tuidType, '/:name/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { id } = urlParams;
         let result = yield runner.tuidGet(name, unit, user, id);
         let arr0 = result[0];
         let value = undefined;
@@ -29,32 +29,30 @@ function default_1(router) {
         }
         return value;
     }));
-    processRequest_1.get(router, tuidType, '-arr/:name/:owner/:arr/:id/', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { id, name, owner, arr } = params;
+    processRequest_1.get(router, tuidType, '-arr/:name/:owner/:arr/:id/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { id, owner, arr } = urlParams;
         let schemaArr = router_1.getTuidArr(schema, arr);
         let result = yield runner.tuidArrGet(name, arr, unit, user, owner, id);
         let row = result[0];
         return row;
     }));
-    processRequest_1.get(router, tuidType, '-all/:name/', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { name } = params;
+    processRequest_1.get(router, tuidType, '-all/:name/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.tuidGetAll(name, unit, user);
         return result;
     }));
-    processRequest_1.get(router, tuidType, '-arr-all/:name/:owner/:arr/', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { name, owner, arr } = params;
+    processRequest_1.get(router, tuidType, '-arr-all/:name/:owner/:arr/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { owner, arr } = urlParams;
         let schemaArr = router_1.getTuidArr(schema, arr);
         let result = yield runner.tuidGetArrAll(name, arr, unit, user, owner);
         return result;
     }));
-    processRequest_1.get(router, tuidType, '-proxy/:name/:type/:id', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { id, type, name } = params;
+    processRequest_1.get(router, tuidType, '-proxy/:name/:type/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { id, type } = urlParams;
         let result = yield runner.tuidProxyGet(name, unit, user, id, type);
         let row = result[0];
         return row;
     }));
-    processRequest_1.post(router, tuidType, '/:name', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { name } = params;
+    processRequest_1.post(router, tuidType, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let id = body["$id"];
         let dbParams = [id];
         let fields = schema.fields;
@@ -90,8 +88,8 @@ function default_1(router) {
         }
         return row;
     }));
-    processRequest_1.post(router, tuidType, '-arr/:name/:owner/:arr/', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { name, owner, arr } = params;
+    processRequest_1.post(router, tuidType, '-arr/:name/:owner/:arr/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { owner, arr } = urlParams;
         let schemaArr = router_1.getTuidArr(schema, arr);
         let id = body["$id"];
         let dbParams = [owner, id];
@@ -104,21 +102,20 @@ function default_1(router) {
         let row = result[0];
         return row;
     }));
-    processRequest_1.post(router, tuidType, '-arr-pos/:name/:owner/:arr/', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { name, owner, arr } = params;
+    processRequest_1.post(router, tuidType, '-arr-pos/:name/:owner/:arr/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { owner, arr } = urlParams;
         let { $id, $order } = body;
         let dbParams = [owner, $id, $order];
         let result = yield runner.tuidArrPos(name, arr, unit, user, dbParams);
         return undefined;
     }));
-    processRequest_1.post(router, tuidType, 'ids/:name/:arr', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { name, arr } = params;
+    processRequest_1.post(router, tuidType, 'ids/:name/:arr', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { arr } = urlParams;
         let ids = body.join(',');
         let result = yield runner.tuidIds(name, arr, unit, user, ids);
         return result;
     }));
-    processRequest_1.post(router, tuidType, 's/:name', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { name } = params;
+    processRequest_1.post(router, tuidType, 's/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { arr, owner, key, pageStart, pageSize } = body;
         let result = arr === undefined ?
             yield runner.tuidSeach(name, unit, user, arr, key, pageStart, pageSize)

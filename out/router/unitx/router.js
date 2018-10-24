@@ -17,12 +17,11 @@ function default_1(router) {
     processRequest_1.post(router, actionType, '/:name', unitxAction);
 }
 exports.default = default_1;
-function unitxAction(unit, user, db, runner, params, body, schema) {
+function unitxAction(unit, user, name, db, urlParams, runner, body, schema, run) {
     return __awaiter(this, void 0, void 0, function* () {
-        let { name } = params;
         switch (name) {
             default:
-                return yield action_1.processAction(unit, user, db, runner, params, body, schema);
+                return yield action_1.processAction(unit, user, name, db, urlParams, runner, body, schema, run);
             case 'a':
                 return;
         }

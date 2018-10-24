@@ -11,10 +11,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const processRequest_1 = require("./processRequest");
 const accessType = 'access';
 function default_1(router) {
-    processRequest_1.get(router, accessType, '', (unit, user, db, runner, params, body) => __awaiter(this, void 0, void 0, function* () {
-        let { name } = params;
+    processRequest_1.get(router, accessType, '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         //let {acc} = '*'; //(req as any).query;
-        let acc = undefined;
+        let { acc } = body;
         let accs = undefined;
         if (acc !== undefined) {
             accs = acc.split('|');

@@ -8,8 +8,8 @@ const tuidType = 'tuid';
 
 export default function(router: Router) {
     get(router, tuidType, '/:name/:id', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body:any, schema:any) => {
-        let {id, name} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {id} = urlParams;
         let result = await runner.tuidGet(name, unit, user, id);
         let arr0 = result[0];
         let value = undefined;
@@ -28,40 +28,38 @@ export default function(router: Router) {
 
 
     get(router, tuidType, '-arr/:name/:owner/:arr/:id/', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body:any, schema:any) => {
-            let {id, name, owner, arr} = params;
-            let schemaArr = getTuidArr(schema, arr);
-            let result = await runner.tuidArrGet(name, arr, unit, user, owner, id);
-            let row = result[0];
-            return row;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {id, owner, arr} = urlParams;
+        let schemaArr = getTuidArr(schema, arr);
+        let result = await runner.tuidArrGet(name, arr, unit, user, owner, id);
+        let row = result[0];
+        return row;
     });
 
     get(router, tuidType, '-all/:name/',
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body:any, schema:any) => {
-        let {name} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let result = await runner.tuidGetAll(name, unit, user);
         return result;
     });
 
     get(router, tuidType, '-arr-all/:name/:owner/:arr/', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body:any, schema:any) => {
-        let {name, owner, arr} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {owner, arr} = urlParams;
         let schemaArr = getTuidArr(schema, arr);
         let result = await runner.tuidGetArrAll(name, arr, unit, user, owner);
         return result;
     });
 
     get(router, tuidType, '-proxy/:name/:type/:id',
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body:any, schema:any) => {
-        let {id, type, name} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {id, type} = urlParams;
         let result = await runner.tuidProxyGet(name, unit, user, id, type);
         let row = result[0];
         return row;
     });
 
     post(router, tuidType, '/:name', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body:any, schema:any) => {
-        let {name} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let id = body["$id"];
         let dbParams:any[] = [id];
         let fields = schema.fields;
@@ -96,8 +94,8 @@ export default function(router: Router) {
     });
 
     post(router, tuidType, '-arr/:name/:owner/:arr/', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body:any, schema:any) => {
-        let {name, owner, arr} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {owner, arr} = urlParams;
         let schemaArr = getTuidArr(schema, arr);
         let id = body["$id"];
         let dbParams:any[] = [owner, id];
@@ -112,8 +110,8 @@ export default function(router: Router) {
     });
 
     post(router, tuidType, '-arr-pos/:name/:owner/:arr/', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body:any, schema:any) => {
-        let {name, owner, arr} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {owner, arr} = urlParams;
         let {$id, $order} = body;
         let dbParams:any[] = [owner, $id, $order];
         let result = await runner.tuidArrPos(name, arr, unit, user, dbParams);
@@ -121,16 +119,15 @@ export default function(router: Router) {
     });
 
     post(router, tuidType, 'ids/:name/:arr', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body:any, schema:any) => {
-        let {name, arr} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {arr} = urlParams;
         let ids = (body as number[]).join(',');
         let result = await runner.tuidIds(name, arr, unit, user, ids);
         return result;
     });
 
     post(router, tuidType, 's/:name', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body:any, schema:any) => {
-        let {name} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {arr, owner, key, pageStart, pageSize} = body;
         let result = arr === undefined?
             await runner.tuidSeach(name, unit, user, arr, key, pageStart, pageSize)

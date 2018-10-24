@@ -223,13 +223,10 @@ export class Runner {
             let runObj = JSON.parse(run);
             schemaObj.typeId = id;
             schemaObj.version = version;
-            /*
             this.schemas[name] = {
                 call: schemaObj,
                 run: runObj,
-            }*/
-            schemaObj.run = runObj;
-            this.schemas[name] = schemaObj;
+            }
             let {type, url} = schemaObj;
             switch (type) {
                 case 'access': this.accessSchemaArr.push(schemaObj); break;

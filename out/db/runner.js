@@ -362,13 +362,12 @@ class Runner {
             schema.queries[i] = call(n);
         }
     }
-    fieldsTuids(fields, tuids) {
-        if (fields === undefined)
-            return;
+    /*
+    private fieldsTuids(fields:any[], tuids:any[]) {
+        if (fields === undefined) return;
         for (let f of fields) {
-            let { tuid } = f;
-            if (tuid === undefined)
-                continue;
+            let {tuid} = f;
+            if (tuid === undefined) continue;
             let schema = this.schemas[tuid.toLowerCase()];
             if (schema === undefined) {
                 continue;
@@ -376,17 +375,19 @@ class Runner {
             this.tuidsPush(tuids, schema.call);
         }
     }
-    arrsTuids(arrs, tuids) {
-        if (arrs === undefined)
-            return;
+    */
+    /*
+    private arrsTuids(arrs:any[], tuids:any[]) {
+        if (arrs === undefined) return;
         for (let arr of arrs) {
             this.fieldsTuids(arr.fields, tuids);
         }
+    }*/
+    /*
+    private tuidsPush(tuids:any[], tuid:any) {
+        if (tuids.find(v => v === tuid) === undefined) tuids.push(tuid);
     }
-    tuidsPush(tuids, tuid) {
-        if (tuids.find(v => v === tuid) === undefined)
-            tuids.push(tuid);
-    }
+    */
     buildAccesses() {
         this.access = {
             usq: this.usqId

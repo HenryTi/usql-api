@@ -10,11 +10,10 @@ export default function(router:Router) {
     post(router, actionType, '/:name', unitxAction);
 }
 
-async function unitxAction(unit:number, user:number, db:string, runner:Runner, params:any, body:any, schema:any):Promise<any> {
-    let {name} = params;
+async function unitxAction(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
     switch (name) {
         default:
-            return await processAction(unit, user, db, runner, params, body, schema);
+            return await processAction(unit, user, name, db, urlParams, runner, body, schema, run);
         case 'a':
             return;
     }

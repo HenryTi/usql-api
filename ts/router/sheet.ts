@@ -7,8 +7,7 @@ const sheetType = 'sheet';
 
 export default function(router:Router) {
     post(router, sheetType, '/:name', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body?:any) => {
-        let {name} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {app, discription, data} = body;
         let result = await runner.sheetSave(name, unit, user, app, discription, data);
         let sheetRet = result[0];
@@ -27,8 +26,7 @@ export default function(router:Router) {
     });
         
     put(router, sheetType, '/:name', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body?:any) => {
-        let {name} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         await runner.sheetProcessing(body.id);
         let {state, action, id, flow} = body;
         await queueSheet({
@@ -48,38 +46,35 @@ export default function(router:Router) {
     });
 
     post(router, sheetType, '/:name/states', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body?:any) => {
-        let {name} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {state, pageStart, pageSize} = body;
         let result = await runner.sheetStates(name, state, unit, user, pageStart, pageSize);
         return result;
     });
 
     get(router, sheetType, '/:name/statecount',
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body?:any) => {
-        let {name} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let result = await runner.sheetStateCount(name, unit, user);
         return result;
     });
 
     get(router, sheetType, '/:name/get/:id', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body?:any) => {
-        let {name, id} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {id} = urlParams;
         let result = await runner.getSheet(name, unit, user, id as any);
         return result;
     });
 
     post(router, sheetType, '/:name/archives',
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body?:any) => {
-        let {name} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {pageStart, pageSize} = body;
         let result = await runner.sheetArchives(name, unit, user, pageStart, pageSize);
         return result;
     });
 
     get(router, sheetType, '/:name/archive/:id', 
-    async (unit:number, user:number, db:string, runner:Runner, params:any, body?:any) => {
-        let {name, id} = params;
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {id} = urlParams;
         let result = await runner.sheetArchive(unit, user, name, id as any);
         return result;
     });

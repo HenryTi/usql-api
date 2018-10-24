@@ -11,26 +11,26 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const router_1 = require("./router");
 function post(router, entityType, path, processer) {
     router.post(`/${entityType}${path}`, (req, res) => __awaiter(this, void 0, void 0, function* () {
-        yield process(req, res, entityType, processer);
+        yield process(req, res, entityType, processer, false);
     }));
 }
 exports.post = post;
 ;
 function get(router, entityType, path, processer) {
-    router.post(`/${entityType}${path}`, (req, res) => __awaiter(this, void 0, void 0, function* () {
-        yield process(req, res, entityType, processer);
+    router.get(`/${entityType}${path}`, (req, res) => __awaiter(this, void 0, void 0, function* () {
+        yield process(req, res, entityType, processer, true);
     }));
 }
 exports.get = get;
 ;
 function put(router, entityType, path, processer) {
-    router.post(`/${entityType}${path}`, (req, res) => __awaiter(this, void 0, void 0, function* () {
-        yield process(req, res, entityType, processer);
+    router.put(`/${entityType}${path}`, (req, res) => __awaiter(this, void 0, void 0, function* () {
+        yield process(req, res, entityType, processer, false);
     }));
 }
 exports.put = put;
 ;
-function process(req, res, entityType, processer) {
+function process(req, res, entityType, processer, isGet) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let userToken = req.user;
@@ -43,10 +43,11 @@ function process(req, res, entityType, processer) {
             let schema = runner.getSchema(name);
             if (schema === undefined)
                 return router_1.unknownEntity(res, name);
-            let schemaCall = schema.call;
-            if (router_1.validEntity(res, schemaCall, entityType) === false)
+            let { call, run } = schema;
+            if (router_1.validEntity(res, call, entityType) === false)
                 return;
-            let result = yield processer(unit, userId, db, runner, params, req.body, schemaCall);
+            let body = isGet === true ? req.query : req.body;
+            let result = yield processer(unit, userId, name, db, params, runner, body, call, run);
             res.json({
                 ok: true,
                 res: result

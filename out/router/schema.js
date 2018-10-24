@@ -8,45 +8,32 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const router_1 = require("./router");
+const processRequest_1 = require("./processRequest");
 function default_1(router) {
-    router.get('/schema/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let user = req.user;
-        let db = user.db;
-        let { name } = req.params;
-        let runner = yield router_1.checkRunner(db, res);
-        let schema = runner.getSchema(name);
-        if (schema === undefined)
-            return router_1.unknownEntity(res, name);
-        let call = schema.call;
-        res.json({
-            ok: true,
-            res: call,
-        });
+    //router.get('/schema/:name', async (req:Request, res:Response) => {
+    processRequest_1.get(router, 'schema', '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        return schema;
     }));
-    router.post('/schema', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let user = req.user;
+    /*
+    router.post('/schema', async (req:Request, res:Response) => {
+        let user:User = (req as any).user;
         let db = user.db;
-        let { body } = req;
-        let runner = yield router_1.checkRunner(db, res);
+        let {body} = req;
+        let runner = await checkRunner(db, res);
         //let schema = runner.getSchema(name);
         //if (schema === undefined) return unknownEntity(res, name);
         //let call = schema.call;
         res.json({
             ok: true,
-            res: body.map(name => (runner.getSchema(name) || {}).call),
+            res: (body as string[]).map(name => (runner.getSchema(name)||{}).call),
         });
-    }));
-    router.get('/schema/:name/:version', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let user = req.user;
-        let db = user.db;
-        let { name, version } = req.params;
-        let runner = yield router_1.checkRunner(db, res);
-        let schema = yield runner.loadSchemaVersion(name, version);
-        res.json({
-            ok: true,
-            res: schema,
-        });
+    });
+    */
+    //router.get('/schema/:name/:version', async (req:Request, res:Response) => {
+    processRequest_1.get(router, 'schema', '/:name/:version', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { version } = urlParams;
+        let schemaVersion = yield runner.loadSchemaVersion(name, version);
+        return schemaVersion;
     }));
 }
 exports.default = default_1;
