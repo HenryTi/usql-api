@@ -1,4 +1,5 @@
 export * from './router';
+export {default as unitxRouter} from './unitx';
 import {router} from './router';
 import accessRouter from './access';
 import schemaRouter from './schema';

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var unitxRouter_1 = require("./unitxRouter");
-exports.unitxRouter = unitxRouter_1.unitxRouter;
+var unitxQueueRouter_1 = require("./unitxQueueRouter");
+exports.unitxQueueRouter = unitxQueueRouter_1.unitxQueueRouter;
 var unitxInQueue_1 = require("./unitxInQueue");
 exports.startUnitxInQueue = unitxInQueue_1.startUnitxInQueue;
 var toUnitxQueue_1 = require("./toUnitxQueue");

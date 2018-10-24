@@ -8,16 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const router_1 = require("./router");
+const processRequest_1 = require("./processRequest");
+const accessType = 'access';
 function default_1(router) {
-    router.get('/access', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let user = req.user;
-        let { name } = req.params;
-        let { acc } = req.query;
-        let db = user.db;
-        let runner = yield router_1.checkRunner(db, res);
-        if (runner === undefined)
-            return;
+    processRequest_1.get(router, accessType, '', (unit, user, db, runner, params, body) => __awaiter(this, void 0, void 0, function* () {
+        let { name } = params;
+        //let {acc} = '*'; //(req as any).query;
+        let acc = undefined;
         let accs = undefined;
         if (acc !== undefined) {
             accs = acc.split('|');
@@ -25,10 +22,7 @@ function default_1(router) {
                 accs = undefined;
         }
         let access = yield runner.getAccesses(accs);
-        res.json({
-            ok: true,
-            res: access,
-        });
+        return access;
     }));
 }
 exports.default = default_1;

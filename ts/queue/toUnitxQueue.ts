@@ -1,7 +1,7 @@
 import * as bull from 'bull';
 import { Message, SheetMessage } from './model';
 import { sendToUnitx } from './sendToUnitx';
-import { getRunner } from '../tv/runner';
+import { getRunner } from '../db/runner';
 
 const toUnitxQueueName = 'to-unitx-queue';
 let toUnitxQueue:bull.Queue<Message>;

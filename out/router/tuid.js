@@ -9,309 +9,123 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const router_1 = require("./router");
+const processRequest_1 = require("./processRequest");
+const tuidType = 'tuid';
 function default_1(router) {
-    router.get('/tuid/:name/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let db = user.db;
-            let { id, name } = req.params;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let schema = runner.getSchema(name);
-            if (schema === undefined)
-                return router_1.unknownEntity(res, name);
-            let schemaCall = schema.call;
-            if (router_1.validEntity(res, schemaCall, 'tuid') === false)
-                return;
-            let result = yield runner.tuidGet(name, user.unit, user.id, id);
-            let arr0 = result[0];
-            let value = undefined;
-            if (arr0.length > 0) {
-                value = arr0[0];
-                let { arrs } = schemaCall;
-                if (arrs !== undefined) {
-                    let len = arrs.length;
-                    for (let i = 0; i < len; i++) {
-                        value[arrs[i].name] = result[i + 1];
-                    }
+    processRequest_1.get(router, tuidType, '/:name/:id', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { id, name } = params;
+        let result = yield runner.tuidGet(name, unit, user, id);
+        let arr0 = result[0];
+        let value = undefined;
+        if (arr0.length > 0) {
+            value = arr0[0];
+            let { arrs } = schema;
+            if (arrs !== undefined) {
+                let len = arrs.length;
+                for (let i = 0; i < len; i++) {
+                    value[arrs[i].name] = result[i + 1];
                 }
             }
-            res.json({
-                ok: true,
-                res: value,
-            });
         }
-        catch (err) {
-            res.json({ error: err });
-            return;
-        }
+        return value;
     }));
-    router.get('/tuid-arr/:name/:owner/:arr/:id/', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let db = user.db;
-            let { id, name, owner, arr } = req.params;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let schema = runner.getSchema(name);
-            if (schema === undefined)
-                return router_1.unknownEntity(res, name);
-            let schemaArr = router_1.validTuidArr(res, schema.call, arr);
-            if (schemaArr === undefined)
-                return;
-            let result = yield runner.tuidArrGet(name, arr, user.unit, user.id, owner, id);
-            let row = result[0];
-            res.json({
-                ok: true,
-                res: row,
-            });
-        }
-        catch (err) {
-            res.json({ error: err });
-            return;
-        }
+    processRequest_1.get(router, tuidType, '-arr/:name/:owner/:arr/:id/', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { id, name, owner, arr } = params;
+        let schemaArr = router_1.getTuidArr(schema, arr);
+        let result = yield runner.tuidArrGet(name, arr, unit, user, owner, id);
+        let row = result[0];
+        return row;
     }));
-    router.get('/tuid-all/:name/', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let db = user.db;
-            let { name } = req.params;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let schema = runner.getSchema(name);
-            if (schema === undefined)
-                return router_1.unknownEntity(res, name);
-            let schemaCall = schema.call;
-            if (router_1.validEntity(res, schemaCall, 'tuid') === false)
-                return;
-            let result = yield runner.tuidGetAll(name, user.unit, user.id);
-            res.json({
-                ok: true,
-                res: result,
-            });
-        }
-        catch (err) {
-            res.json({ error: err });
-            return;
-        }
+    processRequest_1.get(router, tuidType, '-all/:name/', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { name } = params;
+        let result = yield runner.tuidGetAll(name, unit, user);
+        return result;
     }));
-    router.get('/tuid-arr-all/:name/:owner/:arr/', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let db = user.db;
-            let { name, owner, arr } = req.params;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let schema = runner.getSchema(name);
-            if (schema === undefined)
-                return router_1.unknownEntity(res, name);
-            let schemaArr = router_1.validTuidArr(res, schema.call, arr);
-            if (schemaArr === undefined)
-                return;
-            let result = yield runner.tuidGetArrAll(name, arr, user.unit, user.id, owner);
-            res.json({
-                ok: true,
-                res: result,
-            });
-        }
-        catch (err) {
-            res.json({ error: err });
-            return;
-        }
+    processRequest_1.get(router, tuidType, '-arr-all/:name/:owner/:arr/', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { name, owner, arr } = params;
+        let schemaArr = router_1.getTuidArr(schema, arr);
+        let result = yield runner.tuidGetArrAll(name, arr, unit, user, owner);
+        return result;
     }));
-    router.get('/tuid-proxy/:name/:type/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let db = user.db;
-            let { id, type, name } = req.params;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let schema = runner.getSchema(name);
-            if (schema === undefined)
-                return router_1.unknownEntity(res, name);
-            let schemaCall = schema.call;
-            if (router_1.validEntity(res, schemaCall, 'tuid') === false)
-                return;
-            let result = yield runner.tuidProxyGet(name, user.unit, user.id, id, type);
-            let row = result[0];
-            res.json({
-                ok: true,
-                res: row,
-            });
-        }
-        catch (err) {
-            res.json({ error: err });
-            return;
-        }
+    processRequest_1.get(router, tuidType, '-proxy/:name/:type/:id', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { id, type, name } = params;
+        let result = yield runner.tuidProxyGet(name, unit, user, id, type);
+        let row = result[0];
+        return row;
     }));
-    router.post('/tuid/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let { id: userId, unit, db } = user;
-            let { name } = req.params;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let schema = runner.getSchema(name);
-            if (schema === undefined)
-                return router_1.unknownEntity(res, name);
-            let schemaCall = schema.call;
-            if (router_1.validEntity(res, schemaCall, 'tuid') === false)
-                return;
-            let body = req.body;
-            let id = body["$id"];
-            let params = [id];
-            let fields = schemaCall.fields;
-            let len = fields.length;
-            for (let i = 0; i < len; i++) {
-                params.push(body[fields[i].name]);
-            }
-            let result = yield runner.tuidSave(name, unit, userId, params);
-            let row = result[0];
-            if (!id)
-                id = row.id;
-            if (id < 0)
-                id = -id;
-            if (id > 0) {
-                let { arrs } = schemaCall;
-                if (arrs !== undefined) {
-                    for (let arr of arrs) {
-                        let arrName = arr.name;
-                        let fields = arr.fields;
-                        let arrValues = body[arrName];
-                        if (arrValues === undefined)
-                            continue;
-                        for (let arrValue of arrValues) {
-                            let arrParams = [id, arrValue[arr.id]];
-                            let len = fields.length;
-                            for (let i = 0; i < len; i++) {
-                                arrParams.push(arrValue[fields[i].name]);
-                            }
-                            yield runner.tuidArrSave(name, arrName, unit, userId, arrParams);
+    processRequest_1.post(router, tuidType, '/:name', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { name } = params;
+        let id = body["$id"];
+        let dbParams = [id];
+        let fields = schema.fields;
+        let len = fields.length;
+        for (let i = 0; i < len; i++) {
+            dbParams.push(body[fields[i].name]);
+        }
+        let result = yield runner.tuidSave(name, unit, user, dbParams);
+        let row = result[0];
+        if (!id)
+            id = row.id;
+        if (id < 0)
+            id = -id;
+        if (id > 0) {
+            let { arrs } = schema;
+            if (arrs !== undefined) {
+                for (let arr of arrs) {
+                    let arrName = arr.name;
+                    let fields = arr.fields;
+                    let arrValues = body[arrName];
+                    if (arrValues === undefined)
+                        continue;
+                    for (let arrValue of arrValues) {
+                        let arrParams = [id, arrValue[arr.id]];
+                        let len = fields.length;
+                        for (let i = 0; i < len; i++) {
+                            arrParams.push(arrValue[fields[i].name]);
                         }
+                        yield runner.tuidArrSave(name, arrName, unit, user, arrParams);
                     }
                 }
             }
-            res.json({
-                ok: true,
-                res: row,
-            });
         }
-        catch (err) {
-            res.json({ error: err });
-            return;
-        }
+        return row;
     }));
-    router.post('/tuid-arr/:name/:owner/:arr/', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let db = user.db;
-            let { name, owner, arr } = req.params;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let schema = runner.getSchema(name);
-            if (schema === undefined)
-                return router_1.unknownEntity(res, name);
-            let schemaArr = router_1.validTuidArr(res, schema.call, arr);
-            if (schemaArr === undefined)
-                return;
-            let body = req.body;
-            let id = body["$id"];
-            let params = [owner, id];
-            let fields = schemaArr.fields;
-            let len = fields.length;
-            for (let i = 0; i < len; i++) {
-                params.push(body[fields[i].name]);
-            }
-            let result = yield runner.tuidArrSave(name, arr, user.unit, user.id, params);
-            let row = result[0];
-            res.json({
-                ok: true,
-                res: row,
-            });
+    processRequest_1.post(router, tuidType, '-arr/:name/:owner/:arr/', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { name, owner, arr } = params;
+        let schemaArr = router_1.getTuidArr(schema, arr);
+        let id = body["$id"];
+        let dbParams = [owner, id];
+        let fields = schemaArr.fields;
+        let len = fields.length;
+        for (let i = 0; i < len; i++) {
+            dbParams.push(body[fields[i].name]);
         }
-        catch (err) {
-            res.json({ error: err });
-            return;
-        }
+        let result = yield runner.tuidArrSave(name, arr, unit, user, dbParams);
+        let row = result[0];
+        return row;
     }));
-    router.post('/tuid-arr-pos/:name/:owner/:arr/', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let db = user.db;
-            let { name, owner, arr } = req.params;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let schema = runner.getSchema(name);
-            if (schema === undefined)
-                return router_1.unknownEntity(res, name);
-            let schemaArr = router_1.validTuidArr(res, schema.call, arr);
-            if (schemaArr === undefined)
-                return;
-            let body = req.body;
-            let { $id, $order } = body;
-            let params = [owner, $id, $order];
-            //let fields = schemaArr.fields;
-            //let len = fields.length;
-            //for (let i=0; i<len; i++) {
-            //    params.push(body[fields[i].name]);
-            //}
-            let result = yield runner.tuidArrPos(name, arr, user.unit, user.id, params);
-            //let row = result[0];
-            res.json({
-                ok: true,
-            });
-        }
-        catch (err) {
-            res.json({ error: err });
-            return;
-        }
+    processRequest_1.post(router, tuidType, '-arr-pos/:name/:owner/:arr/', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { name, owner, arr } = params;
+        let { $id, $order } = body;
+        let dbParams = [owner, $id, $order];
+        let result = yield runner.tuidArrPos(name, arr, unit, user, dbParams);
+        return undefined;
     }));
-    router.post('/tuidids/:name/:arr', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let user = req.user;
-        let db = user.db;
-        let { name, arr } = req.params;
-        let runner = yield router_1.checkRunner(db, res);
-        if (runner === undefined)
-            return;
-        let body = req.body;
+    processRequest_1.post(router, tuidType, 'ids/:name/:arr', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { name, arr } = params;
         let ids = body.join(',');
-        let result = yield runner.tuidIds(name, arr, user.unit, user.id, ids);
-        res.json({
-            ok: true,
-            res: result
-        });
+        let result = yield runner.tuidIds(name, arr, unit, user, ids);
+        return result;
     }));
-    router.post('/tuids/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let { unit, id, db } = user;
-            let { name } = req.params;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let { arr, owner, key, pageStart, pageSize } = req.body;
-            let result = arr === undefined ?
-                yield runner.tuidSeach(name, unit, id, arr, key, pageStart, pageSize)
-                :
-                    yield runner.tuidArrSeach(name, unit, id, arr, owner, key, pageStart, pageSize);
-            let rows = result[0];
-            res.json({
-                ok: true,
-                res: rows,
-            });
-        }
-        catch (err) {
-            res.json({ error: err });
-        }
-        ;
+    processRequest_1.post(router, tuidType, 's/:name', (unit, user, db, runner, params, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { name } = params;
+        let { arr, owner, key, pageStart, pageSize } = body;
+        let result = arr === undefined ?
+            yield runner.tuidSeach(name, unit, user, arr, key, pageStart, pageSize)
+            :
+                yield runner.tuidArrSeach(name, unit, user, arr, owner, key, pageStart, pageSize);
+        let rows = result[0];
+        return rows;
     }));
 }
 exports.default = default_1;

@@ -2,11 +2,10 @@ import * as express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import {router} from './router';
-//, { startSheetToUnitxQueue, startBusToUnitxQueue, startSheetActQueue } 
+import {router, unitxRouter} from './router';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
 //import { unitxRouter, startUnitxQueue } from './unitx-server';
-import { unitxRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } from './queue';
+import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } from './queue';
 
 (async function () {
     let connection = config.get<any>("connection");
@@ -47,7 +46,8 @@ import { unitxRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } fr
 
     // 正常的tonva usql接口
     //app.use('/usql/:db/bus/', [authUnitx, sendToBusRouter]);
-    app.use('/usql/:db/unitx/', [authUnitx, unitxRouter]);
+    app.use('/usql/:db/unitx/', [authUnitx, unitxQueueRouter]);
+    app.use('/usql/unitx/tv/', [authCheck, unitxRouter]);
     app.use('/usql/:db/tv/', [authCheck, router]);
 
     //app.use('/usql/:db/log', getWsLogs);

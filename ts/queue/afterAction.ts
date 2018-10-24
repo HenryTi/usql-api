@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 import { packBus } from '../core';
-import { Runner } from '../tv/runner';
-import { SchemaBusFace } from '../tv/schemaBusFace';
+import { Runner } from '../db/runner';
+import { SchemaBusFace } from './schemaBusFace';
 import { pushToClient } from './pushToClient';
 import { MsgMessage, BusMessage } from './model';
 import { queueToUnitx } from './toUnitxQueue';

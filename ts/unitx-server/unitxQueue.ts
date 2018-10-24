@@ -1,3 +1,4 @@
+/*
 import * as bull from 'bull';
 import { pushToCenter } from '../core';
 
@@ -19,20 +20,6 @@ export function startUnitxQueue(redis:any) {
             console.log('pushToCenter start');
             await pushToCenter(data);
             console.log('pushToCenter:', data);
-            /*
-            console.log('accept message: ', data);
-            if (data !== undefined) {
-                let {$job, $db, $unit} = data;
-                switch ($job) {
-                    case 'sheetMsg':
-                        await processSheetMessage($unit, $db, data);
-                        break;
-                    //case 'sheetMsgDone':
-                    //    await removeSheetMessage($unit, data);
-                    //    break;
-                }
-            }
-            */
             done();
         }
         catch(err) {
@@ -40,9 +27,5 @@ export function startUnitxQueue(redis:any) {
             done(new Error(err));
         }
     });
-    /*
-    await unitxQueue.isReady();
-    console.log(unitxQueueName, ' is ready');
-    return unitxQueue;
-    */
 }
+*/

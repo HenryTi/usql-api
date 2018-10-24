@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const bull = require("bull");
 const sendToUnitx_1 = require("./sendToUnitx");
-const runner_1 = require("../tv/runner");
+const runner_1 = require("../db/runner");
 const toUnitxQueueName = 'to-unitx-queue';
 let toUnitxQueue;
 function queueToUnitx(msg) {

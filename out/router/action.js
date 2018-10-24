@@ -10,38 +10,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const queue_1 = require("../queue");
 const core_1 = require("../core");
-const router_1 = require("./router");
+const processRequest_1 = require("./processRequest");
+const actionType = 'action';
 function default_1(router) {
-    router.post('/action/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let { id, db, unit } = user;
-            let { name } = req.params;
-            let body = req.body;
-            let { data } = body;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let schema = runner.getSchema(name);
-            let { call } = schema;
-            if (data === undefined)
-                data = core_1.packParam(call, body);
-            let result = yield runner.action(name, unit, id, data);
-            let returns = call.returns;
-            let { hasSend, busFaces } = schema.run;
-            let actionReturn = yield queue_1.afterAction(db, runner, unit, returns, hasSend, busFaces, result);
-            res.json({
-                ok: true,
-                res: actionReturn
-            });
-        }
-        catch (err) {
-            res.json({
-                error: err
-            });
-        }
-        ;
-    }));
+    processRequest_1.post(router, actionType, '/:name', processAction);
 }
 exports.default = default_1;
+function processAction(unit, user, db, runner, params, body, schema) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let { name } = params;
+        let { data } = body;
+        if (data === undefined)
+            data = core_1.packParam(schema, body);
+        let result = yield runner.action(name, unit, user, data);
+        let returns = schema.returns;
+        let { hasSend, busFaces } = schema.run;
+        let actionReturn = yield queue_1.afterAction(db, runner, unit, returns, hasSend, busFaces, result);
+        return actionReturn;
+    });
+}
+exports.processAction = processAction;
+;
 //# sourceMappingURL=action.js.map

@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import {getDb, Db} from '../db';
+import {getDb, Db} from './db';
 
 const runners: {[name:string]: Runner} = {};
 
@@ -223,10 +223,13 @@ export class Runner {
             let runObj = JSON.parse(run);
             schemaObj.typeId = id;
             schemaObj.version = version;
+            /*
             this.schemas[name] = {
                 call: schemaObj,
                 run: runObj,
-            }
+            }*/
+            schemaObj.run = runObj;
+            this.schemas[name] = schemaObj;
             let {type, url} = schemaObj;
             switch (type) {
                 case 'access': this.accessSchemaArr.push(schemaObj); break;
@@ -299,6 +302,7 @@ export class Runner {
             schema.queries[i] = call(n);
         }
     }
+    /*
     private fieldsTuids(fields:any[], tuids:any[]) {
         if (fields === undefined) return;
         for (let f of fields) {
@@ -311,16 +315,19 @@ export class Runner {
             this.tuidsPush(tuids, schema.call);
         }
     }
+    */
+    /*
     private arrsTuids(arrs:any[], tuids:any[]) {
         if (arrs === undefined) return;
         for (let arr of arrs) {
             this.fieldsTuids(arr.fields, tuids);
         }
-    }
+    }*/
+    /*
     private tuidsPush(tuids:any[], tuid:any) {
         if (tuids.find(v => v === tuid) === undefined) tuids.push(tuid);
     }
-
+    */
     private buildAccesses() {
         this.access = {
             usq: this.usqId

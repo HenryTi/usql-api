@@ -1,3 +1,4 @@
+/*
 import * as bull from 'bull';
 import * as _ from 'lodash';
 import { getRunner } from './runner';
@@ -24,11 +25,6 @@ export function startSheetActQueue(redis:any) {
         } 
         done();
     });
-    /*
-    await sheetActQueue.isReady();
-    console.log(sheetActQueueName, ' is ready');
-    return sheetActQueue;
-    */
 }
 
 async function doSheetAct(sheetAct:SheetAct):Promise<void> {
@@ -91,17 +87,9 @@ async function doSheetAct(sheetAct:SheetAct):Promise<void> {
             busFaces = actionRun.busFaces;60
         }
         await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
-        /*
-        sheetAct消息不是在这里推送，而是在unitx里面推送。unitx知道推送给什么人
-        let msg = _.merge({
-            $type: 'sheetAct',
-            $user: user,
-            $unit: unit,
-        }, sheetRet);
-        await pushToCenter(db, msg);
-        */
     }
     catch(err) {
         console.log('sheet Act error: ', err);
     };
 }
+*/

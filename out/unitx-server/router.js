@@ -1,22 +1,15 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const unitxQueue_1 = require("./unitxQueue");
-const processSheetMessage_1 = require("./processSheetMessage");
-exports.unitxRouter = express_1.Router();
-exports.unitxRouter.post('/sheet', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+/*
+import {Router, Request, Response, NextFunction} from 'express';
+import { queueUnitx } from './unitxQueue';
+import { processSheetMessage } from './processSheetMessage';
+
+export const unitxRouter: Router = Router();
+
+unitxRouter.post('/sheet', async (req: Request, res: Response, next: NextFunction) => {
     try {
         let msg = req.body;
-        let { $unit } = msg;
-        let tos = yield processSheetMessage_1.processSheetMessage($unit, msg);
+        let {$unit} = msg;
+        let tos:number[] = await processSheetMessage($unit, msg);
         res.json({
             ok: true,
             res: tos,
@@ -28,11 +21,12 @@ exports.unitxRouter.post('/sheet', (req, res, next) => __awaiter(this, void 0, v
             error: JSON.stringify(e),
         });
     }
-}));
-exports.unitxRouter.post('/bus', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+});
+
+unitxRouter.post('/bus', async (req: Request, res: Response, next: NextFunction) => {
     try {
         let msg = req.body;
-        yield unitxQueue_1.queueUnitx(msg);
+        await queueUnitx(msg);
         res.json({
             ok: true,
         });
@@ -43,5 +37,6 @@ exports.unitxRouter.post('/bus', (req, res, next) => __awaiter(this, void 0, voi
             error: JSON.stringify(e),
         });
     }
-}));
+});
+*/ 
 //# sourceMappingURL=router.js.map

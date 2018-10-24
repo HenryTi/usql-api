@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const bull = require("bull");
-const runner_1 = require("../tv/runner");
+const runner_1 = require("../db/runner");
 const afterAction_1 = require("./afterAction");
 const toUnitxQueue_1 = require("./toUnitxQueue");
 const sheetQueueName = 'sheet-queue';

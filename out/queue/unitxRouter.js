@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const runner_1 = require("../tv/runner");
+const runner_1 = require("../db/runner");
 const unitxInQueue_1 = require("./unitxInQueue");
 exports.unitxRouter = express_1.Router();
 exports.unitxRouter.post('/', (req, res, next) => __awaiter(this, void 0, void 0, function* () {

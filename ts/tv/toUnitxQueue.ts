@@ -1,3 +1,4 @@
+/*
 import * as bull from 'bull';
 import fetch from 'node-fetch';
 import { centerApi, UnitxApi, urlSetUnitxHost } from "../core";
@@ -36,11 +37,6 @@ export function startSheetToUnitxQueue(redis:any) {
             done();
         }
     });
-    /*
-    await sheetQueue.isReady();
-    console.log(sheetToUnitxQueueName, ' is ready');
-    return sheetQueue;
-    */
 };
 
 export function startBusToUnitxQueue(redis:any) {
@@ -62,11 +58,6 @@ export function startBusToUnitxQueue(redis:any) {
             done();
         }
     });
-    /*
-    await busQueue.isReady();
-    console.log(busToUnitxQueueName, ' is ready');
-    return busQueue;
-    */
 }
 
 async function sheetToUnitx(unit:number, db:string, msg:any): Promise<void> {
@@ -150,3 +141,4 @@ export async function trySheetToUnitxQueue() {
         console.log('redis server error: ', reason);
     };
 }
+*/

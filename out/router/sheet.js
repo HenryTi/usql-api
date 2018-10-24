@@ -9,164 +9,72 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const queue_1 = require("../queue");
-const router_1 = require("./router");
+const processRequest_1 = require("./processRequest");
+const sheetType = 'sheet';
 function default_1(router) {
-    router.post('/sheet/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let userToken = req.user;
-            let { db, id: userId, unit } = userToken;
-            let { name } = req.params;
-            let body = req.body;
-            let { app, discription, data } = body;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let result = yield runner.sheetSave(name, unit, userId, app, discription, data);
-            let sheetRet = result[0];
-            if (sheetRet !== undefined) {
-                let sheetMsg = {
-                    unit: unit,
-                    type: 'sheet',
-                    from: userId,
-                    db: db,
-                    body: sheetRet,
-                    to: [userId],
-                };
-                yield queue_1.queueToUnitx(sheetMsg);
-                /*
-                    await queueSheetToUnitx(_.merge({
-                    $unit: unit,
-                    $db: db,
-                }, sheetRet));*/
-            }
-            res.json({
-                ok: true,
-                res: sheetRet
-            });
+    processRequest_1.post(router, sheetType, '/:name', (unit, user, db, runner, params, body) => __awaiter(this, void 0, void 0, function* () {
+        let { name } = params;
+        let { app, discription, data } = body;
+        let result = yield runner.sheetSave(name, unit, user, app, discription, data);
+        let sheetRet = result[0];
+        if (sheetRet !== undefined) {
+            let sheetMsg = {
+                unit: unit,
+                type: sheetType,
+                from: user,
+                db: db,
+                body: sheetRet,
+                to: [user],
+            };
+            yield queue_1.queueToUnitx(sheetMsg);
         }
-        catch (err) {
-            res.json({ error: err });
-        }
+        return sheetRet;
     }));
-    router.put('/sheet/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let user = req.user;
-        let { db, id: userId } = user;
-        let { name } = req.params;
-        let body = req.body;
-        let runner = yield router_1.checkRunner(db, res);
-        if (runner === undefined)
-            return;
+    processRequest_1.put(router, sheetType, '/:name', (unit, user, db, runner, params, body) => __awaiter(this, void 0, void 0, function* () {
+        let { name } = params;
         yield runner.sheetProcessing(body.id);
         let { state, action, id, flow } = body;
         yield queue_1.queueSheet({
             db: db,
-            from: userId,
+            from: user,
             sheetHead: {
                 sheet: name,
                 state: state,
                 action: action,
-                unit: user.unit,
-                user: user.id,
+                unit: unit,
+                user: user,
                 id: id,
                 flow: flow,
             }
         });
-        yield res.json({
-            ok: true,
-            res: { msg: 'add to queue' }
-        });
+        return { msg: 'add to queue' };
     }));
-    router.post('/sheet/:name/states', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let user = req.user;
-        let db = user.db;
-        let { name } = req.params;
-        let body = req.body;
+    processRequest_1.post(router, sheetType, '/:name/states', (unit, user, db, runner, params, body) => __awaiter(this, void 0, void 0, function* () {
+        let { name } = params;
         let { state, pageStart, pageSize } = body;
-        let runner = yield router_1.checkRunner(db, res);
-        if (runner === undefined)
-            return;
-        runner.sheetStates(name, state, user.unit, user.id, pageStart, pageSize).then(result => {
-            res.json({
-                ok: true,
-                res: result
-            });
-        }).catch(err => {
-            res.json({ error: err });
-        });
+        let result = yield runner.sheetStates(name, state, unit, user, pageStart, pageSize);
+        return result;
     }));
-    router.get('/sheet/:name/statecount', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let user = req.user;
-        let db = user.db;
-        let { name } = req.params;
-        let body = req.body;
-        let runner = yield router_1.checkRunner(db, res);
-        if (runner === undefined)
-            return;
-        runner.sheetStateCount(name, user.unit, user.id).then(result => {
-            res.json({
-                ok: true,
-                res: result
-            });
-        }).catch(err => {
-            res.json({ error: err });
-        });
+    processRequest_1.get(router, sheetType, '/:name/statecount', (unit, user, db, runner, params, body) => __awaiter(this, void 0, void 0, function* () {
+        let { name } = params;
+        let result = yield runner.sheetStateCount(name, unit, user);
+        return result;
     }));
-    router.get('/sheet/:name/get/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let user = req.user;
-        let db = user.db;
-        let { name, id } = req.params;
-        let body = req.body;
-        let { state, pageStart, pageSize } = body;
-        let runner = yield router_1.checkRunner(db, res);
-        if (runner === undefined)
-            return;
-        runner.getSheet(name, user.unit, user.id, id).then(result => {
-            res.json({
-                ok: true,
-                res: result
-            });
-        }).catch(err => {
-            res.json({ error: err });
-        });
+    processRequest_1.get(router, sheetType, '/:name/get/:id', (unit, user, db, runner, params, body) => __awaiter(this, void 0, void 0, function* () {
+        let { name, id } = params;
+        let result = yield runner.getSheet(name, unit, user, id);
+        return result;
     }));
-    router.post('/sheet/:name/archives', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let db = user.db;
-            let { name } = req.params;
-            let body = req.body;
-            let { pageStart, pageSize } = body;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let result = yield runner.sheetArchives(name, user.unit, user.id, pageStart, pageSize);
-            res.json({
-                ok: true,
-                res: result
-            });
-        }
-        catch (err) {
-            res.json({ error: err });
-        }
+    processRequest_1.post(router, sheetType, '/:name/archives', (unit, user, db, runner, params, body) => __awaiter(this, void 0, void 0, function* () {
+        let { name } = params;
+        let { pageStart, pageSize } = body;
+        let result = yield runner.sheetArchives(name, unit, user, pageStart, pageSize);
+        return result;
     }));
-    router.get('/sheet/:name/archive/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        try {
-            let user = req.user;
-            let db = user.db;
-            let { name, id } = req.params;
-            let body = req.body;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            let result = yield runner.sheetArchive(user.unit, user.id, name, id);
-            res.json({
-                ok: true,
-                res: result
-            });
-        }
-        catch (err) {
-            res.json({ error: err });
-        }
+    processRequest_1.get(router, sheetType, '/:name/archive/:id', (unit, user, db, runner, params, body) => __awaiter(this, void 0, void 0, function* () {
+        let { name, id } = params;
+        let result = yield runner.sheetArchive(unit, user, name, id);
+        return result;
     }));
 }
 exports.default = default_1;

@@ -4,6 +4,8 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./router"));
+var unitx_1 = require("./unitx");
+exports.unitxRouter = unitx_1.default;
 const router_1 = require("./router");
 const access_1 = require("./access");
 const schema_1 = require("./schema");

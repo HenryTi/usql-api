@@ -1,3 +1,4 @@
+/*
 import * as _ from 'lodash';
 import { getRunner } from "../tv/runner";
 import { packParam } from "../core/packParam";
@@ -9,18 +10,13 @@ const usqlSheetMessage = 'sheetMessage';
 const usqlGetSheetTo = 'getSheetTo';
 export async function processSheetMessage(unit:number, sheetMessage:any): Promise<number[]> {
     let runner = await getRunner($unitx);
-    let {no, discription, /*to, */usq, id:sheet, state, user, name} = sheetMessage;
+    let {no, discription, usq, id:sheet, state, user, name} = sheetMessage;
     // 上句中的to removed，由下面调用unitx来计算
     let sheetName = name;
     let stateName = state;
     let paramsGetSheetTo:any[] = [usq, sheetName, stateName];
     let tos:any[] = await runner.query(usqlGetSheetTo, unit, user, paramsGetSheetTo);
     let prePostSame:boolean = false;
-    /*
-    let toUsers:{toUser:number}[] = sheetTo.map(v => {
-        return {toUser: v.to}
-    });
-    */
     if (tos.length === 0) {
         tos.push({to: user});
         prePostSame = true;
@@ -68,3 +64,4 @@ async function queueSheetToUnitx(type:string, toArr:number[], msg:any) {
     await queueUnitx(m);
     //await pushToCenter(m);
 }
+*/

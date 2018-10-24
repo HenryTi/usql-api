@@ -1,6 +1,6 @@
 import * as bull from 'bull';
 import * as _ from 'lodash';
-import { getRunner } from '../tv/runner';
+import { getRunner } from '../db/runner';
 import { afterAction } from './afterAction';
 import { SheetAct, SheetMessage } from './model';
 import { queueToUnitx } from './toUnitxQueue';

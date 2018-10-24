@@ -1,170 +1,145 @@
-"use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const bull = require("bull");
-const node_fetch_1 = require("node-fetch");
-const core_1 = require("../core");
-const runner_1 = require("./runner");
-const unitxColl = {};
+/*
+import * as bull from 'bull';
+import fetch from 'node-fetch';
+import { centerApi, UnitxApi, urlSetUnitxHost } from "../core";
+import { getRunner } from './runner';
+
+const unitxColl: {[id:number]: string} = {};
 const sheetToUnitxQueueName = 'sheet-to-unitx-queue';
 const busToUnitxQueueName = 'bus-to-unitx-queue';
-let sheetQueue;
-let busQueue;
-function queueSheetToUnitx(msg) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return yield sheetQueue.add(msg);
-    });
+let sheetQueue: bull.Queue;
+let busQueue: bull.Queue;
+
+export async function queueSheetToUnitx(msg:any):Promise<bull.Job> {
+    return await sheetQueue.add(msg);
 }
-exports.queueSheetToUnitx = queueSheetToUnitx;
-function queueBusToUnitx(msg) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return yield busQueue.add(msg);
-    });
+
+export async function queueBusToUnitx(msg:any):Promise<bull.Job> {
+    return await busQueue.add(msg);
 }
-exports.queueBusToUnitx = queueBusToUnitx;
-function startSheetToUnitxQueue(redis) {
+
+export function startSheetToUnitxQueue(redis:any) {
     sheetQueue = bull(sheetToUnitxQueueName, redis);
-    sheetQueue.on("error", (error) => {
+    sheetQueue.on("error", (error: Error) => {
         console.log('queue server: ', error);
     });
-    sheetQueue.process(function (job, done) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                let data = job.data;
-                if (data !== undefined) {
-                    let { $unit, $db } = data;
-                    yield sheetToUnitx($unit, $db, data);
-                }
-                done();
-            }
-            catch (e) {
-                console.error(e);
-                done();
-            }
-        });
-    });
-    /*
-    await sheetQueue.isReady();
-    console.log(sheetToUnitxQueueName, ' is ready');
-    return sheetQueue;
-    */
-}
-exports.startSheetToUnitxQueue = startSheetToUnitxQueue;
-;
-function startBusToUnitxQueue(redis) {
-    busQueue = bull(busToUnitxQueueName, redis);
-    busQueue.on("error", (error) => {
-        console.log('queue server: ', error);
-    });
-    busQueue.process(function (job, done) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                let data = job.data;
-                if (data !== undefined) {
-                    let { $unit, $db } = data;
-                    yield busToDest($unit, data);
-                }
-                done();
-            }
-            catch (e) {
-                console.error(e);
-                done();
-            }
-        });
-    });
-    /*
-    await busQueue.isReady();
-    console.log(busToUnitxQueueName, ' is ready');
-    return busQueue;
-    */
-}
-exports.startBusToUnitxQueue = startBusToUnitxQueue;
-function sheetToUnitx(unit, db, msg) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let unitxUrl = yield getUnitxUrl(unit);
-        if (unitxUrl === null) {
-            console.log('unit %s not have unitx', unit);
-            return;
-        }
-        let unitx = new core_1.UnitxApi(unitxUrl);
-        let toArr = yield unitx.sheet(msg);
-        let runner = yield runner_1.getRunner(db);
-        if (runner !== undefined) {
-            let sheetId = msg.id;
-            let user = undefined;
-            if (toArr !== undefined && toArr.length > 0) {
-                yield runner.sheetTo(unit, user, sheetId, toArr);
-            }
-        }
-        console.log('sheet to unitx', msg);
-    });
-}
-function getUnitxUrl(unit) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let unitxUrl = unitxColl[unit];
-        if (unitxUrl !== undefined)
-            return unitxUrl;
-        let unitx = yield core_1.centerApi.unitx(unit);
-        if (unitx === undefined)
-            return unitxColl[unit] = null;
-        let { url, urlDebug } = unitx;
-        if (urlDebug !== undefined) {
-            try {
-                urlDebug = core_1.urlSetUnitxHost(urlDebug);
-                let ret = yield node_fetch_1.default(urlDebug + 'hello');
-                if (ret.status !== 200)
-                    throw 'not ok';
-                let text = yield ret.text();
-                url = urlDebug;
-            }
-            catch (err) {
-            }
-        }
-        return unitxColl[unit] = url;
-    });
-}
-function busToDest(unit, msg) {
-    return __awaiter(this, void 0, void 0, function* () {
+    sheetQueue.process(async function(job, done) {
         try {
-            let { busOwner, bus, face } = msg;
-            let ret = yield core_1.centerApi.unitxBuses(unit, busOwner, bus, face);
-            for (let service of ret) {
-                let { url } = service;
-                let unitx = new core_1.UnitxApi(url);
-                yield unitx.bus(msg);
-                console.log('bus to ', url, msg);
+            let data = job.data;
+            if (data !== undefined) {
+                let {$unit, $db}  = data;
+                await sheetToUnitx($unit, $db, data);
             }
+            done();
         }
         catch (e) {
             console.error(e);
+            done();
         }
     });
-}
-// 试试redis server，报告是否工作
-function trySheetToUnitxQueue() {
-    return __awaiter(this, void 0, void 0, function* () {
+};
+
+export function startBusToUnitxQueue(redis:any) {
+    busQueue = bull(busToUnitxQueueName, redis);
+    busQueue.on("error", (error: Error) => {
+        console.log('queue server: ', error);
+    });
+    busQueue.process(async function(job, done) {
         try {
-            let job = yield sheetQueue.add({ job: undefined });
-            try {
-                yield job.remove();
-                console.log('redis server ok!');
+            let data = job.data;
+            if (data !== undefined) {
+                let {$unit, $db}  = data;
+                await busToDest($unit, data);
             }
-            catch (err) {
-                console.log('redis server job.remove error: ' + err);
-            }
+            done();
         }
-        catch (reason) {
-            console.log('redis server error: ', reason);
+        catch (e) {
+            console.error(e);
+            done();
         }
-        ;
     });
 }
-exports.trySheetToUnitxQueue = trySheetToUnitxQueue;
+
+async function sheetToUnitx(unit:number, db:string, msg:any): Promise<void> {
+    let unitxUrl = await getUnitxUrl(unit);
+    if (unitxUrl === null) {
+        console.log('unit %s not have unitx', unit);
+        return;
+    }
+    let unitx = new UnitxApi(unitxUrl);
+    let toArr:number[] = await unitx.sheet(msg);
+    let runner = await getRunner(db);
+    if (runner !== undefined) {
+        let sheetId:number = msg.id;
+        let user:number = undefined;
+        if (toArr !== undefined && toArr.length > 0) {
+            await runner.sheetTo(unit, user, sheetId, toArr);
+        }
+    }
+    console.log('sheet to unitx', msg);
+}
+
+async function getUnitxUrl(unit:number):Promise<string> {
+    let unitxUrl = unitxColl[unit];
+    if (unitxUrl !== undefined) return unitxUrl;
+    let unitx = await centerApi.unitx(unit);
+    if (unitx === undefined) return unitxColl[unit] = null;
+    let {url, urlDebug} = unitx;
+    if (urlDebug !== undefined) {
+        try {
+            urlDebug = urlSetUnitxHost(urlDebug);
+            let ret = await fetch(urlDebug + 'hello');
+            if (ret.status !== 200) throw 'not ok';
+            let text = await ret.text();
+            url = urlDebug;
+        }
+        catch (err) {
+        }
+    }
+    return unitxColl[unit] = url;
+}
+
+
+export interface UnitxMessage {
+    service:string;
+    $unit:number;
+    busOwner:string;
+    bus:string;
+    face:string;
+    data:any[];
+}
+
+async function busToDest(unit:number, msg:UnitxMessage):Promise<void> {
+    try {
+        let {busOwner, bus, face} = msg;
+        let ret = await centerApi.unitxBuses(unit, busOwner, bus, face);
+        for (let service of ret) {
+            let {url} = service;
+            let unitx = new UnitxApi(url);
+            await unitx.bus(msg);
+            console.log('bus to ', url, msg);
+        }
+    }
+    catch (e) {
+        console.error(e);
+    }
+}
+
+// 试试redis server，报告是否工作
+export async function trySheetToUnitxQueue() {
+    try {
+        let job = await sheetQueue.add({job: undefined});
+        try {
+            await job.remove();
+            console.log('redis server ok!');
+        }
+        catch (err) {
+            console.log('redis server job.remove error: ' + err);
+        }
+    }
+    catch (reason) {
+        console.log('redis server error: ', reason);
+    };
+}
+*/ 
 //# sourceMappingURL=toUnitxQueue.js.map

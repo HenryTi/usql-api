@@ -1,6 +1,7 @@
 import {Router, Request, Response, NextFunction} from 'express';
-import {getRunner, Runner} from '../tv/runner';
-import {apiErrors} from '../tv/apiErrors';
+import {getRunner, Runner} from '../db/runner';
+
+export const router: Router = Router();
 
 export interface User {
     db: string;
@@ -9,7 +10,9 @@ export interface User {
     roles: string;
 };
 
-export const router: Router = Router();
+const apiErrors = {
+    databaseNotExists: -1,
+}
 
 export async function checkRunner(db:string, res:Response):Promise<Runner> {
     let runner = await getRunner(db);
@@ -42,4 +45,12 @@ export function validTuidArr(res:Response, schema:any, arrName:string):any {
     if (schemaArr !== undefined) return schemaArr;
     res.json({error: name + ' does not have arr ' + arrName });
     return;
+}
+
+export function getTuidArr(schema:any, arrName:string):any {
+    let {name, type, arr} = schema;
+    if (type !== 'tuid') throw name + ' is not tuid';
+    let schemaArr = arr[arrName];
+    if (schemaArr !== undefined) return schemaArr;
+    throw name + ' does not have arr ' + arrName;
 }

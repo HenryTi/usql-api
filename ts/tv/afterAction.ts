@@ -1,3 +1,4 @@
+/*
 import * as _ from 'lodash';
 import {Runner} from './runner';
 import {SchemaBusFace} from './schemaBusFace';
@@ -80,3 +81,4 @@ export async function afterAction(
     if (arr0 === undefined || arr0.length === 0) return;
     return arr0[0];
 }
+*/

@@ -9,10 +9,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const runner_1 = require("../tv/runner");
-const apiErrors_1 = require("../tv/apiErrors");
-;
+const runner_1 = require("../db/runner");
 exports.router = express_1.Router();
+;
+const apiErrors = {
+    databaseNotExists: -1,
+};
 function checkRunner(db, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let runner = yield runner_1.getRunner(db);
@@ -20,7 +22,7 @@ function checkRunner(db, res) {
             return runner;
         res.json({
             error: {
-                no: apiErrors_1.apiErrors.databaseNotExists,
+                no: apiErrors.databaseNotExists,
                 message: 'Database ' + db + ' 不存在'
             }
         });
@@ -51,4 +53,14 @@ function validTuidArr(res, schema, arrName) {
     return;
 }
 exports.validTuidArr = validTuidArr;
+function getTuidArr(schema, arrName) {
+    let { name, type, arr } = schema;
+    if (type !== 'tuid')
+        throw name + ' is not tuid';
+    let schemaArr = arr[arrName];
+    if (schemaArr !== undefined)
+        return schemaArr;
+    throw name + ' does not have arr ' + arrName;
+}
+exports.getTuidArr = getTuidArr;
 //# sourceMappingURL=router.js.map
