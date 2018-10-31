@@ -8,11 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const processRequest_1 = require("./processRequest");
+const process_1 = require("./process");
 function default_1(router) {
     //router.get('/schema/:name', async (req:Request, res:Response) => {
-    processRequest_1.get(router, 'schema', '/:name', (unit, user, name, db, urlParams, runner, body, schema, run) => __awaiter(this, void 0, void 0, function* () {
-        return schema;
+    process_1.get(router, '/schema/:name', (unit, user, urlParams, runner, body) => __awaiter(this, void 0, void 0, function* () {
+        let { name } = urlParams;
+        let schema = runner.getSchema(name);
+        return schema && schema.call;
     }));
     /*
     router.post('/schema', async (req:Request, res:Response) => {
@@ -30,8 +32,8 @@ function default_1(router) {
     });
     */
     //router.get('/schema/:name/:version', async (req:Request, res:Response) => {
-    processRequest_1.get(router, 'schema', '/:name/:version', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { version } = urlParams;
+    process_1.get(router, '/schema/:name/:version', (unit, user, urlParams, runner, body) => __awaiter(this, void 0, void 0, function* () {
+        let { name, version } = urlParams;
         let schemaVersion = yield runner.loadSchemaVersion(name, version);
         return schemaVersion;
     }));

@@ -15,6 +15,7 @@ const centerUrl = urlSetCenterHost(config.get('center'));
 function urlSetCenterHost(url) {
     return url.replace('://centerhost/', '://' + centerHost + '/');
 }
+exports.urlSetCenterHost = urlSetCenterHost;
 class CenterApi extends fetch_1.Fetch {
     constructor() {
         super(centerUrl);
@@ -36,6 +37,11 @@ class CenterApi extends fetch_1.Fetch {
     unitx(unit) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.get('open/unitx', { unit: unit });
+        });
+    }
+    usqUrl(unit, usq) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.get('open/usq-url', { unit: unit, usq: usq });
         });
     }
     usqlDb(name) {

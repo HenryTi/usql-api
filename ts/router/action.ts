@@ -1,21 +1,16 @@
 import { Router } from 'express';
-import { afterAction } from '../queue';
-import { packParam } from '../core';
 import { Runner } from '../db';
-import { post } from './processRequest';
+import { entityPost } from './entityProcess';
+import { actionProcess } from './actionProcess';
+import { unitxActionProcess } from './unitx';
 
 const actionType = 'action';
 
 export default function(router:Router) {
-    post(router, actionType, '/:name', processAction);
+    entityPost(router, actionType, '/:name', 
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> => {
+        if (db === '$unitx')
+            return await unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
+        return await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
+    });
 }
-
-export async function processAction(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
-    let {data} = body;
-    if (data === undefined) data = packParam(schema, body);
-    let result = await runner.action(name, unit, user, data);
-    let returns = schema.returns;
-    let {hasSend, busFaces} = schema.run;
-    let actionReturn = await afterAction(db, runner, unit, returns, hasSend, busFaces, result);
-    return actionReturn;
-};

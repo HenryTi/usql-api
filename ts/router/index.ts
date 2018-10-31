@@ -1,5 +1,6 @@
 export * from './router';
-export {default as unitxRouter} from './unitx';
+export * from './setting';
+
 import {router} from './router';
 import accessRouter from './access';
 import schemaRouter from './schema';
@@ -10,6 +11,8 @@ import bookRouter from './book';
 import historyRouter from './history';
 import queryRouter from './query';
 
+//import settingRouter from './setting';
+
 accessRouter(router);
 schemaRouter(router);
 tuidRouter(router);
@@ -18,3 +21,5 @@ actionRouter(router);
 bookRouter(router);
 historyRouter(router);
 queryRouter(router);
+
+//settingRouter(router);

@@ -2,30 +2,31 @@ import { Runner } from "../db";
 import { Router, Request, Response } from "express";
 import { checkRunner, User, unknownEntity, validEntity } from "./router";
 
-export type Processer = (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any) => Promise<any>;
+type Processer = (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any) => Promise<any>;
 
-export function post(router:Router, entityType:string, path:string, processer:Processer) {
+export function entityPost(router:Router, entityType:string, path:string, processer:Processer) {
     router.post(`/${entityType}${path}`, async (req:Request, res:Response) => {
-        await process(req, res, entityType, processer, false);
+        await entityProcess(req, res, entityType, processer, false);
     });
 };
 
-export function get(router:Router, entityType:string, path:string, processer:Processer) {
+export function entityGet(router:Router, entityType:string, path:string, processer:Processer) {
     router.get(`/${entityType}${path}`, async (req:Request, res:Response) => {
-        await process(req, res, entityType, processer, true);
+        await entityProcess(req, res, entityType, processer, true);
     });
 };
 
-export function put(router:Router, entityType:string, path:string, processer:Processer) {
+export function entityPut(router:Router, entityType:string, path:string, processer:Processer) {
     router.put(`/${entityType}${path}`, async (req:Request, res:Response) => {
-        await process(req, res, entityType, processer, false);
+        await entityProcess(req, res, entityType, processer, false);
     });
 };
 
-async function process(req:Request, res:Response, entityType:string, processer:Processer, isGet:boolean):Promise<void> {
+async function entityProcess(req:Request, res:Response, entityType:string, processer:Processer, isGet:boolean):Promise<void> {
     try {
         let userToken:User = (req as any).user;
         let {db, id:userId, unit} = userToken;
+        if (db === undefined) db = '$unitx';
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
         let {params} = req;

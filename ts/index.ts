@@ -2,9 +2,8 @@ import * as express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import {router, unitxRouter} from './router';
+import {router, settingRouter} from './router';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
-//import { unitxRouter, startUnitxQueue } from './unitx-server';
 import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } from './queue';
 
 (async function () {
@@ -47,8 +46,9 @@ import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue
     // 正常的tonva usql接口
     //app.use('/usql/:db/bus/', [authUnitx, sendToBusRouter]);
     app.use('/usql/:db/unitx/', [authUnitx, unitxQueueRouter]);
-    app.use('/usql/unitx/tv/', [authCheck, unitxRouter]);
+    //app.use('/usql/$unitx/tv/', [authCheck, unitxRouter]);
     app.use('/usql/:db/tv/', [authCheck, router]);
+    app.use('/usql/:db/setting/', [/*authCheck, */settingRouter]); // unitx set access
 
     //app.use('/usql/:db/log', getWsLogs);
     // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口

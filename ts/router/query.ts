@@ -1,11 +1,11 @@
 import {Router} from 'express';
 import {packReturn} from '../core';
-import { post } from './processRequest';
+import { entityPost } from './entityProcess';
 import { Runner } from '../db';
 
 export default function(router:Router) {
     //router.post('/query/:name', async (req:Request, res:Response) => {
-    post(router, 'query', '/:name',
+    entityPost(router, 'query', '/:name',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let params:any[] = [];
         let fields = schema.fields;
@@ -19,7 +19,7 @@ export default function(router:Router) {
     });
 
     //router.post('/page/:name', async (req:Request, res:Response) => {
-    post(router, 'query', '/:name',
+    entityPost(router, 'query', '/:name',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let pageStart = body['$pageStart'];
         if (pageStart !== undefined) {

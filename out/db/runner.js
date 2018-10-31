@@ -56,6 +56,11 @@ class Runner {
     sql(sql, params) {
         return this.db.sql(sql, params);
     }
+    call(proc, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv_' + proc, params);
+        });
+    }
     createDatabase() {
         return this.db.createDatabase();
     }
@@ -93,7 +98,7 @@ class Runner {
     }
     loadSchemas(hasSource) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv_$entitys', [hasSource === true ? 1 : 0]);
+            return yield this.db.tablesFromProc('tv_$entitys', [hasSource === true ? 1 : 0]);
         });
     }
     saveSchema(unit, user, id, name, type, schema, run) {
@@ -243,7 +248,17 @@ class Runner {
     }
     query(query, unit, user, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv_' + query, [unit, user, ...params]);
+            let ret = yield this.db.call('tv_' + query, [unit, user, ...params]);
+            if (query === 'getEntityAccess') {
+                console.log({
+                    $: query,
+                    unit: unit,
+                    user: user,
+                    toUsers: ret,
+                    params: params.join(',')
+                });
+            }
+            return ret;
         });
     }
     busPost(msg) {
@@ -260,21 +275,37 @@ class Runner {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.schemas !== undefined)
                 return;
-            this.app = yield this.getSetting(0, 'app');
-            this.author = yield this.getSetting(0, 'author');
-            this.version = yield this.getSetting(0, 'version');
-            yield this.getSetting(0, 'reloadSchemas');
-            this.usqId = yield this.getSetting(0, 'usqId');
+            /*
+            this.app = await this.getSetting(0, 'app');
+            this.author = await this.getSetting(0, 'author');
+            this.version = await this.getSetting(0, 'version');
+            
+            await this.getSetting(0, 'reloadSchemas');
+            this.usqId = await this.getSetting(0, 'usqId');
+            */
             //this.isSysChat = (this.app === '$unitx' || this.app === 'unitx') 
             //    && this.author === 'henry';
             let rows = yield this.loadSchemas(false);
-            //console.log('schema raw rows: %s', JSON.stringify(rows));
+            let schemaTable = rows[0];
+            let settingTable = rows[1];
+            let setting = {};
+            for (let row of settingTable) {
+                let v = row.value;
+                let n = Number(v);
+                setting[row.name] = isNaN(n) === true ? v : n;
+            }
+            this.app = setting['app']; // await this.getSetting(0, 'app');
+            this.author = setting['author'];
+            this.version = setting['version'];
+            //await this.getSetting(0, 'reloadSchemas');
+            this.usqId = setting['usqId'];
             console.log('init schemas: ', this.app, this.author, this.version);
             this.schemas = {};
             this.accessSchemaArr = [];
             this.tuids = {};
             this.buses = {};
-            for (let row of rows) {
+            this.entityColl = {};
+            for (let row of schemaTable) {
                 let { name, id, version, schema, run } = row;
                 let schemaObj = JSON.parse(schema);
                 let runObj = JSON.parse(run);
@@ -296,6 +327,16 @@ class Runner {
                         this.tuids[name] = schemaObj;
                         break;
                 }
+                this.entityColl[id] = {
+                    name: name,
+                    access: type !== 'sheet' ?
+                        type + '|' + id :
+                        {
+                            $: type,
+                            id: id,
+                            ops: schemaObj.states && schemaObj.states.map(v => v.name)
+                        }
+                };
             }
             for (let i in this.schemas) {
                 let schema = this.schemas[i].call;
@@ -362,32 +403,6 @@ class Runner {
             schema.queries[i] = call(n);
         }
     }
-    /*
-    private fieldsTuids(fields:any[], tuids:any[]) {
-        if (fields === undefined) return;
-        for (let f of fields) {
-            let {tuid} = f;
-            if (tuid === undefined) continue;
-            let schema = this.schemas[tuid.toLowerCase()];
-            if (schema === undefined) {
-                continue;
-            }
-            this.tuidsPush(tuids, schema.call);
-        }
-    }
-    */
-    /*
-    private arrsTuids(arrs:any[], tuids:any[]) {
-        if (arrs === undefined) return;
-        for (let arr of arrs) {
-            this.fieldsTuids(arr.fields, tuids);
-        }
-    }*/
-    /*
-    private tuidsPush(tuids:any[], tuid:any) {
-        if (tuids.find(v => v === tuid) === undefined) tuids.push(tuid);
-    }
-    */
     buildAccesses() {
         this.access = {
             usq: this.usqId
@@ -428,7 +443,14 @@ class Runner {
         }
         console.log('access: ', this.access);
     }
-    getAccesses(acc) {
+    getUserAccess(unit, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = yield this.db.tablesFromProc('tv_$get_access', [unit, user]);
+            let ret = _.union(result[0].map(v => v.entity), result[1].map(v => v.entity));
+            return ret;
+        });
+    }
+    getAccesses(unit, user, acc) {
         return __awaiter(this, void 0, void 0, function* () {
             let reload = yield this.getSetting(0, 'reloadSchemas');
             if (reload === 1) {
@@ -462,8 +484,36 @@ class Runner {
                 for (let a of acc)
                     merge(this.access[a]);
             }
+            let accessEntities = yield this.getUserAccess(unit, user);
+            let entityAccess = {};
+            for (let entityId of accessEntities) {
+                let entity = this.entityColl[entityId];
+                let { name, access } = entity;
+                entityAccess[name] = access;
+            }
             return {
-                access: access,
+                //access: access,
+                access: entityAccess,
+                tuids: this.tuids
+            };
+        });
+    }
+    getEntities(unit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let reload = yield this.getSetting(0, 'reloadSchemas');
+            if (reload === 1) {
+                this.schemas = undefined;
+                yield this.init();
+                yield this.setSetting(0, 'reloadSchemas', '0');
+            }
+            let entityAccess = {};
+            for (let entityId in this.entityColl) {
+                let entity = this.entityColl[entityId];
+                let { name, access } = entity;
+                entityAccess[name] = access;
+            }
+            return {
+                access: entityAccess,
                 tuids: this.tuids
             };
         });

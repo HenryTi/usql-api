@@ -1,14 +1,16 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import * as _ from 'lodash';
 import {User, router, checkRunner, unknownEntity, validEntity, validTuidArr} from './router';
-import { post, get } from './processRequest';
 import { Runner } from '../db';
+import { get } from './process';
 
 export default function(router:Router) {
     //router.get('/schema/:name', async (req:Request, res:Response) => {
-    get(router, 'schema', '/:name',
-    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any) => {
-        return schema;
+    get(router, '/schema/:name',
+    async (unit:number, user:number, urlParams:any, runner:Runner, body:any) => {
+        let {name} = urlParams;
+        let schema = runner.getSchema(name);
+        return schema && schema.call;
     });
     /*
     router.post('/schema', async (req:Request, res:Response) => {
@@ -26,9 +28,9 @@ export default function(router:Router) {
     });
     */
     //router.get('/schema/:name/:version', async (req:Request, res:Response) => {
-    get(router, 'schema', '/:name/:version',
-    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
-        let {version} = urlParams;
+    get(router, '/schema/:name/:version',
+    async (unit:number, user:number, urlParams:any, runner:Runner, body:any) => {
+        let {name, version} = urlParams;
         let schemaVersion = await runner.loadSchemaVersion(name, version);
         return schemaVersion;
     });

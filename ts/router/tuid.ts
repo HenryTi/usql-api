@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import * as _ from 'lodash';
 import { getTuidArr } from './router';
-import { get, post } from './processRequest';
+import { entityGet, entityPost } from './entityProcess';
 import { Runner } from '../db';
 
 const tuidType = 'tuid';
 
 export default function(router: Router) {
-    get(router, tuidType, '/:name/:id', 
+    entityGet(router, tuidType, '/:name/:id', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id} = urlParams;
         let result = await runner.tuidGet(name, unit, user, id);
@@ -27,7 +27,7 @@ export default function(router: Router) {
     });
 
 
-    get(router, tuidType, '-arr/:name/:owner/:arr/:id/', 
+    entityGet(router, tuidType, '-arr/:name/:owner/:arr/:id/', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id, owner, arr} = urlParams;
         let schemaArr = getTuidArr(schema, arr);
@@ -36,13 +36,13 @@ export default function(router: Router) {
         return row;
     });
 
-    get(router, tuidType, '-all/:name/',
+    entityGet(router, tuidType, '-all/:name/',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let result = await runner.tuidGetAll(name, unit, user);
         return result;
     });
 
-    get(router, tuidType, '-arr-all/:name/:owner/:arr/', 
+    entityGet(router, tuidType, '-arr-all/:name/:owner/:arr/', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {owner, arr} = urlParams;
         let schemaArr = getTuidArr(schema, arr);
@@ -50,7 +50,7 @@ export default function(router: Router) {
         return result;
     });
 
-    get(router, tuidType, '-proxy/:name/:type/:id',
+    entityGet(router, tuidType, '-proxy/:name/:type/:id',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id, type} = urlParams;
         let result = await runner.tuidProxyGet(name, unit, user, id, type);
@@ -58,7 +58,7 @@ export default function(router: Router) {
         return row;
     });
 
-    post(router, tuidType, '/:name', 
+    entityPost(router, tuidType, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let id = body["$id"];
         let dbParams:any[] = [id];
@@ -93,7 +93,7 @@ export default function(router: Router) {
         return row;
     });
 
-    post(router, tuidType, '-arr/:name/:owner/:arr/', 
+    entityPost(router, tuidType, '-arr/:name/:owner/:arr/', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {owner, arr} = urlParams;
         let schemaArr = getTuidArr(schema, arr);
@@ -109,7 +109,7 @@ export default function(router: Router) {
         return row;
     });
 
-    post(router, tuidType, '-arr-pos/:name/:owner/:arr/', 
+    entityPost(router, tuidType, '-arr-pos/:name/:owner/:arr/', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {owner, arr} = urlParams;
         let {$id, $order} = body;
@@ -118,7 +118,7 @@ export default function(router: Router) {
         return undefined;
     });
 
-    post(router, tuidType, 'ids/:name/:arr', 
+    entityPost(router, tuidType, 'ids/:name/:arr', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {arr} = urlParams;
         let ids = (body as number[]).join(',');
@@ -126,7 +126,7 @@ export default function(router: Router) {
         return result;
     });
 
-    post(router, tuidType, 's/:name', 
+    entityPost(router, tuidType, 's/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {arr, owner, key, pageStart, pageSize} = body;
         let result = arr === undefined?

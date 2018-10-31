@@ -13,7 +13,6 @@ const bodyParser = require("body-parser");
 const config = require("config");
 const router_1 = require("./router");
 const core_1 = require("./core");
-//import { unitxRouter, startUnitxQueue } from './unitx-server';
 const queue_1 = require("./queue");
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
@@ -55,8 +54,9 @@ const queue_1 = require("./queue");
         // 正常的tonva usql接口
         //app.use('/usql/:db/bus/', [authUnitx, sendToBusRouter]);
         app.use('/usql/:db/unitx/', [core_1.authUnitx, queue_1.unitxQueueRouter]);
-        app.use('/usql/unitx/tv/', [core_1.authCheck, router_1.unitxRouter]);
+        //app.use('/usql/$unitx/tv/', [authCheck, unitxRouter]);
         app.use('/usql/:db/tv/', [core_1.authCheck, router_1.router]);
+        app.use('/usql/:db/setting/', [/*authCheck, */ router_1.settingRouter]); // unitx set access
         //app.use('/usql/:db/log', getWsLogs);
         // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
         //app.use('/usql/:db/debug', [authDebug, tv]);

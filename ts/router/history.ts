@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { packReturn } from '../core';
 import { Runner } from '../db';
-import { post } from './processRequest';
+import { entityPost } from './entityProcess';
 
 export default function(router:Router) {
     //router.post('/history/:name', async (req:Request, res:Response) => {
-    post(router, 'history', '/:name',
+    entityPost(router, 'history', '/:name',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let pageStart = body['$pageStart'];
         if (pageStart !== undefined) {

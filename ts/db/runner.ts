@@ -32,6 +32,11 @@ export function createRunner(name:string) { //, dbName:string) {
     return runners[name] = new Runner(db);
 }
 
+interface EntityAccess {
+    name: string;
+    access: any;
+}
+
 export class Runner {
     private db:Db;
     private access:any;
@@ -40,6 +45,7 @@ export class Runner {
     private tuids: {[name:string]: any};
     private buses:{[url:string]:any}; // 直接查找bus
     private setting: {[name:string]: any};
+    private entityColl: {[id:number]: EntityAccess};
     private usqId: number;
     app: string;
     author: string;
@@ -55,6 +61,9 @@ export class Runner {
     //}
     sql(sql:string, params:any[]): Promise<any> {
         return this.db.sql(sql, params);
+    }
+    async call(proc:string, params:any[]): Promise<any> {
+        return await this.db.call('tv_' + proc, params);
     }
     createDatabase(): Promise<void> {
         return this.db.createDatabase();
@@ -86,8 +95,8 @@ export class Runner {
         return v;
     }
 
-    async loadSchemas(hasSource:boolean): Promise<{id:number, name:string, type:number, version:number, schema:string, run:string}[]> {
-        return await this.db.call('tv_$entitys', [hasSource===true?1:0]);
+    async loadSchemas(hasSource:boolean): Promise<any[][]> {
+        return await this.db.tablesFromProc('tv_$entitys', [hasSource===true?1:0]);
     }
     async saveSchema(unit:number, user:number, id:number, name:string, type:number, schema:string, run:string):Promise<any> {
         return await this.db.call('tv_$entity', [unit, user, id, name, type, schema, run]);
@@ -188,7 +197,8 @@ export class Runner {
     }
 
     async query(query:string, unit:number, user:number, params:any[]): Promise<any> {
-        return await this.db.call('tv_' + query, [unit, user, ...params]);
+        let ret = await this.db.call('tv_' + query, [unit, user, ...params]);
+        return ret;
     }
 
     async busPost(msg:any):Promise<void> {
@@ -201,23 +211,40 @@ export class Runner {
 
     async init() {
         if (this.schemas !== undefined) return;
+        /*
         this.app = await this.getSetting(0, 'app');
         this.author = await this.getSetting(0, 'author');
         this.version = await this.getSetting(0, 'version');
         
         await this.getSetting(0, 'reloadSchemas');
         this.usqId = await this.getSetting(0, 'usqId');
+        */
 
         //this.isSysChat = (this.app === '$unitx' || this.app === 'unitx') 
         //    && this.author === 'henry';
         let rows = await this.loadSchemas(false);
-        //console.log('schema raw rows: %s', JSON.stringify(rows));
+        let schemaTable:{id:number, name:string, type:number, version:number, schema:string, run:string}[] = rows[0];
+        let settingTable:{name:string, value:string}[] = rows[1];
+        let setting:{[name:string]:string|number} = {};
+        for (let row of settingTable) {
+            let v = row.value;
+            let n = Number(v);
+            setting[row.name] = isNaN(n)===true? v : n;
+        }
+        this.app = setting['app'] as string; // await this.getSetting(0, 'app');
+        this.author = setting['author'] as string;
+        this.version = setting['version'] as string;
+        //await this.getSetting(0, 'reloadSchemas');
+        this.usqId = setting['usqId'] as number;
+        
         console.log('init schemas: ', this.app, this.author, this.version);
+
         this.schemas = {};
         this.accessSchemaArr = [];
         this.tuids = {};
         this.buses = {};
-        for (let row of rows) {
+        this.entityColl = {};
+        for (let row of schemaTable) {
             let {name, id, version, schema, run} = row;
             let schemaObj = JSON.parse(schema);
             let runObj = JSON.parse(run);
@@ -233,6 +260,16 @@ export class Runner {
                 case 'bus': this.buses[url] = schemaObj; break;
                 case 'tuid': this.tuids[name] = schemaObj; break;                
             }
+            this.entityColl[id] = {
+                name: name,
+                access: type !== 'sheet'?
+                    type + '|' + id :
+                    {
+                        $: type, 
+                        id: id,
+                        ops: schemaObj.states && schemaObj.states.map(v => v.name)
+                    }
+            };
         }
         for (let i in this.schemas) {
             let schema = this.schemas[i].call;
@@ -299,32 +336,6 @@ export class Runner {
             schema.queries[i] = call(n);
         }
     }
-    /*
-    private fieldsTuids(fields:any[], tuids:any[]) {
-        if (fields === undefined) return;
-        for (let f of fields) {
-            let {tuid} = f;
-            if (tuid === undefined) continue;
-            let schema = this.schemas[tuid.toLowerCase()];
-            if (schema === undefined) {
-                continue;
-            }
-            this.tuidsPush(tuids, schema.call);
-        }
-    }
-    */
-    /*
-    private arrsTuids(arrs:any[], tuids:any[]) {
-        if (arrs === undefined) return;
-        for (let arr of arrs) {
-            this.fieldsTuids(arr.fields, tuids);
-        }
-    }*/
-    /*
-    private tuidsPush(tuids:any[], tuid:any) {
-        if (tuids.find(v => v === tuid) === undefined) tuids.push(tuid);
-    }
-    */
     private buildAccesses() {
         this.access = {
             usq: this.usqId
@@ -364,8 +375,12 @@ export class Runner {
         }
         console.log('access: ', this.access);
     }
-
-    async getAccesses(acc:string[]):Promise<any> {
+    private async getUserAccess(unit:number, user:number):Promise<number[]> {
+        let result = await this.db.tablesFromProc('tv_$get_access', [unit, user]);
+        let ret = _.union(result[0].map(v => v.entity), result[1].map(v => v.entity));
+        return ret;
+    }
+    async getAccesses(unit:number, user:number, acc:string[]):Promise<any> {
         let reload:number = await this.getSetting(0, 'reloadSchemas');
 
         if (reload === 1) {
@@ -398,8 +413,36 @@ export class Runner {
         else {
             for (let a of acc) merge(this.access[a]);
         }
+        let accessEntities = await this.getUserAccess(unit, user);
+        let entityAccess: {[name:string]: any} = {};
+        for (let entityId of accessEntities) {
+            let entity = this.entityColl[entityId];
+            let {name, access} = entity;
+            entityAccess[name] = access;
+        }
         return {
-            access: access,
+            //access: access,
+            access: entityAccess,
+            tuids: this.tuids
+        };
+    }
+
+    async getEntities(unit:number):Promise<any> {
+        let reload:number = await this.getSetting(0, 'reloadSchemas');
+
+        if (reload === 1) {
+            this.schemas = undefined;
+            await this.init();
+            await this.setSetting(0, 'reloadSchemas', '0');
+        }
+        let entityAccess: {[name:string]: any} = {};
+        for (let entityId in this.entityColl) {
+            let entity = this.entityColl[entityId];
+            let {name, access} = entity;
+            entityAccess[name] = access;
+        }
+        return {
+            access: entityAccess,
             tuids: this.tuids
         };
     }

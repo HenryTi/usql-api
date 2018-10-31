@@ -8,26 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const queue_1 = require("../queue");
-const core_1 = require("../core");
-const processRequest_1 = require("./processRequest");
+const entityProcess_1 = require("./entityProcess");
+const actionProcess_1 = require("./actionProcess");
+const unitx_1 = require("./unitx");
 const actionType = 'action';
 function default_1(router) {
-    processRequest_1.post(router, actionType, '/:name', processAction);
+    entityProcess_1.entityPost(router, actionType, '/:name', (unit, user, name, db, urlParams, runner, body, schema, run) => __awaiter(this, void 0, void 0, function* () {
+        if (db === '$unitx')
+            return yield unitx_1.unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
+        return yield actionProcess_1.actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
+    }));
 }
 exports.default = default_1;
-function processAction(unit, user, name, db, urlParams, runner, body, schema, run) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let { data } = body;
-        if (data === undefined)
-            data = core_1.packParam(schema, body);
-        let result = yield runner.action(name, unit, user, data);
-        let returns = schema.returns;
-        let { hasSend, busFaces } = schema.run;
-        let actionReturn = yield queue_1.afterAction(db, runner, unit, returns, hasSend, busFaces, result);
-        return actionReturn;
-    });
-}
-exports.processAction = processAction;
-;
 //# sourceMappingURL=action.js.map

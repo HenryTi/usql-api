@@ -39,8 +39,8 @@ exports.unitxQueueRouter.post('/', (req, res, next) => __awaiter(this, void 0, v
     }
 }));
 const $unitx = '$unitx';
-const usqlSheetMessage = 'sheetMessage';
-const usqlGetSheetTo = 'getSheetTo';
+// 之前用 getSheetTo 查询，现在改名为 getEntityAccess
+const usqlGetSheetTo = 'getEntityAccess';
 function getSheetTos(sheetMessage) {
     return __awaiter(this, void 0, void 0, function* () {
         let runner = yield runner_1.getRunner($unitx);

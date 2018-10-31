@@ -4,7 +4,7 @@ import {Fetch} from './fetch';
 const centerHost = config.get<string>('centerhost');
 const centerUrl = urlSetCenterHost(config.get<string>('center'));
 
-function urlSetCenterHost(url:string):string {
+export function urlSetCenterHost(url:string):string {
     return url.replace('://centerhost/', '://'+centerHost+'/');
 }
 
@@ -27,6 +27,10 @@ class CenterApi extends Fetch {
 
     async unitx(unit:number):Promise<any> {
         return await this.get('open/unitx', {unit:unit});
+    }
+
+    async usqUrl(unit:number, usq:number):Promise<any> {
+        return await this.get('open/usq-url', {unit:unit, usq:usq});
     }
 
     async usqlDb(name:string):Promise<any> {

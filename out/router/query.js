@@ -9,10 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
-const processRequest_1 = require("./processRequest");
+const entityProcess_1 = require("./entityProcess");
 function default_1(router) {
     //router.post('/query/:name', async (req:Request, res:Response) => {
-    processRequest_1.post(router, 'query', '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    entityProcess_1.entityPost(router, 'query', '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let params = [];
         let fields = schema.fields;
         let len = fields.length;
@@ -24,7 +24,7 @@ function default_1(router) {
         return data;
     }));
     //router.post('/page/:name', async (req:Request, res:Response) => {
-    processRequest_1.post(router, 'query', '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    entityProcess_1.entityPost(router, 'query', '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let pageStart = body['$pageStart'];
         if (pageStart !== undefined) {
             let page = schema.returns.find(v => v.name === '$page');

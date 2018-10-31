@@ -8,10 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const processRequest_1 = require("./processRequest");
+const entityProcess_1 = require("./entityProcess");
 const accessType = 'access';
 function default_1(router) {
-    processRequest_1.get(router, accessType, '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    entityProcess_1.entityGet(router, accessType, '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         //let {acc} = '*'; //(req as any).query;
         let { acc } = body;
         let accs = undefined;
@@ -20,8 +20,12 @@ function default_1(router) {
             if (accs.length === 1 && accs[0].trim().length === 0)
                 accs = undefined;
         }
-        let access = yield runner.getAccesses(accs);
+        let access = yield runner.getAccesses(unit, user, accs);
         return access;
+    }));
+    entityProcess_1.entityGet(router, 'entities', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let entities = yield runner.getEntities(unit);
+        return entities;
     }));
 }
 exports.default = default_1;
