@@ -249,15 +249,6 @@ class Runner {
     query(query, unit, user, params) {
         return __awaiter(this, void 0, void 0, function* () {
             let ret = yield this.db.call('tv_' + query, [unit, user, ...params]);
-            if (query === 'getEntityAccess') {
-                console.log({
-                    $: query,
-                    unit: unit,
-                    user: user,
-                    toUsers: ret,
-                    params: params.join(',')
-                });
-            }
             return ret;
         });
     }

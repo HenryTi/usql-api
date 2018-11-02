@@ -19,7 +19,7 @@ export default function(router:Router) {
     });
 
     //router.post('/page/:name', async (req:Request, res:Response) => {
-    entityPost(router, 'query', '/:name',
+    entityPost(router, 'query', '-page/:name',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let pageStart = body['$pageStart'];
         if (pageStart !== undefined) {
