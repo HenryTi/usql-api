@@ -13,11 +13,23 @@ const router_1 = require("../router");
 //import { post } from '../process';
 exports.router = express_1.Router({ mergeParams: true });
 (function (router) {
-    post(router, '/access', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        body.$ = 'seting/access';
+    post(router, '/access-user', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        body.$ = 'seting/access-user';
         console.log(body);
-        let { unit, entity, anyone, users } = body;
-        yield runner.call('$set_access', [unit, entity, anyone, users, undefined]);
+        let { unit, entity, users } = body;
+        yield runner.call('$set_access_user', [unit, entity, users, undefined]);
+    }));
+    post(router, '/access-entity', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        body.$ = 'seting/access-entity';
+        console.log(body);
+        let { unit, entities } = body;
+        yield runner.call('$set_access_entity', [unit, entities]);
+    }));
+    post(router, '/access-fully', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        body.$ = 'seting/access-fully *** ---';
+        console.log(body);
+        let { unit, user, flag } = body;
+        yield runner.call('$set_access_fully', [unit, user, flag]);
     }));
 })(exports.router);
 function post(router, path, processer) {

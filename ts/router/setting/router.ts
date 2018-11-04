@@ -6,14 +6,29 @@ import { checkRunner } from '../router';
 export const router: Router = Router({ mergeParams: true });
 
 (function(router:Router) {
-    post(router, '/access',
+    post(router, '/access-user',
     async (runner:Runner, body:any):Promise<any> => {
-        body.$ = 'seting/access';
+        body.$ = 'seting/access-user';
         console.log(body);
-        let {unit, entity, anyone, users} = body;
-        await runner.call('$set_access', [unit, entity, anyone, users, undefined]);
+        let {unit, entity, users} = body;
+        await runner.call('$set_access_user', [unit, entity, users, undefined]);
     });
 
+    post(router, '/access-entity',
+    async (runner:Runner, body:any):Promise<any> => {
+        body.$ = 'seting/access-entity';
+        console.log(body);
+        let {unit, entities} = body;
+        await runner.call('$set_access_entity', [unit, entities]);
+    });
+
+    post(router, '/access-fully',
+    async (runner:Runner, body:any):Promise<any> => {
+        body.$ = 'seting/access-fully *** ---';
+        console.log(body);
+        let {unit, user, flag} = body;
+        await runner.call('$set_access_fully', [unit, user, flag]);
+    });
 })(router);
 
 type Processer = (runner:Runner, body:any) => Promise<any>;
