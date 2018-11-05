@@ -9,10 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const queue_1 = require("../queue");
+const packParam_1 = require("../core/packParam");
 function actionProcess(unit, user, name, db, urlParams, runner, body, schema, run) {
     return __awaiter(this, void 0, void 0, function* () {
         let { data } = body;
         //if (data === undefined) data = packParam(schema, body);
+        if (data === undefined) {
+            data = packParam_1.packParam(schema, body);
+        }
         let result = yield runner.action(name, unit, user, data);
         let returns = schema.returns;
         let { hasSend, busFaces } = run;
