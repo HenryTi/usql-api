@@ -16,8 +16,9 @@ unitxQueueRouter.post('/', async (req: Request, res: Response, next: NextFunctio
             tos = await getSheetTos(sheetMessage);
             if (tos.length === 0) tos = [from];
             sheetMessage.to = tos;
-        }        
+        }
         await queueUnitxIn(msg);
+        console.log('await queueUnitxIn(msg)', msg);
         res.json({
             ok: true,
             res: tos,

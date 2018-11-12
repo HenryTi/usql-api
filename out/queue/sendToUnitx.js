@@ -9,9 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const config = require("config");
-const fetch_1 = require("../core/fetch");
-const core_1 = require("../core");
 const node_fetch_1 = require("node-fetch");
+const core_1 = require("../core");
 function sendToUnitx(unit, msg) {
     return __awaiter(this, void 0, void 0, function* () {
         let unitxApi = yield getUnitxApi(unit);
@@ -28,7 +27,7 @@ const unitxHost = config.get('unitxhost');
 function urlSetUnitxHost(url) {
     return url.replace('://unitxhost/', '://' + unitxHost + '/');
 }
-class UnitxApi extends fetch_1.Fetch {
+class UnitxApi extends core_1.Fetch {
     send(msg) {
         return __awaiter(this, void 0, void 0, function* () {
             let ret = yield this.post('unitx', msg);

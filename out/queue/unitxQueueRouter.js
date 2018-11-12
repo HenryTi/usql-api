@@ -26,6 +26,7 @@ exports.unitxQueueRouter.post('/', (req, res, next) => __awaiter(this, void 0, v
             sheetMessage.to = tos;
         }
         yield unitxInQueue_1.queueUnitxIn(msg);
+        console.log('await queueUnitxIn(msg)', msg);
         res.json({
             ok: true,
             res: tos,

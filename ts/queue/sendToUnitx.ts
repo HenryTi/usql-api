@@ -1,7 +1,6 @@
 import * as config from 'config';
-import {Fetch} from '../core/fetch';
-import { centerApi } from '../core';
 import fetch from 'node-fetch';
+import { centerApi, Fetch } from '../core';
 import { Message } from './model';
 
 export async function sendToUnitx(unit:number, msg:Message):Promise<number[]> {

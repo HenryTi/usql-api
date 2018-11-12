@@ -13,7 +13,12 @@ const core_1 = require("../core");
 // 以后需要做client消息分发服务器
 function pushToClient(msg) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield core_1.centerApi.pushTo(msg);
+        try {
+            yield core_1.centerApi.pushTo(msg);
+        }
+        catch (err) {
+            console.error(err);
+        }
     });
 }
 exports.pushToClient = pushToClient;

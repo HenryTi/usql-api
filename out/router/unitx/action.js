@@ -10,8 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_fetch_1 = require("node-fetch");
 const core_1 = require("../../core");
-const packReturn_1 = require("../../core/packReturn");
-const fetch_1 = require("../../core/fetch");
 const actionProcess_1 = require("../actionProcess");
 function unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -84,7 +82,7 @@ return await actionProcess(unit, user, name, db, urlParams, runner, body, schema
 */
 function saveEntityOpPost(unit, user, name, db, urlParams, runner, body, schema, run) {
     return __awaiter(this, void 0, void 0, function* () {
-        let actionParam = packReturn_1.unpack(schema, body.data);
+        let actionParam = core_1.unpack(schema, body.data);
         let { usq, entityName, opName } = actionParam;
         let url = yield usqUrl(unit, usq);
         let ret = yield actionProcess_1.actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
@@ -106,7 +104,7 @@ function buildUsqApi(unit, usq) {
 }
 function setAccessFully(unit, body, schema, flag) {
     return __awaiter(this, void 0, void 0, function* () {
-        let actionParam = packReturn_1.unpack(schema, body.data);
+        let actionParam = core_1.unpack(schema, body.data);
         let { _usq, arr1 } = actionParam;
         let usqApi = yield buildUsqApi(unit, _usq);
         for (let arr of arr1) {
@@ -127,14 +125,14 @@ function entityOpUserFully$del$(unit, body, schema) {
 }
 function setAccessEntity(unit, body, schema) {
     return __awaiter(this, void 0, void 0, function* () {
-        let actionParam = packReturn_1.unpack(schema, body.data);
+        let actionParam = core_1.unpack(schema, body.data);
         let { usq, entities } = actionParam;
         let entityNames = entities.map(v => v.entity).join(',');
         let usqApi = yield buildUsqApi(unit, usq);
         yield usqApi.setAccessEntity(unit, entityNames);
     });
 }
-class UsqApi extends fetch_1.Fetch {
+class UsqApi extends core_1.Fetch {
     setAccessUser(unit, entity, users) {
         return __awaiter(this, void 0, void 0, function* () {
             let params = { unit: unit, entity: entity, users: users };

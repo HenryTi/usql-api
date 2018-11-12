@@ -16,4 +16,7 @@ var packReturn_1 = require("./packReturn");
 exports.packReturn = packReturn_1.packReturn;
 exports.packBus = packReturn_1.packBus;
 exports.packParam = packReturn_1.packParam;
+exports.unpack = packReturn_1.unpack;
+var fetch_1 = require("./fetch");
+exports.Fetch = fetch_1.Fetch;
 //# sourceMappingURL=index.js.map
