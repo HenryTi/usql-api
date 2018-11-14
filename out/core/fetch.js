@@ -38,6 +38,7 @@ class Fetch {
     }
     innerFetch(url, method, body) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log('innerFetch ' + method + '  ' + this.baseUrl + url);
             var headers = new node_fetch_1.Headers();
             headers.append('Accept', 'application/json'); // This one is enough for GET requests
             headers.append('Content-Type', 'application/json'); // This one sends body
@@ -50,6 +51,7 @@ class Fetch {
                 body: JSON.stringify(body),
             });
             if (res.status !== 200) {
+                console.error(res.statusText, res.status);
                 throw {
                     error: res.statusText,
                     code: res.status,

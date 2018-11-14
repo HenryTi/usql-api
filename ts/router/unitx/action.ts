@@ -20,9 +20,9 @@ export async function unitxActionProcess(unit:number, user:number, name:string, 
     return await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
 }
 
-const usqHost = 'localhost';
-export function urlSetUsqHost(url:string):string {
-    return url.replace('://usqhost:', '://'+usqHost+':');
+const usqHost = 'localhost:3015';
+function urlSetUsqHost(url:string):string {
+    return url.replace('://usqhost/', '://'+usqHost+'/');
 }
 
 async function usqUrl(unit:number, usq:number):Promise<string> {

@@ -30,11 +30,10 @@ function unitxActionProcess(unit, user, name, db, urlParams, runner, body, schem
     });
 }
 exports.unitxActionProcess = unitxActionProcess;
-const usqHost = 'localhost';
+const usqHost = 'localhost:3015';
 function urlSetUsqHost(url) {
-    return url.replace('://usqhost:', '://' + usqHost + ':');
+    return url.replace('://usqhost/', '://' + usqHost + '/');
 }
-exports.urlSetUsqHost = urlSetUsqHost;
 function usqUrl(unit, usq) {
     return __awaiter(this, void 0, void 0, function* () {
         let urqUrl = yield core_1.centerApi.usqUrl(unit, usq);

@@ -3,45 +3,59 @@ import {DbServer} from './dbServer';
 import {MsDbServer} from './ms';
 import {MyDbServer} from './my';
 
-function createDbServer() {
-    let sqlType = config.get<string>('sqlType');
-    let dbConfig = config.get<any>('connection');
-    switch (sqlType) {
-        case 'mysql': return new MyDbServer(dbConfig);
-        case 'mssql': return new MsDbServer(dbConfig);
-    }
-}
-
-let dbServer:DbServer = createDbServer();
+const const_connectionUnitx = 'connection_$unitx';
+const const_connection = 'connection';
+const const_development = 'development';
+const const_unitx = '$unitx';
 
 export class Db {
     private dbName: string;
     private isExists: boolean;
+    private dbServer:DbServer;
+
     constructor(dbName: string) {
         this.dbName = dbName;
+        this.dbServer = this.createDbServer();
         this.isExists = false;
     }
+    private createDbServer() {
+        let sqlType = config.get<string>('sqlType');
+        let dbConfig;
+        if (this.dbName === const_unitx && process.env.NODE_ENV === const_development) {
+            if (config.has(const_connectionUnitx) === true) {
+                dbConfig = config.get<any>(const_connectionUnitx);
+            }
+        }
+        if (dbConfig === undefined) {
+            dbConfig = config.get<any>(const_connection);
+        }
+        switch (sqlType) {
+            case 'mysql': return new MyDbServer(dbConfig);
+            case 'mssql': return new MsDbServer(dbConfig);
+        }
+    }
+
     async exists(): Promise<boolean> {
         if (this.isExists === true) return true;
-        return this.isExists = await dbServer.existsDatabase(this.dbName);
+        return this.isExists = await this.dbServer.existsDatabase(this.dbName);
     }
     async sql(sql:string, params:any[]): Promise<any> {
-        return await dbServer.sql(this.dbName, sql, params);
+        return await this.dbServer.sql(this.dbName, sql, params);
     }
     async call(proc:string, params:any[]): Promise<any> {
-        return await dbServer.call(this.dbName, proc, params);
+        return await this.dbServer.call(this.dbName, proc, params);
     }
     async callEx(proc:string, params:any[]): Promise<any> {
-        return await dbServer.callEx(this.dbName, proc, params);
+        return await this.dbServer.callEx(this.dbName, proc, params);
     }
     async tableFromProc(proc:string, params:any[]): Promise<any[]> {
-        return await dbServer.tableFromProc(this.dbName, proc, params);
+        return await this.dbServer.tableFromProc(this.dbName, proc, params);
     }
     async tablesFromProc(proc:string, params:any[]): Promise<any[][]> {
-        return await dbServer.tablesFromProc(this.dbName, proc, params);
+        return await this.dbServer.tablesFromProc(this.dbName, proc, params);
     }
     async createDatabase(): Promise<void> {
-        return await dbServer.createDatabase(this.dbName)
+        return await this.dbServer.createDatabase(this.dbName)
     }
 }
 
@@ -57,10 +71,11 @@ export function dbNameFromProject(projectName:string) {
 }
 */
 
+// 数据库名称对照表
 const dbCollection:{[name:string]:string} = (function () {
     const dbColl = "db";
     if (!config.has(dbColl)) return {};
-    return config.get<any>("db");
+    return config.get<any>(dbColl);
 })();
 
 export function getDb(name:string):Db {
@@ -73,7 +88,7 @@ export function getDb(name:string):Db {
     // 开发用户定义usqldb之后，直接用usqldb的dbname，所以，dbname不能有符号什么的，因为会通过url上传
     //if (dbName === undefined) 
     //let dbName = name;
-    if (dbServer === undefined) dbServer = createDbServer();
+    //if (dbServer === undefined) dbServer = createDbServer();
     dbs[name] = db = new Db(dbName);
     return db;
 }

@@ -11,55 +11,67 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const config = require("config");
 const ms_1 = require("./ms");
 const my_1 = require("./my");
-function createDbServer() {
-    let sqlType = config.get('sqlType');
-    let dbConfig = config.get('connection');
-    switch (sqlType) {
-        case 'mysql': return new my_1.MyDbServer(dbConfig);
-        case 'mssql': return new ms_1.MsDbServer(dbConfig);
-    }
-}
-let dbServer = createDbServer();
+const const_connectionUnitx = 'connection_$unitx';
+const const_connection = 'connection';
+const const_development = 'development';
+const const_unitx = '$unitx';
 class Db {
     constructor(dbName) {
         this.dbName = dbName;
+        this.dbServer = this.createDbServer();
         this.isExists = false;
+    }
+    createDbServer() {
+        let sqlType = config.get('sqlType');
+        let dbConfig;
+        if (this.dbName === const_unitx && process.env.NODE_ENV === const_development) {
+            if (config.has(const_connectionUnitx) === true) {
+                dbConfig = config.get(const_connectionUnitx);
+            }
+        }
+        if (dbConfig === undefined) {
+            dbConfig = config.get(const_connection);
+        }
+        switch (sqlType) {
+            case 'mysql': return new my_1.MyDbServer(dbConfig);
+            case 'mssql': return new ms_1.MsDbServer(dbConfig);
+        }
     }
     exists() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.isExists === true)
                 return true;
-            return this.isExists = yield dbServer.existsDatabase(this.dbName);
+            return this.isExists = yield this.dbServer.existsDatabase(this.dbName);
         });
     }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield dbServer.sql(this.dbName, sql, params);
+            return yield this.dbServer.sql(this.dbName, sql, params);
         });
     }
     call(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield dbServer.call(this.dbName, proc, params);
+            return yield this.dbServer.call(this.dbName, proc, params);
         });
     }
     callEx(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield dbServer.callEx(this.dbName, proc, params);
+            return yield this.dbServer.callEx(this.dbName, proc, params);
         });
     }
     tableFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield dbServer.tableFromProc(this.dbName, proc, params);
+            return yield this.dbServer.tableFromProc(this.dbName, proc, params);
         });
     }
     tablesFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield dbServer.tablesFromProc(this.dbName, proc, params);
+            return yield this.dbServer.tablesFromProc(this.dbName, proc, params);
         });
     }
     createDatabase() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield dbServer.createDatabase(this.dbName);
+            return yield this.dbServer.createDatabase(this.dbName);
         });
     }
 }
@@ -73,11 +85,12 @@ export function dbNameFromProject(projectName:string) {
     return proj && proj.db;
 }
 */
+// 数据库名称对照表
 const dbCollection = (function () {
     const dbColl = "db";
     if (!config.has(dbColl))
         return {};
-    return config.get("db");
+    return config.get(dbColl);
 })();
 function getDb(name) {
     let db = dbs[name];
@@ -91,8 +104,7 @@ function getDb(name) {
     // 开发用户定义usqldb之后，直接用usqldb的dbname，所以，dbname不能有符号什么的，因为会通过url上传
     //if (dbName === undefined) 
     //let dbName = name;
-    if (dbServer === undefined)
-        dbServer = createDbServer();
+    //if (dbServer === undefined) dbServer = createDbServer();
     dbs[name] = db = new Db(dbName);
     return db;
 }
