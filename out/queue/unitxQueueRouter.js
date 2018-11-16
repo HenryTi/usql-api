@@ -21,7 +21,7 @@ exports.unitxQueueRouter.post('/', (req, res, next) => __awaiter(this, void 0, v
             let sheetMessage = msg;
             let { from } = sheetMessage;
             tos = yield getSheetTos(sheetMessage);
-            if (tos.length === 0)
+            if (tos === undefined || tos.length === 0)
                 tos = [from];
             sheetMessage.to = tos;
         }
@@ -47,6 +47,9 @@ function getSheetTos(sheetMessage) {
         let runner = yield runner_1.getRunner($unitx);
         let { unit, body } = sheetMessage;
         let { state, user, name, no, discription, usq } = body;
+        // 新单只能发给做单人
+        if (state === '$')
+            return;
         // 上句中的to removed，由下面调用unitx来计算
         let sheetName = name;
         let stateName = state;

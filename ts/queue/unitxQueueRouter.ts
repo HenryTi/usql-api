@@ -14,7 +14,7 @@ unitxQueueRouter.post('/', async (req: Request, res: Response, next: NextFunctio
             let sheetMessage = msg as SheetMessage;
             let {from} = sheetMessage;
             tos = await getSheetTos(sheetMessage);
-            if (tos.length === 0) tos = [from];
+            if (tos === undefined || tos.length === 0) tos = [from];
             sheetMessage.to = tos;
         }
         await queueUnitxIn(msg);
@@ -39,6 +39,8 @@ async function getSheetTos(sheetMessage:SheetMessage):Promise<number[]> {
     let runner = await getRunner($unitx);
     let {unit, body} = sheetMessage;
     let {state, user, name, no, discription, usq } = body;
+    // 新单只能发给做单人
+    if (state === '$') return;
     // 上句中的to removed，由下面调用unitx来计算
     let sheetName = name;
     let stateName = state;
