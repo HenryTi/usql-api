@@ -10,6 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const bull = require("bull");
 const pushToClient_1 = require("./pushToClient");
+const processSheetMessage_1 = require("./processSheetMessage");
+const processBusMessage_1 = require("./processBusMessage");
 const unitxInQueueName = 'unitx-in-queue';
 let unitxInQueue;
 function queueUnitxIn(msg) {
@@ -29,11 +31,13 @@ function startUnitxInQueue(redis) {
                 let { data } = job;
                 switch (data.type) {
                     case 'sheet':
+                        yield processSheetMessage_1.processSheetMessage(data);
+                        break;
                     case 'msg':
                         yield pushToClient_1.pushToClient(data);
                         break;
                     case 'bus':
-                        yield processBusMessage(data);
+                        yield processBusMessage_1.processBusMessage(data);
                         break;
                 }
                 /*
@@ -66,10 +70,4 @@ function startUnitxInQueue(redis) {
     console.log('QUEUE: ' + unitxInQueueName);
 }
 exports.startUnitxInQueue = startUnitxInQueue;
-function processBusMessage(msg) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // 处理 bus message，发送到相应的usq服务器
-        throw 'bus message in UnitxIn not implement';
-    });
-}
 //# sourceMappingURL=unitxInQueue.js.map

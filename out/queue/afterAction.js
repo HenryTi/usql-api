@@ -33,6 +33,7 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
                     type: 'msg',
                     from: from,
                     to: to,
+                    subject: msg,
                     body: {
                         $type: 'msg',
                         $user: to,

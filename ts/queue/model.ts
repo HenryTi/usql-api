@@ -25,6 +25,7 @@ export interface ClientMessage extends Message {
     type: 'sheet' | 'msg';
     from: number;               // 发送人
     to: number[];               // 接收人
+    subject: string;
 }
 
 export interface SheetMessage extends ClientMessage{
@@ -40,11 +41,3 @@ export interface MsgMessage extends ClientMessage {
 export interface BusMessage extends Message {
     type: 'bus';
 }
-
-/*
-export type Message = ClientMessage | BusMessage;
-
-export interface UnitxPack {
-    message: Message;
-}
-*/

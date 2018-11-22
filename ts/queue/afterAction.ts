@@ -36,6 +36,7 @@ export async function afterAction(
                 type: 'msg',
                 from: from,
                 to: to,
+                subject: msg,
                 body: {
                     $type: 'msg',
                     $user: to,

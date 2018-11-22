@@ -83,6 +83,7 @@ function doSheetAct(sheetAct) {
                     type: 'sheet',
                     from: from,
                     db: db,
+                    subject: sheetRet.discription,
                     body: sheetRet,
                     to: undefined,
                 };

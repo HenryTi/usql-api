@@ -1,6 +1,8 @@
 import * as bull from 'bull';
-import { BusMessage, ClientMessage, Message } from './model';
+import { BusMessage, ClientMessage, Message, SheetMessage } from './model';
 import { pushToClient } from './pushToClient';
+import { processSheetMessage } from './processSheetMessage';
+import { processBusMessage } from './processBusMessage';
 
 const unitxInQueueName = 'unitx-in-queue';
 let unitxInQueue:bull.Queue<Message>;
@@ -18,7 +20,7 @@ export function startUnitxInQueue(redis:any) {
         try {
             let {data} = job;
             switch (data.type) {
-                case 'sheet':
+                case 'sheet': await processSheetMessage(data as SheetMessage); break;
                 case 'msg': await pushToClient(data as ClientMessage); break;
                 case 'bus': await processBusMessage(data as BusMessage); break;
             }
@@ -49,9 +51,4 @@ export function startUnitxInQueue(redis:any) {
         }
     });
     console.log('QUEUE: ' + unitxInQueueName);
-}
-
-async function processBusMessage(msg:BusMessage):Promise<void> {
-    // 处理 bus message，发送到相应的usq服务器
-    throw 'bus message in UnitxIn not implement';
 }

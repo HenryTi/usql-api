@@ -4,7 +4,6 @@ import { getRunner } from '../db/runner';
 import { afterAction } from './afterAction';
 import { SheetAct, SheetMessage } from './model';
 import { queueToUnitx } from './toUnitxQueue';
-import { format } from 'path';
 
 const sheetQueueName = 'sheet-queue';
 let sheetQueue:bull.Queue<SheetAct>;
@@ -74,6 +73,7 @@ async function doSheetAct(sheetAct:SheetAct):Promise<void> {
                 type: 'sheet',
                 from: from,
                 db: db,
+                subject: sheetRet.discription,
                 body: sheetRet,
                 to: undefined,
             };
