@@ -10,26 +10,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const queue_1 = require("../queue");
 const entityProcess_1 = require("./entityProcess");
-const sheetType = 'sheet';
+const constSheet = 'sheet';
 function default_1(router) {
-    entityProcess_1.entityPost(router, sheetType, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    entityProcess_1.entityPost(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { app, discription, data } = body;
         let result = yield runner.sheetSave(name, unit, user, app, discription, data);
         let sheetRet = result[0];
         if (sheetRet !== undefined) {
             let sheetMsg = {
                 unit: unit,
-                type: sheetType,
+                type: constSheet,
                 from: user,
                 db: db,
                 body: sheetRet,
                 to: [user],
+                subject: discription
             };
             yield queue_1.queueToUnitx(sheetMsg);
         }
         return sheetRet;
     }));
-    entityProcess_1.entityPut(router, sheetType, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    entityProcess_1.entityPut(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         yield runner.sheetProcessing(body.id);
         let { state, action, id, flow } = body;
         yield queue_1.queueSheet({
@@ -47,26 +48,26 @@ function default_1(router) {
         });
         return { msg: 'add to queue' };
     }));
-    entityProcess_1.entityPost(router, sheetType, '/:name/states', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    entityProcess_1.entityPost(router, constSheet, '/:name/states', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { state, pageStart, pageSize } = body;
         let result = yield runner.sheetStates(name, state, unit, user, pageStart, pageSize);
         return result;
     }));
-    entityProcess_1.entityGet(router, sheetType, '/:name/statecount', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    entityProcess_1.entityGet(router, constSheet, '/:name/statecount', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.sheetStateCount(name, unit, user);
         return result;
     }));
-    entityProcess_1.entityGet(router, sheetType, '/:name/get/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    entityProcess_1.entityGet(router, constSheet, '/:name/get/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id } = urlParams;
         let result = yield runner.getSheet(name, unit, user, id);
         return result;
     }));
-    entityProcess_1.entityPost(router, sheetType, '/:name/archives', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    entityProcess_1.entityPost(router, constSheet, '/:name/archives', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { pageStart, pageSize } = body;
         let result = yield runner.sheetArchives(name, unit, user, pageStart, pageSize);
         return result;
     }));
-    entityProcess_1.entityGet(router, sheetType, '/:name/archive/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    entityProcess_1.entityGet(router, constSheet, '/:name/archive/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id } = urlParams;
         let result = yield runner.sheetArchive(unit, user, name, id);
         return result;

@@ -3,10 +3,10 @@ import { queueSheet, queueToUnitx, SheetMessage } from '../queue';
 import { entityPost, entityPut, entityGet } from './entityProcess';
 import { Runner } from '../db';
 
-const sheetType = 'sheet';
+const constSheet = 'sheet';
 
 export default function(router:Router) {
-    entityPost(router, sheetType, '/:name', 
+    entityPost(router, constSheet, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {app, discription, data} = body;
         let result = await runner.sheetSave(name, unit, user, app, discription, data);
@@ -14,18 +14,19 @@ export default function(router:Router) {
         if (sheetRet !== undefined) {
             let sheetMsg:SheetMessage = {
                 unit: unit,
-                type: sheetType,
+                type: constSheet,
                 from: user,
                 db: db,
                 body: sheetRet,
                 to: [user],
+                subject: discription
             };
             await queueToUnitx(sheetMsg);
         }
         return sheetRet;
     });
         
-    entityPut(router, sheetType, '/:name', 
+    entityPut(router, constSheet, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         await runner.sheetProcessing(body.id);
         let {state, action, id, flow} = body;
@@ -45,34 +46,34 @@ export default function(router:Router) {
         return {msg: 'add to queue'};
     });
 
-    entityPost(router, sheetType, '/:name/states', 
+    entityPost(router, constSheet, '/:name/states', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {state, pageStart, pageSize} = body;
         let result = await runner.sheetStates(name, state, unit, user, pageStart, pageSize);
         return result;
     });
 
-    entityGet(router, sheetType, '/:name/statecount',
+    entityGet(router, constSheet, '/:name/statecount',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let result = await runner.sheetStateCount(name, unit, user);
         return result;
     });
 
-    entityGet(router, sheetType, '/:name/get/:id', 
+    entityGet(router, constSheet, '/:name/get/:id', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id} = urlParams;
         let result = await runner.getSheet(name, unit, user, id as any);
         return result;
     });
 
-    entityPost(router, sheetType, '/:name/archives',
+    entityPost(router, constSheet, '/:name/archives',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {pageStart, pageSize} = body;
         let result = await runner.sheetArchives(name, unit, user, pageStart, pageSize);
         return result;
     });
 
-    entityGet(router, sheetType, '/:name/archive/:id', 
+    entityGet(router, constSheet, '/:name/archive/:id', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id} = urlParams;
         let result = await runner.sheetArchive(unit, user, name, id as any);
