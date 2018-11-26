@@ -8,21 +8,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const dbServer_1 = require("./dbServer");
-class MsDbServer extends dbServer_1.DbServer {
-    constructor(dbConfig) {
-        super();
-    }
-    sql(db, sql, params) { return; }
-    call(db, proc, params) {
-        return __awaiter(this, void 0, void 0, function* () { return; });
-    }
-    callEx(db, proc, params) { return; }
-    tableFromProc(db, proc, params) { return; }
-    tablesFromProc(db, proc, params) { return; }
-    createDatabase(db) { return; }
-    existsDatabase(db) { return; }
-    usqDbs() { return; }
+const open_1 = require("./open");
+let isRunning = false;
+function sync() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (isRunning === true)
+            return;
+        isRunning = true;
+        console.log('sync start at ', new Date().toLocaleTimeString());
+        yield open_1.syncDbs();
+        isRunning = false;
+    });
 }
-exports.MsDbServer = MsDbServer;
-//# sourceMappingURL=ms.js.map
+function startSync() {
+    if (process.env.NODE_ENV === 'development')
+        setTimeout(sync, 3000);
+    else
+        setInterval(sync, 60000);
+}
+exports.startSync = startSync;
+//# sourceMappingURL=index.js.map

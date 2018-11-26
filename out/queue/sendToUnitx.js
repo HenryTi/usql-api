@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const config = require("config");
 const node_fetch_1 = require("node-fetch");
 const core_1 = require("../core");
 function sendToUnitx(unit, msg) {
@@ -23,10 +22,6 @@ function sendToUnitx(unit, msg) {
     });
 }
 exports.sendToUnitx = sendToUnitx;
-const unitxHost = config.get('unitxhost');
-function urlSetUnitxHost(url) {
-    return url.replace('://unitxhost/', '://' + unitxHost + '/');
-}
 class UnitxApi extends core_1.Fetch {
     send(msg) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -49,7 +44,7 @@ function getUnitxApi(unit) {
         let { url, urlDebug } = unitx;
         if (urlDebug !== undefined) {
             try {
-                urlDebug = urlSetUnitxHost(urlDebug);
+                urlDebug = core_1.urlSetUnitxHost(urlDebug);
                 let ret = yield node_fetch_1.default(urlDebug + 'hello');
                 if (ret.status !== 200)
                     throw 'not ok';

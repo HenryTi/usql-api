@@ -47,9 +47,12 @@ export class Runner {
     private setting: {[name:string]: any};
     private entityColl: {[id:number]: EntityAccess};
     private usqId: number;
+
     app: string;
     author: string;
     version: string;
+    importTuids:any[];
+    froms: {[from:string]:{[tuid:string]:{tuid?:any, maps?:{[map:string]:any}}}};
 
     constructor(db:Db) {
         this.db = db;
@@ -110,6 +113,18 @@ export class Runner {
     async loadSchemaVersion(name:string, version:string): Promise<string> {
         return await this.db.call('tv_$entity_version', [name, version]);
     } 
+
+    isTuidOpen(tuid:string) {
+        let t = this.tuids[tuid];
+        if (t === undefined) return false;
+        if (t.isOpen === true) return true;
+        return false;
+    }
+    isMap(map:string) {
+        let m = this.entityColl[map];
+        if (m === undefined) return false;
+        return m.type === 'map';
+    }
 
     async tuidGet(tuid:string, unit:number, user:number, id:number): Promise<any> {
         return await this.db.callEx('tv_' + tuid, [unit, user, id]);
@@ -211,19 +226,19 @@ export class Runner {
 
     async init() {
         if (this.schemas !== undefined) return;
-        /*
-        this.app = await this.getSetting(0, 'app');
-        this.author = await this.getSetting(0, 'author');
-        this.version = await this.getSetting(0, 'version');
-        
-        await this.getSetting(0, 'reloadSchemas');
-        this.usqId = await this.getSetting(0, 'usqId');
-        */
+        try {
+            await this.initInternal();
+        }
+        catch (err) {
+            this.schemas = {};
+            console.error(err.message);
+            debugger;
+        }
+    }
 
-        //this.isSysChat = (this.app === '$unitx' || this.app === 'unitx') 
-        //    && this.author === 'henry';
+    private async initInternal() {
         let rows = await this.loadSchemas(false);
-        let schemaTable:{id:number, name:string, type:number, version:number, schema:string, run:string}[] = rows[0];
+        let schemaTable:{id:number, name:string, type:number, version:number, schema:string, run:string, from:string}[] = rows[0];
         let settingTable:{name:string, value:string}[] = rows[1];
         let setting:{[name:string]:string|number} = {};
         for (let row of settingTable) {
@@ -244,8 +259,10 @@ export class Runner {
         this.tuids = {};
         this.buses = {};
         this.entityColl = {};
+        this.froms = {};
         for (let row of schemaTable) {
-            let {name, id, version, schema, run} = row;
+            let {name, id, version, schema, run, from} = row;
+            let tuidFroms:{[tuid:string]:{tuid?:any, maps?:{[map:string]:any}}};
             let schemaObj = JSON.parse(schema);
             let runObj = JSON.parse(run);
             schemaObj.typeId = id;
@@ -258,7 +275,31 @@ export class Runner {
             switch (type) {
                 case 'access': this.accessSchemaArr.push(schemaObj); break;
                 case 'bus': this.buses[url] = schemaObj; break;
-                case 'tuid': this.tuids[name] = schemaObj; break;                
+                case 'tuid': 
+                    this.tuids[name] = schemaObj; 
+                    if (from) {
+                        tuidFroms = this.froms[from];
+                        if (tuidFroms === undefined) tuidFroms = this.froms[from] = {};
+                        let tuidFrom = tuidFroms[name];
+                        if (tuidFrom === undefined) tuidFrom = tuidFroms[name] = {};
+                        tuidFrom.tuid = schemaObj;
+                    }
+                    break;
+                case 'map':
+                    if (from) {
+                        tuidFroms = this.froms[from];
+                        if (tuidFroms === undefined) tuidFroms = this.froms[from] = {};
+                        let {keys} = schemaObj;
+                        let key0 = keys[0];
+                        let tuidName = key0.tuid;
+                        if (tuidName === undefined) break;
+                        let tuidFrom = tuidFroms[tuidName];
+                        if (tuidFrom === undefined) tuidFrom = tuidFroms[tuidName] = {};
+                        let maps = tuidFrom.maps;
+                        if (maps === undefined) maps = tuidFrom.maps = {};
+                        maps[name] = schemaObj;
+                    }
+                    break;
             }
             this.entityColl[id] = {
                 name: name,

@@ -121,6 +121,20 @@ class Runner {
             return yield this.db.call('tv_$entity_version', [name, version]);
         });
     }
+    isTuidOpen(tuid) {
+        let t = this.tuids[tuid];
+        if (t === undefined)
+            return false;
+        if (t.isOpen === true)
+            return true;
+        return false;
+    }
+    isMap(map) {
+        let m = this.entityColl[map];
+        if (m === undefined)
+            return false;
+        return m.type === 'map';
+    }
     tuidGet(tuid, unit, user, id) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.callEx('tv_' + tuid, [unit, user, id]);
@@ -266,16 +280,18 @@ class Runner {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.schemas !== undefined)
                 return;
-            /*
-            this.app = await this.getSetting(0, 'app');
-            this.author = await this.getSetting(0, 'author');
-            this.version = await this.getSetting(0, 'version');
-            
-            await this.getSetting(0, 'reloadSchemas');
-            this.usqId = await this.getSetting(0, 'usqId');
-            */
-            //this.isSysChat = (this.app === '$unitx' || this.app === 'unitx') 
-            //    && this.author === 'henry';
+            try {
+                yield this.initInternal();
+            }
+            catch (err) {
+                this.schemas = {};
+                console.error(err.message);
+                debugger;
+            }
+        });
+    }
+    initInternal() {
+        return __awaiter(this, void 0, void 0, function* () {
             let rows = yield this.loadSchemas(false);
             let schemaTable = rows[0];
             let settingTable = rows[1];
@@ -296,8 +312,10 @@ class Runner {
             this.tuids = {};
             this.buses = {};
             this.entityColl = {};
+            this.froms = {};
             for (let row of schemaTable) {
-                let { name, id, version, schema, run } = row;
+                let { name, id, version, schema, run, from } = row;
+                let tuidFroms;
                 let schemaObj = JSON.parse(schema);
                 let runObj = JSON.parse(run);
                 schemaObj.typeId = id;
@@ -316,6 +334,34 @@ class Runner {
                         break;
                     case 'tuid':
                         this.tuids[name] = schemaObj;
+                        if (from) {
+                            tuidFroms = this.froms[from];
+                            if (tuidFroms === undefined)
+                                tuidFroms = this.froms[from] = {};
+                            let tuidFrom = tuidFroms[name];
+                            if (tuidFrom === undefined)
+                                tuidFrom = tuidFroms[name] = {};
+                            tuidFrom.tuid = schemaObj;
+                        }
+                        break;
+                    case 'map':
+                        if (from) {
+                            tuidFroms = this.froms[from];
+                            if (tuidFroms === undefined)
+                                tuidFroms = this.froms[from] = {};
+                            let { keys } = schemaObj;
+                            let key0 = keys[0];
+                            let tuidName = key0.tuid;
+                            if (tuidName === undefined)
+                                break;
+                            let tuidFrom = tuidFroms[tuidName];
+                            if (tuidFrom === undefined)
+                                tuidFrom = tuidFroms[tuidName] = {};
+                            let maps = tuidFrom.maps;
+                            if (maps === undefined)
+                                maps = tuidFrom.maps = {};
+                            maps[name] = schemaObj;
+                        }
                         break;
                 }
                 this.entityColl[id] = {

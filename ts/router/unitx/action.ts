@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { Runner } from '../../db';
-import { centerApi, unpack, packParam, Fetch } from '../../core';
+import { centerApi, unpack, packParam, Fetch, urlSetUsqHost } from '../../core';
 import { actionProcess } from '../actionProcess';
 
 export async function unitxActionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
@@ -18,11 +18,6 @@ export async function unitxActionProcess(unit:number, user:number, name:string, 
             break;
     }
     return await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
-}
-
-const usqHost = 'localhost:3015';
-function urlSetUsqHost(url:string):string {
-    return url.replace('://usqhost/', '://'+usqHost+'/');
 }
 
 async function usqUrl(unit:number, usq:number):Promise<string> {

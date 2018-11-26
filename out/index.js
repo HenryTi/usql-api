@@ -14,6 +14,7 @@ const config = require("config");
 const router_1 = require("./router");
 const core_1 = require("./core");
 const queue_1 = require("./queue");
+const sync_1 = require("./sync");
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
         let connection = config.get("connection");
@@ -55,6 +56,7 @@ const queue_1 = require("./queue");
         //app.use('/usql/:db/bus/', [authUnitx, sendToBusRouter]);
         app.use('/usql/:db/unitx/', [core_1.authUnitx, queue_1.unitxQueueRouter]);
         //app.use('/usql/$unitx/tv/', [authCheck, unitxRouter]);
+        app.use('/usql/:db/open/', [core_1.authUnitx, router_1.openRouter]);
         app.use('/usql/:db/tv/', [core_1.authCheck, router_1.router]);
         app.use('/usql/:db/setting/', [/*authCheck, */ router_1.settingRouter]); // unitx set access
         //app.use('/usql/:db/log', getWsLogs);
@@ -85,6 +87,7 @@ const queue_1 = require("./queue");
         queue_1.startToUnitxQueue(redis);
         queue_1.startUnitxInQueue(redis);
         app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
+            sync_1.startSync();
             console.log('USQL-API listening on port ' + port);
             let connection = config.get("connection");
             let { host, user } = connection;

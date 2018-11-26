@@ -1,7 +1,6 @@
-import fetch from 'node-fetch';
-import { centerApi, Fetch, urlSetUnitxHost } from '../core';
-import { Message } from './model';
-
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+/*
 export async function sendToUnitx(unit:number, msg:Message):Promise<number[]> {
     let unitxApi = await getUnitxApi(unit);
     if (unitxApi === null) {
@@ -10,6 +9,11 @@ export async function sendToUnitx(unit:number, msg:Message):Promise<number[]> {
     }
     let toArr:number[] = await unitxApi.send(msg);
     return toArr;
+}
+
+const unitxHost = config.get<string>('unitxhost');
+function urlSetUnitxHost(url:string):string {
+    return url.replace('://unitxhost/', '://'+unitxHost+'/');
 }
 
 class UnitxApi extends Fetch {
@@ -40,3 +44,5 @@ async function getUnitxApi(unit:number):Promise<UnitxApi> {
     }
     return unitxApis[unit] = new UnitxApi(url);
 }
+*/
+//# sourceMappingURL=sendToUnitx.js.map

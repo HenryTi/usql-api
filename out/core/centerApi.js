@@ -44,6 +44,11 @@ class CenterApi extends fetch_1.Fetch {
             return yield this.get('open/usq-url', { unit: unit, usq: usq });
         });
     }
+    urlFromUsq(unit, usqFullName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.get('open/url-from-usq', { unit: unit, usq: usqFullName });
+        });
+    }
     usqlDb(name) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.get('open/usqldb', { name: name });

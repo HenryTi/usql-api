@@ -1,4 +1,7 @@
 "use strict";
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
 Object.defineProperty(exports, "__esModule", { value: true });
 var auth_1 = require("./auth");
 exports.Auth = auth_1.default;
@@ -19,4 +22,5 @@ exports.packParam = packReturn_1.packParam;
 exports.unpack = packReturn_1.unpack;
 var fetch_1 = require("./fetch");
 exports.Fetch = fetch_1.Fetch;
+__export(require("./setHostUrl"));
 //# sourceMappingURL=index.js.map

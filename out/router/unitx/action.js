@@ -30,10 +30,6 @@ function unitxActionProcess(unit, user, name, db, urlParams, runner, body, schem
     });
 }
 exports.unitxActionProcess = unitxActionProcess;
-const usqHost = 'localhost:3015';
-function urlSetUsqHost(url) {
-    return url.replace('://usqhost/', '://' + usqHost + '/');
-}
 function usqUrl(unit, usq) {
     return __awaiter(this, void 0, void 0, function* () {
         let urqUrl = yield core_1.centerApi.usqUrl(unit, usq);
@@ -41,7 +37,7 @@ function usqUrl(unit, usq) {
         if (urlDebug !== undefined) {
             // 这个地方会有问题，urlDebug也许指向错误
             try {
-                urlDebug = urlSetUsqHost(urlDebug);
+                urlDebug = core_1.urlSetUsqHost(urlDebug);
                 let ret = yield node_fetch_1.default(urlDebug + 'hello');
                 if (ret.status !== 200)
                     throw 'not ok';

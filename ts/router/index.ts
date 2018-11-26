@@ -1,5 +1,6 @@
 export * from './router';
 export * from './setting';
+export {openRouter} from './open';
 
 import {router} from './router';
 import accessRouter from './access';

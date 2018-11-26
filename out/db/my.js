@@ -106,6 +106,13 @@ class MyDbServer extends dbServer_1.DbServer {
             return rows.length > 0;
         });
     }
+    usqDbs() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = `select a.schema_name as db from information_schema.schemata a join information_schema.tables b on a.schema_name=b.table_schema where b.table_name='tv_$entity';`;
+            let rows = yield this.exec(sql, undefined);
+            return rows;
+        });
+    }
 }
 exports.MyDbServer = MyDbServer;
 function castField(field, next) {

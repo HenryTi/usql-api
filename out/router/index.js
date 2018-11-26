@@ -5,6 +5,8 @@ function __export(m) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(require("./router"));
 __export(require("./setting"));
+var open_1 = require("./open");
+exports.openRouter = open_1.openRouter;
 const router_1 = require("./router");
 const access_1 = require("./access");
 const schema_1 = require("./schema");

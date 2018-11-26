@@ -55,7 +55,10 @@ export class Db {
         return await this.dbServer.tablesFromProc(this.dbName, proc, params);
     }
     async createDatabase(): Promise<void> {
-        return await this.dbServer.createDatabase(this.dbName)
+        return await this.dbServer.createDatabase(this.dbName);
+    }
+    async usqDbs():Promise<any[]> {
+        return await this.dbServer.usqDbs();
     }
 }
 

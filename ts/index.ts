@@ -2,9 +2,10 @@ import * as express from 'express';
 import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import {router, settingRouter} from './router';
+import {router, settingRouter, openRouter} from './router';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
 import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } from './queue';
+import { startSync } from './sync';
 
 (async function () {
     let connection = config.get<any>("connection");
@@ -47,6 +48,7 @@ import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue
     //app.use('/usql/:db/bus/', [authUnitx, sendToBusRouter]);
     app.use('/usql/:db/unitx/', [authUnitx, unitxQueueRouter]);
     //app.use('/usql/$unitx/tv/', [authCheck, unitxRouter]);
+    app.use('/usql/:db/open/', [authUnitx, openRouter]);
     app.use('/usql/:db/tv/', [authCheck, router]);
     app.use('/usql/:db/setting/', [/*authCheck, */settingRouter]); // unitx set access
 
@@ -84,6 +86,7 @@ import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue
     startUnitxInQueue(redis);
 
     app.listen(port, async ()=>{
+        startSync();
         console.log('USQL-API listening on port ' + port);
         let connection = config.get<any>("connection");
         let {host, user} = connection;
