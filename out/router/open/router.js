@@ -27,16 +27,18 @@ exports.router = express_1.Router({ mergeParams: true });
             return;
         // maps: tab分隔的map名字
         let ret = {};
-        let tuidRet = yield runner.call('tv_' + tuid, [unit, undefined, id]);
+        let tuidRet = yield runner.call(tuid, [unit, undefined, id]);
         ret[tuid] = tuidRet;
-        if (maps !== undefined) {
-            let mapNames = maps.split('\t');
-            for (let map of mapNames) {
-                if (runner.isMap(map) === false)
-                    continue;
-                let mapRet = yield runner.call('tv_' + map + '$query$', [unit, undefined, id]);
-                ret[map] = mapRet;
-            }
+        for (let m of maps) {
+            let map = runner.getMap(m);
+            if (map === undefined)
+                continue;
+            let { keys } = map.call;
+            let params = [unit, undefined, id];
+            for (let i = 1; i < keys.length; i++)
+                params.push(undefined);
+            let mapRet = yield runner.call(m + '$query$', params);
+            ret[m] = mapRet;
         }
         return ret;
     }));

@@ -129,11 +129,16 @@ class Runner {
             return true;
         return false;
     }
-    isMap(map) {
-        let m = this.entityColl[map];
+    getTuid(tuid) {
+        let ret = this.tuids[tuid];
+        return ret;
+    }
+    getMap(map) {
+        let m = this.schemas[map];
         if (m === undefined)
-            return false;
-        return m.type === 'map';
+            return;
+        if (m.type === 'map')
+            return m;
     }
     tuidGet(tuid, unit, user, id) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -320,11 +325,12 @@ class Runner {
                 let runObj = JSON.parse(run);
                 schemaObj.typeId = id;
                 schemaObj.version = version;
+                let { type, url } = schemaObj;
                 this.schemas[name] = {
+                    type: type,
                     call: schemaObj,
                     run: runObj,
                 };
-                let { type, url } = schemaObj;
                 switch (type) {
                     case 'access':
                         this.accessSchemaArr.push(schemaObj);
@@ -341,7 +347,7 @@ class Runner {
                             let tuidFrom = tuidFroms[name];
                             if (tuidFrom === undefined)
                                 tuidFrom = tuidFroms[name] = {};
-                            tuidFrom.tuid = schemaObj;
+                            tuidFrom.tuidObj = schemaObj;
                         }
                         break;
                     case 'map':
@@ -357,10 +363,10 @@ class Runner {
                             let tuidFrom = tuidFroms[tuidName];
                             if (tuidFrom === undefined)
                                 tuidFrom = tuidFroms[tuidName] = {};
-                            let maps = tuidFrom.maps;
-                            if (maps === undefined)
-                                maps = tuidFrom.maps = {};
-                            maps[name] = schemaObj;
+                            let mapObjs = tuidFrom.mapObjs;
+                            if (mapObjs === undefined)
+                                mapObjs = tuidFrom.mapObjs = {};
+                            mapObjs[name] = schemaObj;
                         }
                         break;
                 }
@@ -374,6 +380,20 @@ class Runner {
                             ops: schemaObj.states && schemaObj.states.map(v => v.name)
                         }
                 };
+            }
+            for (let i in this.froms) {
+                let from = this.froms[i];
+                for (let t in from) {
+                    let syncTuid = from[t];
+                    let { tuidObj, mapObjs } = syncTuid;
+                    syncTuid.tuid = tuidObj.name.toLowerCase();
+                    if (mapObjs !== undefined) {
+                        let s = [];
+                        for (let m in mapObjs)
+                            s.push(m.toLowerCase());
+                        syncTuid.maps = s;
+                    }
+                }
             }
             for (let i in this.schemas) {
                 let schema = this.schemas[i].call;

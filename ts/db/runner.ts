@@ -40,7 +40,7 @@ interface EntityAccess {
 export class Runner {
     private db:Db;
     private access:any;
-    private schemas: {[entity:string]: {call:any; run:any;}};
+    private schemas: {[entity:string]: {type:string, call:any; run:any;}};
     private accessSchemaArr: any[];
     private tuids: {[name:string]: any};
     private buses:{[url:string]:any}; // 直接查找bus
@@ -52,7 +52,8 @@ export class Runner {
     author: string;
     version: string;
     importTuids:any[];
-    froms: {[from:string]:{[tuid:string]:{tuid?:any, maps?:{[map:string]:any}}}};
+    // tuid的值，第一个是tuidname，随后用tab分隔的map
+    froms: {[from:string]:{[tuid:string]:{tuid?:string, maps?:string[], tuidObj?:any, mapObjs?:{[map:string]:any}}}};
 
     constructor(db:Db) {
         this.db = db;
@@ -120,10 +121,14 @@ export class Runner {
         if (t.isOpen === true) return true;
         return false;
     }
-    isMap(map:string) {
-        let m = this.entityColl[map];
-        if (m === undefined) return false;
-        return m.type === 'map';
+    getTuid(tuid:string) {
+        let ret = this.tuids[tuid];
+        return ret;
+    }
+    getMap(map:string):any {
+        let m = this.schemas[map];
+        if (m === undefined) return;
+        if (m.type === 'map') return m;
     }
 
     async tuidGet(tuid:string, unit:number, user:number, id:number): Promise<any> {
@@ -262,16 +267,17 @@ export class Runner {
         this.froms = {};
         for (let row of schemaTable) {
             let {name, id, version, schema, run, from} = row;
-            let tuidFroms:{[tuid:string]:{tuid?:any, maps?:{[map:string]:any}}};
+            let tuidFroms:{[tuid:string]:{tuid?:string, maps?:string[], tuidObj?:any, mapObjs?:{[map:string]:any}}};
             let schemaObj = JSON.parse(schema);
             let runObj = JSON.parse(run);
             schemaObj.typeId = id;
             schemaObj.version = version;
+            let {type, url} = schemaObj;
             this.schemas[name] = {
+                type: type,
                 call: schemaObj,
                 run: runObj,
             }
-            let {type, url} = schemaObj;
             switch (type) {
                 case 'access': this.accessSchemaArr.push(schemaObj); break;
                 case 'bus': this.buses[url] = schemaObj; break;
@@ -282,7 +288,7 @@ export class Runner {
                         if (tuidFroms === undefined) tuidFroms = this.froms[from] = {};
                         let tuidFrom = tuidFroms[name];
                         if (tuidFrom === undefined) tuidFrom = tuidFroms[name] = {};
-                        tuidFrom.tuid = schemaObj;
+                        tuidFrom.tuidObj = schemaObj;
                     }
                     break;
                 case 'map':
@@ -295,9 +301,9 @@ export class Runner {
                         if (tuidName === undefined) break;
                         let tuidFrom = tuidFroms[tuidName];
                         if (tuidFrom === undefined) tuidFrom = tuidFroms[tuidName] = {};
-                        let maps = tuidFrom.maps;
-                        if (maps === undefined) maps = tuidFrom.maps = {};
-                        maps[name] = schemaObj;
+                        let mapObjs = tuidFrom.mapObjs;
+                        if (mapObjs === undefined) mapObjs = tuidFrom.mapObjs = {};
+                        mapObjs[name] = schemaObj;
                     }
                     break;
             }
@@ -311,6 +317,19 @@ export class Runner {
                         ops: schemaObj.states && schemaObj.states.map(v => v.name)
                     }
             };
+        }
+        for (let i in this.froms) {
+            let from = this.froms[i];
+            for (let t in from) {
+                let syncTuid = from[t];
+                let {tuidObj, mapObjs} = syncTuid;
+                syncTuid.tuid = (tuidObj.name as string).toLowerCase();
+                if (mapObjs !== undefined) {
+                    let s:string[] = [];
+                    for (let m in mapObjs) s.push(m.toLowerCase());
+                    syncTuid.maps = s;
+                }
+            }
         }
         for (let i in this.schemas) {
             let schema = this.schemas[i].call;

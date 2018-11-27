@@ -1,6 +1,7 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import { Runner } from '../../db';
 import { checkRunner } from '../router';
+import { listenerCount } from 'cluster';
 
 export const router: Router = Router({ mergeParams: true });
 
@@ -22,15 +23,16 @@ export const router: Router = Router({ mergeParams: true });
         if (runner.isTuidOpen(tuid) === false) return;
         // maps: tab分隔的map名字
         let ret:{[key:string]: any} = {};
-        let tuidRet = await runner.call('tv_' + tuid, [unit, undefined, id]);
+        let tuidRet = await runner.call(tuid, [unit, undefined, id]);
         ret[tuid] = tuidRet;
-        if (maps !== undefined) {
-            let mapNames = (maps as string).split('\t');
-            for (let map of mapNames) {
-                if (runner.isMap(map) === false) continue;
-                let mapRet = await runner.call('tv_' + map + '$query$', [unit, undefined, id]);
-                ret[map] = mapRet;
-            }
+        for (let m of maps) {
+            let map = runner.getMap(m);
+            if (map === undefined) continue;
+            let {keys} = map.call;
+            let params = [unit, undefined, id]
+            for (let i=1;i<keys.length; i++) params.push(undefined);
+            let mapRet = await runner.call(m + '$query$', params);
+            ret[m] = mapRet;
         }
         return ret;
     });

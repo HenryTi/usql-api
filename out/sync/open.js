@@ -12,6 +12,7 @@ const node_fetch_1 = require("node-fetch");
 const core_1 = require("../core");
 const db_1 = require("../db/db");
 const db_2 = require("../db");
+const packParam_1 = require("../core/packParam");
 const dbRun = new db_1.Db(undefined);
 function syncDbs() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -61,16 +62,23 @@ function syncFroms(db) {
                     let rows = unitRows[i];
                     let unit = Number(i);
                     let openApi = yield getOpenApi(from, unit);
+                    let stamps = {};
                     for (let row of rows) {
                         let { tuid, id, hasNew, stamp } = row;
+                        stamps[tuid] = stamp;
                         if (hasNew === 1) {
                             if (fromSchemas === undefined)
                                 continue;
                             let syncTuid = fromSchemas[tuid];
-                            let { maps } = syncTuid;
-                            yield syncId(runner, openApi, unit, id, tuid, maps);
+                            let { maps } = syncTuid; // tuid, 随后 tab 分隔的 map
+                            let ids = yield runner.call(tuid + '$sync0', [unit]);
+                            for (let idRet of ids) {
+                                yield syncId(runner, openApi, unit, idRet.id, tuid, maps);
+                            }
                         }
                     }
+                    let str = '';
+                    //let fresh = await openApi.fresh(unit, /*stamps*/str);
                 }
             }
             /*
@@ -110,12 +118,72 @@ async function syncTuid(runner:Runner, unit:number, from:string, tuid:any, maps:
 function syncId(runner, openApi, unit, id, tuid, maps) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('SyncId unit=' + unit + ' id=' + id + ' tuid=' + tuid);
+        let ret = yield openApi.tuid(unit, id, tuid, maps);
+        if (maps !== undefined) {
+            for (let map of maps) {
+                let mapValues = ret[map];
+                if (mapValues === undefined)
+                    continue;
+                yield setMap(runner, map, unit, id, mapValues);
+            }
+        }
+        yield setTuid(runner, tuid, unit, id, ret[tuid]);
+    });
+}
+function setMap(runner, mapName, unit, id, values) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let map = runner.getMap(mapName);
+        if (map === undefined)
+            return;
+        let { actions } = map.call;
+        let { sync } = actions;
+        let data = {
+            __id: id,
+            arr1: values
+        };
+        let param = packParam_1.packParam(sync, data);
+        yield runner.action(sync.name, unit, undefined, param);
+        return;
+    });
+}
+function setTuid(runner, tuidName, unit, id, values) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            let user = undefined;
+            let tuid = runner.getTuid(tuidName);
+            let { id, fields, arrs } = tuid;
+            let main = values[0][0];
+            if (main === undefined)
+                return;
+            let idVal = main[id];
+            if (arrs !== undefined) {
+                let len = arrs.length;
+                for (let i = 0; i < len; i++) {
+                    let arr = arrs[i];
+                    let { name, fields } = arr;
+                    let rows = values[i + 1];
+                    for (let row of rows) {
+                        let param = [idVal, row.id];
+                        fields.forEach(v => param.push(row[v.name]));
+                        param.push(row.$order);
+                        yield runner.tuidArrSave(tuidName, name, unit, user, param);
+                    }
+                }
+            }
+            let paramMain = [idVal];
+            fields.forEach(v => paramMain.push(main[v.name]));
+            paramMain.push(main.$stamp);
+            yield runner.tuidSave(tuidName, unit, user, paramMain);
+        }
+        catch (err) {
+            console.log(err.message);
+        }
     });
 }
 class OpenApi extends core_1.Fetch {
     fresh(unit, stamps) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.post('open', {
+            let ret = yield this.post('open/fresh', {
                 unit: unit,
                 stamps: stamps
             });
@@ -124,11 +192,11 @@ class OpenApi extends core_1.Fetch {
     }
     tuid(unit, id, tuid, maps) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.post('open', {
+            let ret = yield this.post('open/tuid', {
                 unit: unit,
                 id: id,
                 tuid: tuid,
-                maps: maps
+                maps: maps,
             });
             return ret;
         });

@@ -3,6 +3,7 @@ import fetch from 'node-fetch';
 import { centerApi, Fetch, urlSetUsqHost } from '../core';
 import { Db } from '../db/db';
 import { getRunner, Runner } from '../db';
+import { packParam } from '../core/packParam';
 
 const dbRun = new Db(undefined);
 
@@ -61,12 +62,15 @@ async function syncFroms(db:string):Promise<void> {
                     if (hasNew === 1) {
                         if (fromSchemas === undefined) continue;
                         let syncTuid = fromSchemas[tuid];
-                        let {maps} = syncTuid;
-                        await syncId(runner, openApi, unit, id, tuid, maps);
+                        let {maps} = syncTuid; // tuid, 随后 tab 分隔的 map
+                        let ids = await runner.call(tuid + '$sync0', [unit]);
+                        for (let idRet of ids) {
+                            await syncId(runner, openApi, unit, idRet.id, tuid, maps);
+                        }
                     }
                 }
                 let str = '';
-                let fresh = await openApi.fresh(unit, /*stamps*/str);
+                //let fresh = await openApi.fresh(unit, /*stamps*/str);
             }
         }
 
@@ -105,24 +109,79 @@ async function syncTuid(runner:Runner, unit:number, from:string, tuid:any, maps:
 }
 */
 
-async function syncId(runner:Runner, openApi:OpenApi, unit:number, id:number, tuid:string, maps:{[map:string]:any}) {
+async function syncId(runner:Runner, openApi:OpenApi, unit:number, id:number, tuid:string, maps:string[]) {
     console.log('SyncId unit=' + unit + ' id=' + id + ' tuid=' + tuid);
+    let ret = await openApi.tuid(unit, id, tuid, maps);
+    if (maps !== undefined) {
+        for (let map of maps) {
+            let mapValues = ret[map];
+            if (mapValues === undefined) continue;
+            await setMap(runner, map, unit, id, mapValues);
+        }
+    }
+    await setTuid(runner, tuid, unit, id, ret[tuid]);
+}
+
+async function setMap(runner:Runner, mapName:string, unit:number, id:number, values:any[]) {
+    let map = runner.getMap(mapName);
+    if (map === undefined) return;
+    let {actions} = map.call;
+    let {sync} = actions;
+    let data = {
+        __id: id,
+        arr1: values
+    }
+    let param = packParam(sync, data);
+    await runner.action(sync.name, unit, undefined, param);
+    return;
+}
+
+async function setTuid(runner:Runner, tuidName:string, unit:number, id:number, values:any) {
+    try {
+        let user = undefined;
+        let tuid = runner.getTuid(tuidName);
+        let {id, fields, arrs} = tuid;
+        let main = values[0][0];
+        if (main === undefined) return;
+        let idVal = main[id];
+        if (arrs !== undefined) {
+            let len = arrs.length;
+            for (let i=0; i<len; i++) {
+                let arr = arrs[i];
+                let {name, fields} = arr;
+                let rows = values[i+1] as any[];
+                for (let row of rows) {
+                    let param = [idVal, row.id];
+                    (fields as any[]).forEach(v => param.push(row[v.name]));
+                    param.push(row.$order);
+                    await runner.tuidArrSave(tuidName, name, unit, user, param);
+                }
+            }
+        }
+        let paramMain:any[] = [idVal];
+        (fields as any[]).forEach(v => paramMain.push(main[v.name]));
+        paramMain.push(main.$stamp);
+        await runner.tuidSave(tuidName, unit, user, paramMain);
+    }
+    catch (err) {
+        console.log(err.message);
+    }
 }
 
 class OpenApi extends Fetch {
     async fresh(unit:number, stamps:string):Promise<any> {
-        let ret = await this.post('open', {
+        let ret = await this.post('open/fresh', {
             unit: unit,
             stamps: stamps
         });
         return ret;
     }
-    async tuid(unit: number, id: number, tuid: string, maps: string):Promise<any> {
-        let ret = await this.post('open', {
+    async tuid(unit: number, id: number, tuid:string, maps: string[]):Promise<any> {
+        let ret = await this.post('open/tuid', {
             unit: unit,
             id: id,
             tuid: tuid,
-            maps: maps
+            maps: maps,
         });
         return ret;
     }
