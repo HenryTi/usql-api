@@ -12,7 +12,6 @@ const node_fetch_1 = require("node-fetch");
 const core_1 = require("../core");
 const db_1 = require("../db/db");
 const db_2 = require("../db");
-const packParam_1 = require("../core/packParam");
 const dbRun = new db_1.Db(undefined);
 function syncDbs() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -109,17 +108,6 @@ function syncFroms(db) {
         }
     });
 }
-/*
-async function syncTuid(runner:Runner, unit:number, from:string, tuid:any, maps:{[map:string]:any}, hasNew:number, stamp:number) {
-    if (hasNew === 1) {
-        let newIds = await runner.call(tuid.name + '$sync0', [unit]);
-        for (let row of newIds) {
-            let {id} = row;
-            await syncId(runner, unit, id, from, tuid, maps);
-        }
-    }
-}
-*/
 function syncId(runner, openApi, unit, id, tuid, maps) {
     return __awaiter(this, void 0, void 0, function* () {
         let ret = yield openApi.tuid(unit, id, tuid, maps);
@@ -145,7 +133,7 @@ function setMap(runner, mapName, unit, id, values) {
             __id: id,
             arr1: values
         };
-        let param = packParam_1.packParam(sync, data);
+        let param = core_1.packParam(sync, data);
         yield runner.action(sync.name, unit, undefined, param);
         return;
     });
