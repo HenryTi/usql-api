@@ -62,44 +62,49 @@ function syncFroms(db) {
                     let rows = unitRows[i];
                     let unit = Number(i);
                     let openApi = yield getOpenApi(from, unit);
-                    let stamps = {};
+                    let stamps = [];
                     for (let row of rows) {
                         let { tuid, id, hasNew, stamp } = row;
-                        stamps[tuid] = stamp;
+                        stamps.push([tuid, stamp, id]);
                         if (hasNew === 1) {
                             if (fromSchemas === undefined)
                                 continue;
                             let syncTuid = fromSchemas[tuid];
                             let { maps } = syncTuid; // tuid, 随后 tab 分隔的 map
-                            let ids = yield runner.call(tuid + '$sync0', [unit]);
-                            for (let idRet of ids) {
-                                yield syncId(runner, openApi, unit, idRet.id, tuid, maps);
+                            for (;;) {
+                                let ids = yield runner.call(tuid + '$sync0', [unit]);
+                                if (ids.length === 0)
+                                    break;
+                                for (let idRet of ids) {
+                                    yield syncId(runner, openApi, unit, idRet.id, tuid, maps);
+                                }
                             }
+                            yield runner.call(tuid + '$sync_set', [unit, undefined, undefined, 0]);
                         }
                     }
-                    let str = '';
-                    //let fresh = await openApi.fresh(unit, /*stamps*/str);
+                    let fresh = yield openApi.fresh(unit, stamps);
+                    let len = stamps.length;
+                    for (let i = 0; i < len; i++) {
+                        let stampRow = stamps[i];
+                        let tuid = stampRow[0];
+                        let syncTuid = fromSchemas[tuid];
+                        let { maps } = syncTuid; // tuid, 随后 tab 分隔的 map
+                        let tuidIdTable = fresh[i];
+                        let stampMax = 0;
+                        for (let row of tuidIdTable) {
+                            let { id, stamp } = row;
+                            yield syncId(runner, openApi, unit, id, tuid, maps);
+                            if (stamp > stampMax)
+                                stampMax = stamp;
+                            yield runner.call(tuid + '$sync_set', [unit, stampMax, id, undefined]);
+                        }
+                        let s = null;
+                    }
                 }
             }
-            /*
-            let fromStamps:{[from:string]: {[tuid:string]:number}} = {};
-            for (let row of syncTuids) {
-                let {unit, from, tuid:t, id, hasNew, stamp} = row;
-                let f = froms[from];
-                if (f === undefined) continue;
-                let st = f[t];
-                if (st === undefined) continue;
-                let {tuid, maps} = st;
-                let stamps = fromStamps[from];
-                if (stamps === undefined) stamps = fromStamps[from] = {};
-                stamps[tuid.name] = stamp;
-                if (hasNew === 1) {
-                    await syncId(runner, unit, id, from, tuid, maps);
-                }
-            }
-            */
         }
         catch (err) {
+            debugger;
             console.error(err.message);
         }
     });
@@ -117,7 +122,6 @@ async function syncTuid(runner:Runner, unit:number, from:string, tuid:any, maps:
 */
 function syncId(runner, openApi, unit, id, tuid, maps) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('SyncId unit=' + unit + ' id=' + id + ' tuid=' + tuid);
         let ret = yield openApi.tuid(unit, id, tuid, maps);
         if (maps !== undefined) {
             for (let map of maps) {
@@ -151,11 +155,13 @@ function setTuid(runner, tuidName, unit, id, values) {
         try {
             let user = undefined;
             let tuid = runner.getTuid(tuidName);
-            let { id, fields, arrs } = tuid;
+            let { id: idFieldName, fields, arrs } = tuid;
             let main = values[0][0];
-            if (main === undefined)
+            if (main === undefined) {
+                yield runner.tuidSetStamp(tuidName, unit, [id, -2]);
                 return;
-            let idVal = main[id];
+            }
+            let idVal = main[idFieldName];
             if (arrs !== undefined) {
                 let len = arrs.length;
                 for (let i = 0; i < len; i++) {

@@ -17,7 +17,13 @@ exports.router = express_1.Router({ mergeParams: true });
         console.log(body);
         let { unit, stamps } = body;
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
-        yield runner.call('$$open_fresh', [unit, stamps]);
+        try {
+            let ret = yield runner.call('$$open_fresh', [unit, stamps.map(v => v.join('\t')).join('\n')]);
+            return ret;
+        }
+        catch (err) {
+            console.log(err.message);
+        }
     }));
     post(router, '/tuid', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         body.$ = 'open/tuid';
@@ -29,16 +35,18 @@ exports.router = express_1.Router({ mergeParams: true });
         let ret = {};
         let tuidRet = yield runner.call(tuid, [unit, undefined, id]);
         ret[tuid] = tuidRet;
-        for (let m of maps) {
-            let map = runner.getMap(m);
-            if (map === undefined)
-                continue;
-            let { keys } = map.call;
-            let params = [unit, undefined, id];
-            for (let i = 1; i < keys.length; i++)
-                params.push(undefined);
-            let mapRet = yield runner.call(m + '$query$', params);
-            ret[m] = mapRet;
+        if (maps !== undefined) {
+            for (let m of maps) {
+                let map = runner.getMap(m);
+                if (map === undefined)
+                    continue;
+                let { keys } = map.call;
+                let params = [unit, undefined, id];
+                for (let i = 1; i < keys.length; i++)
+                    params.push(undefined);
+                let mapRet = yield runner.call(m + '$query$', params);
+                ret[m] = mapRet;
+            }
         }
         return ret;
     }));

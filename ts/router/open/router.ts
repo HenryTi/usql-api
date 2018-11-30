@@ -1,7 +1,6 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import { Runner } from '../../db';
 import { checkRunner } from '../router';
-import { listenerCount } from 'cluster';
 
 export const router: Router = Router({ mergeParams: true });
 
@@ -12,7 +11,13 @@ export const router: Router = Router({ mergeParams: true });
         console.log(body);
         let {unit, stamps} = body;
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
-        await runner.call('$$open_fresh', [unit, stamps]);
+        try {
+            let ret = await runner.call('$$open_fresh', [unit, stamps.map(v => v.join('\t')).join('\n')]);
+            return ret;
+        }
+        catch (err) {
+            console.log(err.message);
+        }
     });
 
     post(router, '/tuid',
@@ -25,14 +30,16 @@ export const router: Router = Router({ mergeParams: true });
         let ret:{[key:string]: any} = {};
         let tuidRet = await runner.call(tuid, [unit, undefined, id]);
         ret[tuid] = tuidRet;
-        for (let m of maps) {
-            let map = runner.getMap(m);
-            if (map === undefined) continue;
-            let {keys} = map.call;
-            let params = [unit, undefined, id]
-            for (let i=1;i<keys.length; i++) params.push(undefined);
-            let mapRet = await runner.call(m + '$query$', params);
-            ret[m] = mapRet;
+        if (maps !== undefined) {
+            for (let m of maps) {
+                let map = runner.getMap(m);
+                if (map === undefined) continue;
+                let {keys} = map.call;
+                let params = [unit, undefined, id]
+                for (let i=1;i<keys.length; i++) params.push(undefined);
+                let mapRet = await runner.call(m + '$query$', params);
+                ret[m] = mapRet;
+            }
         }
         return ret;
     });

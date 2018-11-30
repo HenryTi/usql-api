@@ -184,6 +184,11 @@ class Runner {
             return yield this.db.call('tv_' + tuid + '$save', [unit, user, ...params]);
         });
     }
+    tuidSetStamp(tuid, unit, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv_' + tuid + '$stamp', [unit, ...params]);
+        });
+    }
     tuidArrSave(tuid, arr, unit, user, params) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.call('tv_' + tuid + '_' + arr + '$save', [unit, user, ...params]);

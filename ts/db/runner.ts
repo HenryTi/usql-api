@@ -158,6 +158,9 @@ export class Runner {
     async tuidSave(tuid:string, unit:number, user:number, params:any[]): Promise<any> {
         return await this.db.call('tv_' + tuid + '$save', [unit, user, ...params]);
     }
+    async tuidSetStamp(tuid:string, unit:number, params:any[]): Promise<void> {
+        return await this.db.call('tv_' + tuid + '$stamp', [unit, ...params]);
+    }
     async tuidArrSave(tuid:string, arr:string, unit:number, user:number, params:any[]): Promise<any> {
         return await this.db.call('tv_' + tuid + '_' + arr + '$save', [unit, user, ...params]);
     }
