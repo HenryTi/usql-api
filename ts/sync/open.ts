@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { centerApi, Fetch, urlSetUsqHost, packParam } from '../core';
+import { centerApi, Fetch, urlSetUsqHost, packParam, urlSetUnitxHost, consts } from '../core';
 import { Db } from '../db/db';
 import { getRunner, Runner } from '../db';
 
@@ -90,10 +90,12 @@ async function syncFroms(db:string):Promise<void> {
                 }
             }
         }
+
+        await syncBus(runner);
     }
     catch (err) {
         debugger;
-        console.error(err.message);
+        if (err && err.message) console.error(err.message);
     }
 }
 
@@ -158,6 +160,13 @@ async function setTuid(runner:Runner, tuidName:string, unit:number, id:number, v
     }
 }
 
+async function syncBus(runner: Runner) {
+    let unit = 27;
+    let openApi = await getOpenApi(consts.$$$unitx, unit);
+    let ret = await openApi.bus(unit, '$$$/test', 0);
+    console.log('syncBus: ', ret);
+}
+
 class OpenApi extends Fetch {
     async fresh(unit:number, stamps:any):Promise<any> {
         let ret = await this.post('open/fresh', {
@@ -172,6 +181,14 @@ class OpenApi extends Fetch {
             id: id,
             tuid: tuid,
             maps: maps,
+        });
+        return ret;
+    }
+    async bus(unit:number, type:string, id:number) {
+        let ret = await this.post('open/bus', {
+            unit: unit,
+            type: type,
+            id: id
         });
         return ret;
     }
@@ -190,6 +207,7 @@ async function getOpenApi(usqFullName:string, unit:number):Promise<OpenApi> {
     if (urlDebug !== undefined) {
         try {
             urlDebug = urlSetUsqHost(urlDebug);
+            urlDebug = urlSetUnitxHost(urlDebug);
             let ret = await fetch(urlDebug + 'hello');
             if (ret.status !== 200) throw 'not ok';
             let text = await ret.text();

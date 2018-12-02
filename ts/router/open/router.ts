@@ -43,6 +43,14 @@ export const router: Router = Router({ mergeParams: true });
         }
         return ret;
     });
+
+    post(router, '/bus',
+    async (runner:Runner, body:any):Promise<any> => {
+        let {unit, type, id} = body;
+        let ret = await runner.call('GetBusMessages', [undefined, undefined, unit, type, id]);
+        console.log(ret);
+        return ret;
+    });
 })(router);
 
 type Processer = (runner:Runner, body:any) => Promise<any>;

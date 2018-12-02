@@ -11,10 +11,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const db_1 = require("../db");
 const pushToClient_1 = require("./pushToClient");
 const actionProcess_1 = require("../router/actionProcess");
-const $unitx = '$unitx';
-const sheetMessage = 'sheetMessage';
+const core_1 = require("../core");
 function processSheetMessage(sheetMsg) {
     return __awaiter(this, void 0, void 0, function* () {
+        let { $unitx, sheetMessage } = core_1.consts;
         let { unit, body, to } = sheetMsg;
         let { id, discription, no, state, app, usq, sheet } = body;
         let runner = yield db_1.getRunner($unitx);

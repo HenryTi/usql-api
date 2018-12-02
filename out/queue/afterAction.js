@@ -83,13 +83,10 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
                     let busMsg = {
                         unit: unit,
                         type: 'bus',
-                        body: {
-                            $unit: unit,
-                            busOwner: owner,
-                            bus: bus,
-                            face: name,
-                            data: packedBusData
-                        }
+                        busOwner: owner,
+                        bus: bus,
+                        face: name,
+                        body: packedBusData
                     };
                     yield toUnitxQueue_1.queueToUnitx(busMsg);
                 }

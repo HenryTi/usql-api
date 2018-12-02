@@ -87,13 +87,10 @@ export async function afterAction(
                 let busMsg: BusMessage = {
                     unit: unit,
                     type: 'bus',
-                    body: {
-                        $unit: unit,
-                        busOwner: owner,
-                        bus: bus,
-                        face: name,
-                        data: packedBusData
-                    }
+                    busOwner: owner,
+                    bus: bus,
+                    face: name,
+                    body: packedBusData
                 }
                 await queueToUnitx(busMsg);
             }

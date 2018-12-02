@@ -2,11 +2,10 @@ import { SheetMessage } from "./model";
 import { getRunner } from "../db";
 import { pushToClient } from "./pushToClient";
 import { actionProcess } from "../router/actionProcess";
-
-const $unitx = '$unitx';
-const sheetMessage = 'sheetMessage';
+import { consts } from '../core';
 
 export async function processSheetMessage(sheetMsg:SheetMessage) {
+    let {$unitx, sheetMessage} = consts;
     let {unit, body, to} = sheetMsg;
     let {id, discription, no, state, app, usq, sheet} = body;
     let runner = await getRunner($unitx);

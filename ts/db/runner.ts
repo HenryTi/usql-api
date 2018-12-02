@@ -254,10 +254,9 @@ export class Runner {
             let n = Number(v);
             setting[row.name] = isNaN(n)===true? v : n;
         }
-        this.app = setting['app'] as string; // await this.getSetting(0, 'app');
+        this.app = setting['app'] as string; 
         this.author = setting['author'] as string;
         this.version = setting['version'] as string;
-        //await this.getSetting(0, 'reloadSchemas');
         this.usqId = setting['usqId'] as number;
         
         console.log('init schemas: ', this.app, this.author, this.version);

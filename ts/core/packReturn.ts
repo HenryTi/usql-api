@@ -61,7 +61,8 @@ function packBusMain(result:string[], schema:BusSchema, main:any) {
     packRow(result, fields, main);
     if (arrs !== undefined && arrs.length > 0) {
         for (let arr of arrs) {
-            packArr(result, arr.fields, main[arr.name]);
+            let {name, fields} = arr;
+            packArr(result, fields, main[name]);
         }
         result.push(ln);
     }
@@ -71,7 +72,8 @@ function packBusMain(result:string[], schema:BusSchema, main:any) {
 }
 
 export function escape(d:any):any {
-    if (d === null) return '\b';
+    //if (d === null) return '\b';
+    if (d === null) return '';
     switch (typeof d) {
         default:
             if (d instanceof Date) return (d as Date).getTime(); //-timezoneOffset-timezoneOffset;

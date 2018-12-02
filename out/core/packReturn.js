@@ -55,7 +55,8 @@ function packBusMain(result, schema, main) {
     packRow(result, fields, main);
     if (arrs !== undefined && arrs.length > 0) {
         for (let arr of arrs) {
-            packArr(result, arr.fields, main[arr.name]);
+            let { name, fields } = arr;
+            packArr(result, fields, main[name]);
         }
         result.push(ln);
     }
@@ -64,8 +65,9 @@ function packBusMain(result, schema, main) {
     }
 }
 function escape(d) {
+    //if (d === null) return '\b';
     if (d === null)
-        return '\b';
+        return '';
     switch (typeof d) {
         default:
             if (d instanceof Date)

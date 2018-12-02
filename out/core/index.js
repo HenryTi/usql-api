@@ -23,4 +23,5 @@ exports.unpack = packReturn_1.unpack;
 var fetch_1 = require("./fetch");
 exports.Fetch = fetch_1.Fetch;
 __export(require("./setHostUrl"));
+__export(require("./consts"));
 //# sourceMappingURL=index.js.map

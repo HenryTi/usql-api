@@ -50,6 +50,12 @@ exports.router = express_1.Router({ mergeParams: true });
         }
         return ret;
     }));
+    post(router, '/bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        let { unit, type, id } = body;
+        let ret = yield runner.call('GetBusMessage', [undefined, undefined, unit, type, id]);
+        console.log(ret);
+        return ret;
+    }));
 })(exports.router);
 function post(router, path, processer) {
     router.post(path, (req, res) => __awaiter(this, void 0, void 0, function* () {

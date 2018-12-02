@@ -101,10 +101,12 @@ function syncFroms(db) {
                     }
                 }
             }
+            yield syncBus(runner);
         }
         catch (err) {
             debugger;
-            console.error(err.message);
+            if (err && err.message)
+                console.error(err.message);
         }
     });
 }
@@ -174,6 +176,14 @@ function setTuid(runner, tuidName, unit, id, values) {
         }
     });
 }
+function syncBus(runner) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let unit = 27;
+        let openApi = yield getOpenApi('$$$/$unitx', unit);
+        let ret = yield openApi.bus(unit, '$$$/test', 0);
+        console.log('syncBus: ', ret);
+    });
+}
 class OpenApi extends core_1.Fetch {
     fresh(unit, stamps) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -195,6 +205,16 @@ class OpenApi extends core_1.Fetch {
             return ret;
         });
     }
+    bus(unit, type, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let ret = yield this.post('open/bus', {
+                unit: unit,
+                type: type,
+                id: id
+            });
+            return ret;
+        });
+    }
 }
 const usqOpenApis = {};
 function getOpenApi(usqFullName, unit) {
@@ -212,6 +232,7 @@ function getOpenApi(usqFullName, unit) {
         if (urlDebug !== undefined) {
             try {
                 urlDebug = core_1.urlSetUsqHost(urlDebug);
+                urlDebug = core_1.urlSetUnitxHost(urlDebug);
                 let ret = yield node_fetch_1.default(urlDebug + 'hello');
                 if (ret.status !== 200)
                     throw 'not ok';
