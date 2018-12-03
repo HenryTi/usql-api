@@ -20,7 +20,7 @@ export class MyDbServer extends DbServer {
         });
     }
     async sql(db:string, sql:string, params:any[]): Promise<any> {
-        let result = await this.exec('use `'+db+'`;'+sql, params);
+        let result = await this.exec('use `'+db.toLowerCase()+'`;'+sql, params);
         if (Array.isArray(result) === false) return [];
         let arr = result as any[];
         arr.shift();
@@ -28,7 +28,7 @@ export class MyDbServer extends DbServer {
         return arr;
     }
     private async execProc(db:string, proc:string, params:any[]): Promise<any> {
-        let sql = 'call `'+db+'`.`'+proc+'`(';
+        let sql = 'call `'+db.toLowerCase()+'`.`'+proc+'`(';
         if (params !== undefined) {
             let len = params.length;
             if (len > 0) {
