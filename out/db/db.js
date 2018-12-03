@@ -21,6 +21,7 @@ class Db {
         this.dbServer = this.createDbServer();
         this.isExists = false;
     }
+    getDbName() { return this.dbName; }
     createDbServer() {
         let sqlType = config.get('sqlType');
         let dbConfig;

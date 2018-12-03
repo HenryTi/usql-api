@@ -56,6 +56,8 @@ async function syncFroms(db:string):Promise<void> {
                 let stamps:any[][] = [];
                 for (let row of rows) {
                     let {tuid, id, hasNew, stamp} = row;
+                    if (stamp === null) stamp = 0;
+                    if (id === null) id = 0;
                     stamps.push([tuid, stamp, id]);
                     if (hasNew === 1) {
                         if (fromSchemas === undefined) continue;
@@ -78,7 +80,9 @@ async function syncFroms(db:string):Promise<void> {
                     let tuid = stampRow[0];
                     let syncTuid = fromSchemas[tuid];
                     let {maps} = syncTuid; // tuid, 随后 tab 分隔的 map
-                    let tuidIdTable = fresh[i];
+                    let tuidIdTable:any[];
+                    if (len === 1) tuidIdTable = fresh;
+                    else tuidIdTable = fresh[i];
                     let stampMax = 0;
                     for (let row of tuidIdTable) {
                         let {id, stamp} = row;
@@ -130,7 +134,8 @@ async function setTuid(runner:Runner, tuidName:string, unit:number, id:number, v
         let user = undefined;
         let tuid = runner.getTuid(tuidName);
         let {id:idFieldName, fields, arrs} = tuid;
-        let main = values[0][0];
+        let main = values[0];
+        if (Array.isArray(main)) main = main[0];
         if (main === undefined) {
             await runner.tuidSetStamp(tuidName, unit, [id, -2]);
             return;

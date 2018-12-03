@@ -37,9 +37,7 @@ class Runner {
         this.db = db;
         this.setting = {};
     }
-    //sysTableCount(db:Db): Promise<number> {
-    //    return this.db.call('tv$sysTableCount', undefined);
-    //}
+    getDb() { return this.db.getDbName(); }
     sql(sql, params) {
         return this.db.sql(sql, params);
     }
@@ -383,7 +381,9 @@ class Runner {
                 for (let t in from) {
                     let syncTuid = from[t];
                     let { tuidObj, mapObjs } = syncTuid;
-                    syncTuid.tuid = tuidObj.name.toLowerCase();
+                    if (tuidObj !== undefined) {
+                        syncTuid.tuid = tuidObj.name.toLowerCase();
+                    }
                     if (mapObjs !== undefined) {
                         let s = [];
                         for (let m in mapObjs)
@@ -542,6 +542,8 @@ class Runner {
             let entityAccess = {};
             for (let entityId of accessEntities) {
                 let entity = this.entityColl[entityId];
+                if (entity === undefined)
+                    continue;
                 let { name, access } = entity;
                 entityAccess[name] = access;
             }

@@ -63,9 +63,8 @@ export class Runner {
         this.setting = {};
     }
 
-    //sysTableCount(db:Db): Promise<number> {
-    //    return this.db.call('tv$sysTableCount', undefined);
-    //}
+    getDb():string {return this.db.getDbName()}
+
     sql(sql:string, params:any[]): Promise<any> {
         return this.db.sql(sql, params);
     }
@@ -294,7 +293,7 @@ export class Runner {
             switch (type) {
                 case 'access': this.accessSchemaArr.push(schemaObj); break;
                 case 'bus': this.buses[url] = schemaObj; break;
-                case 'tuid': 
+                case 'tuid':
                     this.tuids[name] = schemaObj; 
                     if (from) {
                         tuidFroms = this.froms[from];
@@ -336,7 +335,9 @@ export class Runner {
             for (let t in from) {
                 let syncTuid = from[t];
                 let {tuidObj, mapObjs} = syncTuid;
-                syncTuid.tuid = (tuidObj.name as string).toLowerCase();
+                if (tuidObj !== undefined) {
+                    syncTuid.tuid = (tuidObj.name as string).toLowerCase();
+                }
                 if (mapObjs !== undefined) {
                     let s:string[] = [];
                     for (let m in mapObjs) s.push(m.toLowerCase());
@@ -490,6 +491,7 @@ export class Runner {
         let entityAccess: {[name:string]: any} = {};
         for (let entityId of accessEntities) {
             let entity = this.entityColl[entityId];
+            if (entity === undefined) continue;
             let {name, access} = entity;
             entityAccess[name] = access;
         }

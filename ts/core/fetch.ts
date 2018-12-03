@@ -31,7 +31,7 @@ export abstract class Fetch {
         headers.append('Accept', 'application/json'); // This one is enough for GET requests
         headers.append('Content-Type', 'application/json'); // This one sends body
         let res = await fetch(
-            this.baseUrl + url, 
+            encodeURI(this.baseUrl + url), 
             {
                 headers: {
                     "Content-Type": 'application/json',

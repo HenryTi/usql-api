@@ -18,6 +18,7 @@ export class Db {
         this.dbServer = this.createDbServer();
         this.isExists = false;
     }
+    getDbName():string {return this.dbName}
     private createDbServer() {
         let sqlType = config.get<string>('sqlType');
         let dbConfig;

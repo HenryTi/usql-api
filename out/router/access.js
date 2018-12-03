@@ -12,16 +12,22 @@ const entityProcess_1 = require("./entityProcess");
 const accessType = 'access';
 function default_1(router) {
     entityProcess_1.entityGet(router, accessType, '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        //let {acc} = '*'; //(req as any).query;
-        let { acc } = body;
-        let accs = undefined;
-        if (acc !== undefined) {
-            accs = acc.split('|');
-            if (accs.length === 1 && accs[0].trim().length === 0)
-                accs = undefined;
+        try {
+            let { acc } = body;
+            let accs = undefined;
+            if (acc !== undefined) {
+                accs = acc.split('|');
+                if (accs.length === 1 && accs[0].trim().length === 0)
+                    accs = undefined;
+            }
+            console.log('getAccesses: ' + runner.getDb());
+            let access = yield runner.getAccesses(unit, user, accs);
+            return access;
         }
-        let access = yield runner.getAccesses(unit, user, accs);
-        return access;
+        catch (err) {
+            console.error('/access&name=', name, '&db=', db, err);
+            debugger;
+        }
     }));
     entityProcess_1.entityGet(router, 'entities', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let entities = yield runner.getEntities(unit);
