@@ -31,7 +31,7 @@ class MyDbServer extends dbServer_1.DbServer {
     }
     sql(db, sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            let result = yield this.exec('use `' + db.toLowerCase() + '`;' + sql, params);
+            let result = yield this.exec('use `' + db + '`;' + sql, params);
             if (Array.isArray(result) === false)
                 return [];
             let arr = result;
@@ -43,7 +43,7 @@ class MyDbServer extends dbServer_1.DbServer {
     }
     execProc(db, proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = 'call `' + db.toLowerCase() + '`.`' + proc + '`(';
+            let sql = 'call `' + db + '`.`' + proc + '`(';
             if (params !== undefined) {
                 let len = params.length;
                 if (len > 0) {
