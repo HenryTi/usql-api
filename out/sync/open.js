@@ -187,13 +187,17 @@ function syncBus(runner) {
         let syncFaces = yield getSyncFaces(runner);
         if (syncFaces === undefined)
             return;
-        for (let syncFace of syncFaces) {
+        let { faceColl, syncFaceArr } = syncFaces;
+        for (let syncFace of syncFaceArr) {
             let { unit, faces, faceUnitMessages } = syncFace;
             let openApi = yield getOpenApi(core_1.consts.$$$unitx, unit);
             let ret = yield openApi.bus(faces, faceUnitMessages);
-            console.log('syncBus: ', ret);
-            if (ret.length > 0) {
-                console.log(ret[0].body.split('\t'));
+            if (ret.length === 0)
+                break;
+            for (let row of ret) {
+                let { face: faceId, id: msgId, body } = row;
+                let { bus, faceUrl, face } = faceColl[faceId];
+                yield runner.bus(bus, face, unit, faceId, msgId, body);
             }
         }
     });
@@ -205,9 +209,12 @@ function getSyncFaces(runner) {
         let arr1 = syncFaces[1];
         if (arr0.length === 0)
             return;
+        let faceColl = {};
         let faceArr = arr0.map(v => {
             let { id, bus, busOwner, busName, faceName } = v;
-            return `${id}\t${busOwner}/${busName}/${faceName}`;
+            let faceUrl = `${busOwner}/${busName}/${faceName}`;
+            faceColl[id] = { bus: bus, faceUrl: faceUrl, face: faceName };
+            return `${id}\t${faceUrl}`;
         });
         let unitFaceMsgs = {};
         for (let row of arr1) {
@@ -219,7 +226,11 @@ function getSyncFaces(runner) {
             faceMsgs.push({ face: face, msgId: msgId });
         }
         let faces = faceArr.join('\n');
-        let ret = [];
+        let syncFaceArr = [];
+        let ret = {
+            faceColl: faceColl,
+            syncFaceArr: syncFaceArr
+        };
         for (let unit in unitFaceMsgs) {
             let faceMsgs = unitFaceMsgs[unit];
             let msgArr = faceMsgs.map(v => {
@@ -228,7 +239,7 @@ function getSyncFaces(runner) {
                     msgId = 0;
                 return `${face}\t${unit}\t${msgId}`;
             });
-            ret.push({ unit: Number(unit), faces: faces, faceUnitMessages: msgArr.join('\n') });
+            syncFaceArr.push({ unit: Number(unit), faces: faces, faceUnitMessages: msgArr.join('\n') });
         }
         return ret;
     });

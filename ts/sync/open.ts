@@ -166,6 +166,17 @@ interface SyncFace {
     faceUnitMessages: string;
 }
 
+interface Face {
+    bus: string;
+    faceUrl: string;
+    face: string;
+}
+
+interface SyncFaces {
+    faceColl: {[id:number]: Face};
+    syncFaceArr: SyncFace[];
+}
+
 async function syncBus(runner: Runner) {
     /*
     let unit = 27;
@@ -175,25 +186,31 @@ async function syncBus(runner: Runner) {
     */
     let syncFaces = await getSyncFaces(runner);
     if (syncFaces === undefined) return;
-    for (let syncFace of syncFaces) {
+    let {faceColl, syncFaceArr} = syncFaces;
+    for (let syncFace of syncFaceArr) {
         let {unit, faces, faceUnitMessages} = syncFace;
         let openApi = await getOpenApi(consts.$$$unitx, unit);
         let ret = await openApi.bus(faces, faceUnitMessages);
-        console.log('syncBus: ', ret);
-        if (ret.length > 0) {
-            console.log((ret[0].body as string).split('\t'));
+        if (ret.length === 0) break;
+        for (let row of ret) {
+            let {face:faceId, id:msgId, body} = row;
+            let {bus, faceUrl, face} = faceColl[faceId];
+            await runner.bus(bus, face, unit, faceId, msgId, body);
         }
     }
 }
 
-async function getSyncFaces(runner: Runner): Promise<SyncFace[]> {
+async function getSyncFaces(runner: Runner): Promise<SyncFaces> {
     let syncFaces = await runner.call('$sync_faces', []);
     let arr0:any[] = syncFaces[0];
     let arr1:any[] = syncFaces[1];
     if (arr0.length === 0) return;
+    let faceColl: {[id:number]: Face} = {};
     let faceArr:string[] = arr0.map(v => {
         let {id, bus, busOwner, busName, faceName} = v;
-        return `${id}\t${busOwner}/${busName}/${faceName}`;
+        let faceUrl = `${busOwner}/${busName}/${faceName}`;
+        faceColl[id] = {bus:bus, faceUrl:faceUrl, face:faceName};
+        return `${id}\t${faceUrl}`;
     });
 
     let unitFaceMsgs:{[unit:number]: {face:number;msgId:number}[]} = {};
@@ -207,7 +224,11 @@ async function getSyncFaces(runner: Runner): Promise<SyncFace[]> {
     }
 
     let faces = faceArr.join('\n');
-    let ret:SyncFace[] = [];
+    let syncFaceArr: SyncFace[] = [];
+    let ret:SyncFaces = {
+        faceColl: faceColl,
+        syncFaceArr: syncFaceArr
+    };
     for (let unit in unitFaceMsgs) {
         let faceMsgs = unitFaceMsgs[unit];
         let msgArr:string[] = faceMsgs.map(v => {
@@ -215,7 +236,7 @@ async function getSyncFaces(runner: Runner): Promise<SyncFace[]> {
             if (msgId === null) msgId = 0;
             return `${face}\t${unit}\t${msgId}`;
         });
-        ret.push({unit:Number(unit), faces:faces, faceUnitMessages: msgArr.join('\n')})
+        syncFaceArr.push({unit:Number(unit), faces:faces, faceUnitMessages: msgArr.join('\n')});
     }
     return ret;
 }
