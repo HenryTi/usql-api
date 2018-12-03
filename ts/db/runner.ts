@@ -4,6 +4,7 @@ import {getDb, Db} from './db';
 const runners: {[name:string]: Runner} = {};
 
 export async function getRunner(name:string):Promise<Runner> {
+    name = name.toLowerCase();
     let runner = runners[name];
     if (runner === null) return;
     if (runner === undefined) {
@@ -20,6 +21,7 @@ export async function getRunner(name:string):Promise<Runner> {
     return runner;
 }
 
+/*
 export function resetRunner(name:string) {
     runners[name] = undefined;
 }
@@ -31,6 +33,7 @@ export function createRunner(name:string) { //, dbName:string) {
     let db = getDb(name);
     return runners[name] = new Runner(db);
 }
+*/
 
 interface EntityAccess {
     name: string;

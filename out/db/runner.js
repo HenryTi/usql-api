@@ -13,6 +13,7 @@ const db_1 = require("./db");
 const runners = {};
 function getRunner(name) {
     return __awaiter(this, void 0, void 0, function* () {
+        name = name.toLowerCase();
         let runner = runners[name];
         if (runner === null)
             return;
@@ -31,20 +32,6 @@ function getRunner(name) {
     });
 }
 exports.getRunner = getRunner;
-function resetRunner(name) {
-    runners[name] = undefined;
-}
-exports.resetRunner = resetRunner;
-function createRunner(name) {
-    let runner = runners[name];
-    if (runner === null)
-        return;
-    if (runner !== undefined)
-        return runner;
-    let db = db_1.getDb(name);
-    return runners[name] = new Runner(db);
-}
-exports.createRunner = createRunner;
 class Runner {
     constructor(db) {
         this.db = db;
