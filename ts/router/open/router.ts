@@ -46,8 +46,8 @@ export const router: Router = Router({ mergeParams: true });
 
     post(router, '/bus',
     async (runner:Runner, body:any):Promise<any> => {
-        let {unit, type, id} = body;
-        let ret = await runner.call('GetBusMessages', [undefined, undefined, unit, type, id]);
+        let {faces, faceUnitMessages} = body;
+        let ret = await runner.call('GetBusMessages', [undefined, undefined, faces, faceUnitMessages]);
         console.log(ret);
         return ret;
     });

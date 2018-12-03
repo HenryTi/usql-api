@@ -178,10 +178,59 @@ function setTuid(runner, tuidName, unit, id, values) {
 }
 function syncBus(runner) {
     return __awaiter(this, void 0, void 0, function* () {
+        /*
         let unit = 27;
-        let openApi = yield getOpenApi('$$$/$unitx', unit);
-        let ret = yield openApi.bus(unit, '$$$/test', 0);
-        console.log('syncBus: ', ret);
+        let faces = '11\ta/b/c\n33\tb';
+        let faceUnitMessages = '11\t27\t428799000000003\n33\t27\t330343442';
+        let syncFaces = await runner.call('$sync_faces', []);
+        */
+        let syncFaces = yield getSyncFaces(runner);
+        if (syncFaces === undefined)
+            return;
+        for (let syncFace of syncFaces) {
+            let { unit, faces, faceUnitMessages } = syncFace;
+            let openApi = yield getOpenApi(core_1.consts.$$$unitx, unit);
+            let ret = yield openApi.bus(faces, faceUnitMessages);
+            console.log('syncBus: ', ret);
+            if (ret.length > 0) {
+                console.log(ret[0].body.split('\t'));
+            }
+        }
+    });
+}
+function getSyncFaces(runner) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let syncFaces = yield runner.call('$sync_faces', []);
+        let arr0 = syncFaces[0];
+        let arr1 = syncFaces[1];
+        if (arr0.length === 0)
+            return;
+        let faceArr = arr0.map(v => {
+            let { id, bus, busOwner, busName, faceName } = v;
+            return `${id}\t${busOwner}/${busName}/${faceName}`;
+        });
+        let unitFaceMsgs = {};
+        for (let row of arr1) {
+            let { face, unit, msgId } = row;
+            let faceMsgs = unitFaceMsgs[unit];
+            if (faceMsgs === undefined) {
+                unitFaceMsgs[unit] = faceMsgs = [];
+            }
+            faceMsgs.push({ face: face, msgId: msgId });
+        }
+        let faces = faceArr.join('\n');
+        let ret = [];
+        for (let unit in unitFaceMsgs) {
+            let faceMsgs = unitFaceMsgs[unit];
+            let msgArr = faceMsgs.map(v => {
+                let { face, msgId } = v;
+                if (msgId === null)
+                    msgId = 0;
+                return `${face}\t${unit}\t${msgId}`;
+            });
+            ret.push({ unit: Number(unit), faces: faces, faceUnitMessages: msgArr.join('\n') });
+        }
+        return ret;
     });
 }
 class OpenApi extends core_1.Fetch {
@@ -205,12 +254,11 @@ class OpenApi extends core_1.Fetch {
             return ret;
         });
     }
-    bus(unit, type, id) {
+    bus(faces, faceUnitMessages) {
         return __awaiter(this, void 0, void 0, function* () {
             let ret = yield this.post('open/bus', {
-                unit: unit,
-                type: type,
-                id: id
+                faces: faces,
+                faceUnitMessages: faceUnitMessages,
             });
             return ret;
         });
