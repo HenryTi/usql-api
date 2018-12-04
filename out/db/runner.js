@@ -61,6 +61,7 @@ class Runner {
     }
     setSetting(unit, name, value) {
         return __awaiter(this, void 0, void 0, function* () {
+            name = name.toLowerCase();
             yield this.db.call('tv_$set_setting', [unit, name, value]);
             if (unit === 0) {
                 let n = Number(value);
@@ -70,6 +71,7 @@ class Runner {
     }
     getSetting(unit, name) {
         return __awaiter(this, void 0, void 0, function* () {
+            name = name.toLowerCase();
             let ret = yield this.db.tableFromProc('tv_$get_setting', [unit, name]);
             if (ret.length === 0)
                 return undefined;
@@ -107,6 +109,7 @@ class Runner {
         });
     }
     isTuidOpen(tuid) {
+        tuid = tuid.toLowerCase();
         let t = this.tuids[tuid];
         if (t === undefined)
             return false;
@@ -115,10 +118,12 @@ class Runner {
         return false;
     }
     getTuid(tuid) {
+        tuid = tuid.toLowerCase();
         let ret = this.tuids[tuid];
         return ret;
     }
     getMap(map) {
+        map = map.toLowerCase();
         let m = this.schemas[map];
         if (m === undefined)
             return;
@@ -315,12 +320,15 @@ class Runner {
             this.froms = {};
             for (let row of schemaTable) {
                 let { name, id, version, schema, run, from } = row;
+                name = name.toLowerCase();
                 let tuidFroms;
                 let schemaObj = JSON.parse(schema);
                 let runObj = JSON.parse(run);
                 schemaObj.typeId = id;
                 schemaObj.version = version;
                 let { type, url } = schemaObj;
+                if (url !== undefined)
+                    url = url.toLowerCase();
                 this.schemas[name] = {
                     type: type,
                     call: schemaObj,

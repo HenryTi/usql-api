@@ -7,8 +7,6 @@ export const router: Router = Router({ mergeParams: true });
 (function(router:Router) {
     post(router, '/fresh',
     async (runner:Runner, body:any):Promise<any> => {
-        body.$ = 'open/fresh';
-        console.log(body);
         let {unit, stamps} = body;
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
         try {

@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
 import {router, settingRouter, openRouter} from './router';
+import {router as jointRouter} from './router/joint';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
 import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } from './queue';
 import { startSync } from './sync';
@@ -66,6 +67,7 @@ import { startSync } from './sync';
     app.use('/usql/hello', (req:Request, res:Response) => {
         res.json({"hello": 'usql-api: hello, it\'s good'});
     });
+    app.use('/joint', jointRouter);
 
     let port = config.get<number>('port');
     console.log('port=', port);

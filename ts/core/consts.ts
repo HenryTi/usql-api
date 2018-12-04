@@ -3,7 +3,7 @@ export const consts = {
     $unitx: '$unitx',
     $$$unitx: '$$$/$unitx',
     sheetMessage: 'sheetMessage',
-    BusType: 'BusType',
+    Face: 'Face',
     BusQueue: 'BusQueue',
-    GetBusMessage: 'GetBusMessage',
+    GetBusMessages: 'GetBusMessages',
 };

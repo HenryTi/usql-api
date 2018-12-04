@@ -13,8 +13,6 @@ const router_1 = require("../router");
 exports.router = express_1.Router({ mergeParams: true });
 (function (router) {
     post(router, '/fresh', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        body.$ = 'open/fresh';
-        console.log(body);
         let { unit, stamps } = body;
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
         try {

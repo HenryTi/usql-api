@@ -12,6 +12,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const config = require("config");
 const router_1 = require("./router");
+const joint_1 = require("./router/joint");
 const core_1 = require("./core");
 const queue_1 = require("./queue");
 const sync_1 = require("./sync");
@@ -72,6 +73,7 @@ const sync_1 = require("./sync");
         app.use('/usql/hello', (req, res) => {
             res.json({ "hello": 'usql-api: hello, it\'s good' });
         });
+        app.use('/joint', joint_1.router);
         let port = config.get('port');
         console.log('port=', port);
         let redisConfig = config.get('redis');

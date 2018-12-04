@@ -1,7 +1,8 @@
-import fetch from 'node-fetch';
-import { centerApi, Fetch, urlSetUsqHost, packParam, urlSetUnitxHost, consts } from '../core';
+import { packParam } from '../core';
 import { Db } from '../db/db';
 import { getRunner, Runner } from '../db';
+import { getOpenApi, OpenApi } from './openApi';
+import { syncBus } from './bus';
 
 const dbRun = new Db(undefined);
 
@@ -28,6 +29,11 @@ interface SyncRow {
 async function syncFroms(db:string):Promise<void> {
     let runner = await getRunner(db);
     if (runner === undefined) return;
+    await syncTuids(runner);
+    await syncBus(runner);
+}
+
+async function syncTuids(runner:Runner):Promise<void> {
     let {froms} = runner;
     if (froms === undefined) return;
     try {
@@ -84,18 +90,21 @@ async function syncFroms(db:string):Promise<void> {
                     if (len === 1) tuidIdTable = fresh;
                     else tuidIdTable = fresh[i];
                     let stampMax = 0;
+                    try {
                     for (let row of tuidIdTable) {
                         let {id, stamp} = row;
                         await syncId(runner, openApi, unit, id, tuid, maps);
                         if (stamp > stampMax) stampMax = stamp;
                         await runner.call(tuid + '$sync_set', [unit, stampMax, id, undefined]);
                     }
+                }
+                catch (err) {
+                    debugger;
+                }
                     let s = null;
                 }
             }
         }
-
-        await syncBus(runner);
     }
     catch (err) {
         debugger;
@@ -105,6 +114,7 @@ async function syncFroms(db:string):Promise<void> {
 
 async function syncId(runner:Runner, openApi:OpenApi, unit:number, id:number, tuid:string, maps:string[]) {
     let ret = await openApi.tuid(unit, id, tuid, maps);
+    if (ret === undefined) return;
     if (maps !== undefined) {
         for (let map of maps) {
             let mapValues = ret[map];
@@ -163,136 +173,4 @@ async function setTuid(runner:Runner, tuidName:string, unit:number, id:number, v
     catch (err) {
         console.log(err.message);
     }
-}
-
-interface SyncFace {
-    unit: number;
-    faces: string;
-    faceUnitMessages: string;
-}
-
-interface Face {
-    bus: string;
-    faceUrl: string;
-    face: string;
-}
-
-interface SyncFaces {
-    faceColl: {[id:number]: Face};
-    syncFaceArr: SyncFace[];
-}
-
-async function syncBus(runner: Runner) {
-    /*
-    let unit = 27;
-    let faces = '11\ta/b/c\n33\tb';
-    let faceUnitMessages = '11\t27\t428799000000003\n33\t27\t330343442';
-    let syncFaces = await runner.call('$sync_faces', []);
-    */
-    let syncFaces = await getSyncFaces(runner);
-    if (syncFaces === undefined) return;
-    let {faceColl, syncFaceArr} = syncFaces;
-    for (let syncFace of syncFaceArr) {
-        let {unit, faces, faceUnitMessages} = syncFace;
-        let openApi = await getOpenApi(consts.$$$unitx, unit);
-        let ret = await openApi.bus(faces, faceUnitMessages);
-        if (ret.length === 0) break;
-        for (let row of ret) {
-            let {face:faceId, id:msgId, body} = row;
-            let {bus, faceUrl, face} = faceColl[faceId];
-            await runner.bus(bus, face, unit, faceId, msgId, body);
-        }
-    }
-}
-
-async function getSyncFaces(runner: Runner): Promise<SyncFaces> {
-    let syncFaces = await runner.call('$sync_faces', []);
-    let arr0:any[] = syncFaces[0];
-    let arr1:any[] = syncFaces[1];
-    if (arr0.length === 0) return;
-    let faceColl: {[id:number]: Face} = {};
-    let faceArr:string[] = arr0.map(v => {
-        let {id, bus, busOwner, busName, faceName} = v;
-        let faceUrl = `${busOwner}/${busName}/${faceName}`;
-        faceColl[id] = {bus:bus, faceUrl:faceUrl, face:faceName};
-        return `${id}\t${faceUrl}`;
-    });
-
-    let unitFaceMsgs:{[unit:number]: {face:number;msgId:number}[]} = {};
-    for (let row of arr1) {
-        let {face, unit, msgId} = row;
-        let faceMsgs:{face:number;msgId:number}[] = unitFaceMsgs[unit];
-        if (faceMsgs === undefined) {
-            unitFaceMsgs[unit] = faceMsgs = [];
-        }
-        faceMsgs.push({face:face, msgId:msgId});
-    }
-
-    let faces = faceArr.join('\n');
-    let syncFaceArr: SyncFace[] = [];
-    let ret:SyncFaces = {
-        faceColl: faceColl,
-        syncFaceArr: syncFaceArr
-    };
-    for (let unit in unitFaceMsgs) {
-        let faceMsgs = unitFaceMsgs[unit];
-        let msgArr:string[] = faceMsgs.map(v => {
-            let {face, msgId} = v;
-            if (msgId === null) msgId = 0;
-            return `${face}\t${unit}\t${msgId}`;
-        });
-        syncFaceArr.push({unit:Number(unit), faces:faces, faceUnitMessages: msgArr.join('\n')});
-    }
-    return ret;
-}
-
-class OpenApi extends Fetch {
-    async fresh(unit:number, stamps:any):Promise<any> {
-        let ret = await this.post('open/fresh', {
-            unit: unit,
-            stamps: stamps
-        });
-        return ret;
-    }
-    async tuid(unit: number, id: number, tuid:string, maps: string[]):Promise<any> {
-        let ret = await this.post('open/tuid', {
-            unit: unit,
-            id: id,
-            tuid: tuid,
-            maps: maps,
-        });
-        return ret;
-    }
-    async bus(faces:string, faceUnitMessages:string) {
-        let ret = await this.post('open/bus', {
-            faces: faces,
-            faceUnitMessages: faceUnitMessages,
-        });
-        return ret;
-    }
-}
-
-const usqOpenApis: {[usqFullName:string]: {[unit:number]:OpenApi}} = {};
-async function getOpenApi(usqFullName:string, unit:number):Promise<OpenApi> {
-    let openApis = usqOpenApis[usqFullName];
-    if (openApis === null) return null;
-    if (openApis === undefined) {
-        usqOpenApis[usqFullName] = openApis = {};
-    }
-    let usqUrl = await centerApi.urlFromUsq(unit, usqFullName);
-    if (usqUrl === undefined) return openApis[unit] = null;
-    let {url, urlDebug} = usqUrl;
-    if (urlDebug !== undefined) {
-        try {
-            urlDebug = urlSetUsqHost(urlDebug);
-            urlDebug = urlSetUnitxHost(urlDebug);
-            let ret = await fetch(urlDebug + 'hello');
-            if (ret.status !== 200) throw 'not ok';
-            let text = await ret.text();
-            url = urlDebug;
-        }
-        catch (err) {
-        }
-    }
-    return openApis[unit] = new OpenApi(url);
 }

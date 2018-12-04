@@ -8,10 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_fetch_1 = require("node-fetch");
 const core_1 = require("../core");
 const db_1 = require("../db/db");
 const db_2 = require("../db");
+const openApi_1 = require("./openApi");
+const bus_1 = require("./bus");
 const dbRun = new db_1.Db(undefined);
 function syncDbs() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -32,6 +33,12 @@ function syncFroms(db) {
         let runner = yield db_2.getRunner(db);
         if (runner === undefined)
             return;
+        yield syncTuids(runner);
+        yield bus_1.syncBus(runner);
+    });
+}
+function syncTuids(runner) {
+    return __awaiter(this, void 0, void 0, function* () {
         let { froms } = runner;
         if (froms === undefined)
             return;
@@ -60,7 +67,7 @@ function syncFroms(db) {
                 for (let i in unitRows) {
                     let rows = unitRows[i];
                     let unit = Number(i);
-                    let openApi = yield getOpenApi(from, unit);
+                    let openApi = yield openApi_1.getOpenApi(from, unit);
                     let stamps = [];
                     for (let row of rows) {
                         let { tuid, id, hasNew, stamp } = row;
@@ -98,18 +105,22 @@ function syncFroms(db) {
                         else
                             tuidIdTable = fresh[i];
                         let stampMax = 0;
-                        for (let row of tuidIdTable) {
-                            let { id, stamp } = row;
-                            yield syncId(runner, openApi, unit, id, tuid, maps);
-                            if (stamp > stampMax)
-                                stampMax = stamp;
-                            yield runner.call(tuid + '$sync_set', [unit, stampMax, id, undefined]);
+                        try {
+                            for (let row of tuidIdTable) {
+                                let { id, stamp } = row;
+                                yield syncId(runner, openApi, unit, id, tuid, maps);
+                                if (stamp > stampMax)
+                                    stampMax = stamp;
+                                yield runner.call(tuid + '$sync_set', [unit, stampMax, id, undefined]);
+                            }
+                        }
+                        catch (err) {
+                            debugger;
                         }
                         let s = null;
                     }
                 }
             }
-            yield syncBus(runner);
         }
         catch (err) {
             debugger;
@@ -121,6 +132,8 @@ function syncFroms(db) {
 function syncId(runner, openApi, unit, id, tuid, maps) {
     return __awaiter(this, void 0, void 0, function* () {
         let ret = yield openApi.tuid(unit, id, tuid, maps);
+        if (ret === undefined)
+            return;
         if (maps !== undefined) {
             for (let map of maps) {
                 let mapValues = ret[map];
@@ -184,134 +197,6 @@ function setTuid(runner, tuidName, unit, id, values) {
         catch (err) {
             console.log(err.message);
         }
-    });
-}
-function syncBus(runner) {
-    return __awaiter(this, void 0, void 0, function* () {
-        /*
-        let unit = 27;
-        let faces = '11\ta/b/c\n33\tb';
-        let faceUnitMessages = '11\t27\t428799000000003\n33\t27\t330343442';
-        let syncFaces = await runner.call('$sync_faces', []);
-        */
-        let syncFaces = yield getSyncFaces(runner);
-        if (syncFaces === undefined)
-            return;
-        let { faceColl, syncFaceArr } = syncFaces;
-        for (let syncFace of syncFaceArr) {
-            let { unit, faces, faceUnitMessages } = syncFace;
-            let openApi = yield getOpenApi(core_1.consts.$$$unitx, unit);
-            let ret = yield openApi.bus(faces, faceUnitMessages);
-            if (ret.length === 0)
-                break;
-            for (let row of ret) {
-                let { face: faceId, id: msgId, body } = row;
-                let { bus, faceUrl, face } = faceColl[faceId];
-                yield runner.bus(bus, face, unit, faceId, msgId, body);
-            }
-        }
-    });
-}
-function getSyncFaces(runner) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let syncFaces = yield runner.call('$sync_faces', []);
-        let arr0 = syncFaces[0];
-        let arr1 = syncFaces[1];
-        if (arr0.length === 0)
-            return;
-        let faceColl = {};
-        let faceArr = arr0.map(v => {
-            let { id, bus, busOwner, busName, faceName } = v;
-            let faceUrl = `${busOwner}/${busName}/${faceName}`;
-            faceColl[id] = { bus: bus, faceUrl: faceUrl, face: faceName };
-            return `${id}\t${faceUrl}`;
-        });
-        let unitFaceMsgs = {};
-        for (let row of arr1) {
-            let { face, unit, msgId } = row;
-            let faceMsgs = unitFaceMsgs[unit];
-            if (faceMsgs === undefined) {
-                unitFaceMsgs[unit] = faceMsgs = [];
-            }
-            faceMsgs.push({ face: face, msgId: msgId });
-        }
-        let faces = faceArr.join('\n');
-        let syncFaceArr = [];
-        let ret = {
-            faceColl: faceColl,
-            syncFaceArr: syncFaceArr
-        };
-        for (let unit in unitFaceMsgs) {
-            let faceMsgs = unitFaceMsgs[unit];
-            let msgArr = faceMsgs.map(v => {
-                let { face, msgId } = v;
-                if (msgId === null)
-                    msgId = 0;
-                return `${face}\t${unit}\t${msgId}`;
-            });
-            syncFaceArr.push({ unit: Number(unit), faces: faces, faceUnitMessages: msgArr.join('\n') });
-        }
-        return ret;
-    });
-}
-class OpenApi extends core_1.Fetch {
-    fresh(unit, stamps) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.post('open/fresh', {
-                unit: unit,
-                stamps: stamps
-            });
-            return ret;
-        });
-    }
-    tuid(unit, id, tuid, maps) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.post('open/tuid', {
-                unit: unit,
-                id: id,
-                tuid: tuid,
-                maps: maps,
-            });
-            return ret;
-        });
-    }
-    bus(faces, faceUnitMessages) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.post('open/bus', {
-                faces: faces,
-                faceUnitMessages: faceUnitMessages,
-            });
-            return ret;
-        });
-    }
-}
-const usqOpenApis = {};
-function getOpenApi(usqFullName, unit) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let openApis = usqOpenApis[usqFullName];
-        if (openApis === null)
-            return null;
-        if (openApis === undefined) {
-            usqOpenApis[usqFullName] = openApis = {};
-        }
-        let usqUrl = yield core_1.centerApi.urlFromUsq(unit, usqFullName);
-        if (usqUrl === undefined)
-            return openApis[unit] = null;
-        let { url, urlDebug } = usqUrl;
-        if (urlDebug !== undefined) {
-            try {
-                urlDebug = core_1.urlSetUsqHost(urlDebug);
-                urlDebug = core_1.urlSetUnitxHost(urlDebug);
-                let ret = yield node_fetch_1.default(urlDebug + 'hello');
-                if (ret.status !== 200)
-                    throw 'not ok';
-                let text = yield ret.text();
-                url = urlDebug;
-            }
-            catch (err) {
-            }
-        }
-        return openApis[unit] = new OpenApi(url);
     });
 }
 //# sourceMappingURL=open.js.map

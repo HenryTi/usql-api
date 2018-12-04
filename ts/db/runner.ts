@@ -83,6 +83,7 @@ export class Runner {
     }
 
     async setSetting(unit:number, name: string, value: string): Promise<void> {
+        name = name.toLowerCase();
         await this.db.call('tv_$set_setting', [unit, name, value]);
         if (unit === 0) {
             let n = Number(value);
@@ -91,6 +92,7 @@ export class Runner {
     }
 
     async getSetting(unit:number, name: string):Promise<any> {
+        name = name.toLowerCase();
         let ret = await this.db.tableFromProc('tv_$get_setting', [unit, name]);
         if (ret.length===0) return undefined;
         let v = ret[0].value;
@@ -118,16 +120,19 @@ export class Runner {
     } 
 
     isTuidOpen(tuid:string) {
+        tuid = tuid.toLowerCase();
         let t = this.tuids[tuid];
         if (t === undefined) return false;
         if (t.isOpen === true) return true;
         return false;
     }
     getTuid(tuid:string) {
+        tuid = tuid.toLowerCase();
         let ret = this.tuids[tuid];
         return ret;
     }
     getMap(map:string):any {
+        map = map.toLowerCase();
         let m = this.schemas[map];
         if (m === undefined) return;
         if (m.type === 'map') return m;
@@ -279,12 +284,14 @@ export class Runner {
         this.froms = {};
         for (let row of schemaTable) {
             let {name, id, version, schema, run, from} = row;
+            name = name.toLowerCase();
             let tuidFroms:{[tuid:string]:{tuid?:string, maps?:string[], tuidObj?:any, mapObjs?:{[map:string]:any}}};
             let schemaObj = JSON.parse(schema);
             let runObj = JSON.parse(run);
             schemaObj.typeId = id;
             schemaObj.version = version;
             let {type, url} = schemaObj;
+            if (url !== undefined) url = url.toLowerCase();
             this.schemas[name] = {
                 type: type,
                 call: schemaObj,

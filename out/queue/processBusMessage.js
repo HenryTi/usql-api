@@ -10,36 +10,73 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const db_1 = require("../db");
-let BusTypes;
+let Faces;
 let lastHour;
-function processBusMessage(msg) {
+function writeDataToBus(runner, face, unit, body) {
     return __awaiter(this, void 0, void 0, function* () {
-        // 处理 bus message，发送到相应的usq服务器
-        console.log('bus:', msg);
-        let { $unitx, BusQueue, BusType } = core_1.consts;
-        let runner = yield db_1.getRunner($unitx);
-        if (BusTypes === undefined) {
-            BusTypes = {};
-            let ret = yield runner.tuidGetAll(BusType, undefined, undefined);
+        if (Faces === undefined) {
+            Faces = {};
+            let ret = yield runner.tuidGetAll(core_1.consts.Face, undefined, undefined);
             for (let row of ret) {
-                let { id, type } = row;
-                BusTypes[type] = id;
+                let { id, str } = row;
+                Faces[str] = id;
             }
         }
-        let { unit, body, busOwner, bus, face } = msg;
-        let busUrl = busOwner + '/' + bus;
-        let busTypeId = BusTypes[busUrl];
-        if (busTypeId === undefined) {
-            let ret = yield runner.tuidSave(BusType, undefined, undefined, [undefined, busUrl]);
-            busTypeId = ret[0].id;
-            BusTypes[busUrl] = busTypeId;
+        let faceId = Faces[face];
+        if (faceId === undefined) {
+            let ret = yield runner.tuidSave(core_1.consts.Face, undefined, undefined, [undefined, face]);
+            if (ret === undefined)
+                return;
+            if (ret.length === 0)
+                return;
+            let { id } = ret[0];
+            if (id < 0)
+                id = -id;
+            faceId = id;
+            Faces[face] = faceId;
         }
         let hour = Math.floor(Date.now() / (3600 * 1000));
         if (lastHour === undefined || hour > lastHour) {
             yield runner.call('$set_bus_queue_seed', ['busqueue', hour * 1000000000]);
             lastHour = hour;
         }
-        yield runner.tuidSave(BusQueue, unit, undefined, [undefined, unit, busTypeId, body]);
+        yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, unit, faceId, body]);
+    });
+}
+exports.writeDataToBus = writeDataToBus;
+function processBusMessage(msg) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // 处理 bus message，发送到相应的usq服务器
+        console.log('bus:', msg);
+        let runner = yield db_1.getRunner(core_1.consts.$unitx);
+        let { unit, body, busOwner, bus, face } = msg;
+        let faceUrl = busOwner + '/' + bus + '/' + face;
+        yield writeDataToBus(runner, faceUrl, unit, body);
+        /*
+        if (Faces === undefined) {
+            Faces = {};
+            let ret = await runner.tuidGetAll(Face, undefined, undefined);
+            for (let row of ret) {
+                let {id, type} = row;
+                Faces[type] = id;
+            }
+        }
+        let {unit, body, busOwner, bus, face} = msg;
+        let faceUrl = busOwner + '/' + bus + '/' + face;
+        let faceId = Faces[faceUrl];
+        if (faceId === undefined) {
+             let ret = await runner.tuidSave(Face, undefined, undefined, [undefined, faceUrl]);
+             faceId = ret[0].id;
+             Faces[faceUrl] = faceId;
+        }
+    
+        let hour = Math.floor(Date.now()/(3600*1000));
+        if (lastHour === undefined || hour > lastHour) {
+            await runner.call('$set_bus_queue_seed', ['busqueue', hour*1000000000]);
+            lastHour = hour;
+        }
+        await runner.tuidSave(BusQueue, unit, undefined, [undefined, unit, faceId, body]);
+        */
     });
 }
 exports.processBusMessage = processBusMessage;
