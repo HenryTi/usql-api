@@ -59,6 +59,7 @@ async function syncTuids(runner:Runner):Promise<void> {
                 let rows = unitRows[i];
                 let unit = Number(i);
                 let openApi = await getOpenApi(from, unit);
+                if (!openApi) continue;
                 let stamps:any[][] = [];
                 for (let row of rows) {
                     let {tuid, id, hasNew, stamp} = row;

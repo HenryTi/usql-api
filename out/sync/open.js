@@ -68,6 +68,8 @@ function syncTuids(runner) {
                     let rows = unitRows[i];
                     let unit = Number(i);
                     let openApi = yield openApi_1.getOpenApi(from, unit);
+                    if (!openApi)
+                        continue;
                     let stamps = [];
                     for (let row of rows) {
                         let { tuid, id, hasNew, stamp } = row;
