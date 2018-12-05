@@ -20,7 +20,8 @@ exports.router.post('/:unit/:jointName', (req, res) => __awaiter(this, void 0, v
     yield routerProcess(req, res, writeBus);
 }));
 function getClientIp(req) {
-    return req.headers['x-forwarded-for'] ||
+    return req.ip ||
+        req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress ||
         req.socket.remoteAddress;
 }
@@ -32,7 +33,7 @@ function routerProcess(req, res, action) {
             let runner = yield db_1.getRunner(core_1.consts.$unitx);
             let joint = yield getJoint(req, runner, unit, jointName);
             if (typeof joint !== 'string') {
-                res.write('<div>Your IP ' + joint + ' is not valid for joint <b>' + jointName + '</b>!</div>');
+                res.end('<div>Your IP ' + joint + ' is not valid for joint <b>' + jointName + '</b>!</div>');
                 return;
             }
             yield action(req, res, runner, unit, joint);
