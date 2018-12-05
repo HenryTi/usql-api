@@ -147,8 +147,8 @@ async function readBus(req: Request, res: Response, runner:Runner, unit:number, 
 `<pre>
 sample post:
 [
-    {face: '$$$/test/complex1', queue: 0, data: undefined},
-    {face: '$$$/test/complex1', queue: undefined, data: '${JSON.stringify(data)}'}
+    {face: "$$$/test/complex1", queue: 0, data: undefined},
+    {face: "$$$/test/complex1", queue: undefined, data: ${JSON.stringify(data)}}
 ]
 
 sample data:

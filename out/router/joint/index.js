@@ -149,8 +149,8 @@ function readBus(req, res, runner, unit, joint) {
         res.write(`<pre>
 sample post:
 [
-    {face: '$$$/test/complex1', queue: 0, data: undefined},
-    {face: '$$$/test/complex1', queue: undefined, data: '${JSON.stringify(data)}'}
+    {face: "$$$/test/complex1", queue: 0, data: undefined},
+    {face: "$$$/test/complex1", queue: undefined, data: ${JSON.stringify(data)}}
 ]
 
 sample data:
