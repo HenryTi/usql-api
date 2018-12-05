@@ -71,8 +71,8 @@ function routerProcess(req, res, action) {
             let { unit, jointName } = req.params;
             let runner = yield db_1.getRunner(core_1.consts.$unitx);
             let joint = yield getJoint(req, runner, unit, jointName);
-            if (typeof joint === 'string') {
-                res.end('<div>Your IP ' + joint + ' is not valid for joint <b>' + jointName + '</b>!</div>');
+            if (Array.isArray(joint)) {
+                res.end('<div>Your IP ' + joint[0] + ' is not valid for joint <b>' + jointName + '</b>!</div>');
                 return;
             }
             yield action(req, res, runner, unit, joint);
@@ -82,7 +82,7 @@ function routerProcess(req, res, action) {
         }
     });
 }
-const myIps = ['::1', '127.0.0.1', '::ffff:127.0.0.1'];
+const myIps = ['1', '::1', '127.0.0.1', '::ffff:127.0.0.1'];
 function validIp(regIp, ips) {
     for (let ip of ips) {
         if (myIps.find(v => v === ip) !== undefined)
@@ -106,14 +106,15 @@ function getJoint(req, runner, unit, jointName) {
         }
         let jointRet = yield runner.tuidSeach('joint', unit, undefined, undefined, jointName, 0, 1);
         let t0 = jointRet[0];
-        if (t0.length === 0)
-            return reqIP;
-        let joint = t0[0];
-        let { name, ip } = joint;
-        if (name === jointName && validIp(ip, [innerIP, netIP]) === true) {
-            joint.$ip = reqIP;
-            return lastJoint = joint;
+        if (t0.length > 0) {
+            let joint = t0[0];
+            let { name, ip } = joint;
+            if (name === jointName && validIp(ip, [innerIP, netIP]) === true) {
+                joint.$ip = netIP || innerIP || reqIP;
+                return lastJoint = joint;
+            }
         }
+        return [innerIP, netIP, reqIP];
     });
 }
 function readBus(req, res, runner, unit, joint) {

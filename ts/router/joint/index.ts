@@ -67,8 +67,8 @@ async function routerProcess(req: Request, res: Response,
         let {unit, jointName} = req.params;
         let runner = await getRunner(consts.$unitx);
         let joint = await getJoint(req, runner, unit, jointName);
-        if (typeof joint === 'string') {
-            res.end('<div>Your IP ' + joint + ' is not valid for joint <b>'+jointName+'</b>!</div>');
+        if (Array.isArray(joint)) {
+            res.end('<div>Your IP ' + joint[0] + ' is not valid for joint <b>'+jointName+'</b>!</div>');
             return;
         }
         await action(req, res, runner, unit, joint);
@@ -78,7 +78,7 @@ async function routerProcess(req: Request, res: Response,
     }
 }
 
-const myIps:string[] = ['::1', '127.0.0.1', '::ffff:127.0.0.1'];
+const myIps:string[] = ['1', '::1', '127.0.0.1', '::ffff:127.0.0.1'];
 function validIp(regIp:string, ips:string[]):boolean {
     for (let ip of ips) {
         if (myIps.find(v => v === ip) !== undefined) return true;
@@ -102,14 +102,16 @@ async function getJoint(req:Request, runner: Runner, unit:number, jointName:stri
 
     let jointRet = await runner.tuidSeach('joint', unit, undefined, undefined, jointName, 0, 1);
     let t0 = jointRet[0];
-    if (t0.length === 0) return reqIP;
-    let joint = t0[0];
-    let {name, ip} = joint;
-    if (name === jointName && validIp(ip, [innerIP, netIP]) === true)
-    {
-        joint.$ip = reqIP;
-        return lastJoint = joint;
+    if (t0.length > 0) {
+        let joint = t0[0];
+        let {name, ip} = joint;
+        if (name === jointName && validIp(ip, [innerIP, netIP]) === true)
+        {
+            joint.$ip = netIP || innerIP || reqIP;
+            return lastJoint = joint;
+        }
     }
+    return [innerIP, netIP, reqIP];
 }
 
 async function readBus(req: Request, res: Response, runner:Runner, unit:number, joint:any) {
