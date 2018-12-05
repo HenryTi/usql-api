@@ -14,7 +14,8 @@ const core_1 = require("../../core");
 const processBusMessage_1 = require("../../queue/processBusMessage");
 exports.router = express_1.Router({ mergeParams: true });
 exports.router.get('/:unit/:jointName', (req, res) => __awaiter(this, void 0, void 0, function* () {
-    yield routerProcess(req, res, readBus);
+    res.end(getClientIp(req));
+    //await routerProcess(req, res, readBus);
 }));
 exports.router.post('/:unit/:jointName', (req, res) => __awaiter(this, void 0, void 0, function* () {
     yield routerProcess(req, res, writeBus);

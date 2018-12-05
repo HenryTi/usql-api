@@ -6,7 +6,8 @@ import { writeDataToBus } from '../../queue/processBusMessage';
 export const router: Router = Router({ mergeParams: true });
 
 router.get('/:unit/:jointName', async (req: Request, res: Response) => {
-    await routerProcess(req, res, readBus);
+    res.end(getClientIp(req));
+    //await routerProcess(req, res, readBus);
 });
 
 router.post('/:unit/:jointName', async (req: Request, res: Response) => {
