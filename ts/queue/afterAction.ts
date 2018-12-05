@@ -87,6 +87,7 @@ export async function afterAction(
                 let busMsg: BusMessage = {
                     unit: unit,
                     type: 'bus',
+                    from: (runner.usqOwner || 'unknown') + '/' + (runner.usqOwner || 'unknown'),
                     busOwner: owner,
                     bus: bus,
                     face: name,

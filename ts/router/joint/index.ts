@@ -142,6 +142,39 @@ async function readBus(req: Request, res: Response, runner:Runner, unit:number, 
     
     res.write('<br/>');
     res.write('<br/>');
+    let data = '1\t2\ta38\n3\t2\t1543678133000\t\n\n\n';
+    res.write(
+`<pre>
+sample post:
+[
+    {face: '$$$/test/complex1', queue: 0, data: undefined},
+    {face: '$$$/test/complex1', queue: undefined, data: '${JSON.stringify(data)}'}
+]
+
+sample data:
+${data}
+
+sample bus:
+{
+    "schema1": [
+        {"name": "a1", "type": "string"},
+        {"name": "a2", "type": "number"},
+        {"name": "a3", "type": "date"},
+        {"name": "a4", "type": "id"},
+    ],
+    "schema2": [
+        {"name": "a3", "type": "string"},
+        {"name": "cb2", "type": "number"},
+        {"name": "aa3", "type": "date"}
+    ],
+    "complex1": [
+        {"name": "a1", "type": "string"},
+        {"name": "c3", "type": "string"},
+        {"name": "bbba37", "type": "string"},
+        {"name": "arrName", "fields": "schema1"}
+    ]
+}
+</pre>`);
     // res.write('<form action="./'+ name + '" method="post"><button type="submit">submit</button></form>');
 
     res.end();
@@ -176,7 +209,7 @@ async function writeBus(req: Request, res: Response, runner:Runner, unit:number,
     let unitMsgs = [
         {face: 1, unit: unit, msgId: 0}
     ];*/
-    let {facesIn, facesOut} = joint;
+    let {name, facesIn, facesOut} = joint;
     let faces:{id:number; face:string}[] = []
     let unitMsgs:{face:number; unit:number; msgId:number}[] = [];
 
@@ -190,7 +223,7 @@ async function writeBus(req: Request, res: Response, runner:Runner, unit:number,
             // 写bus
             if (facesIn === null) continue;
             if ((facesIn as string).indexOf(face) < 0) continue;
-            await writeDataToBus(runner, face, unit, data);
+            await writeDataToBus(runner, face, unit, name, data);
         }
         else {
             if (facesOut === null) continue;

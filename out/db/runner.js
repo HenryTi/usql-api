@@ -307,11 +307,12 @@ class Runner {
                 let n = Number(v);
                 setting[row.name] = isNaN(n) === true ? v : n;
             }
-            this.app = setting['app'];
+            this.usqOwner = setting['usqOwner'];
+            this.usq = setting['usq'];
             this.author = setting['author'];
             this.version = setting['version'];
             this.usqId = setting['usqId'];
-            console.log('init schemas: ', this.app, this.author, this.version);
+            console.log('init schemas: ', this.usq, this.author, this.version);
             this.schemas = {};
             this.accessSchemaArr = [];
             this.tuids = {};

@@ -40,6 +40,7 @@ export interface MsgMessage extends ClientMessage {
 
 export interface BusMessage extends Message {
     type: 'bus';
+    from: string;           // from usq
     busOwner: string,
     bus: string,
     face: string,

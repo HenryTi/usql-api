@@ -51,7 +51,8 @@ export class Runner {
     private entityColl: {[id:number]: EntityAccess};
     private usqId: number;
 
-    app: string;
+    usqOwner: string;
+    usq: string;
     author: string;
     version: string;
     importTuids:any[];
@@ -269,12 +270,13 @@ export class Runner {
             let n = Number(v);
             setting[row.name] = isNaN(n)===true? v : n;
         }
-        this.app = setting['app'] as string; 
+        this.usqOwner = setting['usqOwner'] as string; 
+        this.usq = setting['usq'] as string; 
         this.author = setting['author'] as string;
         this.version = setting['version'] as string;
         this.usqId = setting['usqId'] as number;
         
-        console.log('init schemas: ', this.app, this.author, this.version);
+        console.log('init schemas: ', this.usq, this.author, this.version);
 
         this.schemas = {};
         this.accessSchemaArr = [];

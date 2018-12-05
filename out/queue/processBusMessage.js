@@ -12,7 +12,7 @@ const core_1 = require("../core");
 const db_1 = require("../db");
 let Faces;
 let lastHour;
-function writeDataToBus(runner, face, unit, body) {
+function writeDataToBus(runner, face, unit, from, body) {
     return __awaiter(this, void 0, void 0, function* () {
         if (Faces === undefined) {
             Faces = {};
@@ -40,7 +40,7 @@ function writeDataToBus(runner, face, unit, body) {
             yield runner.call('$set_bus_queue_seed', ['busqueue', hour * 1000000000]);
             lastHour = hour;
         }
-        yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, unit, faceId, body]);
+        yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, unit, faceId, from, body]);
     });
 }
 exports.writeDataToBus = writeDataToBus;
@@ -49,9 +49,9 @@ function processBusMessage(msg) {
         // 处理 bus message，发送到相应的usq服务器
         console.log('bus:', msg);
         let runner = yield db_1.getRunner(core_1.consts.$unitx);
-        let { unit, body, busOwner, bus, face } = msg;
+        let { unit, body, from, busOwner, bus, face } = msg;
         let faceUrl = busOwner + '/' + bus + '/' + face;
-        yield writeDataToBus(runner, faceUrl, unit, body);
+        yield writeDataToBus(runner, faceUrl, unit, from, body);
         /*
         if (Faces === undefined) {
             Faces = {};

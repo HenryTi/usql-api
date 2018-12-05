@@ -5,7 +5,7 @@ import { getRunner, Runner } from "../db";
 let Faces:{[Face:string]:number};
 let lastHour: number;
 
-export async function writeDataToBus(runner:Runner, face:string, unit:number, body:string) {
+export async function writeDataToBus(runner:Runner, face:string, unit:number, from:string, body:string) {
     if (Faces === undefined) {
         Faces = {};
         let ret = await runner.tuidGetAll(consts.Face, undefined, undefined);
@@ -30,16 +30,16 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, bo
         await runner.call('$set_bus_queue_seed', ['busqueue', hour*1000000000]);
         lastHour = hour;
     }
-    await runner.tuidSave(consts.BusQueue, unit, undefined, [undefined, unit, faceId, body]);
+    await runner.tuidSave(consts.BusQueue, unit, undefined, [undefined, unit, faceId, from, body]);
 }
 
 export async function processBusMessage(msg:BusMessage):Promise<void> {
     // 处理 bus message，发送到相应的usq服务器
     console.log('bus:', msg);
     let runner = await getRunner(consts.$unitx);
-    let {unit, body, busOwner, bus, face} = msg;
+    let {unit, body, from, busOwner, bus, face} = msg;
     let faceUrl = busOwner + '/' + bus + '/' + face;
-    await writeDataToBus(runner, faceUrl, unit, body);
+    await writeDataToBus(runner, faceUrl, unit, from, body);
     /*
     if (Faces === undefined) {
         Faces = {};

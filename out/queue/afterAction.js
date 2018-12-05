@@ -83,6 +83,7 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
                     let busMsg = {
                         unit: unit,
                         type: 'bus',
+                        from: (runner.usqOwner || 'unknown') + '/' + (runner.usqOwner || 'unknown'),
                         busOwner: owner,
                         bus: bus,
                         face: name,
