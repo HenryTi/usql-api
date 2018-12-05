@@ -14,10 +14,7 @@ const core_1 = require("../../core");
 const processBusMessage_1 = require("../../queue/processBusMessage");
 exports.router = express_1.Router({ mergeParams: true });
 exports.router.get('/:unit/:jointName', (req, res) => __awaiter(this, void 0, void 0, function* () {
-    res.end('in ip ' + getIp(req) +
-        ' out ip ' + getNetIp(req) +
-        ' cliet ip ' + getClientIp(req));
-    //await routerProcess(req, res, readBus);
+    yield routerProcess(req, res, readBus);
 }));
 exports.router.post('/:unit/:jointName', (req, res) => __awaiter(this, void 0, void 0, function* () {
     yield routerProcess(req, res, writeBus);
@@ -85,14 +82,25 @@ function routerProcess(req, res, action) {
         }
     });
 }
+const myIps = ['::1', '127.0.0.1', '::ffff:127.0.0.1'];
+function validIp(regIp, ips) {
+    for (let ip of ips) {
+        if (myIps.find(v => v === ip) !== undefined)
+            return true;
+        if (ip === regIp)
+            return true;
+    }
+    return false;
+}
 var lastJoint;
 function getJoint(req, runner, unit, jointName) {
     return __awaiter(this, void 0, void 0, function* () {
         let reqIP = getClientIp(req);
+        let innerIP = getIp(req);
+        let netIP = getNetIp(req);
         if (lastJoint !== undefined) {
             let { name, ip } = lastJoint;
-            if (name === jointName &&
-                (reqIP === '::1' || reqIP === '127.0.0.1' || reqIP === ip)) {
+            if (name === jointName && validIp(ip, [innerIP, netIP]) === true) {
                 return lastJoint;
             }
         }
@@ -102,8 +110,7 @@ function getJoint(req, runner, unit, jointName) {
             return reqIP;
         let joint = t0[0];
         let { name, ip } = joint;
-        if (name === jointName &&
-            (reqIP === '::1' || reqIP === '127.0.0.1' || reqIP === ip)) {
+        if (name === jointName && validIp(ip, [innerIP, netIP]) === true) {
             joint.$ip = reqIP;
             return lastJoint = joint;
         }
@@ -115,6 +122,9 @@ function readBus(req, res, runner, unit, joint) {
         res.writeHead(200, {
             'Content-Type': 'text/html; charset=utf-8'
         });
+        res.write('<div>in ip ' + getIp(req) +
+            ' out ip ' + getNetIp(req) +
+            ' cliet ip ' + getClientIp(req) + '</div><br/><br/>');
         res.write('<h4>交换机: ' + name + '</h4>');
         res.write('<h5>' + discription + '</h5>');
         res.write('<div>IP: ' + $ip + '</div>');

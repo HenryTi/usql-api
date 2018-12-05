@@ -6,10 +6,7 @@ import { writeDataToBus } from '../../queue/processBusMessage';
 export const router: Router = Router({ mergeParams: true });
 
 router.get('/:unit/:jointName', async (req: Request, res: Response) => {
-    res.end('in ip ' + getIp(req) + 
-        ' out ip ' + getNetIp(req) + 
-        ' cliet ip ' + getClientIp(req));
-    //await routerProcess(req, res, readBus);
+    await routerProcess(req, res, readBus);
 });
 
 router.post('/:unit/:jointName', async (req: Request, res: Response) => {
@@ -81,13 +78,24 @@ async function routerProcess(req: Request, res: Response,
     }
 }
 
+const myIps:string[] = ['::1', '127.0.0.1', '::ffff:127.0.0.1'];
+function validIp(regIp:string, ips:string[]):boolean {
+    for (let ip of ips) {
+        if (myIps.find(v => v === ip) !== undefined) return true;
+        if (ip === regIp) return true;
+    }
+    return false;
+}
+
 var lastJoint:any;
 async function getJoint(req:Request, runner: Runner, unit:number, jointName:string) {
     let reqIP = getClientIp(req);
+    let innerIP = getIp(req);
+    let netIP = getNetIp(req);
     if (lastJoint !== undefined) {
         let {name, ip} = lastJoint;
-        if (name === jointName && 
-            (reqIP === '::1' || reqIP === '127.0.0.1' || reqIP === ip)) {
+        if (name === jointName && validIp(ip, [innerIP, netIP]) === true)
+        {
             return lastJoint;
         }
     }
@@ -97,8 +105,7 @@ async function getJoint(req:Request, runner: Runner, unit:number, jointName:stri
     if (t0.length === 0) return reqIP;
     let joint = t0[0];
     let {name, ip} = joint;
-    if (name === jointName && 
-        (reqIP === '::1' || reqIP === '127.0.0.1' || reqIP === ip))
+    if (name === jointName && validIp(ip, [innerIP, netIP]) === true)
     {
         joint.$ip = reqIP;
         return lastJoint = joint;
@@ -110,6 +117,9 @@ async function readBus(req: Request, res: Response, runner:Runner, unit:number, 
     res.writeHead(200, {
         'Content-Type': 'text/html; charset=utf-8'
     });
+    res.write('<div>in ip ' + getIp(req) + 
+        ' out ip ' + getNetIp(req) + 
+        ' cliet ip ' + getClientIp(req) + '</div><br/><br/>');
     res.write('<h4>交换机: ' + name + '</h4>');
     res.write('<h5>' + discription + '</h5>');
     res.write('<div>IP: ' + $ip + '</div>');
