@@ -14,7 +14,9 @@ const core_1 = require("../../core");
 const processBusMessage_1 = require("../../queue/processBusMessage");
 exports.router = express_1.Router({ mergeParams: true });
 exports.router.get('/:unit/:jointName', (req, res) => __awaiter(this, void 0, void 0, function* () {
-    res.end(getClientIp(req));
+    res.end('in ip ' + getIp(req) +
+        ' out ip ' + getNetIp(req) +
+        ' cliet ip ' + getClientIp(req));
     //await routerProcess(req, res, readBus);
 }));
 exports.router.post('/:unit/:jointName', (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -25,6 +27,45 @@ function getClientIp(req) {
         req.headers['x-forwarded-for'] ||
         req.connection.remoteAddress ||
         req.socket.remoteAddress;
+}
+;
+function getIp(_http) {
+    var ipStr = _http.headers['X-Real-IP'] || _http.headers['x-forwarded-for'];
+    if (ipStr) {
+        var ipArray = ipStr.split(",");
+        if (ipArray || ipArray.length > 0) {
+            //如果获取到的为ip数组
+            return ipArray[0];
+        }
+    }
+    else {
+        //获取不到时
+        return _http.ip.substring(_http.ip.lastIndexOf(":") + 1);
+    }
+}
+;
+function getNetIp(_http) {
+    var ipStr = _http.headers['X-Real-IP'] || _http.headers['x-forwarded-for'];
+    if (ipStr) {
+        var ipArray = ipStr.split(",");
+        if (ipArray.length > 1) {
+            //如果获取到的为ip数组
+            for (var i = 0; i < ipArray.length; i++) {
+                var ipNumArray = ipArray[i].split(".");
+                var tmp = ipNumArray[0] + "." + ipNumArray[1];
+                if (tmp == "192.168" ||
+                    (ipNumArray[0] == "172" && ipNumArray[1] >= 16 && ipNumArray[1] <= 32) || tmp == "10.7") {
+                    continue;
+                }
+                return ipArray[i];
+            }
+        }
+        return ipArray[0];
+    }
+    else {
+        //获取不到时
+        return _http.ip.substring(_http.ip.lastIndexOf(":") + 1);
+    }
 }
 ;
 function routerProcess(req, res, action) {

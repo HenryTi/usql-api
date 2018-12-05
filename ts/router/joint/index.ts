@@ -6,7 +6,9 @@ import { writeDataToBus } from '../../queue/processBusMessage';
 export const router: Router = Router({ mergeParams: true });
 
 router.get('/:unit/:jointName', async (req: Request, res: Response) => {
-    res.end(getClientIp(req));
+    res.end('in ip ' + getIp(req) + 
+        ' out ip ' + getNetIp(req) + 
+        ' cliet ip ' + getClientIp(req));
     //await routerProcess(req, res, readBus);
 });
 
@@ -21,6 +23,45 @@ function getClientIp(req:Request) {
         req.socket.remoteAddress;
 };
 
+function getIp(_http:Request) {
+    var ipStr = _http.headers['X-Real-IP'] || _http.headers['x-forwarded-for'];
+    if (ipStr) {
+        var ipArray = ipStr.split(",");
+        if (ipArray || ipArray.length > 0) {
+            //如果获取到的为ip数组
+            return ipArray[0];
+        }
+    }
+    else {
+        //获取不到时
+        return _http.ip.substring(_http.ip.lastIndexOf(":") + 1);
+    }
+};
+
+function getNetIp(_http: Request) {
+    var ipStr = _http.headers['X-Real-IP'] || _http.headers['x-forwarded-for'];
+    if (ipStr) {
+        var ipArray = ipStr.split(",");
+        if (ipArray.length > 1) {
+            //如果获取到的为ip数组
+            for (var i = 0; i < ipArray.length; i++) {
+                var ipNumArray = ipArray[i].split(".");
+                var tmp = ipNumArray[0] + "." + ipNumArray[1];
+                if (tmp == "192.168" || 
+                    (ipNumArray[0] == "172" && ipNumArray[1] >= 16 && ipNumArray[1] <= 32) || tmp == "10.7")
+                {
+                    continue;
+                }
+                return ipArray[i];
+            }
+        }
+        return ipArray[0];	
+    } 
+    else {
+        //获取不到时
+        return _http.ip.substring(_http.ip.lastIndexOf(":") + 1);
+    }
+};
 
 async function routerProcess(req: Request, res: Response, 
     action: (req: Request, res: Response, runner:Runner, unit:number, joint:any) => Promise<void>) 
