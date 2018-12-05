@@ -21,21 +21,20 @@ function getClientIp(req:Request) {
 
 
 async function routerProcess(req: Request, res: Response, 
-    action: (req: Request, res: Response, runner:Runner, unit:number, faces:string[]) => Promise<void>) 
+    action: (req: Request, res: Response, runner:Runner, unit:number, joint:any) => Promise<void>) 
 {
     try {
         let {unit, jointName} = req.params;
         let runner = await getRunner(consts.$unitx);
         let joint = await getJoint(req, runner, unit, jointName);
-        if (joint !== undefined) {
-            await action(req, res, runner, unit, joint);
+        if (typeof joint !== 'string') {
+            res.write('<div>Your IP ' + joint + ' is not valid for joint <b>'+jointName+'</b>!</div>');
+            return;
         }
-        else {
-            throw 'not accepted ip';
-        }
+        await action(req, res, runner, unit, joint);
     }
     catch (err) {
-        res.end('xx', 'utf-8');
+        res.end('error: ' + err.message);
     }
 }
 
@@ -52,7 +51,7 @@ async function getJoint(req:Request, runner: Runner, unit:number, jointName:stri
 
     let jointRet = await runner.tuidSeach('joint', unit, undefined, undefined, jointName, 0, 1);
     let t0 = jointRet[0];
-    if (t0.length === 0) throw 'not exist joint ' + jointName;
+    if (t0.length === 0) return reqIP;
     let joint = t0[0];
     let {name, ip} = joint;
     if (name === jointName && 
