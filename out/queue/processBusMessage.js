@@ -40,7 +40,9 @@ function writeDataToBus(runner, face, unit, from, body) {
             yield runner.call('$set_bus_queue_seed', ['busqueue', hour * 1000000000]);
             lastHour = hour;
         }
-        yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, unit, faceId, from, body]);
+        var now = new Date();
+        yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, unit, faceId, from, body,
+            new Date(now.getTime() + now.getTimezoneOffset() * 60000)]);
     });
 }
 exports.writeDataToBus = writeDataToBus;

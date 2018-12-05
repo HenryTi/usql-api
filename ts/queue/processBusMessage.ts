@@ -30,7 +30,10 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
         await runner.call('$set_bus_queue_seed', ['busqueue', hour*1000000000]);
         lastHour = hour;
     }
-    await runner.tuidSave(consts.BusQueue, unit, undefined, [undefined, unit, faceId, from, body]);
+    var now = new Date();
+    await runner.tuidSave(consts.BusQueue, unit, undefined, 
+        [undefined, unit, faceId, from, body, 
+            new Date(now.getTime() + now.getTimezoneOffset() * 60000)]);
 }
 
 export async function processBusMessage(msg:BusMessage):Promise<void> {
