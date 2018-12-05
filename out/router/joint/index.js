@@ -32,7 +32,7 @@ function routerProcess(req, res, action) {
             let { unit, jointName } = req.params;
             let runner = yield db_1.getRunner(core_1.consts.$unitx);
             let joint = yield getJoint(req, runner, unit, jointName);
-            if (typeof joint !== 'string') {
+            if (typeof joint === 'string') {
                 res.end('<div>Your IP ' + joint + ' is not valid for joint <b>' + jointName + '</b>!</div>');
                 return;
             }

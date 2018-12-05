@@ -28,7 +28,7 @@ async function routerProcess(req: Request, res: Response,
         let {unit, jointName} = req.params;
         let runner = await getRunner(consts.$unitx);
         let joint = await getJoint(req, runner, unit, jointName);
-        if (typeof joint !== 'string') {
+        if (typeof joint === 'string') {
             res.end('<div>Your IP ' + joint + ' is not valid for joint <b>'+jointName+'</b>!</div>');
             return;
         }
