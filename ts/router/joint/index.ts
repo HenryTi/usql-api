@@ -58,16 +58,20 @@ async function getJoint(req:Request, runner: Runner, unit:number, jointName:stri
     if (name === jointName && 
         (reqIP === '::1' || reqIP === '127.0.0.1' || reqIP === ip))
     {
+        joint.$ip = reqIP;
         return lastJoint = joint;
     }
 }
 
 async function readBus(req: Request, res: Response, runner:Runner, unit:number, joint:any) {
-    let {name, discription, facesIn, facesOut} = joint;
+    let {name, discription, facesIn, facesOut, $ip} = joint;
     res.writeHead(200, {
         'Content-Type': 'text/html; charset=utf-8'
     });
-    res.write('<h4>joint: ' + name + ' -- ' + discription + '</h4>');
+    res.write('<h4>交换机: ' + name + '</h4>');
+    res.write('<h5>' + discription + '</h5>');
+    res.write('<div>IP: ' + $ip + '</div>');
+    res.write('<br/>');
     if (facesIn) {
         res.write('<h5>写入接口</h5>');
         (facesIn as string).split('\n').forEach(v => {
@@ -84,7 +88,7 @@ async function readBus(req: Request, res: Response, runner:Runner, unit:number, 
     
     res.write('<br/>');
     res.write('<br/>');
-    res.write('<form action="./a" method="post"><button type="submit">submit</button></form>');
+    // res.write('<form action="./'+ name + '" method="post"><button type="submit">submit</button></form>');
 
     res.end();
 }
@@ -99,6 +103,8 @@ interface Ticket {
 };
 async function writeBus(req: Request, res: Response, runner:Runner, unit:number, joint:any) {
     let tickets:Ticket[] = req.body;
+    if (Array.isArray(tickets) === false) tickets = [tickets as any];
+    /*
     if (!tickets) {
         res.json({});
         return;
@@ -108,7 +114,7 @@ async function writeBus(req: Request, res: Response, runner:Runner, unit:number,
         {face: '$$$/test/complex1', queue: 0, data: undefined},
         {face: '$$$/test/complex1', queue: undefined, data: '1\t2\ta38\n3\t2\t1543678133000\t\n\n\n'}
     ];
-
+    */
     /*
     let faces = [
         {id: 1, face: '$$$/test/complex1'}
