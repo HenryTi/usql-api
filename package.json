@@ -1,5 +1,5 @@
 {
-  "name": "usql-api",
+  "name": "usq-api",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,7 +8,7 @@
     "debug": "SET NODE_ENV=development&&node --nolazy --inspect-brk=5857 out/index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "henry",
   "license": "ISC",
   "devDependencies": {
     "@types/bull": "^3.3.20",

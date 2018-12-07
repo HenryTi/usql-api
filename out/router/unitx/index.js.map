@@ -1,1 +1,1 @@
-{"version":3,"file":"index.js","sourceRoot":"C:/Users/Henry/Tonva/tonva-server/usql-api/ts/","sources":["router/unitx/index.ts"],"names":[],"mappings":";;AAAA,mCAA8C;AAArC,sCAAA,kBAAkB,CAAA"}
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../ts/router/unitx/index.ts"],"names":[],"mappings":";;AAAA,mCAA8C;AAArC,sCAAA,kBAAkB,CAAA"}

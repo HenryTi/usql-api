@@ -2,12 +2,12 @@ import {Router, Request, Response, NextFunction} from 'express';
 import * as jwt from 'jsonwebtoken';
 import * as config from 'config';
 
-export const debugUser = config.get<number>('debugUser');
-export const debugUnit = config.get<number>('debugUnit');
+//export const debugUser = config.get<number>('debugUser');
+//export const debugUnit = config.get<number>('debugUnit');
 export interface AuthUser {
     db: string,
-    id: number,
-    unit: number,
+    //id: number,
+    //unit: number,
     roles?: string,
 }
 
@@ -88,8 +88,8 @@ export default class Auth {
         return function (req:Request, res:Response, next:NextFunction) {
             (req as any).user = {
                 db: req.params.db,
-                id: debugUser,
-                unit: debugUnit,
+                //id: debugUser,
+                //unit: debugUnit,
                 roles: undefined,
             }
             next();
@@ -104,8 +104,20 @@ export default class Auth {
             next();
         }
     }
+    middlewareJoint() {
+        let self = this;
+        return function (req:Request, res:Response, next:NextFunction) {
+            let unit = req.header('unit');
+            (req as any).user = {
+                db: req.params.db,
+                unit: unit
+            }
+            next();
+        }
+    }
 }
 
 export const authCheck = new Auth(['*']).middleware();
 export const authDebug = new Auth(['*']).middlewareDebug();
 export const authUnitx = new Auth(['*']).middlewareUnitx();
+export const authJoint = new Auth(['*']).middlewareJoint();

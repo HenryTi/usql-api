@@ -145,6 +145,11 @@ class Runner {
             return yield this.db.call('tv_' + tuid + '$all', [unit, user]);
         });
     }
+    tuidVid(tuid) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv_' + tuid + '$vid', []);
+        });
+    }
     tuidGetArrAll(tuid, arr, unit, user, owner) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.call('tv_' + tuid + '_' + arr + '$all', [unit, user, owner]);

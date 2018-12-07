@@ -19,21 +19,11 @@
                 "run-script", "debug"
             ],
             "restart": true,
-            /*
-            "runtimeArgs": [
-                "--nolazy"
-            ],*/
             "env": {
-                /*"NODE_ENV": "development"*/
                 "NODE_ENV": "stage"
             },
             "port": 5857,
             "program": "${workspaceRoot}/out/index.js",
-            //"program": "${workspaceRoot}/node_modules/nodemon/bin/nodemon.js",
-            /*
-            "args": [
-                "${workspaceRoot}/out/index.js"
-            ],*/
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceRoot}/out/**/*.js"

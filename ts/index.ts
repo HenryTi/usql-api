@@ -7,6 +7,7 @@ import {router as jointRouter} from './router/joint';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
 import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } from './queue';
 import { startSync } from './sync';
+import { authJoint } from './core/auth';
 
 (async function () {
     let connection = config.get<any>("connection");
@@ -51,6 +52,7 @@ import { startSync } from './sync';
     //app.use('/usql/$unitx/tv/', [authCheck, unitxRouter]);
     app.use('/usql/:db/open/', [authUnitx, openRouter]);
     app.use('/usql/:db/tv/', [authCheck, router]);
+    app.use('/usql/:db/joint/', [authJoint, router]);
     app.use('/usql/:db/setting/', [/*authCheck, */settingRouter]); // unitx set access
 
     //app.use('/usql/:db/log', getWsLogs);

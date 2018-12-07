@@ -16,6 +16,7 @@ const joint_1 = require("./router/joint");
 const core_1 = require("./core");
 const queue_1 = require("./queue");
 const sync_1 = require("./sync");
+const auth_1 = require("./core/auth");
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
         let connection = config.get("connection");
@@ -59,6 +60,7 @@ const sync_1 = require("./sync");
         //app.use('/usql/$unitx/tv/', [authCheck, unitxRouter]);
         app.use('/usql/:db/open/', [core_1.authUnitx, router_1.openRouter]);
         app.use('/usql/:db/tv/', [core_1.authCheck, router_1.router]);
+        app.use('/usql/:db/joint/', [auth_1.authJoint, router_1.router]);
         app.use('/usql/:db/setting/', [/*authCheck, */ router_1.settingRouter]); // unitx set access
         //app.use('/usql/:db/log', getWsLogs);
         // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口

@@ -2,8 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = require("jsonwebtoken");
 const config = require("config");
-exports.debugUser = config.get('debugUser');
-exports.debugUnit = config.get('debugUnit');
 class Auth {
     constructor(roles) {
         if (roles === undefined) {
@@ -81,8 +79,8 @@ class Auth {
         return function (req, res, next) {
             req.user = {
                 db: req.params.db,
-                id: exports.debugUser,
-                unit: exports.debugUnit,
+                //id: debugUser,
+                //unit: debugUnit,
                 roles: undefined,
             };
             next();
@@ -97,9 +95,21 @@ class Auth {
             next();
         };
     }
+    middlewareJoint() {
+        let self = this;
+        return function (req, res, next) {
+            let unit = req.header('unit');
+            req.user = {
+                db: req.params.db,
+                unit: unit
+            };
+            next();
+        };
+    }
 }
 exports.default = Auth;
 exports.authCheck = new Auth(['*']).middleware();
 exports.authDebug = new Auth(['*']).middlewareDebug();
 exports.authUnitx = new Auth(['*']).middlewareUnitx();
+exports.authJoint = new Auth(['*']).middlewareJoint();
 //# sourceMappingURL=auth.js.map

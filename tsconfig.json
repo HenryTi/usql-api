@@ -8,7 +8,7 @@
         "module": "commonjs",
         "watch": false,
         "outDir": "out",
-        "sourceRoot": "ts"
+        //"sourceRoot": "ts"
     },
     "exclude": [
         "node_modules"
