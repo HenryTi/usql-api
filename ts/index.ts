@@ -10,6 +10,8 @@ import { startSync } from './sync';
 import { authJoint } from './core/auth';
 
 (async function () {
+    console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
+    
     let connection = config.get<any>("connection");
     if (connection === undefined || connection.host === '0.0.0.0') {
         console.log("mysql connection must defined in config/default.json or config/production.json");

@@ -19,6 +19,7 @@ const sync_1 = require("./sync");
 const auth_1 = require("./core/auth");
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
         let connection = config.get("connection");
         if (connection === undefined || connection.host === '0.0.0.0') {
             console.log("mysql connection must defined in config/default.json or config/production.json");
