@@ -215,6 +215,11 @@ export class Runner {
         return await this.db.call(sql, [unit, user, sheet, id]);
     }
 
+    async sheetScan(sheet:string, unit:number, user:number, id:number) {
+        let sql = 'tv_$sheet_scan';
+        return await this.db.call(sql, [unit, user, sheet, id]);
+    }
+
     async sheetArchives(sheet:string, unit:number, user:number, pageStart:number, pageSize:number) {
         let sql = 'tv_$archives';
         return await this.db.call(sql, [unit, user, sheet, pageStart, pageSize]);

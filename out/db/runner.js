@@ -247,6 +247,12 @@ class Runner {
             return yield this.db.call(sql, [unit, user, sheet, id]);
         });
     }
+    sheetScan(sheet, unit, user, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = 'tv_$sheet_scan';
+            return yield this.db.call(sql, [unit, user, sheet, id]);
+        });
+    }
     sheetArchives(sheet, unit, user, pageStart, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = 'tv_$archives';

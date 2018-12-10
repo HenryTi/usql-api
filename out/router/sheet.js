@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const queue_1 = require("../queue");
 const entityProcess_1 = require("./entityProcess");
+const core_1 = require("../core");
 const constSheet = 'sheet';
 function default_1(router) {
     entityProcess_1.entityPost(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
@@ -56,6 +57,17 @@ function default_1(router) {
     entityProcess_1.entityGet(router, constSheet, '/:name/statecount', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.sheetStateCount(name, unit, user);
         return result;
+    }));
+    entityProcess_1.entityGet(router, constSheet, '-scan/:name/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { id } = urlParams;
+        let result = yield runner.sheetScan(name, unit, user, id);
+        let main = result[0];
+        if (main === undefined)
+            return;
+        let data = main.data;
+        let json = core_1.unpack(schema, data);
+        main.data = json;
+        return main;
     }));
     entityProcess_1.entityGet(router, constSheet, '/:name/get/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id } = urlParams;

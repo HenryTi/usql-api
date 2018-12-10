@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { queueSheet, queueToUnitx, SheetMessage } from '../queue';
 import { entityPost, entityPut, entityGet } from './entityProcess';
 import { Runner } from '../db';
+import { unpack } from '../core';
 
 const constSheet = 'sheet';
 
@@ -57,6 +58,18 @@ export default function(router:Router) {
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let result = await runner.sheetStateCount(name, unit, user);
         return result;
+    });
+
+    entityGet(router, constSheet, '-scan/:name/:id',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {id} = urlParams;
+        let result = await runner.sheetScan(name, unit, user, id as any);
+        let main = result[0];
+        if (main === undefined) return;
+        let data = main.data;
+        let json = unpack(schema, data);
+        main.data = json;
+        return main;
     });
 
     entityGet(router, constSheet, '/:name/get/:id', 

@@ -45,7 +45,7 @@ export default function(router: Router) {
     entityGet(router, tuidType, '-vid/:name/',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let result = await runner.tuidVid(name);
-        return result;
+        return result[0].id;
     });
 
     entityGet(router, tuidType, '-arr-all/:name/:owner/:arr/', 
