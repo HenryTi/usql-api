@@ -17,6 +17,7 @@ const core_1 = require("./core");
 const queue_1 = require("./queue");
 const sync_1 = require("./sync");
 const auth_1 = require("./core/auth");
+console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);

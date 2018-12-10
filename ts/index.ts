@@ -9,6 +9,7 @@ import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue
 import { startSync } from './sync';
 import { authJoint } from './core/auth';
 
+console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (async function () {
     console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     
