@@ -13,7 +13,6 @@ const core_1 = require("../core");
 function actionProcess(unit, user, name, db, urlParams, runner, body, schema, run) {
     return __awaiter(this, void 0, void 0, function* () {
         let { data } = body;
-        //if (data === undefined) data = packParam(schema, body);
         if (data === undefined) {
             data = core_1.packParam(schema, body);
         }

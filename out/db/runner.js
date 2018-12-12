@@ -147,7 +147,14 @@ class Runner {
     }
     tuidVid(tuid) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv_' + tuid + '$vid', []);
+            let proc = `tv_${tuid}$vid`;
+            return yield this.db.call(proc, []);
+        });
+    }
+    tuidArrVid(tuid, arr) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let proc = `tv_${tuid}_${arr}$vid`;
+            return yield this.db.call(proc, []);
         });
     }
     tuidGetArrAll(tuid, arr, unit, user, owner) {

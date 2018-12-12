@@ -44,6 +44,10 @@ function default_1(router) {
         let result = yield runner.tuidVid(name);
         return result[0].id;
     }));
+    entityProcess_1.entityGet(router, tuidType, '-arr-vid/:name/:arr', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.tuidArrVid(name, urlParams.arr);
+        return result[0].id;
+    }));
     entityProcess_1.entityGet(router, tuidType, '-arr-all/:name/:owner/:arr/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { owner, arr } = urlParams;
         let schemaArr = router_1.getTuidArr(schema, arr);

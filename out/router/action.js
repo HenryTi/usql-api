@@ -18,6 +18,11 @@ function default_1(router) {
             return yield unitx_1.unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
         return yield actionProcess_1.actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
     }));
+    entityProcess_1.entityPost(router, actionType, '-json/:name', (unit, user, name, db, urlParams, runner, body, schema, run) => __awaiter(this, void 0, void 0, function* () {
+        if (db === '$unitx')
+            return yield unitx_1.unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
+        return yield actionProcess_1.actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
+    }));
 }
 exports.default = default_1;
 //# sourceMappingURL=action.js.map
