@@ -63,7 +63,7 @@ class Fetch {
             if (json.error !== undefined) {
                 throw json.error;
             }
-            if (json.true === true) {
+            if (json.ok === true) {
                 return json.res;
             }
             return json;
