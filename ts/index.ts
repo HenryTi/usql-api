@@ -31,7 +31,7 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     });
     app.use(bodyParser.json());
     app.use(cors());
-    app.set('json replacer', (key, value) => {
+    app.set('json replacer', (key:any, value:any) => {
         if (value === null) return undefined;
         return value;
     });
