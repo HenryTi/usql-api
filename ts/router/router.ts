@@ -37,21 +37,21 @@ export function validEntity(res:Response, schema:any, type:string):boolean {
 }
 
 export function validTuidArr(res:Response, schema:any, arrName:string):any {
-    let {name, type, arr} = schema;
+    let {name, type, arrs} = schema;
     if (type !== 'tuid') {
         res.json({error: name + ' is not tuid'});
         return;
     }
-    let schemaArr = arr[arrName];
+    let schemaArr = (arrs as any[]).find(v => v.name === arrName);
     if (schemaArr !== undefined) return schemaArr;
     res.json({error: name + ' does not have arr ' + arrName });
     return;
 }
 
 export function getTuidArr(schema:any, arrName:string):any {
-    let {name, type, arr} = schema;
+    let {name, type, arrs} = schema;
     if (type !== 'tuid') throw name + ' is not tuid';
-    let schemaArr = arr[arrName];
+    let schemaArr = (arrs as any[]).find(v => v.name === arrName);
     if (schemaArr !== undefined) return schemaArr;
     throw name + ' does not have arr ' + arrName;
 }
