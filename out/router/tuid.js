@@ -62,14 +62,12 @@ function default_1(router) {
     }));
     entityProcess_1.entityPost(router, tuidType, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let id = body["$id"];
-        console.log('tuidSave', body);
         let dbParams = [id];
         let fields = schema.fields;
         let len = fields.length;
         for (let i = 0; i < len; i++) {
             dbParams.push(body[fields[i].name]);
         }
-        console.log(dbParams);
         let result = yield runner.tuidSave(name, unit, user, dbParams);
         let row = result[0];
         if (!id)
