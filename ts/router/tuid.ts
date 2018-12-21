@@ -73,12 +73,14 @@ export default function(router: Router) {
     entityPost(router, tuidType, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let id = body["$id"];
+        console.log('tuidSave', body);
         let dbParams:any[] = [id];
         let fields = schema.fields;
         let len = fields.length;
         for (let i=0; i<len; i++) {
             dbParams.push(body[fields[i].name]);
         }
+        console.log(dbParams);
         let result = await runner.tuidSave(name, unit, user, dbParams);
         let row = result[0];
         if (!id) id = row.id;
