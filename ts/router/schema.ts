@@ -1,6 +1,6 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import * as _ from 'lodash';
-import {User, router, checkRunner, unknownEntity, validEntity, validTuidArr} from './router';
+//import {User, router, checkRunner, unknownEntity, validEntity, validTuidArr} from './router';
 import { Runner } from '../db';
 import { get } from './process';
 

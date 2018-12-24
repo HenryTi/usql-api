@@ -52,7 +52,8 @@ export function validTuidArr(res:Response, schema:any, arrName:string):any {
 export function getTuidArr(schema:any, arrName:string):any {
     let {name, type, arrs} = schema;
     if (type !== 'tuid') throw name + ' is not tuid';
-    let schemaArr = (arrs as any[]).find(v => v.name === arrName);
+    let an = arrName.toLowerCase();
+    let schemaArr = (arrs as any[]).find(v => v.name === an);
     if (schemaArr !== undefined) return schemaArr;
-    throw name + 'getTuidArr: does not have arr ' + arrName + ' arrs:' + (arrs as any[]).map(v => v.name).join(',');
+    throw 'getTuidArr: ' + name + ' does not have arr ' + arrName + ' arrs:' + (arrs as any[]).map(v => v.name).join(',');
 }
