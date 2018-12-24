@@ -59,10 +59,11 @@ function getTuidArr(schema, arrName) {
     let { name, type, arrs } = schema;
     if (type !== 'tuid')
         throw name + ' is not tuid';
-    let schemaArr = arrs.find(v => v.name === arrName);
+    let an = arrName.toLowerCase();
+    let schemaArr = arrs.find(v => v.name === an);
     if (schemaArr !== undefined)
         return schemaArr;
-    throw name + 'getTuidArr: does not have arr ' + arrName + ' arrs:' + arrs.map(v => v.name).join(',');
+    throw 'getTuidArr: ' + name + ' does not have arr ' + arrName + ' arrs:' + arrs.map(v => v.name).join(',');
 }
 exports.getTuidArr = getTuidArr;
 //# sourceMappingURL=router.js.map
