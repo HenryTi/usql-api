@@ -44,7 +44,8 @@ export function validTuidArr(res:Response, schema:any, arrName:string):any {
     }
     let schemaArr = (arrs as any[]).find(v => v.name === arrName);
     if (schemaArr !== undefined) return schemaArr;
-    res.json({error: name + ' does not have arr ' + arrName });
+
+    res.json({error: 'validTuidArr: ' + name + ' does not have arr ' + arrName + ' arrs:' + (arrs as any[]).map(v => v.name).join(',')});
     return;
 }
 
@@ -53,5 +54,5 @@ export function getTuidArr(schema:any, arrName:string):any {
     if (type !== 'tuid') throw name + ' is not tuid';
     let schemaArr = (arrs as any[]).find(v => v.name === arrName);
     if (schemaArr !== undefined) return schemaArr;
-    throw name + ' does not have arr ' + arrName;
+    throw name + 'getTuidArr: does not have arr ' + arrName + ' arrs:' + (arrs as any[]).map(v => v.name).join(',');
 }

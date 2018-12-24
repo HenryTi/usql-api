@@ -51,7 +51,7 @@ function validTuidArr(res, schema, arrName) {
     let schemaArr = arrs.find(v => v.name === arrName);
     if (schemaArr !== undefined)
         return schemaArr;
-    res.json({ error: name + ' does not have arr ' + arrName });
+    res.json({ error: 'validTuidArr: ' + name + ' does not have arr ' + arrName + ' arrs:' + arrs.map(v => v.name).join(',') });
     return;
 }
 exports.validTuidArr = validTuidArr;
@@ -62,7 +62,7 @@ function getTuidArr(schema, arrName) {
     let schemaArr = arrs.find(v => v.name === arrName);
     if (schemaArr !== undefined)
         return schemaArr;
-    throw name + ' does not have arr ' + arrName;
+    throw name + 'getTuidArr: does not have arr ' + arrName + ' arrs:' + arrs.map(v => v.name).join(',');
 }
 exports.getTuidArr = getTuidArr;
 //# sourceMappingURL=router.js.map
