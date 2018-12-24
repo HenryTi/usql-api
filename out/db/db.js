@@ -47,26 +47,31 @@ class Db {
     }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(this.dbName, ' sql: ', params.join(','));
             return yield this.dbServer.sql(this.dbName, sql, params);
         });
     }
     call(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(this.dbName, '.', proc, ': ', params.join(','));
             return yield this.dbServer.call(this.dbName, proc, params);
         });
     }
     callEx(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(this.dbName, '.', proc, ': ', params.join(','));
             return yield this.dbServer.callEx(this.dbName, proc, params);
         });
     }
     tableFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(this.dbName, '.', proc, ': ', params.join(','));
             return yield this.dbServer.tableFromProc(this.dbName, proc, params);
         });
     }
     tablesFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log(this.dbName, '.', proc, ': ', params.join(','));
             return yield this.dbServer.tablesFromProc(this.dbName, proc, params);
         });
     }

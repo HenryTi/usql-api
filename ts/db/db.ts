@@ -41,18 +41,23 @@ export class Db {
         return this.isExists = await this.dbServer.existsDatabase(this.dbName);
     }
     async sql(sql:string, params:any[]): Promise<any> {
+        console.log(this.dbName, ' sql: ', params.join(','))
         return await this.dbServer.sql(this.dbName, sql, params);
     }
     async call(proc:string, params:any[]): Promise<any> {
+        console.log(this.dbName, '.', proc, ': ', params.join(','))
         return await this.dbServer.call(this.dbName, proc, params);
     }
     async callEx(proc:string, params:any[]): Promise<any> {
+        console.log(this.dbName, '.', proc, ': ', params.join(','))
         return await this.dbServer.callEx(this.dbName, proc, params);
     }
     async tableFromProc(proc:string, params:any[]): Promise<any[]> {
+        console.log(this.dbName, '.', proc, ': ', params.join(','))
         return await this.dbServer.tableFromProc(this.dbName, proc, params);
     }
     async tablesFromProc(proc:string, params:any[]): Promise<any[][]> {
+        console.log(this.dbName, '.', proc, ': ', params.join(','))
         return await this.dbServer.tablesFromProc(this.dbName, proc, params);
     }
     async createDatabase(): Promise<void> {
