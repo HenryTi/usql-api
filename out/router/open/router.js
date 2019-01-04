@@ -51,7 +51,7 @@ exports.router = express_1.Router({ mergeParams: true });
     post(router, '/bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { faces, faceUnitMessages } = body;
         let ret = yield runner.call('GetBusMessages', [undefined, undefined, faces, faceUnitMessages]);
-        console.log(ret);
+        console.log('$unitx/open/bus - GetBusMessages - ', ret);
         return ret;
     }));
 })(exports.router);

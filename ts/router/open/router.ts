@@ -46,7 +46,7 @@ export const router: Router = Router({ mergeParams: true });
     async (runner:Runner, body:any):Promise<any> => {
         let {faces, faceUnitMessages} = body;
         let ret = await runner.call('GetBusMessages', [undefined, undefined, faces, faceUnitMessages]);
-        console.log(ret);
+        console.log('$unitx/open/bus - GetBusMessages - ', ret);
         return ret;
     });
 })(router);
