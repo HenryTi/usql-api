@@ -9,13 +9,14 @@ interface SyncFace {
 }
 
 interface Face {
+    id: number;
     bus: string;
     faceUrl: string;
     face: string;
 }
 
 interface SyncFaces {
-    faceColl: {[id:number]: Face};
+    faceColl: {[faceUrl:string]: Face};
     syncFaceArr: SyncFace[];
 }
 
@@ -36,8 +37,8 @@ export async function syncBus(runner: Runner) {
             let ret = await openApi.bus(faces, faceUnitMessages);
             if (ret.length === 0) break;
             for (let row of ret) {
-                let {face:faceId, id:msgId, body} = row;
-                let {bus, faceUrl, face} = faceColl[faceId];
+                let {face:faceUrl, id:msgId, body} = row;
+                let {bus, face, id:faceId} = faceColl[faceUrl];
                 await runner.bus(bus, face, unit, faceId, msgId, body);
             }
         }
@@ -53,11 +54,11 @@ async function getSyncFaces(runner: Runner): Promise<SyncFaces> {
     let arr0:any[] = syncFaces[0];
     let arr1:any[] = syncFaces[1];
     if (arr0.length === 0) return;
-    let faceColl: {[id:number]: Face} = {};
+    let faceColl: {[faceUrl:string]: Face} = {};
     let faceArr:string[] = arr0.map(v => {
         let {id, bus, busOwner, busName, faceName} = v;
         let faceUrl = `${busOwner}/${busName}/${faceName}`;
-        faceColl[id] = {bus:bus, faceUrl:faceUrl, face:faceName};
+        faceColl[faceUrl] = {id:id, bus:bus, faceUrl:faceUrl, face:faceName};
         return `${id}\t${faceUrl}`;
     });
 

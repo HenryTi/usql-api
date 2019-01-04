@@ -80,10 +80,11 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
                         data: packedBusData
                     });
                     */
+                    let from = (runner.usqOwner || 'unknown') + '/' + (runner.usq || 'unknown');
                     let busMsg = {
                         unit: unit,
                         type: 'bus',
-                        from: (runner.usqOwner || 'unknown') + '/' + (runner.usqOwner || 'unknown'),
+                        from: from,
                         busOwner: owner,
                         bus: bus,
                         face: name,

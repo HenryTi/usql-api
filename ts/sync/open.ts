@@ -88,20 +88,24 @@ async function syncTuids(runner:Runner):Promise<void> {
                     let syncTuid = fromSchemas[tuid];
                     let {maps} = syncTuid; // tuid, 随后 tab 分隔的 map
                     let tuidIdTable:any[];
+
+                    //tuidIdTable = fresh[i];
+                    // ?????
+                    continue;
                     if (len === 1) tuidIdTable = fresh;
                     else tuidIdTable = fresh[i];
                     let stampMax = 0;
                     try {
-                    for (let row of tuidIdTable) {
-                        let {id, stamp} = row;
-                        await syncId(runner, openApi, unit, id, tuid, maps);
-                        if (stamp > stampMax) stampMax = stamp;
-                        await runner.call(tuid + '$sync_set', [unit, stampMax, id, undefined]);
+                        for (let row of tuidIdTable) {
+                            let {id, stamp} = row;
+                            await syncId(runner, openApi, unit, id, tuid, maps);
+                            if (stamp > stampMax) stampMax = stamp;
+                            await runner.call(tuid + '$sync_set', [unit, stampMax, id, undefined]);
+                        }
                     }
-                }
-                catch (err) {
-                    debugger;
-                }
+                    catch (err) {
+                        debugger;
+                    }
                     let s = null;
                 }
             }

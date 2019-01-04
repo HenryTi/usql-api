@@ -84,10 +84,11 @@ export async function afterAction(
                     data: packedBusData
                 });
                 */
+                let from = (runner.usqOwner || 'unknown') + '/' + (runner.usq || 'unknown');
                 let busMsg: BusMessage = {
                     unit: unit,
                     type: 'bus',
-                    from: (runner.usqOwner || 'unknown') + '/' + (runner.usqOwner || 'unknown'),
+                    from: from, //(runner.usqOwner || 'unknown') + '/' + (runner.usqOwner || 'unknown'),
                     busOwner: owner,
                     bus: bus,
                     face: name,
