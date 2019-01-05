@@ -9,8 +9,9 @@ export const router: Router = Router({ mergeParams: true });
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, stamps} = body;
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
+        let stampsText = stamps.map(v => v.join('\t')).join('\n');
         try {
-            let ret = await runner.call('$$open_fresh', [unit, stamps.map(v => v.join('\t')).join('\n')]);
+            let ret = await runner.call('$$open_fresh', [unit, stampsText]);
             return ret;
         }
         catch (err) {

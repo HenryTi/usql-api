@@ -102,13 +102,12 @@ function syncTuids(runner) {
                         let syncTuid = fromSchemas[tuid];
                         let { maps } = syncTuid; // tuid, 随后 tab 分隔的 map
                         let tuidIdTable;
-                        //tuidIdTable = fresh[i];
-                        // ?????
-                        continue;
-                        if (len === 1)
+                        if (len === 1) {
                             tuidIdTable = fresh;
-                        else
+                        }
+                        else {
                             tuidIdTable = fresh[i];
+                        }
                         let stampMax = 0;
                         try {
                             for (let row of tuidIdTable) {

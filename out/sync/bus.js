@@ -13,12 +13,6 @@ const core_1 = require("../core");
 function syncBus(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            /*
-            let unit = 27;
-            let faces = '11\ta/b/c\n33\tb';
-            let faceUnitMessages = '11\t27\t428799000000003\n33\t27\t330343442';
-            let syncFaces = await runner.call('$sync_faces', []);
-            */
             let syncFaces = yield getSyncFaces(runner);
             if (syncFaces === undefined)
                 return;

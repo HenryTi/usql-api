@@ -22,12 +22,6 @@ interface SyncFaces {
 
 export async function syncBus(runner: Runner) {
     try {
-        /*
-        let unit = 27;
-        let faces = '11\ta/b/c\n33\tb';
-        let faceUnitMessages = '11\t27\t428799000000003\n33\t27\t330343442';
-        let syncFaces = await runner.call('$sync_faces', []);
-        */
         let syncFaces = await getSyncFaces(runner);
         if (syncFaces === undefined) return;
         let {faceColl, syncFaceArr} = syncFaces;

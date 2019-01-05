@@ -89,11 +89,12 @@ async function syncTuids(runner:Runner):Promise<void> {
                     let {maps} = syncTuid; // tuid, 随后 tab 分隔的 map
                     let tuidIdTable:any[];
 
-                    //tuidIdTable = fresh[i];
-                    // ?????
-                    continue;
-                    if (len === 1) tuidIdTable = fresh;
-                    else tuidIdTable = fresh[i];
+                    if (len === 1) {
+                        tuidIdTable = fresh;
+                    }
+                    else {
+                        tuidIdTable = fresh[i];
+                    }
                     let stampMax = 0;
                     try {
                         for (let row of tuidIdTable) {
