@@ -23,7 +23,7 @@ class Fetch {
                         let v = params[k];
                         if (v === undefined)
                             continue;
-                        url += c + k + '=' + params[k];
+                        url += c + k + '=' + encodeURIComponent(params[k]);
                         c = '&';
                     }
                 }
@@ -42,7 +42,7 @@ class Fetch {
             var headers = new node_fetch_1.Headers();
             headers.append('Accept', 'application/json'); // This one is enough for GET requests
             headers.append('Content-Type', 'application/json'); // This one sends body
-            let res = yield node_fetch_1.default(encodeURI(this.baseUrl + url), {
+            let res = yield node_fetch_1.default(this.baseUrl + url, {
                 headers: {
                     "Content-Type": 'application/json',
                     "Accept": 'application/json',

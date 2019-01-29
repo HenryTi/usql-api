@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const db_1 = require("../db");
+const busQueueSeed_1 = require("../core/busQueueSeed");
 let Faces;
 let lastHour;
 function writeDataToBus(runner, face, unit, from, body) {
@@ -35,9 +36,9 @@ function writeDataToBus(runner, face, unit, from, body) {
             faceId = id;
             Faces[face] = faceId;
         }
-        let hour = Math.floor(Date.now() / (3600 * 1000));
+        let hour = busQueueSeed_1.busQueuehour();
         if (lastHour === undefined || hour > lastHour) {
-            yield runner.call('$set_bus_queue_seed', ['busqueue', hour * 1000000000]);
+            yield runner.call('$set_bus_queue_seed', ['busqueue', busQueueSeed_1.busQueueSeedFromHour(hour)]);
             lastHour = hour;
         }
         var now = new Date();

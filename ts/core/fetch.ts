@@ -13,7 +13,7 @@ export abstract class Fetch {
                 for (let k of keys) {
                     let v = params[k];
                     if (v === undefined) continue;
-                    url += c + k + '=' + params[k];
+                    url += c + k + '=' + encodeURIComponent(params[k]);
                     c = '&';
                 }
             }
@@ -31,7 +31,7 @@ export abstract class Fetch {
         headers.append('Accept', 'application/json'); // This one is enough for GET requests
         headers.append('Content-Type', 'application/json'); // This one sends body
         let res = await fetch(
-            encodeURI(this.baseUrl + url), 
+            this.baseUrl + url, 
             {
                 headers: {
                     "Content-Type": 'application/json',

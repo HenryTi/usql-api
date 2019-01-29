@@ -1,6 +1,7 @@
 import {Router, Request, Response, NextFunction} from 'express';
 import { Runner } from '../../db';
 import { checkRunner } from '../router';
+import { busQueueSeed } from '../../core/busQueueSeed';
 
 export const router: Router = Router({ mergeParams: true });
 
@@ -48,6 +49,22 @@ export const router: Router = Router({ mergeParams: true });
         let {faces, faceUnitMessages} = body;
         let ret = await runner.call('GetBusMessages', [undefined, undefined, faces, faceUnitMessages]);
         console.log('$unitx/open/bus - GetBusMessages - ', ret);
+        return ret;
+    });
+
+    post(router, '/joint-read-bus',
+    async (runner:Runner, body:any):Promise<any> => {
+        let {unit, face, queue} = body;
+        if (queue === undefined) queue = busQueueSeed();
+        let ret = await runner.call('BusMessageFromQueue', [unit, undefined, face, queue]);
+        if (ret.length === 0) return;
+        return ret[0];
+    });
+
+    post(router, '/joint-write-bus',
+    async (runner:Runner, body:any):Promise<any> => {
+        let {unit, face, from, sourceId, body:message} = body;
+        let ret = await runner.call('SaveBusMessage', [unit, undefined, face, from, sourceId, message]);
         return ret;
     });
 })(router);

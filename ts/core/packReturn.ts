@@ -46,7 +46,7 @@ interface BusSchema {
     fields: Field[];
     arrs: Arr[];
 }
-//const bus
+
 export function packBus(schema:BusSchema, data:any):string {
     let result:string[] = [];
     if (data !== undefined) {

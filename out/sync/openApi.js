@@ -8,8 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = require("../core");
 const node_fetch_1 = require("node-fetch");
+const core_1 = require("../core");
 class OpenApi extends core_1.Fetch {
     fresh(unit, stamps) {
         return __awaiter(this, void 0, void 0, function* () {

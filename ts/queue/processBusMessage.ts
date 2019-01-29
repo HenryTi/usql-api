@@ -1,6 +1,7 @@
 import { BusMessage } from "./model";
 import { consts } from '../core';
 import { getRunner, Runner } from "../db";
+import { busQueuehour, busQueueSeedFromHour } from "../core/busQueueSeed";
 
 let Faces:{[Face:string]:number};
 let lastHour: number;
@@ -25,9 +26,9 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
          Faces[face] = faceId;
     }
 
-    let hour = Math.floor(Date.now()/(3600*1000));
+    let hour = busQueuehour();
     if (lastHour === undefined || hour > lastHour) {
-        await runner.call('$set_bus_queue_seed', ['busqueue', hour*1000000000]);
+        await runner.call('$set_bus_queue_seed', ['busqueue', busQueueSeedFromHour(hour)]);
         lastHour = hour;
     }
     var now = new Date();

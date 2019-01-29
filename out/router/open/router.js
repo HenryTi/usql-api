@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const router_1 = require("../router");
+const busQueueSeed_1 = require("../../core/busQueueSeed");
 exports.router = express_1.Router({ mergeParams: true });
 (function (router) {
     post(router, '/fresh', (runner, body) => __awaiter(this, void 0, void 0, function* () {
@@ -53,6 +54,20 @@ exports.router = express_1.Router({ mergeParams: true });
         let { faces, faceUnitMessages } = body;
         let ret = yield runner.call('GetBusMessages', [undefined, undefined, faces, faceUnitMessages]);
         console.log('$unitx/open/bus - GetBusMessages - ', ret);
+        return ret;
+    }));
+    post(router, '/joint-read-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        let { unit, face, queue } = body;
+        if (queue === undefined)
+            queue = busQueueSeed_1.busQueueSeed();
+        let ret = yield runner.call('BusMessageFromQueue', [unit, undefined, face, queue]);
+        if (ret.length === 0)
+            return;
+        return ret[0];
+    }));
+    post(router, '/joint-write-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        let { unit, face, from, sourceId, body: message } = body;
+        let ret = yield runner.call('SaveBusMessage', [unit, undefined, face, from, sourceId, message]);
         return ret;
     }));
 })(exports.router);

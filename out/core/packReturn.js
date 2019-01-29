@@ -39,7 +39,6 @@ function packReturn(schema, data) {
     return ret.join('');
 }
 exports.packReturn = packReturn;
-//const bus
 function packBus(schema, data) {
     let result = [];
     if (data !== undefined) {
