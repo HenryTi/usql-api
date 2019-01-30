@@ -3,29 +3,57 @@ import { consts } from '../core';
 import { getRunner, Runner } from "../db";
 import { busQueuehour, busQueueSeedFromHour } from "../core/busQueueSeed";
 
-let Faces:{[Face:string]:number};
+let faces:{[face:string]:number};
+let froms:{[from:string]:number};
 let lastHour: number;
 
-export async function writeDataToBus(runner:Runner, face:string, unit:number, from:string, body:string) {
-    if (Faces === undefined) {
-        Faces = {};
-        let ret = await runner.tuidGetAll(consts.Face, undefined, undefined);
+async function getFaceId(runner:Runner, unit:number, face:string):Promise<number> {
+    if (faces === undefined) {
+        faces = {};
+        let ret = await runner.tuidGetAll(consts.Face, unit, undefined);
         for (let row of ret) {
             let {id, str} = row;
-            Faces[str] = id;
+            faces[str] = id;
         }
     }
-    let faceId = Faces[face];
+    let faceId = faces[face];
     if (faceId === undefined) {
-         let ret = await runner.tuidSave(consts.Face, undefined, undefined, [undefined, face]);
+         let ret = await runner.tuidSave(consts.Face, unit, undefined, [undefined, face]);
          if (ret === undefined) return;
          if (ret.length === 0) return;
          let {id} = ret[0];
          if (id<0) id = -id;
          faceId = id;
-         Faces[face] = faceId;
+         faces[face] = faceId;
     }
+    return faceId;
+}
 
+async function getFromId(runner:Runner, unit:number, from:string):Promise<number> {
+    if (froms === undefined) {
+        froms = {};
+        let ret = await runner.tuidGetAll(consts.BusFrom, unit, undefined);
+        for (let row of ret) {
+            let {id, str} = row;
+            froms[str] = id;
+        }
+    }
+    let fromId = froms[from];
+    if (fromId === undefined) {
+         let ret = await runner.tuidSave(consts.BusFrom, unit, undefined, [undefined, from]);
+         if (ret === undefined) return;
+         if (ret.length === 0) return;
+         let {id} = ret[0];
+         if (id<0) id = -id;
+         fromId = id;
+         froms[from] = fromId;
+    }
+    return fromId;
+}
+
+export async function writeDataToBus(runner:Runner, face:string, unit:number, from:string, body:string) {
+    let faceId = await getFaceId(runner, unit, face);
+    let fromId = await getFromId(runner, unit, from);
     let hour = busQueuehour();
     if (lastHour === undefined || hour > lastHour) {
         await runner.call('$set_bus_queue_seed', ['busqueue', busQueueSeedFromHour(hour)]);
@@ -33,7 +61,7 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
     }
     var now = new Date();
     await runner.tuidSave(consts.BusQueue, unit, undefined, 
-        [undefined, unit, faceId, from, body, 
+        [undefined, faceId, fromId, body, 
             new Date(now.getTime() + now.getTimezoneOffset() * 60000)]);
 }
 
