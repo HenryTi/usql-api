@@ -40,7 +40,7 @@ async function getFromId(runner:Runner, unit:number, from:string):Promise<number
     }
     let fromId = froms[from];
     if (fromId === undefined) {
-         let ret = await runner.tuidSave(consts.BusFrom, unit, undefined, [undefined, from]);
+         let ret = await runner.tuidSave(consts.BusFrom, unit, undefined, [undefined, from, undefined]);
          if (ret === undefined) return;
          if (ret.length === 0) return;
          let {id} = ret[0];

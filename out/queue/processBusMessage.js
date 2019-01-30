@@ -52,7 +52,7 @@ function getFromId(runner, unit, from) {
         }
         let fromId = froms[from];
         if (fromId === undefined) {
-            let ret = yield runner.tuidSave(core_1.consts.BusFrom, unit, undefined, [undefined, from]);
+            let ret = yield runner.tuidSave(core_1.consts.BusFrom, unit, undefined, [undefined, from, undefined]);
             if (ret === undefined)
                 return;
             if (ret.length === 0)
