@@ -22,6 +22,15 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     let app = express();
     //let expressWs = require('express-ws')(app);
 
+    app.use(express.static('public'));
+    app.get('/public/images/*', (req, res) => {
+        console.log("Request for " + req.url + " received.");
+        let len = '/public/images/'.length;
+        let path = __dirname + '/../../imgs/' + req.url.substr(len);
+        console.log('__dirname: ' + __dirname + ' path: ' + path);
+        res.sendFile(path);
+        //res.sendFile( __dirname + "/" + req.url );
+    });
     app.use(function(err, req, res, next) {
         res.status(err.status || 500);
         res.render('error', {

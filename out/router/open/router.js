@@ -12,6 +12,12 @@ const express_1 = require("express");
 const router_1 = require("../router");
 const busQueueSeed_1 = require("../../core/busQueueSeed");
 exports.router = express_1.Router({ mergeParams: true });
+//router.use(Static('public'));
+exports.router.get('/img/*', (req, res) => {
+    console.log("Request for " + req.url + " received.");
+    console.log('__dirname: ' + __dirname);
+    //res.sendFile( __dirname + "/" + req.url );
+});
 (function (router) {
     post(router, '/fresh', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, stamps } = body;

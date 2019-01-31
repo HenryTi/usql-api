@@ -1,9 +1,17 @@
-import {Router, Request, Response, NextFunction} from 'express';
+import {Router, Request, Response, static as Static} from 'express';
 import { Runner } from '../../db';
 import { checkRunner } from '../router';
 import { busQueueSeed } from '../../core/busQueueSeed';
 
 export const router: Router = Router({ mergeParams: true });
+
+//router.use(Static('public'));
+
+router.get('/img/*', (req, res) => {
+    console.log("Request for " + req.url + " received.");
+    console.log('__dirname: ' + __dirname);
+    //res.sendFile( __dirname + "/" + req.url );
+});
 
 (function(router:Router) {
     post(router, '/fresh',
