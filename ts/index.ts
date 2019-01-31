@@ -25,9 +25,9 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     app.use(express.static('public'));
     app.get('/usql/public/images/*', (req, res) => {
         console.log("Request for " + req.url + " received.");
-        let len = '/public/images/'.length;
-        let path = __dirname + '/../../imgs/' + req.url.substr(len);
-        console.log('__dirname: ' + __dirname + ' path: ' + path);
+        let len = '/usql/public/images/'.length;
+        let path = '/root/web/imgs/' + req.url.substr(len);
+        console.log('__dirname: ' + __dirname + ' path: ' + path);        
         res.sendFile(path);
         //res.sendFile( __dirname + "/" + req.url );
     });
