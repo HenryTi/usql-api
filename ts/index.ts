@@ -23,7 +23,7 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     //let expressWs = require('express-ws')(app);
 
     app.use(express.static('public'));
-    app.get('/public/images/*', (req, res) => {
+    app.get('/usql/public/images/*', (req, res) => {
         console.log("Request for " + req.url + " received.");
         let len = '/public/images/'.length;
         let path = __dirname + '/../../imgs/' + req.url.substr(len);
