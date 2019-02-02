@@ -12,7 +12,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const config = require("config");
 const router_1 = require("./router");
-const joint_1 = require("./router/joint");
+const image_1 = require("./res/image");
 const core_1 = require("./core");
 const queue_1 = require("./queue");
 const sync_1 = require("./sync");
@@ -26,18 +26,10 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
             console.log("mysql connection must defined in config/default.json or config/production.json");
             return;
         }
+        image_1.initImgPath();
         var cors = require('cors');
         let app = express();
-        //let expressWs = require('express-ws')(app);
         app.use(express.static('public'));
-        app.get('/usql/public/images/*', (req, res) => {
-            console.log("Request for " + req.url + " received.");
-            let len = '/usql/public/images/'.length;
-            let path = '/root/web/imgs/' + req.url.substr(len);
-            console.log('__dirname: ' + __dirname + ' path: ' + path);
-            res.sendFile(path);
-            //res.sendFile( __dirname + "/" + req.url );
-        });
         app.use(function (err, req, res, next) {
             res.status(err.status || 500);
             res.render('error', {
@@ -65,39 +57,50 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
                 console.error(e);
             }
         }));
+        /*
         // 正常的tonva usql接口
-        //app.use('/usql/:db/bus/', [authUnitx, sendToBusRouter]);
-        app.use('/usql/:db/unitx/', [core_1.authUnitx, queue_1.unitxQueueRouter]);
-        //app.use('/usql/$unitx/tv/', [authCheck, unitxRouter]);
-        app.use('/usql/:db/open/', [core_1.authUnitx, router_1.openRouter]);
-        app.use('/usql/:db/tv/', [core_1.authCheck, router_1.router]);
-        app.use('/usql/:db/joint/', [auth_1.authJoint, router_1.router]);
-        app.use('/usql/:db/setting/', [/*authCheck, */ router_1.settingRouter]); // unitx set access
-        //app.use('/usql/:db/log', getWsLogs);
+        app.use('/usql/:db/unitx/', [authUnitx, unitxQueueRouter]);
+        app.use('/usql/:db/open/', [authUnitx, openRouter]);
+        app.use('/usql/:db/tv/', [authCheck, router]);
+        app.use('/usql/:db/joint/', [authJoint, router]);
+        app.use('/usql/:db/setting/', [settingRouter]); // unitx set access
+    
         // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
-        //app.use('/usql/:db/debug', [authDebug, tv]);
-        app.use('/usql/:db/debug', [core_1.authCheck, router_1.router]);
+        app.use('/usql/:db/debug', [authCheck, router]);
+    
+        function dbHello(req:Request, res:Response) {
+            let db = req.params.db;
+            res.json({"hello": 'usql-api: hello, db is ' + db});
+        }
+        app.use('/usql/:db/hello', dbHello);
+        app.use('/usql/:db/', dbHello);
+        app.use('/usql/hello', (req:Request, res:Response) => {
+            res.json({"hello": 'usql-api: hello, it\'s good'});
+        });
+        app.use('/joint', jointRouter);
+        */
+        // 正常的tonva usql接口 usqRouter
+        let usqRouter = express.Router({ mergeParams: true });
+        usqRouter.use('/unitx', [core_1.authUnitx, queue_1.unitxQueueRouter]);
+        usqRouter.use('/open', [core_1.authUnitx, router_1.openRouter]);
+        usqRouter.use('/tv', [core_1.authCheck, router_1.router]);
+        usqRouter.use('/joint', [auth_1.authJoint, router_1.router]);
+        usqRouter.use('/setting', [router_1.settingRouter]); // unitx set access
+        usqRouter.use('/img', image_1.router);
+        // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
+        usqRouter.use('/debug', [core_1.authCheck, router_1.router]);
         function dbHello(req, res) {
             let db = req.params.db;
             res.json({ "hello": 'usql-api: hello, db is ' + db });
         }
-        app.use('/usql/:db/hello', dbHello);
-        app.use('/usql/:db/', dbHello);
-        app.use('/usql/hello', (req, res) => {
-            res.json({ "hello": 'usql-api: hello, it\'s good' });
-        });
-        app.use('/joint', joint_1.router);
+        usqRouter.use('/hello', dbHello);
+        usqRouter.use('/', dbHello);
+        app.use('/usql/:db/', usqRouter);
         let port = config.get('port');
         console.log('port=', port);
         let redisConfig = config.get('redis');
         let redis = { redis: redisConfig };
         console.log('redis:', redisConfig);
-        /*
-        startBusToUnitxQueue(redis);
-        startSheetToUnitxQueue(redis);
-        startSheetActQueue(redis);
-        startUnitxQueue(redis);
-        */
         queue_1.startSheetQueue(redis);
         queue_1.startToUnitxQueue(redis);
         queue_1.startUnitxInQueue(redis);
