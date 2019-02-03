@@ -13,6 +13,15 @@ const router_1 = require("../router");
 const busQueueSeed_1 = require("../../core/busQueueSeed");
 exports.router = express_1.Router({ mergeParams: true });
 (function (router) {
+    get(router, '/entities/:unit', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+        return yield runner.getEntities(params.unit);
+    }));
+    get(router, '/entity/:entityName', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+        return runner.getSchema(params.entityName);
+    }));
+    post(router, '/entities/:unit', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+        return yield runner.getEntities(params.unit);
+    }));
     post(router, '/fresh', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, stamps } = body;
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
@@ -50,6 +59,23 @@ exports.router = express_1.Router({ mergeParams: true });
         }
         return ret;
     }));
+    post(router, '/tuid-value/:tuid/:div', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+        body.$ = 'open/tuid';
+        console.log(body);
+        let { tuid, div } = params;
+        let { unit, id, ownerId, all } = body;
+        if (runner.isTuidOpen(tuid) === false)
+            return;
+        // maps: tab分隔的map名字
+        if (div === undefined) {
+            let suffix = (all === true ? '$id' : '$main');
+            return yield runner.call(tuid + suffix, [unit, undefined, id]);
+        }
+        else {
+            let suffix = (all === true ? '$id' : '$main');
+            return yield runner.call(`${tuid}_${div}${suffix}`, [unit, undefined, ownerId, id]);
+        }
+    }));
     post(router, '/bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { faces, faceUnitMessages } = body;
         let ret = yield runner.call('GetBusMessages', [undefined, undefined, faces, faceUnitMessages]);
@@ -73,31 +99,31 @@ exports.router = express_1.Router({ mergeParams: true });
 })(exports.router);
 function post(router, path, processer) {
     router.post(path, (req, res) => __awaiter(this, void 0, void 0, function* () {
-        yield process(req, res, processer);
+        yield process(req, res, processer, req.body, req.params);
     }));
 }
 ;
 function get(router, path, processer) {
     router.get(path, (req, res) => __awaiter(this, void 0, void 0, function* () {
-        yield process(req, res, processer);
+        yield process(req, res, processer, req.query, req.params);
     }));
 }
 ;
 function put(router, path, processer) {
     router.put(path, (req, res) => __awaiter(this, void 0, void 0, function* () {
-        yield process(req, res, processer);
+        yield process(req, res, processer, req.body, req.params);
     }));
 }
 ;
-function process(req, res, processer) {
+function process(req, res, processer, queryOrBody, params) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let db = req.params.db;
             let runner = yield router_1.checkRunner(db, res);
             if (runner === undefined)
                 return;
-            let body = req.body;
-            let result = yield processer(runner, body);
+            //let body = (req as any).body;
+            let result = yield processer(runner, queryOrBody, params);
             res.json({
                 ok: true,
                 res: result

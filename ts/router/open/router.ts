@@ -6,6 +6,21 @@ import { busQueueSeed } from '../../core/busQueueSeed';
 export const router: Router = Router({ mergeParams: true });
 
 (function(router:Router) {
+    get(router, '/entities/:unit',
+    async (runner:Runner, body:any, params:any):Promise<any> => {
+        return await runner.getEntities(params.unit);
+    });
+
+    get(router, '/entity/:entityName',
+    async (runner:Runner, body:any, params:any):Promise<any> => {
+        return runner.getSchema(params.entityName);
+    });
+
+    post(router, '/entities/:unit',
+    async (runner:Runner, body:any, params:any):Promise<any> => {
+        return await runner.getEntities(params.unit);
+    });
+
     post(router, '/fresh',
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, stamps} = body;
@@ -44,6 +59,24 @@ export const router: Router = Router({ mergeParams: true });
         return ret;
     });
 
+    post(router, '/tuid-value/:tuid/:div',
+    async (runner:Runner, body:any, params:any):Promise<any> => {
+        body.$ = 'open/tuid';
+        console.log(body);
+        let {tuid, div} = params;
+        let {unit, id, ownerId, all} = body;
+        if (runner.isTuidOpen(tuid) === false) return;
+        // maps: tab分隔的map名字
+        if (div === undefined) {
+            let suffix = (all===true? '$id':'$main');
+            return await runner.call(tuid + suffix, [unit, undefined, id]);
+        }
+        else {
+            let suffix = (all===true? '$id':'$main');
+            return await runner.call(`${tuid}_${div}${suffix}`, [unit, undefined, ownerId, id]);
+        }
+    });
+
     post(router, '/bus',
     async (runner:Runner, body:any):Promise<any> => {
         let {faces, faceUnitMessages} = body;
@@ -69,33 +102,33 @@ export const router: Router = Router({ mergeParams: true });
     });
 })(router);
 
-type Processer = (runner:Runner, body:any) => Promise<any>;
+type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
 
 function post(router:Router, path:string, processer:Processer) {
     router.post(path, async (req:Request, res:Response) => {
-        await process(req, res, processer);
+        await process(req, res, processer, (req as any).body, req.params);
     });
 };
 
 function get(router:Router, path:string, processer:Processer) {
     router.get(path, async (req:Request, res:Response) => {
-        await process(req, res, processer);
+        await process(req, res, processer, req.query, req.params);
     });
 };
 
 function put(router:Router, path:string, processer:Processer) {
     router.put(path, async (req:Request, res:Response) => {
-        await process(req, res, processer);
+        await process(req, res, processer, (req as any).body, req.params);
     });
 };
 
-async function process(req:Request, res:Response, processer:Processer):Promise<void> {
+async function process(req:Request, res:Response, processer:Processer, queryOrBody:any, params:any):Promise<void> {
     try {
         let db = req.params.db;
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
-        let body = (req as any).body;
-        let result = await processer(runner, body);
+        //let body = (req as any).body;
+        let result = await processer(runner, queryOrBody, params);
         res.json({
             ok: true,
             res: result
