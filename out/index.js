@@ -95,6 +95,11 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
         }
         usqRouter.use('/hello', dbHello);
         usqRouter.use('/', dbHello);
+        function dbHello1(req, res) {
+            let db = req.params.db;
+            res.json({ "hello1": 'usql-api: hello, db is ' + db });
+        }
+        usqRouter.use('/hello1', dbHello1);
         app.use('/usql/:db/', usqRouter);
         let port = config.get('port');
         console.log('port=', port);
