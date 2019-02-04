@@ -88,9 +88,9 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 
     function dbHello(req:Request, res:Response) {
         let db = req.params.db;
-        res.json({"hello": 'usql-api: hello, db is ' + db});
+        res.json({"hello2": 'usql-api: hello, db is ' + db});
     }
-    usqRouter.use('/hello', dbHello);
+    usqRouter.use('/hello2', dbHello);
     usqRouter.use('/', dbHello);
     function dbHello1(req:Request, res:Response) {
         let db = req.params.db;
