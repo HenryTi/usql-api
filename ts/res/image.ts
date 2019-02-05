@@ -32,5 +32,7 @@ router.get('/:imgId', (req, res) => {
     let p = path.resolve(imgPath, f1, f2, f3);
     //res.json({ok:true, res: p});
     res.setHeader('Cache-Control', 'max-age=31557600');
+    let d = new Date;
+    res.setHeader('Expires', new Date(d.getFullYear(), d.getMonth(), d.getDate()).toUTCString());
     res.sendFile(p);
 });
