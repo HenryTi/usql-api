@@ -41,7 +41,7 @@ exports.unitxQueueRouter.post('/', (req, res, next) => __awaiter(this, void 0, v
 }));
 const $unitx = '$unitx';
 // 之前用 getSheetTo 查询，现在改名为 getEntityAccess
-const usqlGetSheetTo = 'getEntityAccess';
+const uqGetSheetTo = 'getEntityAccess';
 function getSheetTos(sheetMessage) {
     return __awaiter(this, void 0, void 0, function* () {
         let runner = yield runner_1.getRunner($unitx);
@@ -54,7 +54,7 @@ function getSheetTos(sheetMessage) {
         let sheetName = name;
         let stateName = state;
         let paramsGetSheetTo = [usq, sheetName, stateName];
-        let tos = yield runner.query(usqlGetSheetTo, unit, user, paramsGetSheetTo);
+        let tos = yield runner.query(uqGetSheetTo, unit, user, paramsGetSheetTo);
         return tos.map(v => v.to);
     });
 }

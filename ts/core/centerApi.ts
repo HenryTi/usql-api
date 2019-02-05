@@ -37,7 +37,7 @@ class CenterApi extends Fetch {
         return await this.get('open/url-from-usq', {unit:unit, usq:usqFullName});
     }
 
-    async usqlDb(name:string):Promise<any> {
+    async uqDb(name:string):Promise<any> {
         return await this.get('open/usqldb', {name:name});
     }
 

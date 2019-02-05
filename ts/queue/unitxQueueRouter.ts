@@ -34,7 +34,7 @@ unitxQueueRouter.post('/', async (req: Request, res: Response, next: NextFunctio
 
 const $unitx = '$unitx';
 // 之前用 getSheetTo 查询，现在改名为 getEntityAccess
-const usqlGetSheetTo = 'getEntityAccess';
+const uqGetSheetTo = 'getEntityAccess';
 async function getSheetTos(sheetMessage:SheetMessage):Promise<number[]> {
     let runner = await getRunner($unitx);
     let {unit, body} = sheetMessage;
@@ -45,6 +45,6 @@ async function getSheetTos(sheetMessage:SheetMessage):Promise<number[]> {
     let sheetName = name;
     let stateName = state;
     let paramsGetSheetTo:any[] = [usq, sheetName, stateName];
-    let tos:{to:number}[] = await runner.query(usqlGetSheetTo, unit, user, paramsGetSheetTo);
+    let tos:{to:number}[] = await runner.query(uqGetSheetTo, unit, user, paramsGetSheetTo);
     return tos.map(v=>v.to);
 }

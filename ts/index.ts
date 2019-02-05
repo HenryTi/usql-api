@@ -51,54 +51,32 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
         }
     });
 
-    /*
-    // 正常的tonva usql接口
-    app.use('/usql/:db/unitx/', [authUnitx, unitxQueueRouter]);
-    app.use('/usql/:db/open/', [authUnitx, openRouter]);
-    app.use('/usql/:db/tv/', [authCheck, router]);
-    app.use('/usql/:db/joint/', [authJoint, router]);
-    app.use('/usql/:db/setting/', [settingRouter]); // unitx set access
+    // 正常的tonva uq接口 usqRouter
+    let uqRouter = express.Router({ mergeParams: true });
+    uqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
+    uqRouter.use('/open', [authUnitx, openRouter]);
+    uqRouter.use('/tv', [authCheck, router]);
+    uqRouter.use('/joint', [authJoint, router]);
+    uqRouter.use('/setting', [settingRouter]); // unitx set access
+    uqRouter.use('/img', imgRouter);
 
-    // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
-    app.use('/usql/:db/debug', [authCheck, router]);
-
-    function dbHello(req:Request, res:Response) {
-        let db = req.params.db;
-        res.json({"hello": 'usql-api: hello, db is ' + db});
-    }
-    app.use('/usql/:db/hello', dbHello);
-    app.use('/usql/:db/', dbHello);
-    app.use('/usql/hello', (req:Request, res:Response) => {
-        res.json({"hello": 'usql-api: hello, it\'s good'});
-    });
-    app.use('/joint', jointRouter);
-    */
-
-    // 正常的tonva usql接口 usqRouter
-    let usqRouter = express.Router({ mergeParams: true });
-    usqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
-    usqRouter.use('/open', [authUnitx, openRouter]);
-    usqRouter.use('/tv', [authCheck, router]);
-    usqRouter.use('/joint', [authJoint, router]);
-    usqRouter.use('/setting', [settingRouter]); // unitx set access
-    usqRouter.use('/img', imgRouter);
-
-    // debug tonva usql, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
-    usqRouter.use('/debug', [authCheck, router]);
+    // debug tonva uq, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
+    uqRouter.use('/debug', [authCheck, router]);
 
     function dbHello(req:Request, res:Response) {
         let db = req.params.db;
-        res.json({"hello2": 'usql-api: hello, db is ' + db});
+        res.json({"hello2": 'uq-api: hello, db is ' + db});
     }
-    usqRouter.use('/hello2', dbHello);
-    usqRouter.use('/', dbHello);
+    uqRouter.use('/hello2', dbHello);
+    uqRouter.use('/', dbHello);
     function dbHello1(req:Request, res:Response) {
         let db = req.params.db;
-        res.json({"hello1": 'usql-api: hello, db is ' + db});
+        res.json({"hello1": 'uq-api: hello, db is ' + db});
     }
-    usqRouter.use('/hello1', dbHello1);
+    uqRouter.use('/hello1', dbHello1);
 
-    app.use('/usql/:db/', usqRouter);
+    app.use('/usql/:db/', uqRouter);
+    app.use('/uq/:db/', uqRouter);
 
     let port = config.get<number>('port');
     console.log('port=', port);
@@ -113,7 +91,7 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 
     app.listen(port, async ()=>{
         startSync();
-        console.log('USQL-API listening on port ' + port);
+        console.log('UQ-API listening on port ' + port);
         let connection = config.get<any>("connection");
         let {host, user} = connection;
         console.log('process.env.NODE_ENV: %s\nDB host: %s, user: %s',
@@ -122,5 +100,3 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
             user);
     });
 })();
-
-// test

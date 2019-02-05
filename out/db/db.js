@@ -112,7 +112,7 @@ function getDb(name) {
         dbName = name;
     //let dbName = dbNameFromProject(name);
     //if (dbName === undefined) return;
-    // 开发用户定义usqldb之后，直接用usqldb的dbname，所以，dbname不能有符号什么的，因为会通过url上传
+    // 开发用户定义uqdb之后，直接用uqdb的dbname，所以，dbname不能有符号什么的，因为会通过url上传
     //if (dbName === undefined) 
     //let dbName = name;
     //if (dbServer === undefined) dbServer = createDbServer();

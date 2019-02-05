@@ -28,7 +28,8 @@ router.get('/:imgId', (req, res) => {
     let v = String(1000000000 + n);
     let f1 = v.substr(1, 3);
     let f2 = v.substr(4, 3);
-    let f3 = v.substr(7, 3);    
+    let f3 = v.substr(7, 3);
     let p = path.resolve(imgPath, f1, f2, f3);
-    res.sendFile(p);
+    res.json({ok:true, res: p});
+    //res.sendFile(p);
 });
