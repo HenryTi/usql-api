@@ -32,7 +32,7 @@ exports.router.get('/:imgId', (req, res) => {
     let f2 = v.substr(4, 3);
     let f3 = v.substr(7, 3);
     let p = path.resolve(imgPath, f1, f2, f3);
-    res.json({ ok: true, res: p });
-    //res.sendFile(p);
+    //res.json({ok:true, res: p});
+    res.sendFile(p);
 });
 //# sourceMappingURL=image.js.map
