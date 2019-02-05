@@ -33,7 +33,7 @@ exports.router.get('/:imgId', (req, res) => {
     let f3 = v.substr(7, 3);
     let p = path.resolve(imgPath, f1, f2, f3);
     //res.json({ok:true, res: p});
-    res.setHeader('Cache-Control', 'public, max-age=31557600');
+    res.setHeader('Cache-Control', 'max-age=31557600');
     res.sendFile(p);
 });
 //# sourceMappingURL=image.js.map
