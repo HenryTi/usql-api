@@ -31,5 +31,6 @@ router.get('/:imgId', (req, res) => {
     let f3 = v.substr(7, 3);
     let p = path.resolve(imgPath, f1, f2, f3);
     //res.json({ok:true, res: p});
+    res.cookie('maxAge', 1000 * 60 * 60 * 24 * 30 * 365);
     res.sendFile(p);
 });
