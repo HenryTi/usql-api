@@ -75,20 +75,11 @@ export async function afterAction(
                 }
                 let busSchema = schema.call.schema[name]
                 let packedBusData = packBus(busSchema, main);
-                /*                
-                await queueBusToUnitx({
-                    $unit: unit,
-                    busOwner: owner,
-                    bus: bus,
-                    face: name,
-                    data: packedBusData
-                });
-                */
-                let from = (runner.usqOwner || 'unknown') + '/' + (runner.usq || 'unknown');
+                let from = (runner.uqOwner || 'unknown') + '/' + (runner.uq || 'unknown');
                 let busMsg: BusMessage = {
                     unit: unit,
                     type: 'bus',
-                    from: from, //(runner.usqOwner || 'unknown') + '/' + (runner.usqOwner || 'unknown'),
+                    from: from,
                     busOwner: owner,
                     bus: bus,
                     face: name,

@@ -38,13 +38,13 @@ const uqGetSheetTo = 'getEntityAccess';
 async function getSheetTos(sheetMessage:SheetMessage):Promise<number[]> {
     let runner = await getRunner($unitx);
     let {unit, body} = sheetMessage;
-    let {state, user, name, no, discription, usq } = body;
+    let {state, user, name, no, discription, uq } = body;
     // 新单只能发给做单人
     if (state === '$') return;
     // 上句中的to removed，由下面调用unitx来计算
     let sheetName = name;
     let stateName = state;
-    let paramsGetSheetTo:any[] = [usq, sheetName, stateName];
+    let paramsGetSheetTo:any[] = [uq, sheetName, stateName];
     let tos:{to:number}[] = await runner.query(uqGetSheetTo, unit, user, paramsGetSheetTo);
     return tos.map(v=>v.to);
 }

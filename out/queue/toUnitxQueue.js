@@ -57,7 +57,7 @@ function sendMsgToUnitx(msg) {
         if (runner === undefined)
             return;
         let { id } = body;
-        let user = 0; // 操作usq，必须有操作人，系统操作=0
+        let user = 0; // 操作uq，必须有操作人，系统操作=0
         yield runner.sheetTo(unit, user, id, toArr);
         console.log('sheet to unitx', msg);
     });

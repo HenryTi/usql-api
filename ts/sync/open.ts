@@ -7,7 +7,7 @@ import { syncBus } from './bus';
 const dbRun = new Db(undefined);
 
 export async function syncDbs():Promise<void> {
-    let dbs = await dbRun.usqDbs();
+    let dbs = await dbRun.uqDbs();
     for (let row of dbs) {
         let {db} = row;
         if ((db as string).substr(0, 1) === '$') continue;

@@ -7,19 +7,19 @@ import { consts } from '../core';
 export async function processSheetMessage(sheetMsg:SheetMessage) {
     let {$unitx, sheetMessage} = consts;
     let {unit, body, to} = sheetMsg;
-    let {id, discription, no, state, app, usq, sheet} = body;
+    let {id, discription, no, state, app, uq, sheet} = body;
     let runner = await getRunner($unitx);
     let content = {
         app:app,
         id: id, 
-        usq: usq,
+        uq: uq,
         sheet:sheet
     };
     let msgBody = {
         subject: discription,
         discription: no + ' - ' + state,
         content: JSON.stringify(content),
-        usq: usq,
+        uq: uq,
         sheet: id,
         state: state,
         tos: to.map(v => {return {to: v}}),

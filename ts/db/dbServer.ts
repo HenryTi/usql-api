@@ -6,5 +6,5 @@ export abstract class DbServer {
     abstract tablesFromProc(db:string, proc:string, params:any[]): Promise<any[][]>;
     abstract createDatabase(db:string): Promise<void>;
     abstract existsDatabase(db:string): Promise<boolean>;
-    abstract usqDbs():Promise<any[]>;
+    abstract uqDbs():Promise<any[]>;
 }

@@ -49,10 +49,10 @@ export class Runner {
     private buses:{[url:string]:any}; // 直接查找bus
     private setting: {[name:string]: any};
     private entityColl: {[id:number]: EntityAccess};
-    private usqId: number;
+    private uqId: number;
 
-    usqOwner: string;
-    usq: string;
+    uqOwner: string;
+    uq: string;
     author: string;
     version: string;
     importTuids:any[];
@@ -283,13 +283,13 @@ export class Runner {
             let n = Number(v);
             setting[row.name] = isNaN(n)===true? v : n;
         }
-        this.usqOwner = setting['usqOwner'] as string; 
-        this.usq = setting['usq'] as string; 
+        this.uqOwner = setting['uqOwner'] as string; 
+        this.uq = setting['uq'] as string; 
         this.author = setting['author'] as string;
         this.version = setting['version'] as string;
-        this.usqId = setting['usqId'] as number;
+        this.uqId = setting['uqId'] as number;
         
-        console.log('init schemas: ', this.usq, this.author, this.version);
+        console.log('init schemas: ', this.uq, this.author, this.version);
 
         this.schemas = {};
         this.accessSchemaArr = [];
@@ -434,7 +434,7 @@ export class Runner {
     }
     private buildAccesses() {
         this.access = {
-            usq: this.usqId
+            uq: this.uqId
         };
         for (let access of this.accessSchemaArr) {
             //let la = a.toLowerCase();

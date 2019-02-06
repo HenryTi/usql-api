@@ -51,7 +51,7 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
         }
     });
 
-    // 正常的tonva uq接口 usqRouter
+    // 正常的tonva uq接口 uqRouter
     let uqRouter = express.Router({ mergeParams: true });
     uqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
     uqRouter.use('/open', [authUnitx, openRouter]);
@@ -75,7 +75,6 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     }
     uqRouter.use('/hello1', dbHello1);
 
-    app.use('/usql/:db/', uqRouter);
     app.use('/uq/:db/', uqRouter);
 
     let port = config.get<number>('port');

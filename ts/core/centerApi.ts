@@ -29,16 +29,16 @@ class CenterApi extends Fetch {
         return await this.get('open/unitx', {unit:unit});
     }
 
-    async usqUrl(unit:number, usq:number):Promise<any> {
-        return await this.get('open/usq-url', {unit:unit, usq:usq});
+    async uqUrl(unit:number, uq:number):Promise<any> {
+        return await this.get('open/uq-url', {unit:unit, uq:uq});
     }
 
-    async urlFromUsq(unit:number, usqFullName:string):Promise<any> {
-        return await this.get('open/url-from-usq', {unit:unit, usq:usqFullName});
+    async urlFromUq(unit:number, uqFullName:string):Promise<any> {
+        return await this.get('open/url-from-uq', {unit:unit, uq:uqFullName});
     }
 
     async uqDb(name:string):Promise<any> {
-        return await this.get('open/usqldb', {name:name});
+        return await this.get('open/uqdb', {name:name});
     }
 
     async pushTo(msg:any):Promise<void> {

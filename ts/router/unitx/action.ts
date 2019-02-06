@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import { Runner } from '../../db';
-import { centerApi, unpack, packParam, Fetch, urlSetUsqHost } from '../../core';
+import { centerApi, unpack, packParam, Fetch, urlSetUqHost } from '../../core';
 import { actionProcess } from '../actionProcess';
 
 export async function unitxActionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
@@ -20,13 +20,13 @@ export async function unitxActionProcess(unit:number, user:number, name:string, 
     return await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
 }
 
-async function usqUrl(unit:number, usq:number):Promise<string> {
-    let urqUrl = await centerApi.usqUrl(unit, usq);
+async function uqUrl(unit:number, uq:number):Promise<string> {
+    let urqUrl = await centerApi.uqUrl(unit, uq);
     let {url, urlDebug} = urqUrl;
     if (urlDebug !== undefined) {
         // 这个地方会有问题，urlDebug也许指向错误
         try {
-            urlDebug = urlSetUsqHost(urlDebug);
+            urlDebug = urlSetUqHost(urlDebug);
             let ret = await fetch(urlDebug + 'hello');
             if (ret.status !== 200) throw 'not ok';
             let text = await ret.text();
@@ -45,55 +45,55 @@ async function usqUrl(unit:number, usq:number):Promise<string> {
 if (opName === '$') {
     let users:{to:number}[] = await runner.query(
         'getEntityAccess', unit, user, 
-        [usq, entityName, opName]);
+        [uq, entityName, opName]);
     console.log({
         '$': 'saveEntityOpPost',
         '#': 'getEntityAccess',
         unit: unit, 
         user: user,
-        usq: usq,
+        uq: uq,
         entityName: entityName,
         opName: opName,
         
         users: users.join(','),
     })
-    let usqApi = new UsqApi(url);
-    // 设置usq里面entity的access之后，才写unitx中的entity access
-    await usqApi.setAccess(unit, entityName, anyone, users.map(v=>v.to).join(','));
+    let uqApi = new UqApi(url);
+    // 设置uq里面entity的access之后，才写unitx中的entity access
+    await uqApi.setAccess(unit, entityName, anyone, users.map(v=>v.to).join(','));
 }
 return await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
 */
 
 async function saveEntityOpPost(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any) {
     let actionParam = unpack(schema, body.data);
-    let {usq, entityName, opName} = actionParam;
+    let {uq, entityName, opName} = actionParam;
 
-    let url = await usqUrl(unit, usq);
+    let url = await uqUrl(unit, uq);
     let ret = await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
     if (opName === '$') {
         let users:{to:number}[] = await runner.query(
             'getEntityAccess', unit, user, 
-            [usq, entityName, opName]);
-        let usqApi = new UsqApi(url);
-        // 设置usq里面entity的access之后，才写unitx中的entity access
-        await usqApi.setAccessUser(unit, entityName, users.map(v=>v.to).join(','));
+            [uq, entityName, opName]);
+        let uqApi = new UqApi(url);
+        // 设置uq里面entity的access之后，才写unitx中的entity access
+        await uqApi.setAccessUser(unit, entityName, users.map(v=>v.to).join(','));
     }
     return ret;
 }
 
-async function buildUsqApi(unit:number, usq:number):Promise<UsqApi> {
-    let url = await usqUrl(unit, usq);
-    let usqApi = new UsqApi(url);
-    return usqApi;
+async function buildUqApi(unit:number, uq:number):Promise<UqApi> {
+    let url = await uqUrl(unit, uq);
+    let uqApi = new UqApi(url);
+    return uqApi;
 }
 
 async function setAccessFully(unit:number, body:any, schema:any, flag:number) {
     let actionParam = unpack(schema, body.data);
-    let {_usq, arr1} = actionParam;
-    let usqApi = await buildUsqApi(unit, _usq);
+    let {_uq, arr1} = actionParam;
+    let uqApi = await buildUqApi(unit, _uq);
     for (let arr of arr1) {
         let {_user} = arr;
-        await usqApi.setAccessFully(unit, _user, flag);
+        await uqApi.setAccessFully(unit, _user, flag);
     }
 }
 
@@ -107,13 +107,13 @@ async function entityOpUserFully$del$(unit:number, body:any, schema:any) {
 
 async function setAccessEntity(unit:number, body:any, schema:any) {
     let actionParam = unpack(schema, body.data);
-    let {usq, entities} = actionParam;
+    let {uq, entities} = actionParam;
     let entityNames:string = (entities as {entity:number}[]).map(v=>v.entity).join(',');
-    let usqApi = await buildUsqApi(unit, usq);
-    await usqApi.setAccessEntity(unit, entityNames);
+    let uqApi = await buildUqApi(unit, uq);
+    await uqApi.setAccessEntity(unit, entityNames);
 }
 
-class UsqApi extends Fetch {
+class UqApi extends Fetch {
     async setAccessUser(unit:number, entity:string, users:string) {
         let params = {unit:unit, entity:entity, users:users};
         return await this.post('setting/access-user', params);

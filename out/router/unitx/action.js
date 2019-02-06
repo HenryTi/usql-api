@@ -30,14 +30,14 @@ function unitxActionProcess(unit, user, name, db, urlParams, runner, body, schem
     });
 }
 exports.unitxActionProcess = unitxActionProcess;
-function usqUrl(unit, usq) {
+function uqUrl(unit, uq) {
     return __awaiter(this, void 0, void 0, function* () {
-        let urqUrl = yield core_1.centerApi.usqUrl(unit, usq);
+        let urqUrl = yield core_1.centerApi.uqUrl(unit, uq);
         let { url, urlDebug } = urqUrl;
         if (urlDebug !== undefined) {
             // 这个地方会有问题，urlDebug也许指向错误
             try {
-                urlDebug = core_1.urlSetUsqHost(urlDebug);
+                urlDebug = core_1.urlSetUqHost(urlDebug);
                 let ret = yield node_fetch_1.default(urlDebug + 'hello');
                 if (ret.status !== 200)
                     throw 'not ok';
@@ -57,54 +57,54 @@ function usqUrl(unit, usq) {
 if (opName === '$') {
     let users:{to:number}[] = await runner.query(
         'getEntityAccess', unit, user,
-        [usq, entityName, opName]);
+        [uq, entityName, opName]);
     console.log({
         '$': 'saveEntityOpPost',
         '#': 'getEntityAccess',
         unit: unit,
         user: user,
-        usq: usq,
+        uq: uq,
         entityName: entityName,
         opName: opName,
         
         users: users.join(','),
     })
-    let usqApi = new UsqApi(url);
-    // 设置usq里面entity的access之后，才写unitx中的entity access
-    await usqApi.setAccess(unit, entityName, anyone, users.map(v=>v.to).join(','));
+    let uqApi = new UqApi(url);
+    // 设置uq里面entity的access之后，才写unitx中的entity access
+    await uqApi.setAccess(unit, entityName, anyone, users.map(v=>v.to).join(','));
 }
 return await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
 */
 function saveEntityOpPost(unit, user, name, db, urlParams, runner, body, schema, run) {
     return __awaiter(this, void 0, void 0, function* () {
         let actionParam = core_1.unpack(schema, body.data);
-        let { usq, entityName, opName } = actionParam;
-        let url = yield usqUrl(unit, usq);
+        let { uq, entityName, opName } = actionParam;
+        let url = yield uqUrl(unit, uq);
         let ret = yield actionProcess_1.actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
         if (opName === '$') {
-            let users = yield runner.query('getEntityAccess', unit, user, [usq, entityName, opName]);
-            let usqApi = new UsqApi(url);
-            // 设置usq里面entity的access之后，才写unitx中的entity access
-            yield usqApi.setAccessUser(unit, entityName, users.map(v => v.to).join(','));
+            let users = yield runner.query('getEntityAccess', unit, user, [uq, entityName, opName]);
+            let uqApi = new UqApi(url);
+            // 设置uq里面entity的access之后，才写unitx中的entity access
+            yield uqApi.setAccessUser(unit, entityName, users.map(v => v.to).join(','));
         }
         return ret;
     });
 }
-function buildUsqApi(unit, usq) {
+function buildUqApi(unit, uq) {
     return __awaiter(this, void 0, void 0, function* () {
-        let url = yield usqUrl(unit, usq);
-        let usqApi = new UsqApi(url);
-        return usqApi;
+        let url = yield uqUrl(unit, uq);
+        let uqApi = new UqApi(url);
+        return uqApi;
     });
 }
 function setAccessFully(unit, body, schema, flag) {
     return __awaiter(this, void 0, void 0, function* () {
         let actionParam = core_1.unpack(schema, body.data);
-        let { _usq, arr1 } = actionParam;
-        let usqApi = yield buildUsqApi(unit, _usq);
+        let { _uq, arr1 } = actionParam;
+        let uqApi = yield buildUqApi(unit, _uq);
         for (let arr of arr1) {
             let { _user } = arr;
-            yield usqApi.setAccessFully(unit, _user, flag);
+            yield uqApi.setAccessFully(unit, _user, flag);
         }
     });
 }
@@ -121,13 +121,13 @@ function entityOpUserFully$del$(unit, body, schema) {
 function setAccessEntity(unit, body, schema) {
     return __awaiter(this, void 0, void 0, function* () {
         let actionParam = core_1.unpack(schema, body.data);
-        let { usq, entities } = actionParam;
+        let { uq, entities } = actionParam;
         let entityNames = entities.map(v => v.entity).join(',');
-        let usqApi = yield buildUsqApi(unit, usq);
-        yield usqApi.setAccessEntity(unit, entityNames);
+        let uqApi = yield buildUqApi(unit, uq);
+        yield uqApi.setAccessEntity(unit, entityNames);
     });
 }
-class UsqApi extends core_1.Fetch {
+class UqApi extends core_1.Fetch {
     setAccessUser(unit, entity, users) {
         return __awaiter(this, void 0, void 0, function* () {
             let params = { unit: unit, entity: entity, users: users };

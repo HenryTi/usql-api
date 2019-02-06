@@ -16,19 +16,19 @@ function processSheetMessage(sheetMsg) {
     return __awaiter(this, void 0, void 0, function* () {
         let { $unitx, sheetMessage } = core_1.consts;
         let { unit, body, to } = sheetMsg;
-        let { id, discription, no, state, app, usq, sheet } = body;
+        let { id, discription, no, state, app, uq, sheet } = body;
         let runner = yield db_1.getRunner($unitx);
         let content = {
             app: app,
             id: id,
-            usq: usq,
+            uq: uq,
             sheet: sheet
         };
         let msgBody = {
             subject: discription,
             discription: no + ' - ' + state,
             content: JSON.stringify(content),
-            usq: usq,
+            uq: uq,
             sheet: id,
             state: state,
             tos: to.map(v => { return { to: v }; }),

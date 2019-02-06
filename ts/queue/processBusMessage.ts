@@ -66,35 +66,10 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
 }
 
 export async function processBusMessage(msg:BusMessage):Promise<void> {
-    // 处理 bus message，发送到相应的usq服务器
+    // 处理 bus message，发送到相应的uq服务器
     console.log('bus:', msg);
     let runner = await getRunner(consts.$unitx);
     let {unit, body, from, busOwner, bus, face} = msg;
     let faceUrl = busOwner + '/' + bus + '/' + face;
     await writeDataToBus(runner, faceUrl, unit, from, body);
-    /*
-    if (Faces === undefined) {
-        Faces = {};
-        let ret = await runner.tuidGetAll(Face, undefined, undefined);
-        for (let row of ret) {
-            let {id, type} = row;
-            Faces[type] = id;
-        }
-    }
-    let {unit, body, busOwner, bus, face} = msg;
-    let faceUrl = busOwner + '/' + bus + '/' + face;
-    let faceId = Faces[faceUrl];
-    if (faceId === undefined) {
-         let ret = await runner.tuidSave(Face, undefined, undefined, [undefined, faceUrl]);
-         faceId = ret[0].id;
-         Faces[faceUrl] = faceId;
-    }
-
-    let hour = Math.floor(Date.now()/(3600*1000));
-    if (lastHour === undefined || hour > lastHour) {
-        await runner.call('$set_bus_queue_seed', ['busqueue', hour*1000000000]);
-        lastHour = hour;
-    }
-    await runner.tuidSave(BusQueue, unit, undefined, [undefined, unit, faceId, body]);
-    */
 }

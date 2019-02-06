@@ -1,9 +1,9 @@
 import * as config from 'config';
 
-const usqHost = 'localhost:3015';
+const uqHost = 'localhost:3015';
 
-export function urlSetUsqHost(url:string):string {
-    return url.replace('://usqhost/', '://'+usqHost+'/');
+export function urlSetUqHost(url:string):string {
+    return url.replace('://uqhost/', '://'+uqHost+'/');
 }
 
 const unitxHost = config.get<string>('unitxhost');

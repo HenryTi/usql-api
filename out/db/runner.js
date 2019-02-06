@@ -325,12 +325,12 @@ class Runner {
                 let n = Number(v);
                 setting[row.name] = isNaN(n) === true ? v : n;
             }
-            this.usqOwner = setting['usqOwner'];
-            this.usq = setting['usq'];
+            this.uqOwner = setting['uqOwner'];
+            this.uq = setting['uq'];
             this.author = setting['author'];
             this.version = setting['version'];
-            this.usqId = setting['usqId'];
-            console.log('init schemas: ', this.usq, this.author, this.version);
+            this.uqId = setting['uqId'];
+            console.log('init schemas: ', this.uq, this.author, this.version);
             this.schemas = {};
             this.accessSchemaArr = [];
             this.tuids = {};
@@ -486,7 +486,7 @@ class Runner {
     }
     buildAccesses() {
         this.access = {
-            usq: this.usqId
+            uq: this.uqId
         };
         for (let access of this.accessSchemaArr) {
             //let la = a.toLowerCase();

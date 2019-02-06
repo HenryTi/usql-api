@@ -39,19 +39,19 @@ class CenterApi extends fetch_1.Fetch {
             return yield this.get('open/unitx', { unit: unit });
         });
     }
-    usqUrl(unit, usq) {
+    uqUrl(unit, uq) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.get('open/usq-url', { unit: unit, usq: usq });
+            return yield this.get('open/uq-url', { unit: unit, uq: uq });
         });
     }
-    urlFromUsq(unit, usqFullName) {
+    urlFromUq(unit, uqFullName) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.get('open/url-from-usq', { unit: unit, usq: usqFullName });
+            return yield this.get('open/url-from-uq', { unit: unit, uq: uqFullName });
         });
     }
     uqDb(name) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.get('open/usqldb', { name: name });
+            return yield this.get('open/uqdb', { name: name });
         });
     }
     pushTo(msg) {

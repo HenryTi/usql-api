@@ -42,22 +42,22 @@ class OpenApi extends core_1.Fetch {
     }
 }
 exports.OpenApi = OpenApi;
-const usqOpenApis = {};
-function getOpenApi(usqFullName, unit) {
+const uqOpenApis = {};
+function getOpenApi(uqFullName, unit) {
     return __awaiter(this, void 0, void 0, function* () {
-        let openApis = usqOpenApis[usqFullName];
+        let openApis = uqOpenApis[uqFullName];
         if (openApis === null)
             return null;
         if (openApis === undefined) {
-            usqOpenApis[usqFullName] = openApis = {};
+            uqOpenApis[uqFullName] = openApis = {};
         }
-        let usqUrl = yield core_1.centerApi.urlFromUsq(unit, usqFullName);
-        if (usqUrl === undefined)
+        let uqUrl = yield core_1.centerApi.urlFromUq(unit, uqFullName);
+        if (uqUrl === undefined)
             return openApis[unit] = null;
-        let { url, urlDebug } = usqUrl;
+        let { url, urlDebug } = uqUrl;
         if (urlDebug !== undefined) {
             try {
-                urlDebug = core_1.urlSetUsqHost(urlDebug);
+                urlDebug = core_1.urlSetUqHost(urlDebug);
                 urlDebug = core_1.urlSetUnitxHost(urlDebug);
                 let ret = yield node_fetch_1.default(urlDebug + 'hello');
                 if (ret.status !== 200)

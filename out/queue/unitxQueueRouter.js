@@ -46,14 +46,14 @@ function getSheetTos(sheetMessage) {
     return __awaiter(this, void 0, void 0, function* () {
         let runner = yield runner_1.getRunner($unitx);
         let { unit, body } = sheetMessage;
-        let { state, user, name, no, discription, usq } = body;
+        let { state, user, name, no, discription, uq } = body;
         // 新单只能发给做单人
         if (state === '$')
             return;
         // 上句中的to removed，由下面调用unitx来计算
         let sheetName = name;
         let stateName = state;
-        let paramsGetSheetTo = [usq, sheetName, stateName];
+        let paramsGetSheetTo = [uq, sheetName, stateName];
         let tos = yield runner.query(uqGetSheetTo, unit, user, paramsGetSheetTo);
         return tos.map(v => v.to);
     });

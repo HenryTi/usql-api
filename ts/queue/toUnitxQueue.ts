@@ -43,7 +43,7 @@ async function sendMsgToUnitx(msg:Message): Promise<void> {
     let runner = await getRunner(db);
     if (runner === undefined) return;
     let {id} = body;
-    let user:number = 0; // 操作usq，必须有操作人，系统操作=0
+    let user:number = 0; // 操作uq，必须有操作人，系统操作=0
     await runner.sheetTo(unit, user, id, toArr);
     console.log('sheet to unitx', msg);
 }

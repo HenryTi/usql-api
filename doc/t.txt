@@ -1,4 +1,4 @@
-GET http://localhost:3000/tv/tie/app-api?unit=-99&apiOwner=$%sapiName=usql-first
+GET http://localhost:3000/tv/tie/app-api?unit=-99&apiOwner=$%sapiName=uq-first
 
 {
       "fields":[

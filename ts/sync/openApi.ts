@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { Fetch, centerApi, urlSetUsqHost, urlSetUnitxHost } from "../core";
+import { Fetch, centerApi, urlSetUqHost as urlSetUqHost, urlSetUnitxHost } from "../core";
 
 export class OpenApi extends Fetch {
     async fresh(unit:number, stamps:any):Promise<any> {
@@ -27,19 +27,19 @@ export class OpenApi extends Fetch {
     }
 }
 
-const usqOpenApis: {[usqFullName:string]: {[unit:number]:OpenApi}} = {};
-export async function getOpenApi(usqFullName:string, unit:number):Promise<OpenApi> {
-    let openApis = usqOpenApis[usqFullName];
+const uqOpenApis: {[uqFullName:string]: {[unit:number]:OpenApi}} = {};
+export async function getOpenApi(uqFullName:string, unit:number):Promise<OpenApi> {
+    let openApis = uqOpenApis[uqFullName];
     if (openApis === null) return null;
     if (openApis === undefined) {
-        usqOpenApis[usqFullName] = openApis = {};
+        uqOpenApis[uqFullName] = openApis = {};
     }
-    let usqUrl = await centerApi.urlFromUsq(unit, usqFullName);
-    if (usqUrl === undefined) return openApis[unit] = null;
-    let {url, urlDebug} = usqUrl;
+    let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
+    if (uqUrl === undefined) return openApis[unit] = null;
+    let {url, urlDebug} = uqUrl;
     if (urlDebug !== undefined) {
         try {
-            urlDebug = urlSetUsqHost(urlDebug);
+            urlDebug = urlSetUqHost(urlDebug);
             urlDebug = urlSetUnitxHost(urlDebug);
             let ret = await fetch(urlDebug + 'hello');
             if (ret.status !== 200) throw 'not ok';

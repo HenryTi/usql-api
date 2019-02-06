@@ -80,9 +80,9 @@ class Db {
             return yield this.dbServer.createDatabase(this.dbName);
         });
     }
-    usqDbs() {
+    uqDbs() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.dbServer.usqDbs();
+            return yield this.dbServer.uqDbs();
         });
     }
 }

@@ -71,16 +71,7 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
                     }
                     let busSchema = schema.call.schema[name];
                     let packedBusData = core_1.packBus(busSchema, main);
-                    /*
-                    await queueBusToUnitx({
-                        $unit: unit,
-                        busOwner: owner,
-                        bus: bus,
-                        face: name,
-                        data: packedBusData
-                    });
-                    */
-                    let from = (runner.usqOwner || 'unknown') + '/' + (runner.usq || 'unknown');
+                    let from = (runner.uqOwner || 'unknown') + '/' + (runner.uq || 'unknown');
                     let busMsg = {
                         unit: unit,
                         type: 'bus',

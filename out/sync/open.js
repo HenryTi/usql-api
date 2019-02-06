@@ -16,7 +16,7 @@ const bus_1 = require("./bus");
 const dbRun = new db_1.Db(undefined);
 function syncDbs() {
     return __awaiter(this, void 0, void 0, function* () {
-        let dbs = yield dbRun.usqDbs();
+        let dbs = yield dbRun.uqDbs();
         for (let row of dbs) {
             let { db } = row;
             if (db.substr(0, 1) === '$')

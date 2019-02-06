@@ -73,7 +73,7 @@ export class MyDbServer extends DbServer {
         let rows:RowDataPacket[] = await this.exec(sql, undefined);
         return rows.length > 0;
     }
-    async usqDbs():Promise<any[]> {
+    async uqDbs():Promise<any[]> {
         let sql = `select a.schema_name as db from information_schema.schemata a join information_schema.tables b on a.schema_name=b.table_schema where b.table_name='tv_$entity';`;
         let rows:RowDataPacket[] = await this.exec(sql, undefined);
         return rows;
