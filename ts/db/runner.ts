@@ -245,15 +245,6 @@ export class Runner {
         return ret;
     }
 
-    /*
-    async busPost(msg:any):Promise<void> {
-        let {service, unit, busOwner, bus, face, data} = msg;
-        let schema = this.buses[busOwner + '/' + bus];
-        if (schema === undefined) return;
-        let sql = 'tv_' + schema.name + '_' + face;
-        return await this.db.call(sql, [unit, 0, data]);
-    }*/
-
     // msgId: bus message id
     // body: bus message body
     async bus(bus:string, face:string, unit:number, faceId:number, msgId:number, body:string): Promise<void> {
