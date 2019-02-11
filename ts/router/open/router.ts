@@ -97,7 +97,9 @@ export const router: Router = Router({ mergeParams: true });
     post(router, '/joint-write-bus',
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, face, from, sourceId, body:message} = body;
-        let ret = await runner.call('SaveBusMessage', [unit, undefined, face, from, sourceId, message]);
+        let data = face + '\t' + from + '\t' + sourceId + '\t' + body + '\n';
+        //let ret = await runner.call('SaveBusMessage', [unit, undefined, face, from, sourceId, message]);
+        let ret = await runner.call('SaveBusMessage', [unit, undefined, data]);
         return ret;
     });
 })(router);
