@@ -93,9 +93,18 @@ exports.router = express_1.Router({ mergeParams: true });
     }));
     post(router, '/joint-write-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, face, from, sourceId, body: message } = body;
-        let data = face + '\t' + from + '\t' + sourceId + '\t' + JSON.stringify(body) + '\n';
-        //let ret = await runner.call('SaveBusMessage', [unit, undefined, face, from, sourceId, message]);
-        let ret = yield runner.call('SaveBusMessage', [unit, undefined, data]);
+        /*
+        let data = '';
+        if (face !== null && face !== undefined) data += face;
+        data += '\t';
+        if (from !== null && from !== undefined) data += from;
+        data += '\t';
+        if (sourceId !== null && sourceId !== undefined) data += sourceId;
+        data += '\t';
+        data += message + '\n';
+        */
+        let ret = yield runner.call('SaveBusMessage', [unit, undefined, face, from, sourceId, message]);
+        //let ret = await runner.call('SaveBusMessage', [unit, undefined, data]);
         return ret;
     }));
 })(exports.router);
