@@ -31,9 +31,10 @@ class OpenApi extends core_1.Fetch {
             return ret;
         });
     }
-    bus(faces, faceUnitMessages) {
+    bus(unit, faces, faceUnitMessages) {
         return __awaiter(this, void 0, void 0, function* () {
             let ret = yield this.post('open/bus', {
+                unit: unit,
                 faces: faces,
                 faceUnitMessages: faceUnitMessages,
             });

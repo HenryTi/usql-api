@@ -20,7 +20,7 @@ function syncBus(runner) {
             for (let syncFace of syncFaceArr) {
                 let { unit, faces, faceUnitMessages } = syncFace;
                 let openApi = yield openApi_1.getOpenApi(core_1.consts.$$$unitx, unit);
-                let ret = yield openApi.bus(faces, faceUnitMessages);
+                let ret = yield openApi.bus(unit, faces, faceUnitMessages);
                 if (ret.length === 0)
                     break;
                 for (let row of ret) {

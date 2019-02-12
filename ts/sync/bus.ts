@@ -28,7 +28,7 @@ export async function syncBus(runner: Runner) {
         for (let syncFace of syncFaceArr) {
             let {unit, faces, faceUnitMessages} = syncFace;
             let openApi = await getOpenApi(consts.$$$unitx, unit);
-            let ret = await openApi.bus(faces, faceUnitMessages);
+            let ret = await openApi.bus(unit, faces, faceUnitMessages);
             if (ret.length === 0) break;
             for (let row of ret) {
                 let {face:faceUrl, id:msgId, body} = row;

@@ -59,26 +59,32 @@ exports.router = express_1.Router({ mergeParams: true });
         }
         return ret;
     }));
-    post(router, '/tuid-value/:tuid/:div', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
-        body.$ = 'open/tuid';
+    post(router, '/tuid-main/:tuid', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+        body.$ = 'open/tuid-main/';
+        console.log(body);
+        let { tuid } = params;
+        let { unit, id, all } = body;
+        if (runner.isTuidOpen(tuid) === false)
+            return;
+        // maps: tab分隔的map名字
+        let suffix = (all === true ? '$id' : '$main');
+        let ret = yield runner.call(tuid + suffix, [unit, undefined, id]);
+        return ret;
+    }));
+    post(router, '/tuid-div/:tuid/:div', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+        body.$ = 'open/tuid-div/';
         console.log(body);
         let { tuid, div } = params;
         let { unit, id, ownerId, all } = body;
         if (runner.isTuidOpen(tuid) === false)
             return;
         // maps: tab分隔的map名字
-        if (div === undefined) {
-            let suffix = (all === true ? '$id' : '$main');
-            return yield runner.call(tuid + suffix, [unit, undefined, id]);
-        }
-        else {
-            let suffix = (all === true ? '$id' : '$main');
-            return yield runner.call(`${tuid}_${div}${suffix}`, [unit, undefined, ownerId, id]);
-        }
+        let suffix = (all === true ? '$id' : '$main');
+        return yield runner.call(`${tuid}_${div}${suffix}`, [unit, undefined, ownerId, id]);
     }));
     post(router, '/bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        let { faces, faceUnitMessages } = body;
-        let ret = yield runner.call('GetBusMessages', [undefined, undefined, faces, faceUnitMessages]);
+        let { unit, faces, faceUnitMessages } = body;
+        let ret = yield runner.call('GetBusMessages', [unit, undefined, faces, faceUnitMessages]);
         console.log('$unitx/open/bus - GetBusMessages - ', ret);
         return ret;
     }));
