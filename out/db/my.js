@@ -113,6 +113,40 @@ class MyDbServer extends dbServer_1.DbServer {
             return rows;
         });
     }
+    initResDb(resDbName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.createDatabase(resDbName);
+            let sql = `
+            CREATE TABLE if not exists ${resDbName}.item(
+                id int not null auto_increment primary key,
+                fileName varchar(120),
+                mimetype varchar(50),
+                uploadDate datetime default now(),
+                useDate datetime
+            );
+        `;
+            yield this.exec(sql, undefined);
+            let proc = `
+            use ${resDbName};
+            DROP PROCEDURE IF EXISTS createItem;
+            CREATE PROCEDURE createItem (\`_fileName\` varchar(120), _mimetype varchar(50))
+            BEGIN
+                insert into item (fileName, mimetype) values (\`_fileName\`, _mimetype);
+                select last_insert_id() as id;
+            END;
+        `;
+            yield this.exec(proc, undefined);
+            proc = `
+            use ${resDbName};
+            DROP PROCEDURE IF EXISTS useItem;
+            CREATE PROCEDURE useItem(_id int)
+            BEGIN
+                update item set useDate=now() where id=_id;
+            END;
+        `;
+            yield this.exec(proc, undefined);
+        });
+    }
 }
 exports.MyDbServer = MyDbServer;
 function castField(field, next) {

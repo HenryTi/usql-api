@@ -12,12 +12,13 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const config = require("config");
 const router_1 = require("./router");
-const image_1 = require("./res/image");
+const router_2 = require("./res/router");
 //import {router as jointRouter} from './router/joint';
 const core_1 = require("./core");
 const queue_1 = require("./queue");
 const sync_1 = require("./sync");
 const auth_1 = require("./core/auth");
+const resDb_1 = require("./res/resDb");
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
@@ -27,7 +28,7 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
             console.log("mysql connection must defined in config/default.json or config/production.json");
             return;
         }
-        image_1.initImgPath();
+        router_2.initResPath();
         var cors = require('cors');
         let app = express();
         app.use(express.static('public'));
@@ -58,6 +59,7 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
                 console.error(e);
             }
         }));
+        app.use('/res', router_2.router);
         // 正常的tonva uq接口 uqRouter
         let uqRouter = express.Router({ mergeParams: true });
         uqRouter.use('/unitx', [core_1.authUnitx, queue_1.unitxQueueRouter]);
@@ -65,7 +67,6 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
         uqRouter.use('/tv', [core_1.authCheck, router_1.router]);
         uqRouter.use('/joint', [auth_1.authJoint, router_1.router]);
         uqRouter.use('/setting', [router_1.settingRouter]); // unitx set access
-        uqRouter.use('/img', image_1.router);
         // debug tonva uq, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
         uqRouter.use('/debug', [core_1.authCheck, router_1.router]);
         function dbHello(req, res) {
@@ -90,6 +91,7 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
         queue_1.startUnitxInQueue(redis);
         app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
             sync_1.startSync();
+            yield resDb_1.initResDb();
             console.log('UQ-API listening on port ' + port);
             let connection = config.get("connection");
             let { host, user } = connection;

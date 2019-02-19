@@ -69,6 +69,9 @@ export class Runner {
     sql(sql:string, params:any[]): Promise<any> {
         return this.db.sql(sql, params);
     }
+    async procCall(proc:string, params:any[]): Promise<any> {
+        return await this.db.call(proc, params);
+    }
     async call(proc:string, params:any[]): Promise<any> {
         return await this.db.call('tv_' + proc, params);
     }
@@ -82,7 +85,9 @@ export class Runner {
     async start(unit:number, user:number): Promise<void> {
         return await this.db.call('tv_$start', [unit, user]);
     }
-
+    async initResDb(resDbName:string): Promise<void> {
+        await this.db.initResDb(resDbName);
+    }
     async setSetting(unit:number, name: string, value: string): Promise<void> {
         name = name.toLowerCase();
         await this.db.call('tv_$set_setting', [unit, name, value]);
@@ -304,8 +309,12 @@ export class Runner {
                 run: runObj,
             }
             switch (type) {
-                case 'access': this.accessSchemaArr.push(schemaObj); break;
-                case 'bus': this.buses[url] = schemaObj; break;
+                case 'access':
+                    this.accessSchemaArr.push(schemaObj); 
+                    break;
+                case 'bus':
+                    this.buses[url] = schemaObj;
+                    break;
                 case 'tuid':
                     this.tuids[name] = schemaObj; 
                     if (from) {

@@ -41,6 +41,11 @@ class Runner {
     sql(sql, params) {
         return this.db.sql(sql, params);
     }
+    procCall(proc, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call(proc, params);
+        });
+    }
     call(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.call('tv_' + proc, params);
@@ -57,6 +62,11 @@ class Runner {
     start(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.call('tv_$start', [unit, user]);
+        });
+    }
+    initResDb(resDbName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.initResDb(resDbName);
         });
     }
     setSetting(unit, name, value) {

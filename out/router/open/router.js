@@ -25,7 +25,7 @@ exports.router = express_1.Router({ mergeParams: true });
     post(router, '/fresh', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, stamps } = body;
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
-        let stampsText = stamps.map(v => v.join('\t')).join('\n');
+        let stampsText = stamps.map((v) => v.join('\t')).join('\n');
         try {
             let ret = yield runner.call('$$open_fresh', [unit, stampsText]);
             return ret;

@@ -25,7 +25,7 @@ export const router: Router = Router({ mergeParams: true });
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, stamps} = body;
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
-        let stampsText = stamps.map(v => v.join('\t')).join('\n');
+        let stampsText = stamps.map((v:string[]) => v.join('\t')).join('\n');
         try {
             let ret = await runner.call('$$open_fresh', [unit, stampsText]);
             return ret;
@@ -70,7 +70,7 @@ export const router: Router = Router({ mergeParams: true });
         let suffix = (all===true? '$id':'$main');
         let ret = await runner.call(tuid + suffix, [unit, undefined, id]);
         return ret;
-});
+    });
 
     post(router, '/tuid-div/:tuid/:div',
     async (runner:Runner, body:any, params:any):Promise<any> => {

@@ -85,6 +85,11 @@ class Db {
             return yield this.dbServer.uqDbs();
         });
     }
+    initResDb(resDbName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.dbServer.initResDb(resDbName);
+        });
+    }
 }
 exports.Db = Db;
 const dbs = {};

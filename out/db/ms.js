@@ -23,6 +23,7 @@ class MsDbServer extends dbServer_1.DbServer {
     createDatabase(db) { return; }
     existsDatabase(db) { return; }
     uqDbs() { return; }
+    initResDb(resDbName) { return; }
 }
 exports.MsDbServer = MsDbServer;
 //# sourceMappingURL=ms.js.map

@@ -66,6 +66,10 @@ export class Db {
     async uqDbs():Promise<any[]> {
         return await this.dbServer.uqDbs();
     }
+
+    async initResDb(resDbName:string):Promise<void> {
+        await this.dbServer.initResDb(resDbName);
+    }
 }
 
 const dbs:{[name:string]:Db} = {

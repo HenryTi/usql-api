@@ -3,12 +3,13 @@ import { Request, Response, NextFunction } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
 import {router, settingRouter, openRouter} from './router';
-import {router as imgRouter, initImgPath} from './res/image';
+import {router as resRouter, initResPath} from './res/router';
 //import {router as jointRouter} from './router/joint';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
 import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } from './queue';
 import { startSync } from './sync';
 import { authJoint } from './core/auth';
+import { initResDb } from './res/resDb';
 
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (async function () {
@@ -19,7 +20,7 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
         console.log("mysql connection must defined in config/default.json or config/production.json");
         return;
     }
-    initImgPath();
+    initResPath();
     
     var cors = require('cors')
     let app = express();
@@ -51,6 +52,8 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
         }
     });
 
+    app.use('/res', resRouter);
+
     // 正常的tonva uq接口 uqRouter
     let uqRouter = express.Router({ mergeParams: true });
     uqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
@@ -58,7 +61,6 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     uqRouter.use('/tv', [authCheck, router]);
     uqRouter.use('/joint', [authJoint, router]);
     uqRouter.use('/setting', [settingRouter]); // unitx set access
-    uqRouter.use('/img', imgRouter);
 
     // debug tonva uq, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
     uqRouter.use('/debug', [authCheck, router]);
@@ -90,6 +92,7 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 
     app.listen(port, async ()=>{
         startSync();
+        await initResDb();
         console.log('UQ-API listening on port ' + port);
         let connection = config.get<any>("connection");
         let {host, user} = connection;

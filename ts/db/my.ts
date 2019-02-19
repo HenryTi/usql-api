@@ -78,6 +78,39 @@ export class MyDbServer extends DbServer {
         let rows:RowDataPacket[] = await this.exec(sql, undefined);
         return rows;
     }
+    async initResDb(resDbName:string):Promise<void> {
+        await this.createDatabase(resDbName);
+        let sql = `
+            CREATE TABLE if not exists ${resDbName}.item(
+                id int not null auto_increment primary key,
+                fileName varchar(120),
+                mimetype varchar(50),
+                uploadDate datetime default now(),
+                useDate datetime
+            );
+        `;
+        await this.exec(sql, undefined);
+        let proc = `
+            use ${resDbName};
+            DROP PROCEDURE IF EXISTS createItem;
+            CREATE PROCEDURE createItem (\`_fileName\` varchar(120), _mimetype varchar(50))
+            BEGIN
+                insert into item (fileName, mimetype) values (\`_fileName\`, _mimetype);
+                select last_insert_id() as id;
+            END;
+        `;
+        await this.exec(proc, undefined);
+
+        proc = `
+            use ${resDbName};
+            DROP PROCEDURE IF EXISTS useItem;
+            CREATE PROCEDURE useItem(_id int)
+            BEGIN
+                update item set useDate=now() where id=_id;
+            END;
+        `;
+        await this.exec(proc, undefined);
+    }
 }
 
 function castField( field, next ) {
