@@ -37,22 +37,14 @@ exports.initResPath = initResPath;
 exports.router.get('/hello', (req, res) => {
     res.end('hello! ' + req.method + '#' + req.originalUrl);
 });
-function getResId(req, res) {
+exports.router.get('/:resId', (req, res) => {
     let resId = req.params['resId'];
-    writeResId(req, res, resId);
-}
-function writeResId(req, res, resId) {
     let p = path.resolve(resFilesPath, resId.replace('-', '/'));
     res.setHeader('Cache-Control', 'max-age=31557600');
     let d = new Date;
     res.setHeader('Expires', new Date(d.getFullYear() + 1, d.getMonth(), d.getDate()).toUTCString());
     res.sendFile(p);
-}
-exports.router.get('/img/0-0018.png', (req, res) => {
-    writeResId(req, res, '0-0018.png');
 });
-exports.router.get('/i/:resId', getResId);
-exports.router.get('/:resId', getResId);
 exports.router.post('/upload', (req, res) => {
     let s = req.body;
     upload.any()(req, res, function (err) {
