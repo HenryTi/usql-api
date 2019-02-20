@@ -35,7 +35,7 @@ function initResPath() {
 }
 exports.initResPath = initResPath;
 exports.router.get('/hello', (req, res) => {
-    res.end('hello');
+    res.end('hello! ' + req.method + '#' + req.originalUrl);
 });
 exports.router.get('/:resId', (req, res) => {
     let resId = req.params['resId'];

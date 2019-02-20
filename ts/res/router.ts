@@ -27,7 +27,7 @@ export function initResPath() {
 }
 
 router.get('/hello', (req, res) => {
-    res.end('hello');
+    res.end('hello! ' + req.method + '#' +  req.originalUrl);
 });
 
 router.get('/:resId', (req, res) => {
