@@ -32,12 +32,19 @@ router.get('/hello', (req, res) => {
 
 function getResId(req: Request, res: Response) {
     let resId:string = req.params['resId'];
+    writeResId(req, res, resId);
+}
+function writeResId(req: Request, res: Response, resId:string) {
     let p = path.resolve(resFilesPath, resId.replace('-', '/'));
     res.setHeader('Cache-Control', 'max-age=31557600');
     let d = new Date;
     res.setHeader('Expires', new Date(d.getFullYear()+1, d.getMonth(), d.getDate()).toUTCString());
     res.sendFile(p);
 }
+
+router.get('/img/0-0018.png', (req, res) => {
+    writeResId(req, res, '0-0018.png');
+});
 router.get('/i/:resId', getResId);
 router.get('/:resId', getResId);
 
