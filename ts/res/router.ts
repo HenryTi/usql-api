@@ -1,7 +1,7 @@
 import * as config from 'config';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import * as multer from 'multer';
 import { getResDbRunner } from './resDb';
 
@@ -30,14 +30,16 @@ router.get('/hello', (req, res) => {
     res.end('hello! ' + req.method + '#' +  req.originalUrl);
 });
 
-router.get('/:resId', (req, res) => {
+function getResId(req: Request, res: Response) {
     let resId:string = req.params['resId'];
     let p = path.resolve(resFilesPath, resId.replace('-', '/'));
     res.setHeader('Cache-Control', 'max-age=31557600');
     let d = new Date;
     res.setHeader('Expires', new Date(d.getFullYear()+1, d.getMonth(), d.getDate()).toUTCString());
     res.sendFile(p);
-});
+}
+router.get('/i/:resId', getResId);
+router.get('/:resId', getResId);
 
 router.post('/upload', (req, res) => {
     let s = req.body;
