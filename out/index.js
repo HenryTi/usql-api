@@ -60,6 +60,8 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
             }
         }));
         app.use('/res', router_2.router);
+        app.use('/res1', router_2.router);
+        app.use('/res2', router_2.router);
         // 正常的tonva uq接口 uqRouter
         let uqRouter = express.Router({ mergeParams: true });
         uqRouter.use('/unitx', [core_1.authUnitx, queue_1.unitxQueueRouter]);

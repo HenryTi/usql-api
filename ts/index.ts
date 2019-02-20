@@ -53,6 +53,8 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     });
 
     app.use('/res', resRouter);
+    app.use('/res1', resRouter);
+    app.use('/res2', resRouter);
 
     // 正常的tonva uq接口 uqRouter
     let uqRouter = express.Router({ mergeParams: true });
