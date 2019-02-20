@@ -42,7 +42,7 @@ exports.router.get('/:resId', (req, res) => {
     let p = path.resolve(resFilesPath, resId.replace('-', '/'));
     res.setHeader('Cache-Control', 'max-age=31557600');
     let d = new Date;
-    res.setHeader('Expires', new Date(d.getFullYear(), d.getMonth(), d.getDate()).toUTCString());
+    res.setHeader('Expires', new Date(d.getFullYear() + 1, d.getMonth(), d.getDate()).toUTCString());
     res.sendFile(p);
 });
 exports.router.post('/upload', (req, res) => {
