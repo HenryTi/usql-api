@@ -22,20 +22,22 @@ export function packParam(schema:any, data:any):string {
     return ret.join('');
 }
 
-export function packReturn(schema:any, data:any):string {
+export function packReturnsFromSchema(schema:any, data:any):string {
+    if (schema === undefined) return;
+    return packReturns(schema['returns'], data);
+}
+
+export function packReturns(returns:any[], data:any) {
+    if (data === undefined) return;
+    if (returns === undefined) return '';
     let ret:string[] = [];
-    if (schema === undefined || data === undefined) return;
-    //let fields = schema.fields;
-    //if (fields !== undefined) packRow(ret, schema.fields, data);
-    let arrs = schema['returns'];
-    if (arrs === undefined) return '';
-    let len = arrs.length;
+    let len = returns.length;
     if (len === 1) {
-        packArr(ret, arrs[0].fields, data);
+        packArr(ret, returns[0].fields, data);
     }
     else {
         for (let i=0; i<len; i++) {
-            let arr = arrs[i];
+            let arr = returns[i];
             packArr(ret, arr.fields, data[i]);
         }
     }

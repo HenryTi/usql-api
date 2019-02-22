@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
 const db_1 = require("./db");
+const packReturn_1 = require("../core/packReturn");
 const runners = {};
 function getRunner(name) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -219,8 +220,32 @@ class Runner {
     }
     tuidArrSeach(tuid, unit, user, arr, ownerId, key, pageStart, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
-            let proc = 'tv_' + tuid + '_' + arr + '$search';
+            let proc = `tv_${tuid}_${arr}$search`;
             return yield this.db.tablesFromProc(proc, [unit, user, ownerId, key || '', pageStart, pageSize]);
+        });
+    }
+    sheetVerify(sheet, unit, user, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sheetRun = this.sheetRuns[sheet];
+            if (sheetRun === undefined)
+                return;
+            let { verify } = sheetRun;
+            let ret = yield this.db.call(`tv_${sheet}_$verify`, [unit, user, data]);
+            let { length } = verify;
+            if (length === 0) {
+                if (ret === undefined)
+                    return 'fail';
+                return;
+            }
+            if (length === 1)
+                ret = [ret];
+            for (let i = 0; i < length; i++) {
+                let t = ret[0];
+                if (t.length > 0) {
+                    return packReturn_1.packReturns(verify, ret);
+                }
+            }
+            return;
         });
     }
     sheetSave(sheet, unit, user, app, discription, data) {
@@ -339,6 +364,7 @@ class Runner {
             this.buses = {};
             this.entityColl = {};
             this.froms = {};
+            this.sheetRuns = {};
             for (let row of schemaTable) {
                 let { name, id, version, schema, run, from } = row;
                 name = name.toLowerCase();
@@ -392,6 +418,12 @@ class Runner {
                                 mapObjs = tuidFrom.mapObjs = {};
                             mapObjs[name] = schemaObj;
                         }
+                        break;
+                    case 'sheet':
+                        this.sheetRuns[name] = {
+                            onsave: runObj['$'] !== undefined,
+                            verify: schemaObj.verify,
+                        };
                         break;
                 }
                 this.entityColl[id] = {

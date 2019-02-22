@@ -12,7 +12,7 @@ var centerApi_1 = require("./centerApi");
 exports.centerApi = centerApi_1.centerApi;
 //export {UnitxApi, urlSetUnitxHost} from '../tv/unitxApi';
 var packReturn_1 = require("./packReturn");
-exports.packReturn = packReturn_1.packReturn;
+exports.packReturn = packReturn_1.packReturnsFromSchema;
 exports.packBus = packReturn_1.packBus;
 exports.packParam = packReturn_1.packParam;
 exports.unpack = packReturn_1.unpack;

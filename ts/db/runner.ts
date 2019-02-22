@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import {getDb, Db} from './db';
+import { packReturns } from '../core/packReturn';
 
 const runners: {[name:string]: Runner} = {};
 
@@ -21,23 +22,14 @@ export async function getRunner(name:string):Promise<Runner> {
     return runner;
 }
 
-/*
-export function resetRunner(name:string) {
-    runners[name] = undefined;
-}
-
-export function createRunner(name:string) { //, dbName:string) {
-    let runner = runners[name];
-    if (runner === null) return;
-    if (runner !== undefined) return runner;
-    let db = getDb(name);
-    return runners[name] = new Runner(db);
-}
-*/
-
 interface EntityAccess {
     name: string;
     access: any;
+}
+
+interface SheetRun {
+    onsave: boolean;
+    verify: any[];      // returns;
 }
 
 export class Runner {
@@ -50,6 +42,7 @@ export class Runner {
     private setting: {[name:string]: any};
     private entityColl: {[id:number]: EntityAccess};
     private uqId: number;
+    private sheetRuns: {[sheet:string]: SheetRun};
 
     uqOwner: string;
     uq: string;
@@ -193,8 +186,27 @@ export class Runner {
         return await this.db.tablesFromProc(proc, [unit, user, key||'', pageStart, pageSize]);
     }
     async tuidArrSeach(tuid:string, unit:number, user:number, arr:string, ownerId:number, key:string, pageStart:number, pageSize:number): Promise<any> {
-        let proc = 'tv_' + tuid + '_' + arr + '$search';
+        let proc = `tv_${tuid}_${arr}$search`;
         return await this.db.tablesFromProc(proc, [unit, user, ownerId, key||'', pageStart, pageSize]);
+    }
+    async sheetVerify(sheet:string, unit:number, user:number, data:string):Promise<string> {
+        let sheetRun = this.sheetRuns[sheet];
+        if (sheetRun === undefined) return;
+        let {verify} = sheetRun;
+        let ret = await this.db.call(`tv_${sheet}_$verify`, [unit, user, data]);
+        let {length} = verify;
+        if (length === 0) {
+            if (ret === undefined) return 'fail';
+            return;
+        }
+        if (length === 1) ret = [ret];
+        for (let i=0; i<length; i++) {
+            let t = ret[0];
+            if (t.length > 0) {
+                return packReturns(verify, ret);
+            }
+        }
+        return;
     }
     async sheetSave(sheet:string, unit:number, user:number, app:number, discription:string, data:string): Promise<{}> {
         return await this.db.call('tv_$sheet_save', [unit, user, sheet, app, discription, data]);
@@ -293,6 +305,7 @@ export class Runner {
         this.buses = {};
         this.entityColl = {};
         this.froms = {};
+        this.sheetRuns = {};
         for (let row of schemaTable) {
             let {name, id, version, schema, run, from} = row;
             name = name.toLowerCase();
@@ -339,6 +352,12 @@ export class Runner {
                         if (mapObjs === undefined) mapObjs = tuidFrom.mapObjs = {};
                         mapObjs[name] = schemaObj;
                     }
+                    break;
+                case 'sheet':
+                    this.sheetRuns[name] = {
+                        onsave: runObj['$']!==undefined,
+                        verify: schemaObj.verify,
+                    };
                     break;
             }
             this.entityColl[id] = {

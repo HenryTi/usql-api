@@ -15,6 +15,10 @@ const constSheet = 'sheet';
 function default_1(router) {
     entityProcess_1.entityPost(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { app, discription, data } = body;
+        let verify = yield runner.sheetVerify(name, unit, user, data);
+        if (verify !== undefined) {
+            return verify;
+        }
         let result = yield runner.sheetSave(name, unit, user, app, discription, data);
         let sheetRet = result[0];
         if (sheetRet !== undefined) {
@@ -28,6 +32,21 @@ function default_1(router) {
                 subject: discription
             };
             yield queue_1.queueToUnitx(sheetMsg);
+            let { id, flow } = sheetRet;
+            yield runner.sheetProcessing(id);
+            yield queue_1.queueSheet({
+                db: db,
+                from: user,
+                sheetHead: {
+                    sheet: name,
+                    state: '$',
+                    action: '$onsave',
+                    unit: unit,
+                    user: user,
+                    id: id,
+                    flow: flow,
+                }
+            });
         }
         return sheetRet;
     }));

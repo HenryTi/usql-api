@@ -10,6 +10,10 @@ export default function(router:Router) {
     entityPost(router, constSheet, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {app, discription, data} = body;
+        let verify = await runner.sheetVerify(name, unit, user, data);
+        if (verify!==undefined) {
+            return verify;
+        }
         let result = await runner.sheetSave(name, unit, user, app, discription, data);
         let sheetRet = result[0];
         if (sheetRet !== undefined) {
@@ -23,6 +27,21 @@ export default function(router:Router) {
                 subject: discription
             };
             await queueToUnitx(sheetMsg);
+            let {id, flow} = sheetRet;
+            await runner.sheetProcessing(id);
+            await queueSheet({
+                db: db,
+                from: user,
+                sheetHead: {
+                    sheet: name,
+                    state: '$',
+                    action: '$onsave',
+                    unit: unit,
+                    user: user,
+                    id: id,
+                    flow: flow,
+                }
+            });
         }
         return sheetRet;
     });

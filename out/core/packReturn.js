@@ -17,28 +17,31 @@ function packParam(schema, data) {
     return ret.join('');
 }
 exports.packParam = packParam;
-function packReturn(schema, data) {
-    let ret = [];
-    if (schema === undefined || data === undefined)
+function packReturnsFromSchema(schema, data) {
+    if (schema === undefined)
         return;
-    //let fields = schema.fields;
-    //if (fields !== undefined) packRow(ret, schema.fields, data);
-    let arrs = schema['returns'];
-    if (arrs === undefined)
+    return packReturns(schema['returns'], data);
+}
+exports.packReturnsFromSchema = packReturnsFromSchema;
+function packReturns(returns, data) {
+    if (data === undefined)
+        return;
+    if (returns === undefined)
         return '';
-    let len = arrs.length;
+    let ret = [];
+    let len = returns.length;
     if (len === 1) {
-        packArr(ret, arrs[0].fields, data);
+        packArr(ret, returns[0].fields, data);
     }
     else {
         for (let i = 0; i < len; i++) {
-            let arr = arrs[i];
+            let arr = returns[i];
             packArr(ret, arr.fields, data[i]);
         }
     }
     return ret.join('');
 }
-exports.packReturn = packReturn;
+exports.packReturns = packReturns;
 function packBus(schema, data) {
     let result = [];
     if (data !== undefined) {
