@@ -1,4 +1,4 @@
-import {createConnection, createPool, QueryError, RowDataPacket, OkPacket, Pool} from 'mysql';
+import {createConnection, createPool, Pool} from 'mysql';
 import {DbServer} from './dbServer';
 
 export class MyDbServer extends DbServer {
@@ -70,12 +70,12 @@ export class MyDbServer extends DbServer {
     }
     async existsDatabase(db:string): Promise<boolean> {
         let sql = 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'' + db + '\'';
-        let rows:RowDataPacket[] = await this.exec(sql, undefined);
+        let rows:any[] = await this.exec(sql, undefined);
         return rows.length > 0;
     }
     async uqDbs():Promise<any[]> {
         let sql = `select a.schema_name as db from information_schema.schemata a join information_schema.tables b on a.schema_name=b.table_schema where b.table_name='tv_$entity';`;
-        let rows:RowDataPacket[] = await this.exec(sql, undefined);
+        let rows:any[] = await this.exec(sql, undefined);
         return rows;
     }
     async initResDb(resDbName:string):Promise<void> {
