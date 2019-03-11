@@ -15,6 +15,7 @@ const const_connectionUnitx = 'connection_$unitx';
 const const_connection = 'connection';
 const const_development = 'development';
 const const_unitx = '$unitx';
+exports.isDevelopment = (process.env.NODE_ENV === const_development);
 class Db {
     constructor(dbName) {
         this.dbName = dbName;
@@ -25,7 +26,7 @@ class Db {
     createDbServer() {
         let sqlType = config.get('sqlType');
         let dbConfig;
-        if (this.dbName === const_unitx && process.env.NODE_ENV === const_development) {
+        if (this.dbName === const_unitx && exports.isDevelopment === true) {
             if (config.has(const_connectionUnitx) === true) {
                 dbConfig = config.get(const_connectionUnitx);
             }

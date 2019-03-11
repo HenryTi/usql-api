@@ -1,5 +1,14 @@
-import {createConnection, createPool, Pool} from 'mysql';
+import {createPool, Pool, MysqlError} from 'mysql';
 import {DbServer} from './dbServer';
+import { isDevelopment } from './db';
+
+const retries = 5;
+const minMillis = 1;
+const maxMillis = 100;
+
+const ER_LOCK_WAIT_TIMEOUT = 1205;
+const ER_LOCK_TIMEOUT = 1213;
+const ER_LOCK_DEADLOCK = 1213;
 
 export class MyDbServer extends DbServer {
     private pool: Pool;
@@ -10,13 +19,43 @@ export class MyDbServer extends DbServer {
     }
     private async exec(sql:string, values:any[]): Promise<any> {
         return await new Promise<any>((resolve, reject) => {
-            this.pool.query(sql, values, (err, result) => {
-                if (err !== null) {
+            let retryCount = 0;
+            let handleResponse = function(err:MysqlError, result:any) {
+                if (err === null) {
+                    resolve(result);
+                    return;
+                }
+                switch (+err.errno) {
+                case +ER_LOCK_WAIT_TIMEOUT:
+                case +ER_LOCK_TIMEOUT:
+                case +ER_LOCK_DEADLOCK:
+                    if (isDevelopment) console.log(`ERROR - ${ err.errno } ${ err.message }`);
+                    ++retryCount;
+                    if (retryCount > retries) {    
+                        if (isDevelopment) console.log(`Out of retries so just returning the error.`);
+                        reject(err);
+                        return;
+                    }    
+                    let sleepMillis = Math.floor((Math.random()*maxMillis)+minMillis)
+                    if (isDevelopment) {
+                        console.log('Retrying request with',retries-retryCount,'retries left. Timeout',sleepMillis);
+                    }    
+                    return setTimeout(function() {
+                        this.pool.query(sql, values, handleResponse)
+                    }, sleepMillis);
+                default:
+                    if (isDevelopment) console.log(`Standard error - ${ err.toString() }`);
                     reject(err);
                     return;
                 }
-                resolve(result);
-            })
+            }
+            /*
+            let orgHandleResponse = function(err:MysqlError, result:any) {
+                if (err !== null) reject(err);
+                else resolve(result);
+            } */
+            this.pool.query(sql, values, handleResponse);
+
         });
     }
     async sql(db:string, sql:string, params:any[]): Promise<any> {

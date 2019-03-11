@@ -8,6 +8,8 @@ const const_connection = 'connection';
 const const_development = 'development';
 const const_unitx = '$unitx';
 
+export const isDevelopment = (process.env.NODE_ENV === const_development);
+
 export class Db {
     private dbName: string;
     private isExists: boolean;
@@ -22,7 +24,7 @@ export class Db {
     private createDbServer() {
         let sqlType = config.get<string>('sqlType');
         let dbConfig;
-        if (this.dbName === const_unitx && process.env.NODE_ENV === const_development) {
+        if (this.dbName === const_unitx && isDevelopment === true) {
             if (config.has(const_connectionUnitx) === true) {
                 dbConfig = config.get<any>(const_connectionUnitx);
             }

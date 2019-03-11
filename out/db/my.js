@@ -10,6 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const mysql_1 = require("mysql");
 const dbServer_1 = require("./dbServer");
+const db_1 = require("./db");
+const retries = 5;
+const minMillis = 1;
+const maxMillis = 100;
+const ER_LOCK_WAIT_TIMEOUT = 1205;
+const ER_LOCK_TIMEOUT = 1213;
+const ER_LOCK_DEADLOCK = 1213;
 class MyDbServer extends dbServer_1.DbServer {
     constructor(dbConfig) {
         super();
@@ -19,13 +26,45 @@ class MyDbServer extends dbServer_1.DbServer {
     exec(sql, values) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield new Promise((resolve, reject) => {
-                this.pool.query(sql, values, (err, result) => {
-                    if (err !== null) {
-                        reject(err);
+                let retryCount = 0;
+                let handleResponse = function (err, result) {
+                    if (err === null) {
+                        resolve(result);
                         return;
                     }
-                    resolve(result);
-                });
+                    switch (+err.errno) {
+                        case +ER_LOCK_WAIT_TIMEOUT:
+                        case +ER_LOCK_TIMEOUT:
+                        case +ER_LOCK_DEADLOCK:
+                            if (db_1.isDevelopment)
+                                console.log(`ERROR - ${err.errno} ${err.message}`);
+                            ++retryCount;
+                            if (retryCount > retries) {
+                                if (db_1.isDevelopment)
+                                    console.log(`Out of retries so just returning the error.`);
+                                reject(err);
+                                return;
+                            }
+                            let sleepMillis = Math.floor((Math.random() * maxMillis) + minMillis);
+                            if (db_1.isDevelopment) {
+                                console.log('Retrying request with', retries - retryCount, 'retries left. Timeout', sleepMillis);
+                            }
+                            return setTimeout(function () {
+                                this.pool.query(sql, values, handleResponse);
+                            }, sleepMillis);
+                        default:
+                            if (db_1.isDevelopment)
+                                console.log(`Standard error - ${err.toString()}`);
+                            reject(err);
+                            return;
+                    }
+                };
+                /*
+                let orgHandleResponse = function(err:MysqlError, result:any) {
+                    if (err !== null) reject(err);
+                    else resolve(result);
+                } */
+                this.pool.query(sql, values, handleResponse);
             });
         });
     }
