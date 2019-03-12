@@ -27,7 +27,7 @@ class MyDbServer extends dbServer_1.DbServer {
         return __awaiter(this, void 0, void 0, function* () {
             return yield new Promise((resolve, reject) => {
                 let retryCount = 0;
-                let handleResponse = function (err, result) {
+                let handleResponse = (err, result) => {
                     if (err === null) {
                         resolve(result);
                         return;
@@ -49,7 +49,7 @@ class MyDbServer extends dbServer_1.DbServer {
                             if (db_1.isDevelopment) {
                                 console.error('Retrying request with', retries - retryCount, 'retries left. Timeout', sleepMillis);
                             }
-                            return setTimeout(function () {
+                            return setTimeout(() => {
                                 this.pool.query(sql, values, handleResponse);
                             }, sleepMillis);
                         default:

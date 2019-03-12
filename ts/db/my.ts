@@ -20,7 +20,7 @@ export class MyDbServer extends DbServer {
     private async exec(sql:string, values:any[]): Promise<any> {
         return await new Promise<any>((resolve, reject) => {
             let retryCount = 0;
-            let handleResponse = function(err:MysqlError, result:any) {
+            let handleResponse = (err:MysqlError, result:any) => {
                 if (err === null) {
                     resolve(result);
                     return;
@@ -40,7 +40,7 @@ export class MyDbServer extends DbServer {
                     if (isDevelopment) {
                         console.error('Retrying request with',retries-retryCount,'retries left. Timeout',sleepMillis);
                     }    
-                    return setTimeout(function() {
+                    return setTimeout(() => {
                         this.pool.query(sql, values, handleResponse)
                     }, sleepMillis);
                 default:
