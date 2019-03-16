@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import { getTuidArr } from './router';
 import { entityGet, entityPost } from './entityProcess';
 import { Runner } from '../db';
+import { packArr } from '../core/packReturn';
 
 const tuidType = 'tuid';
 
@@ -135,6 +136,24 @@ export default function(router: Router) {
         let {arr} = urlParams;
         let ids = (body as number[]).join(',');
         let result = await runner.tuidIds(name, arr, unit, user, ids);
+        if (arr === '$') {
+            let {mainFields} = schema;
+            if (mainFields !== undefined) {
+                let ret:string[] = [];
+                packArr(ret, mainFields, result);
+                return ret.join('');
+            }
+        }
+        else {
+            let {arrs} = schema;
+            let arrSchema = arrs.find(v => v.name === arr);
+            let {mainFields} = arrSchema;
+            if (mainFields !== undefined) {
+                let ret:string[] = [];
+                packArr(ret, mainFields, result);
+                return ret.join('');
+            }
+        }
         return result;
     });
 

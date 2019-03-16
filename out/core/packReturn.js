@@ -31,7 +31,8 @@ function packReturns(returns, data) {
     let ret = [];
     let len = returns.length;
     if (len === 1) {
-        packArr(ret, returns[0].fields, data);
+        let fields = returns[0].fields;
+        packArr(ret, fields, data);
     }
     else {
         for (let i = 0; i < len; i++) {
@@ -114,6 +115,7 @@ function packArr(result, fields, data) {
     }
     result.push(ln);
 }
+exports.packArr = packArr;
 function unpack(schema, data) {
     let ret = {};
     if (schema === undefined || data === undefined)

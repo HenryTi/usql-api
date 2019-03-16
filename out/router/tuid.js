@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const router_1 = require("./router");
 const entityProcess_1 = require("./entityProcess");
+const packReturn_1 = require("../core/packReturn");
 const tuidType = 'tuid';
 function default_1(router) {
     entityProcess_1.entityGet(router, tuidType, '/:name/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
@@ -121,6 +122,24 @@ function default_1(router) {
         let { arr } = urlParams;
         let ids = body.join(',');
         let result = yield runner.tuidIds(name, arr, unit, user, ids);
+        if (arr === '$') {
+            let { mainFields } = schema;
+            if (mainFields !== undefined) {
+                let ret = [];
+                packReturn_1.packArr(ret, mainFields, result);
+                return ret.join('');
+            }
+        }
+        else {
+            let { arrs } = schema;
+            let arrSchema = arrs.find(v => v.name === arr);
+            let { mainFields } = arrSchema;
+            if (mainFields !== undefined) {
+                let ret = [];
+                packReturn_1.packArr(ret, mainFields, result);
+                return ret.join('');
+            }
+        }
         return result;
     }));
     entityProcess_1.entityPost(router, tuidType, 's/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {

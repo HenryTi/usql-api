@@ -33,7 +33,8 @@ export function packReturns(returns:any[], data:any) {
     let ret:string[] = [];
     let len = returns.length;
     if (len === 1) {
-        packArr(ret, returns[0].fields, data);
+        let fields = returns[0].fields;
+        packArr(ret, fields, data);
     }
     else {
         for (let i=0; i<len; i++) {
@@ -106,7 +107,7 @@ function packRow(result:string[], fields:Field[], data:any) {
     result.push(ret + ln);
 }
 
-function packArr(result:string[], fields:Field[], data:any[]) {
+export function packArr(result:string[], fields:Field[], data:any[]) {
     if (data !== undefined) {
         for (let row of data) {
             packRow(result, fields, row);

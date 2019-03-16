@@ -399,6 +399,7 @@ class Runner {
                                 tuidFrom = tuidFroms[name] = {};
                             tuidFrom.tuidObj = schemaObj;
                         }
+                        this.buildTuidMainFields(schemaObj);
                         break;
                     case 'map':
                         if (from) {
@@ -498,6 +499,30 @@ class Runner {
             //console.log('schema: %s', JSON.stringify(this.schemas));
             this.buildAccesses();
         });
+    }
+    buildTuidMainFields(tuidSchema) {
+        let { id, base, fields, main, arrs } = tuidSchema;
+        let mainFields = tuidSchema.mainFields = [
+            { name: id, type: 'id' }
+        ];
+        if (base)
+            for (let b of base)
+                mainFields.push(fields.find(v => v.name === b));
+        if (main)
+            for (let m of main)
+                mainFields.push(fields.find(v => v.name === m));
+        if (arrs === undefined)
+            return;
+        for (let arr of arrs) {
+            let { id, owner, main, fields } = arr;
+            mainFields = arr.mainFields = [
+                { name: id, type: 'id' },
+                { name: owner, type: 'id' }
+            ];
+            if (main)
+                for (let m of main)
+                    mainFields.push(fields.find(v => v.name === m));
+        }
     }
     mapBorn(schema) {
         function getCall(s) {
