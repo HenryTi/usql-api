@@ -61,6 +61,7 @@ async function syncTuids(runner:Runner):Promise<void> {
                 let openApi = await getOpenApi(from, unit);
                 if (!openApi) continue;
                 let stamps:any[][] = [];
+                // 如果本tuid有新id了，去from端同步
                 for (let row of rows) {
                     let {tuid, id, hasNew, stamp} = row;
                     if (stamp === null) stamp = 0;
@@ -70,16 +71,23 @@ async function syncTuids(runner:Runner):Promise<void> {
                         if (fromSchemas === undefined) continue;
                         let syncTuid = fromSchemas[tuid];
                         let {maps} = syncTuid; // tuid, 随后 tab 分隔的 map
-                        for (;;) {
-                            let ids = await runner.call(tuid + '$sync0', [unit]);
-                            if (ids.length === 0) break;
-                            for (let idRet of ids) {
-                                await syncId(runner, openApi, unit, idRet.id, tuid, maps);
+                        try {
+                            for (;;) {
+                                let ids = await runner.call(tuid + '$sync0', [unit]);
+                                if (ids.length === 0) break;
+                                for (let idRet of ids) {
+                                    await syncId(runner, openApi, unit, idRet.id, tuid, maps);
+                                }
                             }
+                            await runner.call(tuid + '$sync_set', [unit, undefined, undefined, 0]);
                         }
-                        await runner.call(tuid + '$sync_set', [unit, undefined, undefined, 0]);
+                        catch (err) {
+                            debugger;
+                        }
+                        let s = null;
                     }
                 }
+                // 如果from端更新了tuid，同步过来。
                 let fresh = await openApi.fresh(unit, stamps);
                 let len = stamps.length;
                 for (let i=0; i<len; i++) {
