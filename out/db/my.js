@@ -51,6 +51,7 @@ class MyDbServer extends dbServer_1.DbServer {
                             }
                             return setTimeout(() => {
                                 this.pool.query(sql, values, handleResponse);
+                                //this.pool.releaseConnection
                             }, sleepMillis);
                         default:
                             if (db_1.isDevelopment)

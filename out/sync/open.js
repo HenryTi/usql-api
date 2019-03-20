@@ -71,6 +71,7 @@ function syncTuids(runner) {
                     if (!openApi)
                         continue;
                     let stamps = [];
+                    // 如果本tuid有新id了，去from端同步
                     for (let row of rows) {
                         let { tuid, id, hasNew, stamp } = row;
                         if (stamp === null)
@@ -83,17 +84,24 @@ function syncTuids(runner) {
                                 continue;
                             let syncTuid = fromSchemas[tuid];
                             let { maps } = syncTuid; // tuid, 随后 tab 分隔的 map
-                            for (;;) {
-                                let ids = yield runner.call(tuid + '$sync0', [unit]);
-                                if (ids.length === 0)
-                                    break;
-                                for (let idRet of ids) {
-                                    yield syncId(runner, openApi, unit, idRet.id, tuid, maps);
+                            try {
+                                for (;;) {
+                                    let ids = yield runner.call(tuid + '$sync0', [unit]);
+                                    if (ids.length === 0)
+                                        break;
+                                    for (let idRet of ids) {
+                                        yield syncId(runner, openApi, unit, idRet.id, tuid, maps);
+                                    }
                                 }
+                                yield runner.call(tuid + '$sync_set', [unit, undefined, undefined, 0]);
                             }
-                            yield runner.call(tuid + '$sync_set', [unit, undefined, undefined, 0]);
+                            catch (err) {
+                                debugger;
+                            }
+                            let s = null;
                         }
                     }
+                    // 如果from端更新了tuid，同步过来。
                     let fresh = yield openApi.fresh(unit, stamps);
                     let len = stamps.length;
                     for (let i = 0; i < len; i++) {

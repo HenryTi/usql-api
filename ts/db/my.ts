@@ -41,7 +41,7 @@ export class MyDbServer extends DbServer {
                         console.error('Retrying request with',retries-retryCount,'retries left. Timeout',sleepMillis);
                     }    
                     return setTimeout(() => {
-                        this.pool.query(sql, values, handleResponse)
+                        this.pool.query(sql, values, handleResponse);
                     }, sleepMillis);
                 default:
                     if (isDevelopment) console.error(`Standard error - ${ err.toString() }`);
@@ -55,7 +55,6 @@ export class MyDbServer extends DbServer {
                 else resolve(result);
             } */
             this.pool.query(sql, values, handleResponse);
-
         });
     }
     async sql(db:string, sql:string, params:any[]): Promise<any> {
