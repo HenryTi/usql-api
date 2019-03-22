@@ -38,6 +38,7 @@ async function syncTuids(runner:Runner):Promise<void> {
     if (froms === undefined) return;
     try {
         let syncTuids = await runner.call('$sync_tuids', []);
+        if (syncTuids.length === 0) return;
         let fromRows: {[from:string]: {[unit:number]: SyncRow[]}} = {};
         for (let row of syncTuids) {
             let {from, unit, tuid} = row as SyncRow;
@@ -66,7 +67,11 @@ async function syncTuids(runner:Runner):Promise<void> {
                     let {tuid, id, hasNew, stamp} = row;
                     if (stamp === null) stamp = 0;
                     if (id === null) id = 0;
-                    stamps.push([tuid, stamp, id]);
+                    let tuidSchema = runner.getTuid(tuid);
+                    // 只有import from all的tuid才同步
+                    if (tuidSchema.from.all === true) {
+                        stamps.push([tuid, stamp, id]);
+                    }
                     if (hasNew === 1) {
                         if (fromSchemas === undefined) continue;
                         let syncTuid = fromSchemas[tuid];
@@ -87,6 +92,7 @@ async function syncTuids(runner:Runner):Promise<void> {
                         let s = null;
                     }
                 }
+                if (stamps.length === 0) continue;
                 // 如果from端更新了tuid，同步过来。
                 let fresh = await openApi.fresh(unit, stamps);
                 let len = stamps.length;
