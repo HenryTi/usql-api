@@ -230,6 +230,8 @@ class Runner {
             if (sheetRun === undefined)
                 return;
             let { verify } = sheetRun;
+            if (verify === undefined)
+                return;
             let ret = yield this.db.call(`tv_${sheet}_$verify`, [unit, user, data]);
             let { length } = verify;
             if (length === 0) {

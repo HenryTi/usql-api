@@ -193,6 +193,7 @@ export class Runner {
         let sheetRun = this.sheetRuns[sheet];
         if (sheetRun === undefined) return;
         let {verify} = sheetRun;
+        if (verify === undefined) return;
         let ret = await this.db.call(`tv_${sheet}_$verify`, [unit, user, data]);
         let {length} = verify;
         if (length === 0) {
