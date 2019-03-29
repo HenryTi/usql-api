@@ -156,16 +156,16 @@ class Runner {
             return yield this.db.call('tv_' + tuid + '$all', [unit, user]);
         });
     }
-    tuidVid(tuid, uniqueValue) {
+    tuidVid(tuid, unit, uniqueValue) {
         return __awaiter(this, void 0, void 0, function* () {
             let proc = `tv_${tuid}$vid`;
-            return yield this.db.call(proc, [uniqueValue]);
+            return yield this.db.call(proc, [unit, uniqueValue]);
         });
     }
-    tuidArrVid(tuid, arr, uniqueValue) {
+    tuidArrVid(tuid, arr, unit, uniqueValue) {
         return __awaiter(this, void 0, void 0, function* () {
             let proc = `tv_${tuid}_${arr}$vid`;
-            return yield this.db.call(proc, [uniqueValue]);
+            return yield this.db.call(proc, [unit, uniqueValue]);
         });
     }
     tuidGetArrAll(tuid, arr, unit, user, owner) {

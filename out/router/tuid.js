@@ -43,12 +43,12 @@ function default_1(router) {
     }));
     entityProcess_1.entityGet(router, tuidType, '-vid/:name/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { u } = body;
-        let result = yield runner.tuidVid(name, u);
+        let result = yield runner.tuidVid(name, unit, u);
         return result[0].id;
     }));
     entityProcess_1.entityGet(router, tuidType, '-arr-vid/:name/:arr', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { u } = body;
-        let result = yield runner.tuidArrVid(name, urlParams.arr, u);
+        let result = yield runner.tuidArrVid(name, urlParams.arr, unit, u);
         return result[0].id;
     }));
     entityProcess_1.entityGet(router, tuidType, '-arr-all/:name/:owner/:arr/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
