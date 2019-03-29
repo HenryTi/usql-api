@@ -146,13 +146,13 @@ export class Runner {
     async tuidGetAll(tuid:string, unit:number, user:number): Promise<any> {
         return await this.db.call('tv_' + tuid + '$all', [unit, user]);
     }
-    async tuidVid(tuid:string): Promise<any> {
+    async tuidVid(tuid:string, uniqueValue:any): Promise<any> {
         let proc = `tv_${tuid}$vid`;
-        return await this.db.call(proc, []);
+        return await this.db.call(proc, [uniqueValue]);
     }
-    async tuidArrVid(tuid:string, arr:string): Promise<any> {
+    async tuidArrVid(tuid:string, arr:string, uniqueValue:any): Promise<any> {
         let proc = `tv_${tuid}_${arr}$vid`;
-        return await this.db.call(proc, []);
+        return await this.db.call(proc, [uniqueValue]);
     }
     async tuidGetArrAll(tuid:string, arr:string, unit:number, user:number, owner:number): Promise<any> {
         return await this.db.call('tv_' + tuid + '_' + arr + '$all', [unit, user, owner]);
