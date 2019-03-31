@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import {getDb, Db} from './db';
 import { packReturns } from '../core/packReturn';
+import { ImportData } from './importData';
 
 const runners: {[name:string]: Runner} = {};
 
@@ -268,6 +269,13 @@ export class Runner {
     async bus(bus:string, face:string, unit:number, faceId:number, msgId:number, body:string): Promise<void> {
         let sql = 'tv_' + bus + '_' + face;
         return await this.db.call(sql, [unit, 0, faceId, msgId, body]);
+    }
+
+    async importData(unit:number, user:number, entity:string, div:string, data: string): Promise<void> {
+        let importData = new ImportData(this.db);
+        let schema: any, fields:any[];
+        //await importData.init(entity, schema, fields);
+
     }
 
     async init() {

@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
 const db_1 = require("./db");
 const packReturn_1 = require("../core/packReturn");
+const importData_1 = require("./importData");
 const runners = {};
 function getRunner(name) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -327,6 +328,13 @@ class Runner {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = 'tv_' + bus + '_' + face;
             return yield this.db.call(sql, [unit, 0, faceId, msgId, body]);
+        });
+    }
+    importData(unit, user, entity, div, data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let importData = new importData_1.ImportData(this.db);
+            let schema, fields;
+            //await importData.init(entity, schema, fields);
         });
     }
     init() {

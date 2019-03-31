@@ -10,9 +10,13 @@ import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue
 import { startSync } from './sync';
 import { authJoint } from './core/auth';
 import { initResDb } from './res/resDb';
+import { ImportData } from './db/importData';
 
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (async function () {
+    let importData = new ImportData(undefined);
+    await importData.importData(undefined, undefined, 'C:/Users/Henry/Desktop/Results.csv');
+
     console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     
     let connection = config.get<any>("connection");
