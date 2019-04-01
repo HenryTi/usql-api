@@ -330,11 +330,14 @@ class Runner {
             return yield this.db.call(sql, [unit, 0, faceId, msgId, body]);
         });
     }
-    importData(unit, user, entity, div, data) {
+    importData(unit, user, entity, div, schema, filePath) {
         return __awaiter(this, void 0, void 0, function* () {
-            let importData = new importData_1.ImportData(this.db);
-            let schema, fields;
-            //await importData.init(entity, schema, fields);
+            let pos = entity.indexOf('-');
+            if (pos >= 0) {
+                div = entity.substr(pos + 1);
+                entity = entity.substr(0, pos);
+            }
+            yield importData_1.ImportData.exec(this.db, entity, div, schema, filePath);
         });
     }
     init() {

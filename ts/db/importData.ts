@@ -4,21 +4,37 @@ import { Db } from "./db";
 
 const bufferSize = 7;
 
-export class ImportData {
+export abstract class ImportData {
+    // entity: 'product';
+    // entity: 'product-pack'
+    static async exec(db: Db, entity:string, div:string, schema: any, filePath: string): Promise<void> {
+        let importData:ImportData;
+        let {type} = schema;
+        switch (type) {
+            case 'tuid':
+                importData = new ImportTuid();
+                break;
+            case 'map':
+                importData = new ImportMap();
+                break;
+        }
+        importData.db = db;
+        importData.entity = entity;
+        importData.div = div;
+        importData.schema = schema;
+        importData.filePath = filePath;
+        await importData.importData();
+    }
+
     private db: Db;
     private entity: string;
+    private div: string;
     private schema: any;
     private filePath: string;
     //private rs: fs.ReadStream;
     private buffer: string;
     private bufferPrev: string;
     private p: number;
-
-    // entity: 'product';
-    // entity: 'product-pack'
-    constructor(db: Db) {
-        this.db = db;
-    }
 
     private readLine():any[] {
         let ret:string[] = [];
@@ -79,43 +95,24 @@ export class ImportData {
         }
     }
 
-    async importData(entity:string, schema: any, filePath: string) {
+    async importData() {
         debugger;
-        this.entity = entity;
-        this.schema = schema;
         this.bufferPrev = '';
-        this.filePath = path.resolve(filePath);
         this.buffer = await readFileAsync(this.filePath, 'utf8');
         this.p = 0;
 
-        //this.rs = fs.createReadStream(this.filePath);
-        //this.rs.setEncoding('utf8');
-
-        //let {name, type} = this.schema;
-        let type= 'tuid';
-        switch (type) {
-            case 'tuid': await this.importTuid(); break;
-            case 'map': await this.importMap(); break;
-        }
-
-        //this.rs.close();
-    }
-
-    private async importTuid() {
         for (;;) {
             let line = this.readLine();
             if (line === undefined) break;
             console.log(line);
         }
     }
+}
 
-    private async importMap() {
-        for (;;) {
-            let line = this.readLine();
-            if (line === undefined) break;
-            console.log(line);
-        }
-    }
+class ImportTuid extends ImportData {
+}
+
+class ImportMap extends ImportData {
 }
 
 async function readFileAsync(filename?:string, code?:string) {

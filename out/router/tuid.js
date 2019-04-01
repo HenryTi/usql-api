@@ -153,6 +153,12 @@ function default_1(router) {
         let rows = result[0];
         return rows;
     }));
+    entityProcess_1.entityPost(router, tuidType, 'import/:name/:arr', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { arr } = urlParams;
+        let filePath = 'C:/Users/Henry/Desktop/Results.csv';
+        yield runner.importData(unit, user, name, arr, schema, filePath);
+        return;
+    }));
 }
 exports.default = default_1;
 ;

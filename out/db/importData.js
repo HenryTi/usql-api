@@ -9,13 +9,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
-const path = require("path");
 const bufferSize = 7;
 class ImportData {
     // entity: 'product';
     // entity: 'product-pack'
-    constructor(db) {
-        this.db = db;
+    static exec(db, entity, div, schema, filePath) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let importData;
+            let { type } = schema;
+            switch (type) {
+                case 'tuid':
+                    importData = new ImportTuid();
+                    break;
+                case 'map':
+                    importData = new ImportMap();
+                    break;
+            }
+            importData.db = db;
+            importData.entity = entity;
+            importData.div = div;
+            importData.schema = schema;
+            importData.filePath = filePath;
+            yield importData.importData();
+        });
     }
     readLine() {
         let ret = [];
@@ -76,42 +92,12 @@ class ImportData {
             case 'dec': return Number(val);
         }
     }
-    importData(entity, schema, filePath) {
+    importData() {
         return __awaiter(this, void 0, void 0, function* () {
             debugger;
-            this.entity = entity;
-            this.schema = schema;
             this.bufferPrev = '';
-            this.filePath = path.resolve(filePath);
             this.buffer = yield readFileAsync(this.filePath, 'utf8');
             this.p = 0;
-            //this.rs = fs.createReadStream(this.filePath);
-            //this.rs.setEncoding('utf8');
-            //let {name, type} = this.schema;
-            let type = 'tuid';
-            switch (type) {
-                case 'tuid':
-                    yield this.importTuid();
-                    break;
-                case 'map':
-                    yield this.importMap();
-                    break;
-            }
-            //this.rs.close();
-        });
-    }
-    importTuid() {
-        return __awaiter(this, void 0, void 0, function* () {
-            for (;;) {
-                let line = this.readLine();
-                if (line === undefined)
-                    break;
-                console.log(line);
-            }
-        });
-    }
-    importMap() {
-        return __awaiter(this, void 0, void 0, function* () {
             for (;;) {
                 let line = this.readLine();
                 if (line === undefined)
@@ -122,6 +108,10 @@ class ImportData {
     }
 }
 exports.ImportData = ImportData;
+class ImportTuid extends ImportData {
+}
+class ImportMap extends ImportData {
+}
 function readFileAsync(filename, code) {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise(function (resolve, reject) {

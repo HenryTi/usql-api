@@ -271,11 +271,13 @@ export class Runner {
         return await this.db.call(sql, [unit, 0, faceId, msgId, body]);
     }
 
-    async importData(unit:number, user:number, entity:string, div:string, data: string): Promise<void> {
-        let importData = new ImportData(this.db);
-        let schema: any, fields:any[];
-        //await importData.init(entity, schema, fields);
-
+    async importData(unit:number, user:number, entity:string, div:string, schema:any, filePath: string): Promise<void> {
+        let pos = entity.indexOf('-');
+        if (pos >= 0) {
+            div = entity.substr(pos+1);
+            entity = entity.substr(0, pos);
+        }
+        await ImportData.exec(this.db, entity, div, schema, filePath);
     }
 
     async init() {

@@ -170,4 +170,12 @@ export default function(router: Router) {
         let rows = result[0];
         return rows;
     });
+
+    entityPost(router, tuidType, 'import/:name/:arr',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {arr} = urlParams;
+        let filePath = 'C:/Users/Henry/Desktop/Results.csv';
+        await runner.importData(unit, user, name, arr, schema, filePath);
+        return;
+    });
 };

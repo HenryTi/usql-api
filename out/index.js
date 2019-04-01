@@ -19,12 +19,17 @@ const queue_1 = require("./queue");
 const sync_1 = require("./sync");
 const auth_1 = require("./core/auth");
 const resDb_1 = require("./res/resDb");
-const importData_1 = require("./db/importData");
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
-        let importData = new importData_1.ImportData(undefined);
-        yield importData.importData(undefined, undefined, 'C:/Users/Henry/Desktop/Results.csv');
+        /*
+        let db = undefined;
+        let entity = '';
+        let div = '';
+        let schema = {type: 'tuid'};
+        let filePath = 'C:/Users/Henry/Desktop/Results.csv';
+        await ImportData.exec(db, entity, div, schema, filePath);
+        */
         console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
         let connection = config.get("connection");
         if (connection === undefined || connection.host === '0.0.0.0') {

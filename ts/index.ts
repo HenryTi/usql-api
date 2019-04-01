@@ -14,8 +14,14 @@ import { ImportData } from './db/importData';
 
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (async function () {
-    let importData = new ImportData(undefined);
-    await importData.importData(undefined, undefined, 'C:/Users/Henry/Desktop/Results.csv');
+    /*
+    let db = undefined;
+    let entity = '';
+    let div = '';
+    let schema = {type: 'tuid'};
+    let filePath = 'C:/Users/Henry/Desktop/Results.csv';
+    await ImportData.exec(db, entity, div, schema, filePath);
+    */
 
     console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     
