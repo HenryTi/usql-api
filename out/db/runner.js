@@ -286,6 +286,12 @@ class Runner {
             return yield this.db.call(sql, [unit, user, sheet]);
         });
     }
+    mySheets(sheet, state, unit, user, pageStart, pageSize) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = 'tv_$sheet_state_my';
+            return yield this.db.call(sql, [unit, user, sheet, state, pageStart, pageSize]);
+        });
+    }
     getSheet(sheet, unit, user, id) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = 'tv_$sheet_id';

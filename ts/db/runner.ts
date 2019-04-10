@@ -233,7 +233,10 @@ export class Runner {
         let sql = 'tv_$sheet_state_count';
         return await this.db.call(sql, [unit, user, sheet]);
     }
-
+    async mySheets(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
+        let sql = 'tv_$sheet_state_my';
+        return await this.db.call(sql, [unit, user, sheet, state, pageStart, pageSize]);
+    }
     async getSheet(sheet:string, unit:number, user:number, id:number) {
         let sql = 'tv_$sheet_id';
         return await this.db.call(sql, [unit, user, sheet, id]);

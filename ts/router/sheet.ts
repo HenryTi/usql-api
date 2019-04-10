@@ -79,6 +79,13 @@ export default function(router:Router) {
         return result;
     });
 
+    entityPost(router, constSheet, '/:name/my-sheets', 
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {state, pageStart, pageSize} = body;
+        let result = await runner.mySheets(name, state, unit, user, pageStart, pageSize);
+        return result;
+    });
+
     entityGet(router, constSheet, '-scan/:name/:id',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id} = urlParams;

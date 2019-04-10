@@ -77,6 +77,11 @@ function default_1(router) {
         let result = yield runner.sheetStateCount(name, unit, user);
         return result;
     }));
+    entityProcess_1.entityPost(router, constSheet, '/:name/my-sheets', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { state, pageStart, pageSize } = body;
+        let result = yield runner.mySheets(name, state, unit, user, pageStart, pageSize);
+        return result;
+    }));
     entityProcess_1.entityGet(router, constSheet, '-scan/:name/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id } = urlParams;
         let result = yield runner.sheetScan(name, unit, user, id);
