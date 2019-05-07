@@ -275,12 +275,7 @@ export class Runner {
     }
 
     async importData(unit:number, user:number, entity:string, div:string, schema:any, filePath: string): Promise<void> {
-        let pos = entity.indexOf('-');
-        if (pos >= 0) {
-            div = entity.substr(pos+1);
-            entity = entity.substr(0, pos);
-        }
-        await ImportData.exec(this.db, entity, div, schema, filePath);
+        await ImportData.exec(this, this.db, entity, div, schema, filePath);
     }
 
     async init() {

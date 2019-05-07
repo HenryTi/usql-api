@@ -22,7 +22,7 @@ function sync() {
 }
 function startSync() {
     if (process.env.NODE_ENV === 'development') {
-        setTimeout(sync, 3000);
+        //setTimeout(sync, 3000);
     }
     else {
         setInterval(sync, 60000);

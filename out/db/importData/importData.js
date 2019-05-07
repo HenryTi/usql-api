@@ -9,10 +9,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
+const field_1 = require("./field");
+// 导入文件表头
+// $id  $owner  字段1    字段2   字段3@字段2
+// 字段3是div，其owner是字段2
+// 如果是div entity，则必须有$owner字段
+// 如果字段描述：字段3@/字段2，那么，div的no就是 owner的no/div no；
 const bufferSize = 7;
 class ImportData {
-    constructor() {
-        this.header = {};
+    //protected fieldColl: {[name:string]: Field} = {};
+    constructor(logger = console) {
+        //protected header: Header = {};
+        this.fields = [];
+        this.logger = logger;
     }
     // entity: 'product';
     // entity: 'product-pack'
@@ -22,12 +31,16 @@ class ImportData {
             let { type } = schema;
             switch (type) {
                 case 'tuid':
-                    importData = new ImportTuid();
+                    if (div === undefined)
+                        importData = new ImportTuid();
+                    else
+                        importData = new ImportTuidDiv();
                     break;
                 case 'map':
                     importData = new ImportMap();
                     break;
             }
+            importData.runner = runner;
             importData.db = db;
             importData.entity = entity;
             importData.div = div;
@@ -102,10 +115,44 @@ class ImportData {
         }
     }
     buildHeader(line) {
+        let header = {};
         let len = line.length;
+        let divOwner = [];
         for (let i = 0; i < len; i++) {
-            this.header[line[i]] = i;
+            let f = line[i];
+            let pos = f.indexOf('@');
+            if (pos > 0) {
+                let p0 = f.substr(0, pos);
+                let p1 = f.substr(pos + 1);
+                header[p0] = i;
+                divOwner.push({ div: p0, owner: p1 });
+            }
+            else {
+                header[line[i]] = i;
+            }
         }
+        for (let i = 0; i < divOwner.length; i++) {
+            let { div, owner } = divOwner[i];
+            if (owner[0] === '/') {
+                owner = owner.substr(1);
+            }
+            let ownerIndex = header[owner];
+            if (ownerIndex === undefined) {
+                this.logger.log(`${div} of ${owner} not exists`);
+                return false;
+            }
+            header[div + '$owner'] = ownerIndex;
+        }
+        let neededFields = this.checkHeader(header);
+        if (neededFields !== undefined) {
+            this.logger.log('导入表必须包含字段：', neededFields);
+            return false;
+        }
+        for (let i = 0; i < len; i++) {
+            let field = field_1.Field.create(this.runner, this.schema, line[i], header);
+            this.fields.push(field);
+        }
+        return true;
     }
     importData() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -120,10 +167,10 @@ class ImportData {
                     break;
                 if (line.length === 0)
                     continue;
-                this.buildHeader(line);
+                if (this.buildHeader(line) === false)
+                    return;
                 break;
             }
-            console.log(this.header);
             for (;;) {
                 let line = this.readLine();
                 if (line === undefined)
@@ -134,28 +181,24 @@ class ImportData {
             }
         });
     }
+    checkHeader(header) { return undefined; }
+    ;
     saveItem(line) {
         return __awaiter(this, void 0, void 0, function* () {
-            let fields = this.schema.call.fields;
             let values = [];
-            for (let f of fields) {
-                let { name, type, tuid } = f;
-                let srcVal = line[this.header[name]];
-                let val;
-                if (tuid === undefined) {
-                    val = this.to(type, srcVal);
+            let len = line.length;
+            for (let i = 0; i < len; i++) {
+                let field = this.fields[i];
+                let v;
+                if (field !== undefined) {
+                    let v = field.getValue(line);
+                    if (v === null) {
+                        v = yield field.getId(line);
+                    }
                 }
-                else {
-                    val = yield this.getTuidId(tuid, srcVal);
-                }
-                values.push(val);
+                values.push(v);
             }
-            console.log(values);
-        });
-    }
-    getTuidId(tuid, srcVal) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return srcVal;
+            this.logger.log(values);
         });
     }
 }
@@ -169,6 +212,15 @@ class ImportTuid extends ImportData {
             yield _super.saveItem.call(this, line);
         });
     }
+}
+class ImportTuidDiv extends ImportTuid {
+    checkHeader(header) {
+        let $owner = header['$owner'];
+        if ($owner !== undefined)
+            return undefined;
+        return ['$owner'];
+    }
+    ;
 }
 class ImportMap extends ImportData {
     saveItem(line) {

@@ -19,6 +19,7 @@ const queue_1 = require("./queue");
 const sync_1 = require("./sync");
 const auth_1 = require("./core/auth");
 const resDb_1 = require("./res/resDb");
+const db_1 = require("./db");
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
@@ -104,7 +105,24 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
             let connection = config.get("connection");
             let { host, user } = connection;
             console.log('process.env.NODE_ENV: %s\nDB host: %s, user: %s', process.env.NODE_ENV, host, user);
+            yield importData();
         }));
     });
 })();
+function importData() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            let runner = yield db_1.getRunner('biz_license');
+            let unit = 99;
+            let user = 99;
+            let entity = 'vendor';
+            let filePath = 'C:/Users/Henry/Desktop/Results.csv';
+            let schema = runner.getSchema(entity);
+            yield runner.importData(unit, user, entity, undefined, schema, filePath);
+        }
+        catch (err) {
+            console.error(err);
+        }
+    });
+}
 //# sourceMappingURL=index.js.map

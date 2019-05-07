@@ -338,12 +338,7 @@ class Runner {
     }
     importData(unit, user, entity, div, schema, filePath) {
         return __awaiter(this, void 0, void 0, function* () {
-            let pos = entity.indexOf('-');
-            if (pos >= 0) {
-                div = entity.substr(pos + 1);
-                entity = entity.substr(0, pos);
-            }
-            yield importData_1.ImportData.exec(this.db, entity, div, schema, filePath);
+            yield importData_1.ImportData.exec(this, this.db, entity, div, schema, filePath);
         });
     }
     init() {
