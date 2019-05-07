@@ -99,6 +99,7 @@ export function escape(d:any):any {
 function packRow(result:string[], fields:Field[], data:any) {
     let ret = '';
     let len = fields.length;
+    console.log('packRow field0', data, fields[0].name, data[fields[0].name]);
     ret += escape(data[fields[0].name]);
     for (let i=1;i<len;i++) {
         let f = fields[i];

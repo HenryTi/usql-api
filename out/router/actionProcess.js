@@ -20,7 +20,6 @@ function actionProcess(unit, user, name, db, urlParams, runner, body, schema, ru
         console.log('action process param: ', data);
         let result = yield runner.action(name, unit, user, data);
         let returns = schema.returns;
-        console.log('action process returns: ', returns);
         let { hasSend, busFaces } = run;
         let actionReturn = yield queue_1.afterAction(db, runner, unit, returns, hasSend, busFaces, result);
         return actionReturn;

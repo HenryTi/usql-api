@@ -100,6 +100,7 @@ exports.escape = escape;
 function packRow(result, fields, data) {
     let ret = '';
     let len = fields.length;
+    console.log('packRow field0', data, fields[0].name, data[fields[0].name]);
     ret += escape(data[fields[0].name]);
     for (let i = 1; i < len; i++) {
         let f = fields[i];
