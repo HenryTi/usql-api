@@ -10,7 +10,6 @@ import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue
 import { startSync } from './sync';
 import { authJoint } from './core/auth';
 import { initResDb } from './res/resDb';
-import { ImportData } from './db/importData';
 import { Runner, getRunner } from './db';
 
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
@@ -64,6 +63,7 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     });
 
     app.use('/res', resRouter);
+    app.use('/hello', dbHello);
 
     // 正常的tonva uq接口 uqRouter
     let uqRouter = express.Router({ mergeParams: true });
@@ -116,16 +116,30 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     });
 })();
 
-
 async function importData() {
     try {
         let runner = await getRunner('biz_license');
+        if (runner === undefined) return;
         let unit = 99;
         let user = 99;
-        let entity = 'vendor';
-        let filePath = 'C:/Users/Henry/Desktop/Results.csv';
-        let schema = runner.getSchema(entity);
-        await runner.importData(unit, user, entity, undefined, schema, filePath);
+        let source = '#';
+        let files = [
+            {
+                entity: 'vendor',
+                filePath: 'C:/Users/Henry/Desktop/Results.csv',
+            },
+            {
+                entity: 'vendorPercentage',
+                filePath: 'C:/Users/Henry/Desktop/map.csv',
+            }
+        ]
+
+        for (let f of files) {
+            let {entity, filePath} = f;
+            if (filePath === undefined) continue;
+            await runner.importData(unit, user, source, entity, filePath);
+        }
+        console.log('files imported!');
     }
     catch (err) {
         console.error(err);

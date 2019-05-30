@@ -16,6 +16,7 @@ const action_1 = require("./action");
 const book_1 = require("./book");
 const history_1 = require("./history");
 const query_1 = require("./query");
+const import_1 = require("./import");
 //import settingRouter from './setting';
 access_1.default(router_1.router);
 schema_1.default(router_1.router);
@@ -25,5 +26,6 @@ action_1.default(router_1.router);
 book_1.default(router_1.router);
 history_1.default(router_1.router);
 query_1.default(router_1.router);
+import_1.default(router_1.router);
 //settingRouter(router);
 //# sourceMappingURL=index.js.map

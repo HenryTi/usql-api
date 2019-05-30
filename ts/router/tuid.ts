@@ -174,8 +174,9 @@ export default function(router: Router) {
     entityPost(router, tuidType, 'import/:name/:arr',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {arr} = urlParams;
+        let entity = arr !== undefined? name + '.' + arr : name;
         let filePath = 'C:/Users/Henry/Desktop/Results.csv';
-        await runner.importData(unit, user, name, arr, schema, filePath);
+        await runner.importData(unit, user, body.source, entity, filePath);
         return;
     });
 };

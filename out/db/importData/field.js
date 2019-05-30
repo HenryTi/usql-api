@@ -8,54 +8,70 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const core_1 = require("../../core");
 class Field {
-    static create(runner, schema, fieldName, header) {
-        let schemaField = schema.fields[fieldName];
-        if (schemaField === undefined)
-            return Field.createSpecialField(runner, schema, fieldName, header);
+    static create(runner, schema, fieldName, header, source) {
+        let field;
+        let schemaField = schema.fields.find(v => v.name === fieldName);
+        if (schemaField === undefined) {
+            let keys = schema.keys;
+            if (keys === undefined)
+                return;
+            schemaField = keys.find(v => v.name === fieldName);
+            if (schemaField === undefined)
+                return;
+        }
         let { name, type } = schemaField;
         switch (type) {
+            default: return;
             case 'tinyint':
             case 'smallint':
             case 'int':
             case 'dec':
-                return Field.createNumberField(name, type, header[name]);
+                field = Field.createNumberField(name, type);
+                break;
             case 'char':
-                return Field.createCharField(name, type, header[name]);
+                field = Field.createCharField(name, type);
+                break;
             case 'bigint':
                 let tuid = schemaField.tuid;
-                if (tuid !== undefined)
-                    return Field.createTuidField(runner, name, tuid, header);
-                return Field.createNumberField(name, type, header[name]);
+                if (tuid !== undefined) {
+                    let tField = Field.createTuidField(name, tuid, header);
+                    tField.runner = runner;
+                    tField.source = source;
+                    field = tField;
+                }
+                else {
+                    field = Field.createNumberField(name, type);
+                }
+                break;
         }
-        return;
+        field.colIndex = header[name];
+        return field;
     }
-    static createNumberField(name, type, colIndex) {
+    static createNumberField(name, type) {
         let f = new NumberField();
         f.name = name;
         f.type = type;
-        f.colIndex = colIndex;
         return f;
     }
-    static createCharField(name, type, colIndex) {
+    static createCharField(name, type) {
         let f = new StringField();
         f.name = name;
         f.type = type;
-        f.colIndex = colIndex;
         return f;
     }
-    static createTuidField(runner, name, tuid, header) {
-        return;
+    static createTuidField(name, tuid, header) {
+        let f = new TuidField();
+        f.name = name;
+        f.type = 'bigint';
+        f.tuid = tuid;
+        return f;
     }
-    static createSpecialField(runner, schema, fieldName, header) {
+    static createSpecialField(schema, fieldName, header) {
         let pos = fieldName.indexOf('@');
-        if (pos < 0) {
-            switch (fieldName) {
-                default: return;
-                case '$id': return this.createIdField(runner, schema);
-                case '$owner': return this.createOwnerField(runner, schema);
-            }
-        }
+        if (pos < 0)
+            return;
         let name = fieldName.substr(0, pos);
         let owner;
         let divUnqiue;
@@ -67,7 +83,7 @@ class Field {
             owner = fieldName.substr(pos + 1);
             divUnqiue = true;
         }
-        let schemaField = schema.fields[fieldName];
+        let schemaField = schema.fields.find(v => v.name === fieldName);
         let { tuid } = schemaField;
         let f = new TuidDivField();
         f.name = name;
@@ -76,14 +92,23 @@ class Field {
         f.owner = owner;
         return f;
     }
-    static createIdField(runner, schema) {
-        return;
+    static createIdField(runner, source, tuid, div) {
+        let field = new IdField();
+        field.source = source;
+        field.tuid = tuid;
+        field.div = div;
+        field.runner = runner;
+        return field;
     }
-    static createOwnerField(runner, schema) {
-        return;
+    static createUserField() {
+        return new UserField();
+    }
+    static createOwnerField(schema) {
+        let field = new OwnerField();
+        return field;
     }
     getValue(row) { return null; }
-    getId(row) {
+    getId(unit, row) {
         return __awaiter(this, void 0, void 0, function* () {
             return undefined;
         });
@@ -92,7 +117,9 @@ class Field {
 exports.Field = Field;
 class NumberField extends Field {
     getValue(row) {
-        return Number(row[this.colIndex]);
+        let v = row[this.colIndex];
+        if (v !== undefined)
+            return Number(v);
     }
 }
 class StringField extends Field {
@@ -100,38 +127,59 @@ class StringField extends Field {
         return row[this.colIndex];
     }
 }
+class UserField extends Field {
+    getId(unit, row) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield core_1.centerApi.userIdFromName(row[this.colIndex]);
+        });
+    }
+}
 class BaseTuidField extends Field {
 }
-class TuidField extends BaseTuidField {
-    getId(row) {
+class IdField extends BaseTuidField {
+    getId(unit, row) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.runner.importVId(unit, undefined, this.source, this.tuid, this.div, row[this.colIndex]);
+        });
+    }
+}
+class OwnerField extends BaseTuidField {
+    getId(unit, row) {
         return __awaiter(this, void 0, void 0, function* () {
             return undefined;
         });
     }
 }
+class TuidField extends BaseTuidField {
+    getId(unit, row) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.runner.importVId(unit, undefined, this.source, this.tuid, undefined, row[this.colIndex]);
+        });
+    }
+}
 class TuidDivField extends BaseTuidField {
-    getId(row) {
+    getId(unit, row) {
         return __awaiter(this, void 0, void 0, function* () {
             return undefined;
         });
     }
 }
 class ImportField extends BaseTuidField {
-    getId(row) {
+    getId(unit, row) {
         return __awaiter(this, void 0, void 0, function* () {
             return undefined;
         });
     }
 }
 class TuidImportField extends ImportField {
-    getId(row) {
+    getId(unit, row) {
         return __awaiter(this, void 0, void 0, function* () {
             return undefined;
         });
     }
 }
 class TuidDivImportField extends ImportField {
-    getId(row) {
+    getId(unit, row) {
         return __awaiter(this, void 0, void 0, function* () {
             return undefined;
         });

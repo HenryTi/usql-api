@@ -15,36 +15,44 @@ const field_1 = require("./field");
 // 字段3是div，其owner是字段2
 // 如果是div entity，则必须有$owner字段
 // 如果字段描述：字段3@/字段2，那么，div的no就是 owner的no/div no；
-const bufferSize = 7;
 class ImportData {
-    //protected fieldColl: {[name:string]: Field} = {};
-    constructor(logger = console) {
-        //protected header: Header = {};
+    constructor() {
         this.fields = [];
-        this.logger = logger;
     }
     // entity: 'product';
     // entity: 'product-pack'
-    static exec(runner, db, entity, div, schema, filePath) {
+    static exec(runner, unit, db, source, entity, filePath) {
         return __awaiter(this, void 0, void 0, function* () {
             let importData;
+            let parts = entity.split('.');
+            entity = parts[0];
+            let div = parts[1];
+            let schema = runner.getSchema(entity);
+            let logger = console;
+            if (schema === undefined) {
+                logger.error('unknown entity %s', entity);
+                return;
+            }
             let { type } = schema;
             switch (type) {
                 case 'tuid':
                     if (div === undefined)
-                        importData = new ImportTuid();
+                        importData = new ImportTuid;
                     else
-                        importData = new ImportTuidDiv();
+                        importData = new ImportTuidDiv;
                     break;
                 case 'map':
-                    importData = new ImportMap();
+                    importData = new ImportMap;
                     break;
             }
+            importData.logger = logger;
             importData.runner = runner;
+            importData.unit = unit;
             importData.db = db;
+            importData.source = source;
             importData.entity = entity;
             importData.div = div;
-            importData.schema = schema;
+            importData.schema = schema.call;
             importData.filePath = filePath;
             yield importData.importData();
         });
@@ -96,6 +104,8 @@ class ImportData {
                     val = val.trim();
                 this.p = cur + 1;
             }
+            if (val === 'NULL')
+                val = undefined;
             ret.push(val);
         }
         if (ret.length === 1 && ret[0] === '')
@@ -149,14 +159,34 @@ class ImportData {
             return false;
         }
         for (let i = 0; i < len; i++) {
-            let field = field_1.Field.create(this.runner, this.schema, line[i], header);
+            let field;
+            let fieldName = line[i];
+            switch (fieldName) {
+                case '$id':
+                    field = field_1.Field.createIdField(this.runner, this.source, this.entity, this.div);
+                    field.name = fieldName;
+                    field.colIndex = header[fieldName];
+                    break;
+                case '$owner':
+                    //field = Field.createOwnerField(this.runner, this.entity, this.div, header);
+                    // field.name = fieldName;
+                    //field.colIndex = header[fieldName];
+                    break;
+                case '$user':
+                    field = field_1.Field.createUserField();
+                    field.name = fieldName;
+                    field.colIndex = header[fieldName];
+                    break;
+                default:
+                    field = field_1.Field.create(this.runner, this.schema, fieldName, header, this.source);
+                    break;
+            }
             this.fields.push(field);
         }
         return true;
     }
     importData() {
         return __awaiter(this, void 0, void 0, function* () {
-            debugger;
             this.bufferPrev = '';
             this.buffer = yield readFileAsync(this.filePath, 'utf8');
             this.p = 0;
@@ -177,13 +207,14 @@ class ImportData {
                     break;
                 if (line.length === 0)
                     continue;
-                yield this.saveItem(line);
+                let values = yield this.mapValues(line);
+                yield this.saveItem(values);
             }
         });
     }
     checkHeader(header) { return undefined; }
     ;
-    saveItem(line) {
+    mapValues(line) {
         return __awaiter(this, void 0, void 0, function* () {
             let values = [];
             let len = line.length;
@@ -191,25 +222,27 @@ class ImportData {
                 let field = this.fields[i];
                 let v;
                 if (field !== undefined) {
-                    let v = field.getValue(line);
+                    v = field.getValue(line);
                     if (v === null) {
-                        v = yield field.getId(line);
+                        v = yield field.getId(this.unit, line);
                     }
                 }
                 values.push(v);
             }
-            this.logger.log(values);
+            return values;
+        });
+    }
+    saveItem(values) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.logger.log('to be saved: ', values);
         });
     }
 }
 exports.ImportData = ImportData;
 class ImportTuid extends ImportData {
-    saveItem(line) {
-        const _super = Object.create(null, {
-            saveItem: { get: () => super.saveItem }
-        });
+    saveItem(values) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield _super.saveItem.call(this, line);
+            yield this.runner.tuidSave(this.entity, this.unit, undefined, values);
         });
     }
 }
@@ -223,12 +256,10 @@ class ImportTuidDiv extends ImportTuid {
     ;
 }
 class ImportMap extends ImportData {
-    saveItem(line) {
-        const _super = Object.create(null, {
-            saveItem: { get: () => super.saveItem }
-        });
+    saveItem(values) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield _super.saveItem.call(this, line);
+            yield this.runner.mapSave(this.entity, this.unit, undefined, values);
+            console.log('import map ', values);
         });
     }
 }

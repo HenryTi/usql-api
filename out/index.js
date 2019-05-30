@@ -69,6 +69,7 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
             }
         }));
         app.use('/res', router_2.router);
+        app.use('/hello', dbHello);
         // 正常的tonva uq接口 uqRouter
         let uqRouter = express.Router({ mergeParams: true });
         uqRouter.use('/unitx', [core_1.authUnitx, queue_1.unitxQueueRouter]);
@@ -113,12 +114,28 @@ function importData() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let runner = yield db_1.getRunner('biz_license');
+            if (runner === undefined)
+                return;
             let unit = 99;
             let user = 99;
-            let entity = 'vendor';
-            let filePath = 'C:/Users/Henry/Desktop/Results.csv';
-            let schema = runner.getSchema(entity);
-            yield runner.importData(unit, user, entity, undefined, schema, filePath);
+            let source = '#';
+            let files = [
+                {
+                    entity: 'vendor',
+                    filePath: 'C:/Users/Henry/Desktop/Results.csv',
+                },
+                {
+                    entity: 'vendorPercentage',
+                    filePath: 'C:/Users/Henry/Desktop/map.csv',
+                }
+            ];
+            for (let f of files) {
+                let { entity, filePath } = f;
+                if (filePath === undefined)
+                    continue;
+                yield runner.importData(unit, user, source, entity, filePath);
+            }
+            console.log('files imported!');
         }
         catch (err) {
             console.error(err);

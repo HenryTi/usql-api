@@ -1,5 +1,4 @@
 import * as fs from 'fs';
-import * as path from 'path';
 import { Db } from "../db";
 import { Runner } from '../runner';
 import { Field, Header } from './field';
@@ -12,53 +11,61 @@ import { Field, Header } from './field';
 
 // 如果字段描述：字段3@/字段2，那么，div的no就是 owner的no/div no；
 
-const bufferSize = 7;
-
 export abstract class ImportData {
     // entity: 'product';
     // entity: 'product-pack'
-    static async exec(runner:Runner, db: Db, entity:string, div:string, schema: any, filePath: string): Promise<void> {
+    static async exec(runner:Runner, unit:number, db: Db, source:string, entity:string, filePath: string): Promise<void> {
         let importData:ImportData;
+        let parts = entity.split('.');
+        entity = parts[0];
+        let div = parts[1];
+
+        let schema:any = runner.getSchema(entity);
+        let logger = console;
+
+        if (schema === undefined) {
+            logger.error('unknown entity %s', entity);
+            return;
+        }
+
         let {type} = schema;
         switch (type) {
             case 'tuid':
                 if (div === undefined)
-                    importData = new ImportTuid();
+                    importData = new ImportTuid;
                 else
-                    importData = new ImportTuidDiv();
+                    importData = new ImportTuidDiv;
                 break;
             case 'map':
-                importData = new ImportMap();
+                importData = new ImportMap;
                 break;
         }
+        importData.logger = logger;
         importData.runner = runner;
+        importData.unit = unit;
         importData.db = db;
+        importData.source = source;
         importData.entity = entity;
         importData.div = div;
-        importData.schema = schema;
+        importData.schema = schema.call;
         importData.filePath = filePath;
         await importData.importData();
     }
 
-    private logger: Console;
-    private runner: Runner;
-    private db: Db;
-    private entity: string;
-    private div: string;
     private schema: any;
     private filePath: string;
-    //private rs: fs.ReadStream;
     private buffer: string;
     private bufferPrev: string;
     private p: number;
+    private fields: Field[] = [];
 
-    //protected header: Header = {};
-    protected fields: Field[] = [];
-    //protected fieldColl: {[name:string]: Field} = {};
-
-    constructor(logger:Console = console) {
-        this.logger = logger;
-    }
+    protected logger: Console;
+    protected unit: number;
+    protected db: Db;
+    protected source: string;
+    protected entity: string;
+    protected div: string;
+    protected runner: Runner;
 
     private readLine():any[] {
         let ret:string[] = [];
@@ -104,6 +111,7 @@ export abstract class ImportData {
                 if (c === 10) val = val.trim();
                 this.p = cur+1;
             }
+            if (val === 'NULL') val = undefined;
             ret.push(val);
         }
         if (ret.length === 1 && ret[0] === '') return [];
@@ -159,7 +167,28 @@ export abstract class ImportData {
         }
 
         for (let i=0; i<len; i++) {
-            let field = Field.create(this.runner, this.schema, line[i], header);
+            let field:Field;
+            let fieldName = line[i];
+            switch (fieldName) {
+                case '$id':
+                    field = Field.createIdField(this.runner, this.source, this.entity, this.div);
+                    field.name = fieldName;
+                    field.colIndex = header[fieldName];
+                    break;
+                case '$owner':
+                    //field = Field.createOwnerField(this.runner, this.entity, this.div, header);
+                    // field.name = fieldName;
+                    //field.colIndex = header[fieldName];
+                    break;
+                case '$user':
+                    field = Field.createUserField();
+                    field.name = fieldName;
+                    field.colIndex = header[fieldName];
+                    break;
+                default: 
+                    field = Field.create(this.runner, this.schema, fieldName, header, this.source);
+                    break;
+            }
             this.fields.push(field);
         }
 
@@ -167,7 +196,6 @@ export abstract class ImportData {
     }
 
     async importData() {
-        debugger;
         this.bufferPrev = '';
         this.buffer = await readFileAsync(this.filePath, 'utf8');
         this.p = 0;
@@ -185,33 +213,38 @@ export abstract class ImportData {
             let line = this.readLine();
             if (line === undefined) break;
             if (line.length === 0) continue;
-            await this.saveItem(line);
+            let values = await this.mapValues(line);
+            await this.saveItem(values);
         }
     }
 
     protected checkHeader(header:Header):string[] {return undefined};
 
-    protected async saveItem(line:any[]): Promise<void> {
+    private async mapValues(line:any[]):Promise<any[]> {
         let values:any[] = [];
         let len = line.length;
         for (let i=0; i<len; i++) {
             let field = this.fields[i];
             let v:any;
             if (field !== undefined) {
-                let v = field.getValue(line);
+                v = field.getValue(line);
                 if (v === null) {
-                    v = await field.getId(line);
+                    v = await field.getId(this.unit, line);
                 }
             }
             values.push(v);
         }
-        this.logger.log(values);
+        return values;
+    }
+
+    protected async saveItem(values:any[]): Promise<void> {
+        this.logger.log('to be saved: ', values);
     }
 }
 
 class ImportTuid extends ImportData {
-    protected async saveItem(line:any[]): Promise<void> {
-        await super.saveItem(line);
+    protected async saveItem(values:any[]): Promise<void> {
+        await this.runner.tuidSave(this.entity, this.unit, undefined, values);
     }
 }
 
@@ -224,8 +257,9 @@ class ImportTuidDiv extends ImportTuid {
 }
 
 class ImportMap extends ImportData {
-    protected async saveItem(line:any[]): Promise<void> {
-        await super.saveItem(line);
+    protected async saveItem(values:any[]): Promise<void> {
+        await this.runner.mapSave(this.entity, this.unit, undefined, values);
+        console.log('import map ', values);
     }
 }
 

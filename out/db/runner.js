@@ -185,7 +185,8 @@ class Runner {
             if (arr !== '$')
                 proc += '_' + arr;
             proc += '$ids';
-            return yield this.db.call(proc, [unit, user, ids]);
+            let ret = yield this.db.call(proc, [unit, user, ids]);
+            return ret;
         });
     }
     tuidMain(tuid, unit, user, id) {
@@ -223,6 +224,18 @@ class Runner {
         return __awaiter(this, void 0, void 0, function* () {
             let proc = `tv_${tuid}_${arr}$search`;
             return yield this.db.tablesFromProc(proc, [unit, user, ownerId, key || '', pageStart, pageSize]);
+        });
+    }
+    mapSave(map, unit, user, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.call('tv_' + map + '$save', [unit, user, ...params]);
+        });
+    }
+    importVId(unit, user, source, tuid, arr, no) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let proc = `tv_$import_vid`;
+            let ret = yield this.db.tableFromProc(proc, [unit, user, source, tuid, arr, no]);
+            return ret[0].vid;
         });
     }
     sheetVerify(sheet, unit, user, data) {
@@ -336,9 +349,9 @@ class Runner {
             return yield this.db.call(sql, [unit, 0, faceId, msgId, body]);
         });
     }
-    importData(unit, user, entity, div, schema, filePath) {
+    importData(unit, user, source, entity, filePath) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield importData_1.ImportData.exec(this, this.db, entity, div, schema, filePath);
+            yield importData_1.ImportData.exec(this, unit, this.db, source, entity, filePath);
         });
     }
     init() {

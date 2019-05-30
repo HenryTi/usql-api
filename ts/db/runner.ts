@@ -165,7 +165,8 @@ export class Runner {
         let proc = 'tv_' + tuid;
         if (arr !== '$') proc += '_' + arr;
         proc += '$ids';
-        return await this.db.call(proc, [unit, user, ids]);
+        let ret = await this.db.call(proc, [unit, user, ids]);
+        return ret;
     }
     async tuidMain(tuid:string, unit:number, user:number, id:number): Promise<any> {
         return await this.db.call('tv_' + tuid + '$main', [unit, user, id]);
@@ -189,6 +190,14 @@ export class Runner {
     async tuidArrSeach(tuid:string, unit:number, user:number, arr:string, ownerId:number, key:string, pageStart:number, pageSize:number): Promise<any> {
         let proc = `tv_${tuid}_${arr}$search`;
         return await this.db.tablesFromProc(proc, [unit, user, ownerId, key||'', pageStart, pageSize]);
+    }
+    async mapSave(map:string, unit:number, user:number, params:any[]): Promise<any> {
+        return await this.db.call('tv_' + map + '$save', [unit, user, ...params]);
+    }
+    async importVId(unit:number, user:number, source:string, tuid:string, arr:string, no:string): Promise<number> {
+        let proc = `tv_$import_vid`;
+        let ret = await this.db.tableFromProc(proc, [unit, user, source, tuid, arr, no]);
+        return ret[0].vid;
     }
     async sheetVerify(sheet:string, unit:number, user:number, data:string):Promise<string> {
         let sheetRun = this.sheetRuns[sheet];
@@ -274,8 +283,8 @@ export class Runner {
         return await this.db.call(sql, [unit, 0, faceId, msgId, body]);
     }
 
-    async importData(unit:number, user:number, entity:string, div:string, schema:any, filePath: string): Promise<void> {
-        await ImportData.exec(this, this.db, entity, div, schema, filePath);
+    async importData(unit:number, user:number, source:string, entity:string, filePath: string): Promise<void> {
+        await ImportData.exec(this, unit, this.db, source, entity, filePath);
     }
 
     async init() {

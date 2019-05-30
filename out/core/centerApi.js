@@ -64,6 +64,11 @@ class CenterApi extends fetch_1.Fetch {
             return yield this.get('open/unitx-buses', { unit: unit, busOwner: busOwner, bus: bus, face: face });
         });
     }
+    userIdFromName(user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.get('open/user-id-from-name', { user: user });
+        });
+    }
 }
 exports.centerApi = new CenterApi();
 //# sourceMappingURL=centerApi.js.map

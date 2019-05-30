@@ -155,8 +155,9 @@ function default_1(router) {
     }));
     entityProcess_1.entityPost(router, tuidType, 'import/:name/:arr', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { arr } = urlParams;
+        let entity = arr !== undefined ? name + '.' + arr : name;
         let filePath = 'C:/Users/Henry/Desktop/Results.csv';
-        yield runner.importData(unit, user, name, arr, schema, filePath);
+        yield runner.importData(unit, user, body.source, entity, filePath);
         return;
     }));
 }
