@@ -12,6 +12,7 @@ const _ = require("lodash");
 const db_1 = require("./db");
 const packReturn_1 = require("../core/packReturn");
 const importData_1 = require("./importData");
+const packParam_1 = require("../core/packParam");
 const runners = {};
 function getRunner(name) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -331,6 +332,14 @@ class Runner {
     }
     action(action, unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
+            let result = yield this.db.callEx('tv_' + action, [unit, user, data]);
+            return result;
+        });
+    }
+    actionFromObj(action, unit, user, obj) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let schema = this.getSchema(action);
+            let data = packParam_1.packParam(schema, obj);
             let result = yield this.db.callEx('tv_' + action, [unit, user, data]);
             return result;
         });
