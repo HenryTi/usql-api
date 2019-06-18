@@ -1,4 +1,5 @@
 import {createPool, Pool, MysqlError} from 'mysql';
+import * as _ from 'lodash';
 import {DbServer} from './dbServer';
 import { isDevelopment } from './db';
 
@@ -14,8 +15,9 @@ export class MyDbServer extends DbServer {
     private pool: Pool;
     constructor(dbConfig:any) {
         super();
-        dbConfig.typeCast = castField;
-        this.pool = createPool(dbConfig);
+        let conf = _.clone(dbConfig);
+        conf.typeCast = castField;
+        this.pool = createPool(conf);
     }
     private async exec(sql:string, values:any[]): Promise<any> {
         return await new Promise<any>((resolve, reject) => {

@@ -339,7 +339,7 @@ class Runner {
     actionFromObj(action, unit, user, obj) {
         return __awaiter(this, void 0, void 0, function* () {
             let schema = this.getSchema(action);
-            let data = packParam_1.packParam(schema, obj);
+            let data = packParam_1.packParam(schema.call, obj);
             let result = yield this.db.callEx('tv_' + action, [unit, user, data]);
             return result;
         });

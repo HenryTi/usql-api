@@ -275,7 +275,7 @@ export class Runner {
 
     async actionFromObj(action:string, unit:number, user:number, obj:any): Promise<any> {
         let schema = this.getSchema(action);
-        let data = packParam(schema, obj);
+        let data = packParam(schema.call, obj);
         let result = await this.db.callEx('tv_' + action, [unit, user, data]);
         return result;
     }
