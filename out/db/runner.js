@@ -42,7 +42,9 @@ class Runner {
     }
     getDb() { return this.db.getDbName(); }
     sql(sql, params) {
-        return this.db.sql(sql, params);
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.sql(sql, params);
+        });
     }
     procCall(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -55,7 +57,9 @@ class Runner {
         });
     }
     createDatabase() {
-        return this.db.createDatabase();
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.createDatabase();
+        });
     }
     unitCall(proc, unit, ...params) {
         return __awaiter(this, void 0, void 0, function* () {

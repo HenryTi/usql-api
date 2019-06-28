@@ -35,7 +35,7 @@ interface SheetRun {
 }
 
 export class Runner {
-    private db:Db;
+    protected db:Db;
     private access:any;
     private schemas: {[entity:string]: {type:string, call:any; run:any;}};
     private accessSchemaArr: any[];
@@ -62,8 +62,8 @@ export class Runner {
 
     getDb():string {return this.db.getDbName()}
 
-    sql(sql:string, params:any[]): Promise<any> {
-        return this.db.sql(sql, params);
+    async sql(sql:string, params:any[]): Promise<any> {
+        return await this.db.sql(sql, params);
     }
     async procCall(proc:string, params:any[]): Promise<any> {
         return await this.db.call(proc, params);
@@ -71,8 +71,8 @@ export class Runner {
     async call(proc:string, params:any[]): Promise<any> {
         return await this.db.call('tv_' + proc, params);
     }    
-    createDatabase(): Promise<void> {
-        return this.db.createDatabase();
+    async createDatabase(): Promise<void> {
+        return await this.db.createDatabase();
     }
 
     async unitCall(proc:string, unit:number, ...params:any[]): Promise<any> {
