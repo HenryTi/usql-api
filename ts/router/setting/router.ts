@@ -11,7 +11,7 @@ export const router: Router = Router({ mergeParams: true });
         body.$ = 'seting/access-user';
         console.log(body);
         let {unit, entity, users} = body;
-        await runner.call('$set_access_user', [unit, entity, users, undefined]);
+        await runner.unitCall('$set_access_user', unit, entity, users, undefined);
     });
 
     post(router, '/access-entity',
@@ -19,7 +19,7 @@ export const router: Router = Router({ mergeParams: true });
         body.$ = 'seting/access-entity';
         console.log(body);
         let {unit, entities} = body;
-        await runner.call('$set_access_entity', [unit, entities]);
+        await runner.unitCall('$set_access_entity', unit, entities);
     });
 
     post(router, '/access-fully',
@@ -27,7 +27,7 @@ export const router: Router = Router({ mergeParams: true });
         body.$ = 'seting/access-fully *** ---';
         console.log(body);
         let {unit, user, flag} = body;
-        await runner.call('$set_access_fully', [unit, user, flag]);
+        await runner.unitUserCall('$set_access_fully', unit, user, flag);
     });
 })(router);
 

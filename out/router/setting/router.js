@@ -17,19 +17,19 @@ exports.router = express_1.Router({ mergeParams: true });
         body.$ = 'seting/access-user';
         console.log(body);
         let { unit, entity, users } = body;
-        yield runner.call('$set_access_user', [unit, entity, users, undefined]);
+        yield runner.unitCall('$set_access_user', unit, entity, users, undefined);
     }));
     post(router, '/access-entity', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         body.$ = 'seting/access-entity';
         console.log(body);
         let { unit, entities } = body;
-        yield runner.call('$set_access_entity', [unit, entities]);
+        yield runner.unitCall('$set_access_entity', unit, entities);
     }));
     post(router, '/access-fully', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         body.$ = 'seting/access-fully *** ---';
         console.log(body);
         let { unit, user, flag } = body;
-        yield runner.call('$set_access_fully', [unit, user, flag]);
+        yield runner.unitUserCall('$set_access_fully', unit, user, flag);
     }));
 })(exports.router);
 function post(router, path, processer) {

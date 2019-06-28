@@ -1,7 +1,6 @@
 import * as _ from 'lodash';
 import { packBus } from '../core';
 import { Runner } from '../db/runner';
-import { SchemaBusFace } from './schemaBusFace';
 import { pushToClient } from './pushToClient';
 import { MsgMessage, BusMessage } from './model';
 import { queueToUnitx } from './toUnitxQueue';
@@ -14,6 +13,19 @@ import { queueToUnitx } from './toUnitxQueue';
 // 当下为了快速写出程序，暂时先简单处理。数据库操作返回数据，直接发送unitx，可能会有数据丢失。
 // git
 
+export interface SchemaBusFace {
+    name:string;
+    owner:string;
+    bus:string;
+    faces: {
+        name: string;
+        arr: string[];
+    }[];
+}
+export interface TempletFace {
+    templet: string;
+    params: string[];
+}
 export async function afterAction(
     db:string,
     runner: Runner, 
@@ -21,6 +33,7 @@ export async function afterAction(
     schemaReturns:any[],
     hasMessage:boolean,
     busFaces:SchemaBusFace[],
+    templetFaces:TempletFace[],
     result:any):Promise<any>
 {
     let nFaceCount:number = 0;
@@ -56,8 +69,8 @@ export async function afterAction(
 
     if (busFaces !== undefined && busFaces.length > 0) {
         // 发送face消息，子系统间的数据交换
-        for (let i in busFaces) {
-            let {name:busName, owner, bus, faces} = busFaces[i];
+        for (let busFace of busFaces) {
+            let {name:busName, owner, bus, faces} = busFace;
             let schema = runner.getSchema(busName);
             for (let j in faces) {
                 let {name, arr} = faces[j];
@@ -89,7 +102,31 @@ export async function afterAction(
             }
         }
     }
+
+    if (templetFaces !== undefined) {
+        for (let templetFace of templetFaces) {
+            let res = resArrs.shift();
+            let {templet} = templetFace;
+            let templetSchema = runner.getSchema(templet).schema;
+            for (let row of res) {
+                await sendTemplet(templetSchema, row);
+            }
+        }
+    }
+
     let arr0 = result[0];
     if (arr0 === undefined || arr0.length === 0) return;
     return arr0[0];
+}
+
+async function sendTemplet(templetRun: any, values:any) {
+    let {subjectSections, sections} = templetRun;
+    let {$method, $to, $cc, $bcc} = values;
+    let subject = stringFromSections(subjectSections, values);
+    let body = stringFromSections(sections, values);
+
+}
+
+function stringFromSections(sections:string[], values: any):string {
+    if (sections === undefined) return;
 }

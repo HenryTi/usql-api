@@ -3,7 +3,6 @@ import {getDb, Db} from './db';
 import { packReturns } from '../core/packReturn';
 import { ImportData } from './importData';
 import { packParam } from '../core/packParam';
-import schema from '../router/schema';
 
 const runners: {[name:string]: Runner} = {};
 
@@ -45,6 +44,7 @@ export class Runner {
     private setting: {[name:string]: any};
     private entityColl: {[id:number]: EntityAccess};
     private uqId: number;
+    private hasUnit: boolean;
     private sheetRuns: {[sheet:string]: SheetRun};
 
     uqOwner: string;
@@ -70,23 +70,87 @@ export class Runner {
     }
     async call(proc:string, params:any[]): Promise<any> {
         return await this.db.call('tv_' + proc, params);
-    }
+    }    
     createDatabase(): Promise<void> {
         return this.db.createDatabase();
     }
 
+    async unitCall(proc:string, unit:number, ...params:any[]): Promise<any> {
+        let p:any[] = [];
+        if (this.hasUnit === true) p.push(unit);
+        if (params !== undefined) p.push(...params);
+        return await this.db.call(proc, p);
+    }
+    async unitUserCall(proc:string, unit:number, user:number, ...params:any[]): Promise<any> {
+        let p:any[] = [];
+        if (this.hasUnit === true) p.push(unit);
+        p.push(user);
+        if (params !== undefined) p.push(...params);
+        return await this.db.call(proc, p);
+    }
+
+    private async unitCallEx(proc:string, unit:number, ...params:any[]): Promise<any> {
+        let p:any[] = [];
+        if (this.hasUnit === true) p.push(unit);
+        if (params !== undefined) p.push(...params);
+        return await this.db.callEx(proc, p);
+    }
+    private async unitUserCallEx(proc:string, unit:number, user:number, ...params:any[]): Promise<any> {
+        let p:any[] = [];
+        if (this.hasUnit === true) p.push(unit);
+        p.push(user);
+        if (params !== undefined) p.push(...params);
+        return await this.db.callEx(proc, p);
+    }
+
+    private async unitTableFromProc(proc:string, unit:number, ...params:any[]):Promise<any[]> {
+        let p:any[] = [];
+        if (this.hasUnit === true) p.push(unit);
+        if (params !== undefined) p.push(...params);
+        let ret = await this.db.tableFromProc(proc, p);
+        return ret;
+    }
+    private async unitUserTableFromProc(proc:string, unit:number, user:number, ...params:any[]):Promise<any[]> {
+        let p:any[] = [];
+        if (this.hasUnit === true) p.push(unit);
+        p.push(user);
+        if (params !== undefined) p.push(...params);
+        let ret = await this.db.tableFromProc(proc, p);
+        return ret;
+    }
+
+    private async unitTablesFromProc(proc:string, unit:number, ...params:any[]):Promise<any[][]> {
+        let p:any[] = [];
+        if (this.hasUnit === true) p.push(unit);
+        if (params !== undefined) p.push(...params);
+        let ret = await this.db.tablesFromProc(proc, p);
+        return ret;
+    }
+    private async unitUserTablesFromProc(proc:string, unit:number, user:number, ...params:any[]):Promise<any[][]> {
+        let p:any[] = [];
+        if (this.hasUnit === true) p.push(unit);
+        p.push(user);
+        if (params !== undefined) p.push(...params);
+        let ret = await this.db.tablesFromProc(proc, p);
+        return ret;
+    }
+
+    async $$openFresh(unit:number, stampsText:string) {
+        return await this.unitCall('$$open_fresh', unit, stampsText);
+    }
+
     async setTimezone(unit:number, user:number): Promise<void> {
-        return await this.db.call('tv_$set_timezone', [unit, user]);
+        return await this.unitUserCall('tv_$set_timezone', unit, user);
     }
     async start(unit:number, user:number): Promise<void> {
-        return await this.db.call('tv_$start', [unit, user]);
+        return await this.unitUserCall('tv_$start', unit, user);
     }
     async initResDb(resDbName:string): Promise<void> {
         await this.db.initResDb(resDbName);
     }
     async setSetting(unit:number, name: string, value: string): Promise<void> {
         name = name.toLowerCase();
-        await this.db.call('tv_$set_setting', [unit, name, value]);
+        await this.unitCall('tv_$set_setting', unit, name, value);
         if (unit === 0) {
             let n = Number(value);
             this.setting[name] = n === NaN? value : n;
@@ -95,7 +159,7 @@ export class Runner {
 
     async getSetting(unit:number, name: string):Promise<any> {
         name = name.toLowerCase();
-        let ret = await this.db.tableFromProc('tv_$get_setting', [unit, name]);
+        let ret = await this.unitTableFromProc('tv_$get_setting', unit, name);
         if (ret.length===0) return undefined;
         let v = ret[0].value;
         if (unit === 0) {
@@ -109,7 +173,7 @@ export class Runner {
         return await this.db.tablesFromProc('tv_$entitys', [hasSource===true?1:0]);
     }
     async saveSchema(unit:number, user:number, id:number, name:string, type:number, schema:string, run:string):Promise<any> {
-        return await this.db.call('tv_$entity', [unit, user, id, name, type, schema, run]);
+        return await this.unitUserCall('tv_$entity', unit, user, id, name, type, schema, run);
     }
     async loadConstStrs(): Promise<{[name:string]:number}[]> {
         return await this.db.call('tv_$const_strs', undefined);
@@ -141,64 +205,64 @@ export class Runner {
     }
 
     async tuidGet(tuid:string, unit:number, user:number, id:number): Promise<any> {
-        return await this.db.callEx('tv_' + tuid, [unit, user, id]);
+        return await this.unitUserCallEx('tv_' + tuid, unit, user, id);
     }
     async tuidArrGet(tuid:string, arr:string, unit:number, user:number, owner:number, id:number): Promise<any> {
-        return await this.db.call('tv_' + tuid + '_' + arr + '$id', [unit, user, owner, id]);
+        return await this.unitUserCall('tv_' + tuid + '_' + arr + '$id', unit, user, owner, id);
     }
     async tuidGetAll(tuid:string, unit:number, user:number): Promise<any> {
-        return await this.db.call('tv_' + tuid + '$all', [unit, user]);
+        return await this.unitUserCall('tv_' + tuid + '$all', unit, user);
     }
     async tuidVid(tuid:string, unit:number, uniqueValue:any): Promise<any> {
         let proc = `tv_${tuid}$vid`;
-        return await this.db.call(proc, [unit, uniqueValue]);
+        return await this.unitCall(proc, unit, uniqueValue);
     }
     async tuidArrVid(tuid:string, arr:string, unit:number, uniqueValue:any): Promise<any> {
         let proc = `tv_${tuid}_${arr}$vid`;
-        return await this.db.call(proc, [unit, uniqueValue]);
+        return await this.unitCall(proc, unit, uniqueValue);
     }
     async tuidGetArrAll(tuid:string, arr:string, unit:number, user:number, owner:number): Promise<any> {
-        return await this.db.call('tv_' + tuid + '_' + arr + '$all', [unit, user, owner]);
+        return await this.unitUserCall('tv_' + tuid + '_' + arr + '$all', unit, user, owner);
     }
     async tuidProxyGet(tuid:string, unit:number, user:number, id:number, type:string): Promise<any> {
-        return await this.db.call('tv_' + tuid + '$proxy', [unit, user, id, type]);
+        return await this.unitUserCall('tv_' + tuid + '$proxy', unit, user, id, type);
     }
     async tuidIds(tuid:string, arr:string, unit:number, user:number, ids:string): Promise<any> {
         let proc = 'tv_' + tuid;
         if (arr !== '$') proc += '_' + arr;
         proc += '$ids';
-        let ret = await this.db.call(proc, [unit, user, ids]);
+        let ret = await this.unitUserCall(proc, unit, user, ids);
         return ret;
     }
     async tuidMain(tuid:string, unit:number, user:number, id:number): Promise<any> {
-        return await this.db.call('tv_' + tuid + '$main', [unit, user, id]);
+        return await this.unitUserCall('tv_' + tuid + '$main', unit, user, id);
     }
     async tuidSave(tuid:string, unit:number, user:number, params:any[]): Promise<any> {
-        return await this.db.call('tv_' + tuid + '$save', [unit, user, ...params]);
+        return await this.unitUserCall('tv_' + tuid + '$save', unit, user, ...params);
     }
     async tuidSetStamp(tuid:string, unit:number, params:any[]): Promise<void> {
-        return await this.db.call('tv_' + tuid + '$stamp', [unit, ...params]);
+        return await this.unitCall('tv_' + tuid + '$stamp', unit, ...params);
     }
     async tuidArrSave(tuid:string, arr:string, unit:number, user:number, params:any[]): Promise<any> {
-        return await this.db.call('tv_' + tuid + '_' + arr + '$save', [unit, user, ...params]);
+        return await this.unitUserCall('tv_' + tuid + '_' + arr + '$save', unit, user, ...params);
     }
     async tuidArrPos(tuid:string, arr:string, unit:number, user:number, params:any[]): Promise<any> {
-        return await this.db.call('tv_' + tuid + '_' + arr + '$pos', [unit, user, ...params]);
+        return await this.unitUserCall('tv_' + tuid + '_' + arr + '$pos', unit, user, ...params);
     }
     async tuidSeach(tuid:string, unit:number, user:number, arr:string, key:string, pageStart:number, pageSize:number): Promise<any> {
         let proc = 'tv_' + tuid + '$search';
-        return await this.db.tablesFromProc(proc, [unit, user, key||'', pageStart, pageSize]);
+        return await this.unitUserTablesFromProc(proc, unit, user, key||'', pageStart, pageSize);
     }
     async tuidArrSeach(tuid:string, unit:number, user:number, arr:string, ownerId:number, key:string, pageStart:number, pageSize:number): Promise<any> {
         let proc = `tv_${tuid}_${arr}$search`;
-        return await this.db.tablesFromProc(proc, [unit, user, ownerId, key||'', pageStart, pageSize]);
+        return await this.unitUserTablesFromProc(proc, unit, user, ownerId, key||'', pageStart, pageSize);
     }
     async mapSave(map:string, unit:number, user:number, params:any[]): Promise<any> {
-        return await this.db.call('tv_' + map + '$save', [unit, user, ...params]);
+        return await this.unitUserCall('tv_' + map + '$save', unit, user, ...params);
     }
     async importVId(unit:number, user:number, source:string, tuid:string, arr:string, no:string): Promise<number> {
         let proc = `tv_$import_vid`;
-        let ret = await this.db.tableFromProc(proc, [unit, user, source, tuid, arr, no]);
+        let ret = await this.unitUserTableFromProc(proc, unit, user, source, tuid, arr, no);
         return ret[0].vid;
     }
     async sheetVerify(sheet:string, unit:number, user:number, data:string):Promise<string> {
@@ -206,7 +270,7 @@ export class Runner {
         if (sheetRun === undefined) return;
         let {verify} = sheetRun;
         if (verify === undefined) return;
-        let ret = await this.db.call(`tv_${sheet}_$verify`, [unit, user, data]);
+        let ret = await this.unitUserCall(`tv_${sheet}_$verify`, unit, user, data);
         let {length} = verify;
         if (length === 0) {
             if (ret === undefined) return 'fail';
@@ -222,10 +286,10 @@ export class Runner {
         return;
     }
     async sheetSave(sheet:string, unit:number, user:number, app:number, discription:string, data:string): Promise<{}> {
-        return await this.db.call('tv_$sheet_save', [unit, user, sheet, app, discription, data]);
+        return await this.unitUserCall('tv_$sheet_save', unit, user, sheet, app, discription, data);
     }
     async sheetTo(unit:number, user:number, sheetId:number, toArr:number[]) {
-        await this.db.call('tv_$sheet_to', [unit, user, sheetId, toArr.join(',')]);
+        await this.unitUserCall('tv_$sheet_to', unit, user, sheetId, toArr.join(','));
     }
     async sheetProcessing(sheetId:number):Promise<void> {
         await this.db.call('tv_$sheet_processing', [sheetId]);
@@ -234,54 +298,54 @@ export class Runner {
         let sql = state === '$'?
             'tv_' + sheet + '_' + action :
             'tv_' + sheet + '_' + state + '_' + action;
-        return await this.db.callEx(sql, [unit, user, id, flow, action]);
+        return await this.unitUserCallEx(sql, unit, user, id, flow, action);
     }
     async sheetStates(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
         let sql = 'tv_$sheet_state';
-        return await this.db.call(sql, [unit, user, sheet, state, pageStart, pageSize]);
+        return await this.unitUserCall(sql, unit, user, sheet, state, pageStart, pageSize);
     }
     async sheetStateCount(sheet:string, unit:number, user:number) {
         let sql = 'tv_$sheet_state_count';
-        return await this.db.call(sql, [unit, user, sheet]);
+        return await this.unitUserCall(sql, unit, user, sheet);
     }
     async mySheets(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
         let sql = 'tv_$sheet_state_my';
-        return await this.db.call(sql, [unit, user, sheet, state, pageStart, pageSize]);
+        return await this.unitUserCall(sql, unit, user, sheet, state, pageStart, pageSize);
     }
     async getSheet(sheet:string, unit:number, user:number, id:number) {
         let sql = 'tv_$sheet_id';
-        return await this.db.call(sql, [unit, user, sheet, id]);
+        return await this.unitUserCall(sql, unit, user, sheet, id);
     }
 
     async sheetScan(sheet:string, unit:number, user:number, id:number) {
         let sql = 'tv_$sheet_scan';
-        return await this.db.call(sql, [unit, user, sheet, id]);
+        return await this.unitUserCall(sql, unit, user, sheet, id);
     }
 
     async sheetArchives(sheet:string, unit:number, user:number, pageStart:number, pageSize:number) {
         let sql = 'tv_$archives';
-        return await this.db.call(sql, [unit, user, sheet, pageStart, pageSize]);
+        return await this.unitUserCall(sql, unit, user, sheet, pageStart, pageSize);
     }
 
     async sheetArchive(unit:number, user:number, sheet:string, id:number) {
         let sql = 'tv_$archive_id';
-        return await this.db.call(sql, [unit, user, sheet, id]);
+        return await this.unitUserCall(sql, unit, user, sheet, id);
     }
 
     async action(action:string, unit:number, user:number, data:string): Promise<any> {
-        let result = await this.db.callEx('tv_' + action, [unit, user, data]);
+        let result = await this.unitUserCallEx('tv_' + action, unit, user, data);
         return result;
     }
 
     async actionFromObj(action:string, unit:number, user:number, obj:any): Promise<any> {
         let schema = this.getSchema(action);
         let data = packParam(schema.call, obj);
-        let result = await this.db.callEx('tv_' + action, [unit, user, data]);
+        let result = await this.unitUserCallEx('tv_' + action, unit, user, data);
         return result;
     }
 
     async query(query:string, unit:number, user:number, params:any[]): Promise<any> {
-        let ret = await this.db.call('tv_' + query, [unit, user, ...params]);
+        let ret = await this.unitUserCall('tv_' + query, unit, user, ...params);
         return ret;
     }
 
@@ -289,7 +353,7 @@ export class Runner {
     // body: bus message body
     async bus(bus:string, face:string, unit:number, faceId:number, msgId:number, body:string): Promise<void> {
         let sql = 'tv_' + bus + '_' + face;
-        return await this.db.call(sql, [unit, 0, faceId, msgId, body]);
+        return await this.unitUserCall(sql, unit, 0, faceId, msgId, body);
     }
 
     async importData(unit:number, user:number, source:string, entity:string, filePath: string): Promise<void> {
@@ -323,6 +387,7 @@ export class Runner {
         this.author = setting['author'] as string;
         this.version = setting['version'] as string;
         this.uqId = setting['uqId'] as number;
+        this.hasUnit = !(setting['hasUnit'] as number === 0);
         
         console.log('init schemas: ', this.uq, this.author, this.version);
 
@@ -537,7 +602,7 @@ export class Runner {
         console.log('access: ', this.access);
     }
     private async getUserAccess(unit:number, user:number):Promise<number[]> {
-        let result = await this.db.tablesFromProc('tv_$get_access', [unit, user]);
+        let result = await this.unitUserTablesFromProc('tv_$get_access', unit, user);
         let ret = _.union(result[0].map(v => v.entity), result[1].map(v => v.entity));
         return ret;
     }

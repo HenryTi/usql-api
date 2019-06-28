@@ -11,14 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const pushToClient_1 = require("./pushToClient");
 const toUnitxQueue_1 = require("./toUnitxQueue");
-// 2018-02-25
-// Bus face 数据保全的说明：
-// bus数据的产生，应该跟action或者sheetAction构成事务。
-// 所以，应该把bus face 信息在事务内写数据库。
-// 在job queue里面，读数据，然后发送到unitx，然后再从数据库删除。这样保证不会丢失信息。
-// 当下为了快速写出程序，暂时先简单处理。数据库操作返回数据，直接发送unitx，可能会有数据丢失。
-// git
-function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, result) {
+function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, templetFaces, result) {
     return __awaiter(this, void 0, void 0, function* () {
         let nFaceCount = 0;
         let resArrs = result;
@@ -52,8 +45,8 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
         }
         if (busFaces !== undefined && busFaces.length > 0) {
             // 发送face消息，子系统间的数据交换
-            for (let i in busFaces) {
-                let { name: busName, owner, bus, faces } = busFaces[i];
+            for (let busFace of busFaces) {
+                let { name: busName, owner, bus, faces } = busFace;
                 let schema = runner.getSchema(busName);
                 for (let j in faces) {
                     let { name, arr } = faces[j];
@@ -85,6 +78,16 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
                 }
             }
         }
+        if (templetFaces !== undefined) {
+            for (let templetFace of templetFaces) {
+                let res = resArrs.shift();
+                let { templet } = templetFace;
+                let templetSchema = runner.getSchema(templet).schema;
+                for (let row of res) {
+                    yield sendTemplet(templetSchema, row);
+                }
+            }
+        }
         let arr0 = result[0];
         if (arr0 === undefined || arr0.length === 0)
             return;
@@ -92,4 +95,16 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, resu
     });
 }
 exports.afterAction = afterAction;
+function sendTemplet(templetRun, values) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let { subjectSections, sections } = templetRun;
+        let { $method, $to, $cc, $bcc } = values;
+        let subject = stringFromSections(subjectSections, values);
+        let body = stringFromSections(sections, values);
+    });
+}
+function stringFromSections(sections, values) {
+    if (sections === undefined)
+        return;
+}
 //# sourceMappingURL=afterAction.js.map

@@ -27,7 +27,6 @@ export default function(router: Router) {
         return value;
     });
 
-
     entityGet(router, tuidType, '-arr/:name/:owner/:arr/:id/', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id, owner, arr} = urlParams;

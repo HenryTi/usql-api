@@ -80,16 +80,17 @@ async function doSheetAct(sheetAct:SheetAct):Promise<void> {
             await queueToUnitx(sheetMsg);
         }
 
-        let hasMessage, busFaces;
+        let hasMessage:boolean, busFaces:any[], templets:any[];
         if (Array.isArray(actionRun) === true) {
             hasMessage = false;
             busFaces = actionRun;
         }
         else {
             hasMessage = actionRun.hasSend;
-            busFaces = actionRun.busFaces;60
+            busFaces = actionRun.busFaces;
+            templets = actionRun.templets;
         }
-        await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
+        await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, templets, result);
     }
     catch(err) {
         console.log('sheet Act error: ', err);

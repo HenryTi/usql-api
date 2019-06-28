@@ -89,7 +89,7 @@ function doSheetAct(sheetAct) {
                 };
                 yield toUnitxQueue_1.queueToUnitx(sheetMsg);
             }
-            let hasMessage, busFaces;
+            let hasMessage, busFaces, templets;
             if (Array.isArray(actionRun) === true) {
                 hasMessage = false;
                 busFaces = actionRun;
@@ -97,9 +97,9 @@ function doSheetAct(sheetAct) {
             else {
                 hasMessage = actionRun.hasSend;
                 busFaces = actionRun.busFaces;
-                60;
+                templets = actionRun.templets;
             }
-            yield afterAction_1.afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, result);
+            yield afterAction_1.afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, templets, result);
         }
         catch (err) {
             console.log('sheet Act error: ', err);

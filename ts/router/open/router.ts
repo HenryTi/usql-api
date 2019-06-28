@@ -27,7 +27,7 @@ export const router: Router = Router({ mergeParams: true });
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
         let stampsText = stamps.map((v:string[]) => v.join('\t')).join('\n');
         try {
-            let ret = await runner.call('$$open_fresh', [unit, stampsText]);
+            let ret = await runner.$$openFresh(unit, stampsText);
             return ret;
         }
         catch (err) {
@@ -43,7 +43,7 @@ export const router: Router = Router({ mergeParams: true });
         if (runner.isTuidOpen(tuid) === false) return;
         // maps: tab分隔的map名字
         let ret:{[key:string]: any} = {};
-        let tuidRet = await runner.call(tuid, [unit, undefined, id]);
+        let tuidRet = await runner.unitUserCall(tuid, unit, undefined, id);
         ret[tuid] = tuidRet;
         if (maps !== undefined) {
             for (let m of maps) {
@@ -68,7 +68,7 @@ export const router: Router = Router({ mergeParams: true });
         if (runner.isTuidOpen(tuid) === false) return;
         // maps: tab分隔的map名字
         let suffix = (all===true? '$id':'$main');
-        let ret = await runner.call(tuid + suffix, [unit, undefined, id]);
+        let ret = await runner.unitUserCall(tuid + suffix, unit, undefined, id);
         return ret;
     });
 
@@ -81,13 +81,13 @@ export const router: Router = Router({ mergeParams: true });
         if (runner.isTuidOpen(tuid) === false) return;
         // maps: tab分隔的map名字
         let suffix = (all===true? '$id':'$main');
-        return await runner.call(`${tuid}_${div}${suffix}`, [unit, undefined, ownerId, id]);
+        return await runner.unitUserCall(`${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
     });
 
     post(router, '/bus',
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, faces, faceUnitMessages} = body;
-        let ret = await runner.call('GetBusMessages', [unit, undefined, faces, faceUnitMessages]);
+        let ret = await runner.unitUserCall('GetBusMessages', unit, undefined, faces, faceUnitMessages);
         console.log('$unitx/open/bus - GetBusMessages - ', ret);
         return ret;
     });
@@ -96,7 +96,7 @@ export const router: Router = Router({ mergeParams: true });
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, face, queue} = body;
         if (queue === undefined) queue = busQueueSeed();
-        let ret = await runner.call('BusMessageFromQueue', [unit, undefined, face, queue]);
+        let ret = await runner.unitUserCall('BusMessageFromQueue', unit, undefined, face, queue);
         if (ret.length === 0) return;
         return ret[0];
     });
@@ -114,8 +114,7 @@ export const router: Router = Router({ mergeParams: true });
         data += '\t';
         data += message + '\n';
         */
-        let ret = await runner.call('SaveBusMessage', [unit, undefined, face, from, sourceId, message]);
-        //let ret = await runner.call('SaveBusMessage', [unit, undefined, data]);
+        let ret = await runner.unitUserCall('SaveBusMessage', unit, undefined, face, from, sourceId, message);
         return ret;
     });
 })(router);

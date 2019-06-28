@@ -11,7 +11,7 @@ export async function actionProcess(unit:number, user:number, name:string, db:st
     console.log('action process param: ', data);
     let result = await runner.action(name, unit, user, data);
     let returns = schema.returns;
-    let {hasSend, busFaces} = run;
-    let actionReturn = await afterAction(db, runner, unit, returns, hasSend, busFaces, result);
+    let {hasSend,  busFaces, templets} = run;
+    let actionReturn = await afterAction(db, runner, unit, returns, hasSend, busFaces, templets, result);
     return actionReturn;
 };

@@ -78,13 +78,13 @@ async function syncTuids(runner:Runner):Promise<void> {
                         let {maps} = syncTuid; // tuid, 随后 tab 分隔的 map
                         try {
                             for (;;) {
-                                let ids = await runner.call(tuid + '$sync0', [unit]);
+                                let ids = await runner.unitCall(tuid + '$sync0', unit);
                                 if (ids.length === 0) break;
                                 for (let idRet of ids) {
                                     await syncId(runner, openApi, unit, idRet.id, tuid, maps);
                                 }
                             }
-                            await runner.call(tuid + '$sync_set', [unit, undefined, undefined, 0]);
+                            await runner.unitUserCall(tuid + '$sync_set', unit, undefined, undefined, 0);
                         }
                         catch (err) {
                             debugger;
@@ -115,7 +115,7 @@ async function syncTuids(runner:Runner):Promise<void> {
                             let {id, stamp} = row;
                             await syncId(runner, openApi, unit, id, tuid, maps);
                             if (stamp > stampMax) stampMax = stamp;
-                            await runner.call(tuid + '$sync_set', [unit, stampMax, id, undefined]);
+                            await runner.unitCall(tuid + '$sync_set', unit, stampMax, id, undefined);
                         }
                     }
                     catch (err) {

@@ -190,9 +190,10 @@ class MyDbServer extends dbServer_1.DbServer {
     }
 }
 exports.MyDbServer = MyDbServer;
-function castField(field, next) {
+const castField = (field, next) => {
     switch (field.type) {
         default: return next();
+        case 'DATE':
         case 'DATETIME': return castDate(field);
     }
     /*
@@ -205,12 +206,13 @@ function castField(field, next) {
     }
     return next();
     */
-}
+};
 // 确保服务器里面保存的时间是UTC时间
 const timezoneOffset = new Date().getTimezoneOffset() * 60000;
 function castDate(field) {
     // 这个地方也许有某种方法加速吧
     let d = new Date(new Date(field.string()).getTime() - timezoneOffset);
+    //let ret = d.toLocaleString();
     return d;
 }
 //# sourceMappingURL=my.js.map

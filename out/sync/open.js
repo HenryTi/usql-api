@@ -92,14 +92,14 @@ function syncTuids(runner) {
                             let { maps } = syncTuid; // tuid, 随后 tab 分隔的 map
                             try {
                                 for (;;) {
-                                    let ids = yield runner.call(tuid + '$sync0', [unit]);
+                                    let ids = yield runner.unitCall(tuid + '$sync0', unit);
                                     if (ids.length === 0)
                                         break;
                                     for (let idRet of ids) {
                                         yield syncId(runner, openApi, unit, idRet.id, tuid, maps);
                                     }
                                 }
-                                yield runner.call(tuid + '$sync_set', [unit, undefined, undefined, 0]);
+                                yield runner.unitUserCall(tuid + '$sync_set', unit, undefined, undefined, 0);
                             }
                             catch (err) {
                                 debugger;
@@ -131,7 +131,7 @@ function syncTuids(runner) {
                                 yield syncId(runner, openApi, unit, id, tuid, maps);
                                 if (stamp > stampMax)
                                     stampMax = stamp;
-                                yield runner.call(tuid + '$sync_set', [unit, stampMax, id, undefined]);
+                                yield runner.unitCall(tuid + '$sync_set', unit, stampMax, id, undefined);
                             }
                         }
                         catch (err) {
