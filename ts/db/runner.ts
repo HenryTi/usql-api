@@ -44,7 +44,6 @@ export class Runner {
     private setting: {[name:string]: any};
     private entityColl: {[id:number]: EntityAccess};
     private uqId: number;
-    private hasUnit: boolean;
     private sheetRuns: {[sheet:string]: SheetRun};
 
     uqOwner: string;
@@ -54,6 +53,7 @@ export class Runner {
     importTuids:any[];
     // tuid的值，第一个是tuidname，随后用tab分隔的map
     froms: {[from:string]:{[tuid:string]:{tuid?:string, maps?:string[], tuidObj?:any, mapObjs?:{[map:string]:any}}}};
+    hasUnit: boolean;
 
     constructor(db:Db) {
         this.db = db;

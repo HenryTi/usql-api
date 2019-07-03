@@ -50,6 +50,7 @@ class Jobs {
                 let start = 0;
                 let ret = yield runner.call('$message_queue_get', [start]);
                 for (let row of ret) {
+                    // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
                     let { $unit, id, type, content, tries, update_time } = row;
                     if (tries > 0 && new Date().getTime() - update_time.getTime() < tries * 10 * 60 * 10000)
                         continue;
@@ -91,49 +92,19 @@ class Jobs {
     email(runner, unit, id, type, content, tries, update_time) {
         return __awaiter(this, void 0, void 0, function* () {
             let values = this.values(content);
-            let { $isUser, $to, $cc, $bcc } = values;
+            let { $isUser, $to, $cc, $bcc, $templet } = values;
             if (!$to)
                 return;
-            let schema = runner.getSchema(values.$templet);
+            let schema = runner.getSchema($templet);
+            if (schema === undefined) {
+                debugger;
+                throw 'something wrong';
+            }
             let { subjectSections, sections } = schema.call;
             let subject = stringFromSections(subjectSections, values);
             let body = stringFromSections(sections, values);
-            /*
-            let to: string = $to, cc: string = $cc, bcc:string = $bcc;
-            if ($isUser === '1') {
-                let toIds = $to.split(',');
-                let ids:string[] = [...toIds];
-                let ccIds:string[], bccIds:string[];
-                if ($cc) {
-                    ccIds = $cc.split(',');
-                    ids.push(...ccIds);
-                }
-                if ($bcc) {
-                    bccIds = $bcc.split(',');
-                    ids.push(...bccIds);
-                }
-                let users = await centerApi.users(_.uniq(ids).join(','));
-                let userColl:any = {};
-                for (let user of users) {
-                    let {id} = user;
-                    userColl[String(id)] = user;
-                }
-                let emails:string[] = [];
-                for (let id of ids) emails.push(userColl[id].email);
-                to = emails.join(',');
-                if (ccIds) {
-                    emails = [];
-                    for (let id of ccIds) emails.push(userColl[id].email);
-                    cc = emails.join(',');
-                }
-                if (bccIds) {
-                    emails = [];
-                    for (let id of bccIds) emails.push(userColl[id].email);
-                    bcc = emails.join(',');
-                }
-            }
-            console.log(subject, body);
-            */
+            let procMessageQueueSet = 'tv_$message_queue_set';
+            let finish;
             try {
                 yield core_1.centerApi.send({
                     isUser: $isUser === '1',
@@ -144,17 +115,17 @@ class Jobs {
                     cc: $cc,
                     bcc: $bcc
                 });
-                //await sendEmail(subject, body, to, cc, bcc);
-                yield runner.call('$message_queue_set', [id, 1]); // success
+                finish = 1; // success
             }
             catch (err) {
                 if (tries < 5) {
-                    yield runner.call('$message_queue_set', [id, 2]); // retry
+                    finish = 2; // retry
                 }
                 else {
-                    yield runner.call('$message_queue_set', [id, 3]); // fail
+                    finish = 3; // fail
                 }
             }
+            yield runner.unitCall(procMessageQueueSet, unit, id, finish);
         });
     }
 }

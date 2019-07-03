@@ -40,8 +40,9 @@ export class Jobs {
             let runner = await getRunner(uq);
             await runner.init();
             let start = 0;
-            let ret = await runner.call('$message_queue_get', [start]);
+            let ret = await runner.call('$message_queue_get',  [start]);
             for (let row of ret) {
+                // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
                 let {$unit, id, type, content, tries, update_time} = row;
                 if (tries > 0 && new Date().getTime() - update_time.getTime() < tries * 10 * 60 * 10000) continue;
                 switch (type) {
@@ -81,48 +82,19 @@ export class Jobs {
 
     private async email(runner:Runner, unit:number, id:number, type:string, content:string, tries:number, update_time:Date): Promise<void> {
         let values = this.values(content);
-        let {$isUser, $to, $cc, $bcc} = values;
+        let {$isUser, $to, $cc, $bcc, $templet} = values;
         if (!$to) return;
-        let schema = runner.getSchema(values.$templet);
+        let schema = runner.getSchema($templet);
+        if (schema === undefined) {
+            debugger;
+            throw 'something wrong';
+        }
         let {subjectSections, sections} = schema.call;
         let subject = stringFromSections(subjectSections, values);
         let body = stringFromSections(sections, values);
-        /*
-        let to: string = $to, cc: string = $cc, bcc:string = $bcc;
-        if ($isUser === '1') {
-            let toIds = $to.split(',');
-            let ids:string[] = [...toIds];
-            let ccIds:string[], bccIds:string[];
-            if ($cc) {
-                ccIds = $cc.split(',');
-                ids.push(...ccIds);
-            }
-            if ($bcc) {
-                bccIds = $bcc.split(',');
-                ids.push(...bccIds);
-            }
-            let users = await centerApi.users(_.uniq(ids).join(','));
-            let userColl:any = {};
-            for (let user of users) {
-                let {id} = user;
-                userColl[String(id)] = user;
-            }
-            let emails:string[] = [];
-            for (let id of ids) emails.push(userColl[id].email);
-            to = emails.join(',');
-            if (ccIds) {
-                emails = [];
-                for (let id of ccIds) emails.push(userColl[id].email);
-                cc = emails.join(',');
-            }
-            if (bccIds) {
-                emails = [];
-                for (let id of bccIds) emails.push(userColl[id].email);
-                bcc = emails.join(',');
-            }
-        }
-        console.log(subject, body);
-        */
+
+        let procMessageQueueSet = 'tv_$message_queue_set';
+        let finish:number;
         try {
             await centerApi.send({
                 isUser: $isUser === '1',
@@ -133,17 +105,17 @@ export class Jobs {
                 cc: $cc,
                 bcc: $bcc
             });
-            //await sendEmail(subject, body, to, cc, bcc);
-            await runner.call('$message_queue_set', [id, 1]); // success
+            finish = 1; // success
         }
         catch (err) {
             if (tries < 5) {
-                await runner.call('$message_queue_set', [id, 2]); // retry
+                finish = 2; // retry
             }
             else {
-                await runner.call('$message_queue_set', [id, 3]); // fail
+                finish = 3;  // fail
             }
         }
+        await runner.unitCall(procMessageQueueSet, unit, id, finish); 
     }
 }
 
