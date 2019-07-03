@@ -18,12 +18,23 @@ const maxMillis = 100;
 const ER_LOCK_WAIT_TIMEOUT = 1205;
 const ER_LOCK_TIMEOUT = 1213;
 const ER_LOCK_DEADLOCK = 1213;
+const pools = [];
+function getPool(dbConfig) {
+    for (let p of pools) {
+        let { config, pool } = p;
+        if (_.isEqual(dbConfig, config) === true)
+            return pool;
+    }
+    let conf = _.clone(dbConfig);
+    conf.typeCast = castField;
+    let newPool = mysql_1.createPool(conf);
+    pools.push({ config: dbConfig, pool: newPool });
+    return newPool;
+}
 class MyDbServer extends dbServer_1.DbServer {
     constructor(dbConfig) {
         super();
-        let conf = _.clone(dbConfig);
-        conf.typeCast = castField;
-        this.pool = mysql_1.createPool(conf);
+        this.pool = getPool(dbConfig);
     }
     exec(sql, values) {
         return __awaiter(this, void 0, void 0, function* () {

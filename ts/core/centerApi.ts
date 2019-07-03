@@ -52,6 +52,27 @@ class CenterApi extends Fetch {
     async userIdFromName(user:string):Promise<number> {
         return await this.get('open/user-id-from-name', {user: user});
     }
+
+    /*
+    // \t 分隔的ids组
+    async users(ids:string):Promise<any> {
+        return await this.post('open/users', {ids: ids});
+    }*/
+
+    async send(param: SendParameter):Promise<void> {
+        return await this.post('send', param);
+    }
 }
+
+interface SendParameter {
+    isUser:boolean;
+    type: string;
+    subject:string;
+    body:string;
+    to:string;
+    cc:string; 
+    bcc:string
+};
+
 
 export const centerApi = new CenterApi();

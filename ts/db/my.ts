@@ -11,14 +11,32 @@ const ER_LOCK_WAIT_TIMEOUT = 1205;
 const ER_LOCK_TIMEOUT = 1213;
 const ER_LOCK_DEADLOCK = 1213;
 
+interface DbConfigPool {
+    config: any;
+    pool: Pool;
+}
+
+const pools: DbConfigPool[] = [];
+
+function getPool(dbConfig: any): Pool {
+    for (let p of pools) {
+        let {config, pool} = p;
+        if (_.isEqual(dbConfig, config) === true) return pool;
+    }
+    let conf = _.clone(dbConfig);
+    conf.typeCast = castField;
+    let newPool = createPool(conf);
+    pools.push({config: dbConfig, pool: newPool});
+    return newPool;
+}
+
 export class MyDbServer extends DbServer {
     private pool: Pool;
     constructor(dbConfig:any) {
         super();
-        let conf = _.clone(dbConfig);
-        conf.typeCast = castField;
-        this.pool = createPool(conf);
+        this.pool = getPool(dbConfig);
     }
+
     private async exec(sql:string, values:any[]): Promise<any> {
         return await new Promise<any>((resolve, reject) => {
             let retryCount = 0;

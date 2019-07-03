@@ -11,6 +11,7 @@ import { startSync } from './sync';
 import { authJoint } from './core/auth';
 import { initResDb } from './res/resDb';
 import { Runner, getRunner } from './db';
+import { Jobs } from './jobs';
 
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (async function () {
@@ -112,7 +113,8 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
             host,
             user);
 
-        await importData();
+        //await importData();
+        Jobs.start();
     });
 })();
 

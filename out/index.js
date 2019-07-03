@@ -20,6 +20,7 @@ const sync_1 = require("./sync");
 const auth_1 = require("./core/auth");
 const resDb_1 = require("./res/resDb");
 const db_1 = require("./db");
+const jobs_1 = require("./jobs");
 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
@@ -106,7 +107,8 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
             let connection = config.get("connection");
             let { host, user } = connection;
             console.log('process.env.NODE_ENV: %s\nDB host: %s, user: %s', process.env.NODE_ENV, host, user);
-            yield importData();
+            //await importData();
+            jobs_1.Jobs.start();
         }));
     });
 })();

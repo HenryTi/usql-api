@@ -23,7 +23,7 @@ export class Db {
     getDbName():string {return this.dbName}
     private createDbServer() {
         let sqlType = config.get<string>('sqlType');
-        let dbConfig;
+        let dbConfig:any;
         if (this.dbName === const_unitx && isDevelopment === true) {
             if (config.has(const_connectionUnitx) === true) {
                 dbConfig = config.get<any>(const_connectionUnitx);
@@ -41,6 +41,9 @@ export class Db {
     async exists(): Promise<boolean> {
         if (this.isExists === true) return true;
         return this.isExists = await this.dbServer.existsDatabase(this.dbName);
+    }
+    async uqs(): Promise<any[]> {
+        return await this.dbServer.uqDbs();
     }
     async sql(sql:string, params:any[]): Promise<any> {
         console.log(this.dbName, ' sql: ', params.join(','))

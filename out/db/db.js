@@ -46,6 +46,11 @@ class Db {
             return this.isExists = yield this.dbServer.existsDatabase(this.dbName);
         });
     }
+    uqs() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.dbServer.uqDbs();
+        });
+    }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(this.dbName, ' sql: ', params.join(','));

@@ -69,6 +69,17 @@ class CenterApi extends fetch_1.Fetch {
             return yield this.get('open/user-id-from-name', { user: user });
         });
     }
+    /*
+    // \t 分隔的ids组
+    async users(ids:string):Promise<any> {
+        return await this.post('open/users', {ids: ids});
+    }*/
+    send(param) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.post('send', param);
+        });
+    }
 }
+;
 exports.centerApi = new CenterApi();
 //# sourceMappingURL=centerApi.js.map
