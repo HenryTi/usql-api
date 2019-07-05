@@ -4,7 +4,6 @@ import * as bodyParser from 'body-parser';
 import * as config from 'config';
 import {router, settingRouter, openRouter} from './router';
 import {router as resRouter, initResPath} from './res/router';
-//import {router as jointRouter} from './router/joint';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
 import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } from './queue';
 import { startSync } from './sync';

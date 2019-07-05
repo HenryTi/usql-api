@@ -204,8 +204,8 @@ exports.MyDbServer = MyDbServer;
 const castField = (field, next) => {
     switch (field.type) {
         default: return next();
-        case 'DATE':
-        case 'DATETIME': return castDate(field);
+        case 'DATE': return castDate(field);
+        case 'DATETIME': return castDateTime(field);
     }
     /*
     if (( field.type === "BIT" ) && ( field.length === 1 ) ) {
@@ -222,8 +222,17 @@ const castField = (field, next) => {
 const timezoneOffset = new Date().getTimezoneOffset() * 60000;
 function castDate(field) {
     // 这个地方也许有某种方法加速吧
-    let d = new Date(new Date(field.string()).getTime() - timezoneOffset);
-    //let ret = d.toLocaleString();
+    let text = field.string();
+    return text;
+}
+function castDateTime(field) {
+    // 这个地方也许有某种方法加速吧
+    let text = field.string();
+    if (text === null)
+        return null;
+    if (text === undefined)
+        return undefined;
+    let d = new Date(new Date(text).getTime() - timezoneOffset);
     return d;
 }
 //# sourceMappingURL=my.js.map

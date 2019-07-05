@@ -13,7 +13,6 @@ const bodyParser = require("body-parser");
 const config = require("config");
 const router_1 = require("./router");
 const router_2 = require("./res/router");
-//import {router as jointRouter} from './router/joint';
 const core_1 = require("./core");
 const queue_1 = require("./queue");
 const sync_1 = require("./sync");
