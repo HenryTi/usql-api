@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import {getDb, Db} from './db';
+import {getDb, Db, isDevelopment} from './db';
 import { packReturns } from '../core/packReturn';
 import { ImportData } from './importData';
 import { packParam } from '../core/packParam';
@@ -389,7 +389,7 @@ export class Runner {
         this.uqId = setting['uqId'] as number;
         this.hasUnit = !(setting['hasUnit'] as number === 0);
         
-        console.log('init schemas: ', this.uq, this.author, this.version);
+        if (isDevelopment===true) console.log('init schemas: ', this.uq, this.author, this.version);
 
         this.schemas = {};
         this.accessSchemaArr = [];
@@ -599,7 +599,7 @@ export class Runner {
 
             }
         }
-        console.log('access: ', this.access);
+        if (isDevelopment===true) console.log('access: ', this.access);
     }
     private async getUserAccess(unit:number, user:number):Promise<number[]> {
         let result = await this.unitUserTablesFromProc('tv_$get_access', unit, user);

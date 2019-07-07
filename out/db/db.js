@@ -15,7 +15,10 @@ const const_connectionUnitx = 'connection_$unitx';
 const const_connection = 'connection';
 const const_development = 'development';
 const const_unitx = '$unitx';
-exports.isDevelopment = (process.env.NODE_ENV === const_development);
+exports.isDevelopment = (function () {
+    return false;
+    //return (process.env.NODE_ENV === const_development);
+})();
 class Db {
     constructor(dbName) {
         this.dbName = dbName;
@@ -53,31 +56,36 @@ class Db {
     }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(this.dbName, ' sql: ', params.join(','));
+            if (exports.isDevelopment === true)
+                console.log(this.dbName, ' sql: ', params.join(','));
             return yield this.dbServer.sql(this.dbName, sql, params);
         });
     }
     call(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(this.dbName, '.', proc, ': ', params.join(','));
+            if (exports.isDevelopment === true)
+                console.log(this.dbName, '.', proc, ': ', params.join(','));
             return yield this.dbServer.call(this.dbName, proc, params);
         });
     }
     callEx(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(this.dbName, '.', proc, ': ', params.join(','));
+            if (exports.isDevelopment === true)
+                console.log(this.dbName, '.', proc, ': ', params.join(','));
             return yield this.dbServer.callEx(this.dbName, proc, params);
         });
     }
     tableFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(this.dbName, '.', proc, ': ', params.join(','));
+            if (exports.isDevelopment === true)
+                console.log(this.dbName, '.', proc, ': ', params.join(','));
             return yield this.dbServer.tableFromProc(this.dbName, proc, params);
         });
     }
     tablesFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(this.dbName, '.', proc, ': ', params.join(','));
+            if (exports.isDevelopment === true)
+                console.log(this.dbName, '.', proc, ': ', params.join(','));
             return yield this.dbServer.tablesFromProc(this.dbName, proc, params);
         });
     }

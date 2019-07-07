@@ -491,7 +491,8 @@ class Runner {
             this.version = setting['version'];
             this.uqId = setting['uqId'];
             this.hasUnit = !(setting['hasUnit'] === 0);
-            console.log('init schemas: ', this.uq, this.author, this.version);
+            if (db_1.isDevelopment === true)
+                console.log('init schemas: ', this.uq, this.author, this.version);
             this.schemas = {};
             this.accessSchemaArr = [];
             this.tuids = {};
@@ -715,7 +716,8 @@ class Runner {
                     };
             }
         }
-        console.log('access: ', this.access);
+        if (db_1.isDevelopment === true)
+            console.log('access: ', this.access);
     }
     getUserAccess(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {

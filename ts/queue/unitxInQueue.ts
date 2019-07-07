@@ -1,8 +1,12 @@
 import * as bull from 'bull';
+/*
 import { BusMessage, ClientMessage, Message, SheetMessage } from '../core/model';
 import { pushToClient } from './pushToClient';
 import { processSheetMessage } from './processSheetMessage';
 import { processBusMessage } from './processBusMessage';
+*/
+import { Message } from '../core/model';
+import { processMessage } from './processMessage';
 
 const unitxInQueueName = 'unitx-in-queue';
 let unitxInQueue:bull.Queue<Message>;
@@ -19,11 +23,7 @@ export function startUnitxInQueue(redis:any) {
     unitxInQueue.process(async function(job, done) {
         try {
             let {data} = job;
-            switch (data.type) {
-                case 'sheet': await processSheetMessage(data as SheetMessage); break;
-                case 'msg': await pushToClient(data as ClientMessage); break;
-                case 'bus': await processBusMessage(data as BusMessage); break;
-            }
+            await processMessage(data as Message);
             done();
         }
         catch(err) {

@@ -8,7 +8,10 @@ const const_connection = 'connection';
 const const_development = 'development';
 const const_unitx = '$unitx';
 
-export const isDevelopment = (process.env.NODE_ENV === const_development);
+export const isDevelopment = (function ():boolean {
+    return false;
+    //return (process.env.NODE_ENV === const_development);
+})();
 
 export class Db {
     private dbName: string;
@@ -46,23 +49,23 @@ export class Db {
         return await this.dbServer.uqDbs();
     }
     async sql(sql:string, params:any[]): Promise<any> {
-        console.log(this.dbName, ' sql: ', params.join(','))
+        if (isDevelopment===true) console.log(this.dbName, ' sql: ', params.join(','))
         return await this.dbServer.sql(this.dbName, sql, params);
     }
     async call(proc:string, params:any[]): Promise<any> {
-        console.log(this.dbName, '.', proc, ': ', params.join(','))
+        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params.join(','))
         return await this.dbServer.call(this.dbName, proc, params);
     }
     async callEx(proc:string, params:any[]): Promise<any> {
-        console.log(this.dbName, '.', proc, ': ', params.join(','))
+        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params.join(','))
         return await this.dbServer.callEx(this.dbName, proc, params);
     }
     async tableFromProc(proc:string, params:any[]): Promise<any[]> {
-        console.log(this.dbName, '.', proc, ': ', params.join(','))
+        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params.join(','))
         return await this.dbServer.tableFromProc(this.dbName, proc, params);
     }
     async tablesFromProc(proc:string, params:any[]): Promise<any[][]> {
-        console.log(this.dbName, '.', proc, ': ', params.join(','))
+        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params.join(','))
         return await this.dbServer.tablesFromProc(this.dbName, proc, params);
     }
     async createDatabase(): Promise<void> {

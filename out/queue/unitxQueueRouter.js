@@ -10,7 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const runner_1 = require("../db/runner");
-const unitxInQueue_1 = require("./unitxInQueue");
+//import { queueUnitxIn } from './unitxInQueue';
+const processMessage_1 = require("./processMessage");
 exports.unitxQueueRouter = express_1.Router();
 exports.unitxQueueRouter.post('/', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     try {
@@ -25,7 +26,8 @@ exports.unitxQueueRouter.post('/', (req, res, next) => __awaiter(this, void 0, v
                 tos = [from];
             sheetMessage.to = tos;
         }
-        yield unitxInQueue_1.queueUnitxIn(msg);
+        //await queueUnitxIn(msg);
+        yield processMessage_1.processMessage(msg);
         console.log('await queueUnitxIn(msg)', msg);
         res.json({
             ok: true,

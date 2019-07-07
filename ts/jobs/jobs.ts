@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Runner, getRunner } from "../db";
-import { Db } from "../db/db";
+import { Db, isDevelopment } from "../db/db";
 import { centerApi } from "../core";
 import { sendToUnitx } from '../core/sendToUnitx';
 import { BusMessage } from '../queue';
@@ -14,7 +14,7 @@ export class Jobs {
 
     private run = async (): Promise<void> => {
         try {
-            console.log('Jobs run at: ', new Date());
+            if (isDevelopment===true) console.log('Jobs run at: ', new Date());
             let db = new Db(undefined);
             let uqs = await db.uqDbs();
             for (let uqRow of uqs) {
@@ -48,11 +48,11 @@ export class Jobs {
                             await this.processItem(runner, $unit, id, action, subject, content, update_time);
                             break;
                         case 'email':
-                            await this.email(runner, $unit, id, content, update_time);
+                            await this.email(runner, $unit, id, content);
                             finish = 1;
                             break;
                         case 'bus':
-                            await this.bus(runner, $unit, id, subject, content, update_time);
+                            await this.bus(runner, $unit, id, subject, content);
                             break;
                     }
                 }
@@ -68,7 +68,7 @@ export class Jobs {
             }
         }
         catch (err) {
-            console.log(err);
+            if (isDevelopment===true) console.log(err);
         }
     }
 
@@ -92,7 +92,7 @@ export class Jobs {
         return json;
     }
 
-    private async email(runner:Runner, unit:number, id:number, content:string, update_time:Date): Promise<void> {
+    private async email(runner:Runner, unit:number, id:number, content:string): Promise<void> {
         let values = this.values(content);
         let {$isUser, $to, $cc, $bcc, $templet} = values;
         if (!$to) return;
@@ -114,19 +114,31 @@ export class Jobs {
             cc: $cc,
             bcc: $bcc
         });
-        //await runner.unitCall(procMessageQueueSet, unit, id, finish); 
     }
 
-    async bus(runner:Runner, unit:number, id:number, subject:string, content:string, update_time:Date): Promise<void> {
+    async bus(runner:Runner, unit:number, id:number, subject:string, content:string): Promise<void> {
         let parts = subject.split('/');
+        let busEntityName = parts[0];
+        let face = parts[1];
+
+        let schema = runner.getSchema(busEntityName);
+        if (schema === undefined) {
+            debugger;
+            throw 'something wrong';
+        }
+        let {schema:busSchema, busOwner, busName} = schema.call;
+
+        let {uqOwner, uq} = runner;
+
+        let body = toBusMessage(busSchema, face, content);
         let message: BusMessage = {
             unit: unit,
             type: 'bus',
-            from: runner.uqOwner + '/' + runner.uq,           // from uq
-            busOwner: parts[0],
-            bus: parts[1],
-            face: parts[2],
-            body: content,
+            from: uqOwner + '/' + uq,           // from uq
+            busOwner: busOwner,
+            bus: busName,
+            face: face,
+            body: body,
         };
         await sendToUnitx(unit, message);
     }
@@ -147,4 +159,59 @@ function stringFromSections(sections:string[], values: any):string {
         }
     }
     return ret.join('');
+}
+
+function toBusMessage(busSchema:any, face:string, content:string):string {
+    let faceSchema = busSchema[face];
+    if (faceSchema === undefined) {
+        debugger;
+        throw 'something wrong';
+    }
+    let data:{[key:string]: string[]}[] = [];
+    let p = 0;
+    let part:{[key:string]: string[]};
+    for (;;) {
+        let t = content.indexOf('\t', p);
+        if (t<0) break;
+        let key = content.substring(p, t);
+        ++t;
+        let n = content.indexOf('\n', t);
+        let sec = content.substring(t, n<0? undefined: n);
+        if (key === '$') {
+            if (part !== undefined) data.push(part);
+            part = {$: [sec]};
+        }
+        else {
+            if (part !== undefined) {
+                let arr = part[key];
+                if (arr === undefined) {
+                    part[key] = arr = [];
+                }
+                arr.push(sec);
+            }
+        }
+        if (n<0) break;
+        p = n+1;
+    }
+    if (part !== undefined) data.push(part);
+
+    let {fields, arrs} = faceSchema;
+    let ret:string = '';
+    for (let item of data) {
+        ret += item['$'];
+        ret += '\n';
+        for (let arr of arrs) {
+            let arrRows = item[arr.name];
+            if (arrRows !== undefined) {
+                for (let ar of arrRows) {
+                    ret += ar;
+                    ret += '\n';
+                }
+            }
+            ret += '\n';
+        }
+        ret += '\n';
+    }
+
+    return ret;
 }

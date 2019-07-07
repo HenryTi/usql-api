@@ -20,7 +20,6 @@ const auth_1 = require("./core/auth");
 const resDb_1 = require("./res/resDb");
 const db_1 = require("./db");
 const jobs_1 = require("./jobs");
-console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
         /*
@@ -93,12 +92,12 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
         app.use('/uq/:db/', uqRouter);
         let port = config.get('port');
         console.log('port=', port);
-        let redisConfig = config.get('redis');
-        let redis = { redis: redisConfig };
-        console.log('redis:', redisConfig);
-        queue_1.startSheetQueue(redis);
-        queue_1.startToUnitxQueue(redis);
-        queue_1.startUnitxInQueue(redis);
+        //let redisConfig = config.get<any>('redis');
+        //let redis = {redis: redisConfig};
+        //console.log('redis:', redisConfig);
+        //startSheetQueue(redis);
+        //startToUnitxQueue(redis);
+        //startUnitxInQueue(redis);
         app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
             sync_1.startSync();
             yield resDb_1.initResDb();

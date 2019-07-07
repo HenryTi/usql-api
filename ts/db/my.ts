@@ -49,22 +49,22 @@ export class MyDbServer extends DbServer {
                 case +ER_LOCK_WAIT_TIMEOUT:
                 case +ER_LOCK_TIMEOUT:
                 case +ER_LOCK_DEADLOCK:
-                    if (isDevelopment) console.error(`ERROR - ${ err.errno } ${ err.message }`);
+                    if (isDevelopment===true) console.error(`ERROR - ${ err.errno } ${ err.message }`);
                     ++retryCount;
                     if (retryCount > retries) {    
-                        if (isDevelopment) console.error(`Out of retries so just returning the error.`);
+                        if (isDevelopment===true) console.error(`Out of retries so just returning the error.`);
                         reject(err);
                         return;
                     }    
                     let sleepMillis = Math.floor((Math.random()*maxMillis)+minMillis)
-                    if (isDevelopment) {
+                    if (isDevelopment===true) {
                         console.error('Retrying request with',retries-retryCount,'retries left. Timeout',sleepMillis);
                     }    
                     return setTimeout(() => {
                         this.pool.query(sql, values, handleResponse);
                     }, sleepMillis);
                 default:
-                    if (isDevelopment) console.error(`Standard error - ${ err.toString() }`);
+                    if (isDevelopment===true) console.error(`Standard error - ${ err.toString() }`);
                     reject(err);
                     return;
                 }

@@ -12,7 +12,6 @@ import { initResDb } from './res/resDb';
 import { Runner, getRunner } from './db';
 import { Jobs } from './jobs';
 
-console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
 (async function () {
     /*
     let db = undefined;
@@ -93,13 +92,13 @@ console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
     let port = config.get<number>('port');
     console.log('port=', port);
 
-    let redisConfig = config.get<any>('redis');
-    let redis = {redis: redisConfig};
-    console.log('redis:', redisConfig);
+    //let redisConfig = config.get<any>('redis');
+    //let redis = {redis: redisConfig};
+    //console.log('redis:', redisConfig);
 
-    startSheetQueue(redis);
-    startToUnitxQueue(redis);
-    startUnitxInQueue(redis);
+    //startSheetQueue(redis);
+    //startToUnitxQueue(redis);
+    //startUnitxInQueue(redis);
 
     app.listen(port, async ()=>{
         startSync();
