@@ -11,12 +11,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const db_1 = require("../db");
 const db_2 = require("../db/db");
 const core_1 = require("../core");
-/*
-var nodemailer = require('nodemailer');
-let emailOptions = config.get<any>('emailOptions');
-const from = emailOptions.from; // 'noreply1@jkchemical.com';
-const transporter = nodemailer.createTransport(emailOptions.options);
-*/
 class Jobs {
     constructor() {
         this.run = () => __awaiter(this, void 0, void 0, function* () {
@@ -51,15 +45,15 @@ class Jobs {
                 let ret = yield runner.call('$message_queue_get', [start]);
                 for (let row of ret) {
                     // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
-                    let { $unit, id, type, content, tries, update_time } = row;
+                    let { $unit, id, action, subject, content, tries, update_time } = row;
                     if (tries > 0 && new Date().getTime() - update_time.getTime() < tries * 10 * 60 * 10000)
                         continue;
-                    switch (type) {
+                    switch (action) {
                         default:
-                            yield this.processItem(runner, $unit, id, type, content, tries, update_time);
+                            yield this.processItem(runner, $unit, id, action, subject, content, tries, update_time);
                             break;
                         case 'email':
-                            yield this.email(runner, $unit, id, type, content, tries, update_time);
+                            yield this.email(runner, $unit, id, action, subject, content, tries, update_time);
                             break;
                     }
                 }
@@ -69,7 +63,7 @@ class Jobs {
             }
         });
     }
-    processItem(runner, unit, id, type, content, tries, update_time) {
+    processItem(runner, unit, id, action, subject, content, tries, update_time) {
         return __awaiter(this, void 0, void 0, function* () {
             let json = {};
             let items = content.split('\n\t\n');
@@ -77,7 +71,7 @@ class Jobs {
                 let parts = item.split('\n');
                 json[parts[0]] = parts[1];
             }
-            console.log('queue item: ', unit, id, type, json);
+            console.log('queue item: ', unit, id, action, subject, json);
         });
     }
     values(content) {
@@ -89,7 +83,7 @@ class Jobs {
         }
         return json;
     }
-    email(runner, unit, id, type, content, tries, update_time) {
+    email(runner, unit, id, action, subject, content, tries, update_time) {
         return __awaiter(this, void 0, void 0, function* () {
             let values = this.values(content);
             let { $isUser, $to, $cc, $bcc, $templet } = values;
@@ -101,16 +95,16 @@ class Jobs {
                 throw 'something wrong';
             }
             let { subjectSections, sections } = schema.call;
-            let subject = stringFromSections(subjectSections, values);
-            let body = stringFromSections(sections, values);
+            let mailSubject = stringFromSections(subjectSections, values);
+            let mailBody = stringFromSections(sections, values);
             let procMessageQueueSet = 'tv_$message_queue_set';
             let finish;
             try {
                 yield core_1.centerApi.send({
                     isUser: $isUser === '1',
                     type: 'email',
-                    subject: subject,
-                    body: body,
+                    subject: mailSubject,
+                    body: mailBody,
                     to: $to,
                     cc: $cc,
                     bcc: $bcc
@@ -147,27 +141,4 @@ function stringFromSections(sections, values) {
     }
     return ret.join('');
 }
-/*
-async function sendEmail(subject:string, body:string, to:string, cc:string, bcc:string): Promise<void> {
-    return new Promise((resolve, reject) => {
-        // send mail with defined transport object
-        let mailOptions = {
-            from: from,
-            to: to,
-            cc: cc,
-            bcc: bcc,
-            subject: subject,
-            text: body,
-            html: body,
-        };
-        transporter.sendMail(mailOptions, function(error:any, info:any){
-            if(error){
-                return reject(error);
-            }
-            console.log('Message sent: ' + info.response);
-            resolve();
-        });
-    });
-}
-*/
 //# sourceMappingURL=jobs.js.map

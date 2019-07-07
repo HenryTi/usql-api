@@ -1,4 +1,4 @@
-import { ClientMessage } from "./model";
+import { ClientMessage } from "../core/model";
 import { centerApi } from "../core";
 
 // 现在简单的把client message推送给center，由center来分发给client

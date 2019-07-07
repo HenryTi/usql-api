@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { centerApi, Fetch, urlSetUnitxHost } from '../core';
+import { centerApi, Fetch, urlSetUnitxHost } from '.';
 import { Message } from './model';
 
 export async function sendToUnitx(unit:number, msg:Message):Promise<number[]> {

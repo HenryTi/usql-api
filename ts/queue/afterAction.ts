@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { packBus } from '../core';
 import { Runner } from '../db/runner';
 import { pushToClient } from './pushToClient';
-import { MsgMessage, BusMessage } from './model';
+import { MsgMessage, BusMessage } from '../core/model';
 import { queueToUnitx } from './toUnitxQueue';
 
 // 2018-02-25
@@ -31,13 +31,14 @@ export async function afterAction(
     runner: Runner, 
     unit:number,
     schemaReturns:any[],
-    hasMessage:boolean,
+    //hasMessage:boolean,
     busFaces:SchemaBusFace[],
-    templetFaces:TempletFace[],
+    //templetFaces:TempletFace[],
     result:any):Promise<any>
 {
     let nFaceCount:number = 0;
     let resArrs = result as any[][];
+    /*
     if (hasMessage === true) {
         // 处理发送信息
         let messages = resArrs.shift();
@@ -66,7 +67,7 @@ export async function afterAction(
             console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(infoMsg));
         }
     }
-
+    */
     if (busFaces !== undefined && busFaces.length > 0) {
         // 发送face消息，子系统间的数据交换
         for (let busFace of busFaces) {
@@ -102,7 +103,7 @@ export async function afterAction(
             }
         }
     }
-
+    /*
     if (templetFaces !== undefined) {
         for (let templetFace of templetFaces) {
             let res = resArrs.shift();
@@ -113,12 +114,14 @@ export async function afterAction(
             }
         }
     }
+    */
 
     let arr0 = result[0];
     if (arr0 === undefined || arr0.length === 0) return;
     return arr0[0];
 }
 
+/*
 async function sendTemplet(templetRun: any, values:any) {
     let {subjectSections, sections} = templetRun;
     let {$method, $to, $cc, $bcc} = values;
@@ -130,3 +133,4 @@ async function sendTemplet(templetRun: any, values:any) {
 function stringFromSections(sections:string[], values: any):string {
     if (sections === undefined) return;
 }
+*/

@@ -1,4 +1,4 @@
-import { SheetMessage } from "./model";
+import { SheetMessage } from "../core/model";
 import { getRunner } from "../db";
 import { pushToClient } from "./pushToClient";
 import { actionProcess } from "../router/actionProcess";

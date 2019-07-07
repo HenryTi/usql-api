@@ -43,7 +43,6 @@ export class Runner {
     private buses:{[url:string]:any}; // 直接查找bus
     private setting: {[name:string]: any};
     private entityColl: {[id:number]: EntityAccess};
-    private uqId: number;
     private sheetRuns: {[sheet:string]: SheetRun};
 
     uqOwner: string;
@@ -54,6 +53,7 @@ export class Runner {
     // tuid的值，第一个是tuidname，随后用tab分隔的map
     froms: {[from:string]:{[tuid:string]:{tuid?:string, maps?:string[], tuidObj?:any, mapObjs?:{[map:string]:any}}}};
     hasUnit: boolean;
+    uqId: number;
 
     constructor(db:Db) {
         this.db = db;

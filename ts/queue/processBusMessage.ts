@@ -1,4 +1,4 @@
-import { BusMessage } from "./model";
+import { BusMessage } from "../core/model";
 import { consts } from '../core';
 import { getRunner, Runner } from "../db";
 import { busQueuehour, busQueueSeedFromHour } from "../core/busQueueSeed";

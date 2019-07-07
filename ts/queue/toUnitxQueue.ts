@@ -1,6 +1,6 @@
 import * as bull from 'bull';
-import { Message, SheetMessage } from './model';
-import { sendToUnitx } from './sendToUnitx';
+import { Message, SheetMessage } from '../core/model';
+import { sendToUnitx } from '../core/sendToUnitx';
 import { getRunner } from '../db/runner';
 
 const toUnitxQueueName = 'to-unitx-queue';

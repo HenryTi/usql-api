@@ -174,7 +174,7 @@ export class MyDbServer extends DbServer {
 const castField:TypeCast = (field, next) =>{
     switch (field.type) {
         default: return next();
-        case 'DATE': return castDate(field);       
+        case 'DATE': return castDate(field);
         case 'DATETIME': return castDateTime(field);
     }
     /*

@@ -2,7 +2,7 @@ import * as bull from 'bull';
 import * as _ from 'lodash';
 import { getRunner } from '../db/runner';
 import { afterAction } from './afterAction';
-import { SheetAct, SheetMessage } from './model';
+import { SheetAct, SheetMessage } from '../core/model';
 import { queueToUnitx } from './toUnitxQueue';
 
 const sheetQueueName = 'sheet-queue';
@@ -80,17 +80,19 @@ async function doSheetAct(sheetAct:SheetAct):Promise<void> {
             await queueToUnitx(sheetMsg);
         }
 
-        let hasMessage:boolean, busFaces:any[], templets:any[];
+        //let hasMessage:boolean, templets:any[];
+        let busFaces:any[];
         if (Array.isArray(actionRun) === true) {
-            hasMessage = false;
+            //hasMessage = false;
             busFaces = actionRun;
         }
         else {
-            hasMessage = actionRun.hasSend;
+            //hasMessage = actionRun.hasSend;
             busFaces = actionRun.busFaces;
-            templets = actionRun.templets;
+            //templets = actionRun.templets;
         }
-        await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, templets, result);
+        //await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, templets, result);
+        await afterAction(db, runner, unit, actionSchema.returns, busFaces, result);
     }
     catch(err) {
         console.log('sheet Act error: ', err);

@@ -9,19 +9,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
-const pushToClient_1 = require("./pushToClient");
 const toUnitxQueue_1 = require("./toUnitxQueue");
-function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, templetFaces, result) {
+function afterAction(db, runner, unit, schemaReturns, 
+//hasMessage:boolean,
+busFaces, 
+//templetFaces:TempletFace[],
+result) {
     return __awaiter(this, void 0, void 0, function* () {
         let nFaceCount = 0;
         let resArrs = result;
+        /*
         if (hasMessage === true) {
             // 处理发送信息
             let messages = resArrs.shift();
             // 将执行操作action，或者sheetAction产生的消息，发送给最终用户的客户端
             for (let row of messages) {
-                let { from, to, msg, action, data, notify } = row;
-                let infoMsg = {
+                let {from, to, msg, action, data, notify} = row;
+                let infoMsg:MsgMessage = {
                     unit: unit,
                     type: 'msg',
                     from: from,
@@ -37,12 +41,13 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, temp
                         data: data,
                     }
                 };
-                yield pushToClient_1.pushToClient(infoMsg);
+                await pushToClient(infoMsg);
                 //await pushToCenter(wsMsg);
                 //await queueUnitx(wsMsg);
                 console.log('ws send db=%s unit=%s to=%s msg=%s', db, unit, to, JSON.stringify(infoMsg));
             }
         }
+        */
         if (busFaces !== undefined && busFaces.length > 0) {
             // 发送face消息，子系统间的数据交换
             for (let busFace of busFaces) {
@@ -78,16 +83,18 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, temp
                 }
             }
         }
+        /*
         if (templetFaces !== undefined) {
             for (let templetFace of templetFaces) {
                 let res = resArrs.shift();
-                let { templet } = templetFace;
+                let {templet} = templetFace;
                 let templetSchema = runner.getSchema(templet).schema;
                 for (let row of res) {
-                    yield sendTemplet(templetSchema, row);
+                    await sendTemplet(templetSchema, row);
                 }
             }
         }
+        */
         let arr0 = result[0];
         if (arr0 === undefined || arr0.length === 0)
             return;
@@ -95,16 +102,17 @@ function afterAction(db, runner, unit, schemaReturns, hasMessage, busFaces, temp
     });
 }
 exports.afterAction = afterAction;
-function sendTemplet(templetRun, values) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let { subjectSections, sections } = templetRun;
-        let { $method, $to, $cc, $bcc } = values;
-        let subject = stringFromSections(subjectSections, values);
-        let body = stringFromSections(sections, values);
-    });
+/*
+async function sendTemplet(templetRun: any, values:any) {
+    let {subjectSections, sections} = templetRun;
+    let {$method, $to, $cc, $bcc} = values;
+    let subject = stringFromSections(subjectSections, values);
+    let body = stringFromSections(sections, values);
+
 }
-function stringFromSections(sections, values) {
-    if (sections === undefined)
-        return;
+
+function stringFromSections(sections:string[], values: any):string {
+    if (sections === undefined) return;
 }
+*/
 //# sourceMappingURL=afterAction.js.map

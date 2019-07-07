@@ -2,13 +2,8 @@ import * as _ from 'lodash';
 import { Runner, getRunner } from "../db";
 import { Db } from "../db/db";
 import { centerApi } from "../core";
-
-/*
-var nodemailer = require('nodemailer');
-let emailOptions = config.get<any>('emailOptions');
-const from = emailOptions.from; // 'noreply1@jkchemical.com';
-const transporter = nodemailer.createTransport(emailOptions.options);
-*/
+import { sendToUnitx } from '../core/sendToUnitx';
+import { BusMessage } from '../queue';
 
 export class Jobs {
     static start(): void {
@@ -41,18 +36,35 @@ export class Jobs {
             await runner.init();
             let start = 0;
             let ret = await runner.call('$message_queue_get',  [start]);
+            let procMessageQueueSet = 'tv_$message_queue_set';
             for (let row of ret) {
                 // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
-                let {$unit, id, type, content, tries, update_time} = row;
+                let {$unit, id, action, subject, content, tries, update_time} = row;
                 if (tries > 0 && new Date().getTime() - update_time.getTime() < tries * 10 * 60 * 10000) continue;
-                switch (type) {
-                    default:
-                        await this.processItem(runner, $unit, id, type, content, tries, update_time);
-                        break;
-                    case 'email':
-                        await this.email(runner, $unit, id, type, content, tries, update_time);
-                        break;
+                let finish:number;
+                try {
+                    switch (action) {
+                        default:
+                            await this.processItem(runner, $unit, id, action, subject, content, update_time);
+                            break;
+                        case 'email':
+                            await this.email(runner, $unit, id, content, update_time);
+                            finish = 1;
+                            break;
+                        case 'bus':
+                            await this.bus(runner, $unit, id, subject, content, update_time);
+                            break;
+                    }
                 }
+                catch (err) {
+                    if (tries < 5) {
+                        finish = 2; // retry
+                    }
+                    else {
+                        finish = 3;  // fail
+                    }
+                }
+                if (finish !== undefined) await runner.unitCall(procMessageQueueSet, $unit, id, finish); 
             }
         }
         catch (err) {
@@ -60,14 +72,14 @@ export class Jobs {
         }
     }
 
-    private async processItem(runner:Runner, unit:number, id:number, type:string, content:string, tries:number, update_time:Date): Promise<void> {
+    private async processItem(runner:Runner, unit:number, id:number, action:string, subject:string, content:string, update_time:Date): Promise<void> {
         let json:any = {};
         let items = content.split('\n\t\n');
         for (let item of items) {
             let parts = item.split('\n');
             json[parts[0]] = parts[1];
         }
-        console.log('queue item: ', unit, id, type, json);
+        console.log('queue item: ', unit, id, action, subject, json);
     }
 
     private values(content:string):any {
@@ -80,7 +92,7 @@ export class Jobs {
         return json;
     }
 
-    private async email(runner:Runner, unit:number, id:number, type:string, content:string, tries:number, update_time:Date): Promise<void> {
+    private async email(runner:Runner, unit:number, id:number, content:string, update_time:Date): Promise<void> {
         let values = this.values(content);
         let {$isUser, $to, $cc, $bcc, $templet} = values;
         if (!$to) return;
@@ -90,32 +102,33 @@ export class Jobs {
             throw 'something wrong';
         }
         let {subjectSections, sections} = schema.call;
-        let subject = stringFromSections(subjectSections, values);
-        let body = stringFromSections(sections, values);
+        let mailSubject = stringFromSections(subjectSections, values);
+        let mailBody = stringFromSections(sections, values);
 
-        let procMessageQueueSet = 'tv_$message_queue_set';
-        let finish:number;
-        try {
-            await centerApi.send({
-                isUser: $isUser === '1',
-                type: 'email',
-                subject: subject,
-                body: body,
-                to: $to,
-                cc: $cc,
-                bcc: $bcc
-            });
-            finish = 1; // success
-        }
-        catch (err) {
-            if (tries < 5) {
-                finish = 2; // retry
-            }
-            else {
-                finish = 3;  // fail
-            }
-        }
-        await runner.unitCall(procMessageQueueSet, unit, id, finish); 
+        await centerApi.send({
+            isUser: $isUser === '1',
+            type: 'email',
+            subject: mailSubject,
+            body: mailBody,
+            to: $to,
+            cc: $cc,
+            bcc: $bcc
+        });
+        //await runner.unitCall(procMessageQueueSet, unit, id, finish); 
+    }
+
+    async bus(runner:Runner, unit:number, id:number, subject:string, content:string, update_time:Date): Promise<void> {
+        let parts = subject.split('/');
+        let message: BusMessage = {
+            unit: unit,
+            type: 'bus',
+            from: runner.uqOwner + '/' + runner.uq,           // from uq
+            busOwner: parts[0],
+            bus: parts[1],
+            face: parts[2],
+            body: content,
+        };
+        await sendToUnitx(unit, message);
     }
 }
 
@@ -135,26 +148,3 @@ function stringFromSections(sections:string[], values: any):string {
     }
     return ret.join('');
 }
-/*
-async function sendEmail(subject:string, body:string, to:string, cc:string, bcc:string): Promise<void> {
-    return new Promise((resolve, reject) => {
-        // send mail with defined transport object
-        let mailOptions = {
-            from: from,
-            to: to,
-            cc: cc,
-            bcc: bcc,
-            subject: subject,
-            text: body,
-            html: body,
-        };
-        transporter.sendMail(mailOptions, function(error:any, info:any){
-            if(error){
-                return reject(error);
-            }
-            console.log('Message sent: ' + info.response);
-            resolve();
-        });
-    });
-}
-*/

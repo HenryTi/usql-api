@@ -89,17 +89,19 @@ function doSheetAct(sheetAct) {
                 };
                 yield toUnitxQueue_1.queueToUnitx(sheetMsg);
             }
-            let hasMessage, busFaces, templets;
+            //let hasMessage:boolean, templets:any[];
+            let busFaces;
             if (Array.isArray(actionRun) === true) {
-                hasMessage = false;
+                //hasMessage = false;
                 busFaces = actionRun;
             }
             else {
-                hasMessage = actionRun.hasSend;
+                //hasMessage = actionRun.hasSend;
                 busFaces = actionRun.busFaces;
-                templets = actionRun.templets;
+                //templets = actionRun.templets;
             }
-            yield afterAction_1.afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, templets, result);
+            //await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, templets, result);
+            yield afterAction_1.afterAction(db, runner, unit, actionSchema.returns, busFaces, result);
         }
         catch (err) {
             console.log('sheet Act error: ', err);

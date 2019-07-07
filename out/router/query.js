@@ -11,7 +11,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const entityProcess_1 = require("./entityProcess");
 function default_1(router) {
-    //router.post('/query/:name', async (req:Request, res:Response) => {
     entityProcess_1.entityPost(router, 'query', '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let params = [];
         let fields = schema.fields;
@@ -23,7 +22,6 @@ function default_1(router) {
         let data = core_1.packReturn(schema, result);
         return data;
     }));
-    //router.post('/page/:name', async (req:Request, res:Response) => {
     entityProcess_1.entityPost(router, 'query', '-page/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let pageStart = body['$pageStart'];
         if (pageStart !== undefined) {

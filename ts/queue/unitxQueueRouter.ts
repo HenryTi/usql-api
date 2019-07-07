@@ -1,5 +1,5 @@
 import {Router, Request, Response, NextFunction} from 'express';
-import { Message, SheetMessage } from './model';
+import { Message, SheetMessage } from '../core/model';
 import { getRunner } from '../db/runner';
 import { queueUnitxIn } from './unitxInQueue';
 
