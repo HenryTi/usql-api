@@ -16,8 +16,7 @@ const const_connection = 'connection';
 const const_development = 'development';
 const const_unitx = '$unitx';
 exports.isDevelopment = (function () {
-    return false;
-    //return (process.env.NODE_ENV === const_development);
+    return (process.env.NODE_ENV === const_development);
 })();
 class Db {
     constructor(dbName) {

@@ -54,6 +54,7 @@ export class Runner {
     froms: {[from:string]:{[tuid:string]:{tuid?:string, maps?:string[], tuidObj?:any, mapObjs?:{[map:string]:any}}}};
     hasUnit: boolean;
     uqId: number;
+    uniqueUnit: number;
 
     constructor(db:Db) {
         this.db = db;
@@ -136,7 +137,7 @@ export class Runner {
     }
 
     async $$openFresh(unit:number, stampsText:string) {
-        return await this.unitCall('$$open_fresh', unit, stampsText);
+        return await this.unitCall('tv_$$open_fresh', unit, stampsText);
     }
 
     async setTimezone(unit:number, user:number): Promise<void> {
@@ -379,8 +380,13 @@ export class Runner {
         let setting:{[name:string]:string|number} = {};
         for (let row of settingTable) {
             let v = row.value;
-            let n = Number(v);
-            setting[row.name] = isNaN(n)===true? v : n;
+            if (v === null) {
+                setting[row.name] = null;
+            }
+            else {
+                let n = Number(v);
+                setting[row.name] = isNaN(n)===true? v : n;
+            }
         }
         this.uqOwner = setting['uqOwner'] as string; 
         this.uq = setting['uq'] as string; 
@@ -388,8 +394,11 @@ export class Runner {
         this.version = setting['version'] as string;
         this.uqId = setting['uqId'] as number;
         this.hasUnit = !(setting['hasUnit'] as number === 0);
+
+        let uu = setting['uniqueUnit'];
+        this.uniqueUnit = uu? uu as number: 0;
         
-        if (isDevelopment===true) console.log('init schemas: ', this.uq, this.author, this.version);
+        if (isDevelopment) console.log('init schemas: ', this.uq, this.author, this.version);
 
         this.schemas = {};
         this.accessSchemaArr = [];
@@ -599,10 +608,10 @@ export class Runner {
 
             }
         }
-        if (isDevelopment===true) console.log('access: ', this.access);
+        if (isDevelopment) console.log('access: ', this.access);
     }
     private async getUserAccess(unit:number, user:number):Promise<number[]> {
-        let result = await this.unitUserTablesFromProc('tv_$get_access', unit, user);
+        let result = await this.db.tablesFromProc('tv_$get_access', [unit]);
         let ret = _.union(result[0].map(v => v.entity), result[1].map(v => v.entity));
         return ret;
     }

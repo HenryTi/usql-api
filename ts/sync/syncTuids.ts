@@ -1,21 +1,6 @@
 import { packParam } from '../core';
-import { Db } from '../db/db';
-import { getRunner, Runner } from '../db';
+import { Runner } from '../db';
 import { getOpenApi, OpenApi } from './openApi';
-import { syncBus } from './bus';
-
-const dbRun = new Db(undefined);
-
-export async function syncDbs():Promise<void> {
-    let dbs = await dbRun.uqDbs();
-    for (let row of dbs) {
-        let {db} = row;
-        if ((db as string).substr(0, 1) === '$') continue;
-        console.log('---- sync db: ' + db);
-        await syncFroms(db);
-    }
-    return;
-}
 
 interface SyncRow {
     unit: number;
@@ -26,14 +11,7 @@ interface SyncRow {
     stamp: number;
 }
 
-async function syncFroms(db:string):Promise<void> {
-    let runner = await getRunner(db);
-    if (runner === undefined) return;
-    await syncTuids(runner);
-    await syncBus(runner);
-}
-
-async function syncTuids(runner:Runner):Promise<void> {
+export async function syncTuids(runner:Runner):Promise<void> {
     let {froms} = runner;
     if (froms === undefined) return;
     try {
@@ -111,11 +89,13 @@ async function syncTuids(runner:Runner):Promise<void> {
                     }
                     let stampMax = 0;
                     try {
-                        for (let row of tuidIdTable) {
-                            let {id, stamp} = row;
-                            await syncId(runner, openApi, unit, id, tuid, maps);
-                            if (stamp > stampMax) stampMax = stamp;
-                            await runner.unitCall(tuid + '$sync_set', unit, stampMax, id, undefined);
+                        if (tuidIdTable !== undefined) {
+                            for (let row of tuidIdTable) {
+                                let {id, stamp} = row;
+                                await syncId(runner, openApi, unit, id, tuid, maps);
+                                if (stamp > stampMax) stampMax = stamp;
+                                await runner.unitCall(tuid + '$sync_set', unit, stampMax, id, undefined);
+                            }
                         }
                     }
                     catch (err) {

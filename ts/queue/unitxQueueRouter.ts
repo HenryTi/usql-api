@@ -3,6 +3,7 @@ import { Message, SheetMessage } from '../core/model';
 import { getRunner } from '../db/runner';
 //import { queueUnitxIn } from './unitxInQueue';
 import { processMessage } from './processMessage';
+import { consts } from '../core';
 
 export const unitxQueueRouter: Router = Router();
 
@@ -34,11 +35,10 @@ unitxQueueRouter.post('/', async (req: Request, res: Response, next: NextFunctio
     }
 });
 
-const $unitx = '$unitx';
 // 之前用 getSheetTo 查询，现在改名为 getEntityAccess
 const uqGetSheetTo = 'getEntityAccess';
 async function getSheetTos(sheetMessage:SheetMessage):Promise<number[]> {
-    let runner = await getRunner($unitx);
+    let runner = await getRunner(consts.$unitx);
     let {unit, body} = sheetMessage;
     let {state, user, name, no, discription, uq } = body;
     // 新单只能发给做单人

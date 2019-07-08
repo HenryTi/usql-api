@@ -66,8 +66,10 @@ class MyDbServer extends dbServer_1.DbServer {
                                 this.pool.query(sql, values, handleResponse);
                             }, sleepMillis);
                         default:
-                            if (db_1.isDevelopment === true)
-                                console.error(`Standard error - ${err.toString()}`);
+                            if (db_1.isDevelopment === true) {
+                                console.error(err);
+                                console.error(sql);
+                            }
                             reject(err);
                             return;
                     }

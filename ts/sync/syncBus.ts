@@ -25,11 +25,12 @@ export async function syncBus(runner: Runner) {
         let syncFaces = await getSyncFaces(runner);
         if (syncFaces === undefined) return;
         let {faceColl, syncFaceArr} = syncFaces;
+        let db = runner.getDb();
         for (let syncFace of syncFaceArr) {
             let {unit, faces, faceUnitMessages} = syncFace;
             let openApi = await getOpenApi(consts.$$$unitx, unit);
             let ret = await openApi.bus(unit, faces, faceUnitMessages);
-            if (ret.length === 0) break;
+            if (ret.length === 0) continue;
             for (let row of ret) {
                 let {face:faceUrl, id:msgId, body} = row;
                 let {bus, face, id:faceId} = faceColl[faceUrl];

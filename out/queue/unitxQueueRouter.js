@@ -12,6 +12,7 @@ const express_1 = require("express");
 const runner_1 = require("../db/runner");
 //import { queueUnitxIn } from './unitxInQueue';
 const processMessage_1 = require("./processMessage");
+const core_1 = require("../core");
 exports.unitxQueueRouter = express_1.Router();
 exports.unitxQueueRouter.post('/', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
     try {
@@ -41,12 +42,11 @@ exports.unitxQueueRouter.post('/', (req, res, next) => __awaiter(this, void 0, v
         });
     }
 }));
-const $unitx = '$unitx';
 // 之前用 getSheetTo 查询，现在改名为 getEntityAccess
 const uqGetSheetTo = 'getEntityAccess';
 function getSheetTos(sheetMessage) {
     return __awaiter(this, void 0, void 0, function* () {
-        let runner = yield runner_1.getRunner($unitx);
+        let runner = yield runner_1.getRunner(core_1.consts.$unitx);
         let { unit, body } = sheetMessage;
         let { state, user, name, no, discription, uq } = body;
         // 新单只能发给做单人

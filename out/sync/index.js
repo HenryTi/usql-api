@@ -8,25 +8,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const open_1 = require("./open");
-let isRunning = false;
-function sync() {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (isRunning === true)
-            return;
-        isRunning = true;
-        console.log('sync start at ', new Date().toLocaleTimeString());
-        yield open_1.syncDbs();
-        isRunning = false;
-    });
-}
+const syncDbs_1 = require("./syncDbs");
 function startSync() {
-    if (process.env.NODE_ENV === 'development') {
-        //setTimeout(sync, 3000);
-    }
-    else {
-        setInterval(sync, 60000);
-    }
+    let timeout = process.env.NODE_ENV === 'development' ?
+        6000 : 60 * 1000;
+    setTimeout(sync, timeout);
 }
 exports.startSync = startSync;
+function sync() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            console.log('sync at: ' + new Date().toLocaleTimeString());
+            yield syncDbs_1.syncDbs();
+        }
+        catch (err) {
+            console.error('sync error: ', err);
+        }
+        finally {
+            setTimeout(sync, 60 * 1000);
+        }
+    });
+}
 //# sourceMappingURL=index.js.map

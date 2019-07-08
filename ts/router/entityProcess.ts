@@ -1,6 +1,7 @@
 import { Runner } from "../db";
 import { Router, Request, Response } from "express";
 import { checkRunner, User, unknownEntity, validEntity } from "./router";
+import { consts } from "../core";
 
 type Processer = (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any) => Promise<any>;
 
@@ -26,12 +27,12 @@ async function entityProcess(req:Request, res:Response, entityType:string, proce
     try {
         let userToken:User = (req as any).user;
         let {db, id:userId, unit} = userToken;
-        if (db === undefined) db = '$unitx';
+        if (db === undefined) db = consts.$unitx;
         let runner = await checkRunner(db, res);
         if (runner === undefined) return;
         let {params} = req;
         let {name} = params;
-        let call, run;
+        let call:any, run:any;
         if (name !== undefined) {
             let schema = runner.getSchema(name);
             if (schema === undefined) return unknownEntity(res, name);

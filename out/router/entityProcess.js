@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const router_1 = require("./router");
+const core_1 = require("../core");
 function entityPost(router, entityType, path, processer) {
     router.post(`/${entityType}${path}`, (req, res) => __awaiter(this, void 0, void 0, function* () {
         yield entityProcess(req, res, entityType, processer, false);
@@ -36,7 +37,7 @@ function entityProcess(req, res, entityType, processer, isGet) {
             let userToken = req.user;
             let { db, id: userId, unit } = userToken;
             if (db === undefined)
-                db = '$unitx';
+                db = core_1.consts.$unitx;
             let runner = yield router_1.checkRunner(db, res);
             if (runner === undefined)
                 return;

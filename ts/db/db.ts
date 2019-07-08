@@ -9,8 +9,7 @@ const const_development = 'development';
 const const_unitx = '$unitx';
 
 export const isDevelopment = (function ():boolean {
-    return false;
-    //return (process.env.NODE_ENV === const_development);
+    return (process.env.NODE_ENV === const_development);
 })();
 
 export class Db {

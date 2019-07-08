@@ -1,20 +1,20 @@
-import { syncDbs } from "./open";
-
-let isRunning = false;
-
-async function sync() {
-    if (isRunning === true) return;
-    isRunning = true;
-    console.log('sync start at ', new Date().toLocaleTimeString());
-    await syncDbs();
-    isRunning = false;
-}
+import { syncDbs } from "./syncDbs";
 
 export function startSync() {
-    if (process.env.NODE_ENV === 'development') {
-        //setTimeout(sync, 3000);
+    let timeout:number = process.env.NODE_ENV === 'development'?
+        6000 : 60*1000;
+    setTimeout(sync, timeout);
+}
+
+async function sync() {
+    try {
+        console.log('sync at: ' + new Date().toLocaleTimeString());
+        await syncDbs();
     }
-    else {
-        setInterval(sync, 60000);
+    catch (err) {
+        console.error('sync error: ', err);
+    }
+    finally {
+        setTimeout(sync, 60*1000);
     }
 }

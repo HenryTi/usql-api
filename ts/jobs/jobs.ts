@@ -9,7 +9,7 @@ export class Jobs {
     static start(): void {
         setTimeout(async ()=>{
             await new Jobs().run()
-        }, 5*1000);
+        }, 3*1000);
     }
 
     private run = async (): Promise<void> => {
@@ -40,6 +40,7 @@ export class Jobs {
             for (let row of ret) {
                 // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
                 let {$unit, id, action, subject, content, tries, update_time} = row;
+                if (!$unit) $unit = runner.uniqueUnit;
                 if (tries > 0 && new Date().getTime() - update_time.getTime() < tries * 10 * 60 * 10000) continue;
                 let finish:number;
                 try {
@@ -53,6 +54,7 @@ export class Jobs {
                             break;
                         case 'bus':
                             await this.bus(runner, $unit, id, subject, content);
+                            finish = 1;
                             break;
                     }
                 }
@@ -117,6 +119,8 @@ export class Jobs {
     }
 
     async bus(runner:Runner, unit:number, id:number, subject:string, content:string): Promise<void> {
+        if (!unit) return;
+        
         let parts = subject.split('/');
         let busEntityName = parts[0];
         let face = parts[1];

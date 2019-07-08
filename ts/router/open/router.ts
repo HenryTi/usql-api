@@ -68,7 +68,7 @@ export const router: Router = Router({ mergeParams: true });
         if (runner.isTuidOpen(tuid) === false) return;
         // maps: tab分隔的map名字
         let suffix = (all===true? '$id':'$main');
-        let ret = await runner.unitUserCall(tuid + suffix, unit, undefined, id);
+        let ret = await runner.unitUserCall('tv_' + tuid + suffix, unit, undefined, id);
         return ret;
     });
 
@@ -81,14 +81,14 @@ export const router: Router = Router({ mergeParams: true });
         if (runner.isTuidOpen(tuid) === false) return;
         // maps: tab分隔的map名字
         let suffix = (all===true? '$id':'$main');
-        return await runner.unitUserCall(`${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
+        return await runner.unitUserCall(`tv_${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
     });
 
     post(router, '/bus',
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, faces, faceUnitMessages} = body;
-        let ret = await runner.unitUserCall('GetBusMessages', unit, undefined, faces, faceUnitMessages);
-        console.log('$unitx/open/bus - GetBusMessages - ', ret);
+        let ret = await runner.unitUserCall('tv_GetBusMessages', unit, undefined, faces, faceUnitMessages);
+        console.log(`$unitx/open/bus - GetBusMessages - ${ret}`);
         return ret;
     });
 
@@ -96,7 +96,7 @@ export const router: Router = Router({ mergeParams: true });
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, face, queue} = body;
         if (queue === undefined) queue = busQueueSeed();
-        let ret = await runner.unitUserCall('BusMessageFromQueue', unit, undefined, face, queue);
+        let ret = await runner.unitUserCall('tv_BusMessageFromQueue', unit, undefined, face, queue);
         if (ret.length === 0) return;
         return ret[0];
     });
@@ -114,7 +114,7 @@ export const router: Router = Router({ mergeParams: true });
         data += '\t';
         data += message + '\n';
         */
-        let ret = await runner.unitUserCall('SaveBusMessage', unit, undefined, face, from, sourceId, message);
+        let ret = await runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
         return ret;
     });
 })(router);

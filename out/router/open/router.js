@@ -68,7 +68,7 @@ exports.router = express_1.Router({ mergeParams: true });
             return;
         // maps: tab分隔的map名字
         let suffix = (all === true ? '$id' : '$main');
-        let ret = yield runner.unitUserCall(tuid + suffix, unit, undefined, id);
+        let ret = yield runner.unitUserCall('tv_' + tuid + suffix, unit, undefined, id);
         return ret;
     }));
     post(router, '/tuid-div/:tuid/:div', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
@@ -80,19 +80,19 @@ exports.router = express_1.Router({ mergeParams: true });
             return;
         // maps: tab分隔的map名字
         let suffix = (all === true ? '$id' : '$main');
-        return yield runner.unitUserCall(`${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
+        return yield runner.unitUserCall(`tv_${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
     }));
     post(router, '/bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, faces, faceUnitMessages } = body;
-        let ret = yield runner.unitUserCall('GetBusMessages', unit, undefined, faces, faceUnitMessages);
-        console.log('$unitx/open/bus - GetBusMessages - ', ret);
+        let ret = yield runner.unitUserCall('tv_GetBusMessages', unit, undefined, faces, faceUnitMessages);
+        console.log(`$unitx/open/bus - GetBusMessages - ${ret}`);
         return ret;
     }));
     post(router, '/joint-read-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, face, queue } = body;
         if (queue === undefined)
             queue = busQueueSeed_1.busQueueSeed();
-        let ret = yield runner.unitUserCall('BusMessageFromQueue', unit, undefined, face, queue);
+        let ret = yield runner.unitUserCall('tv_BusMessageFromQueue', unit, undefined, face, queue);
         if (ret.length === 0)
             return;
         return ret[0];
@@ -109,7 +109,7 @@ exports.router = express_1.Router({ mergeParams: true });
         data += '\t';
         data += message + '\n';
         */
-        let ret = yield runner.unitUserCall('SaveBusMessage', unit, undefined, face, from, sourceId, message);
+        let ret = yield runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
         return ret;
     }));
 })(exports.router);

@@ -151,7 +151,7 @@ class Runner {
     }
     $$openFresh(unit, stampsText) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.unitCall('$$open_fresh', unit, stampsText);
+            return yield this.unitCall('tv_$$open_fresh', unit, stampsText);
         });
     }
     setTimezone(unit, user) {
@@ -482,8 +482,13 @@ class Runner {
             let setting = {};
             for (let row of settingTable) {
                 let v = row.value;
-                let n = Number(v);
-                setting[row.name] = isNaN(n) === true ? v : n;
+                if (v === null) {
+                    setting[row.name] = null;
+                }
+                else {
+                    let n = Number(v);
+                    setting[row.name] = isNaN(n) === true ? v : n;
+                }
             }
             this.uqOwner = setting['uqOwner'];
             this.uq = setting['uq'];
@@ -491,7 +496,9 @@ class Runner {
             this.version = setting['version'];
             this.uqId = setting['uqId'];
             this.hasUnit = !(setting['hasUnit'] === 0);
-            if (db_1.isDevelopment === true)
+            let uu = setting['uniqueUnit'];
+            this.uniqueUnit = uu ? uu : 0;
+            if (db_1.isDevelopment)
                 console.log('init schemas: ', this.uq, this.author, this.version);
             this.schemas = {};
             this.accessSchemaArr = [];
@@ -716,12 +723,12 @@ class Runner {
                     };
             }
         }
-        if (db_1.isDevelopment === true)
+        if (db_1.isDevelopment)
             console.log('access: ', this.access);
     }
     getUserAccess(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            let result = yield this.unitUserTablesFromProc('tv_$get_access', unit, user);
+            let result = yield this.db.tablesFromProc('tv_$get_access', [unit]);
             let ret = _.union(result[0].map(v => v.entity), result[1].map(v => v.entity));
             return ret;
         });
