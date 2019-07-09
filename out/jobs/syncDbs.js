@@ -1,3 +1,4 @@
+/*
 import { Db } from '../db/db';
 import { getRunner, Runner } from '../db';
 import { syncBus } from './syncBus';
@@ -23,3 +24,5 @@ async function syncFroms(db:string):Promise<void> {
     await syncBus(runner);
 }
 
+*/ 
+//# sourceMappingURL=syncDbs.js.map

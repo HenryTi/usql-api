@@ -4,12 +4,17 @@ import { Db, isDevelopment } from "../db/db";
 import { centerApi } from "../core";
 import { sendToUnitx } from '../core/sendToUnitx';
 import { BusMessage } from '../queue';
+import { syncTuids } from './syncTuids';
+import { syncBus } from './syncBus';
+
+let firstRun: number = isDevelopment === true? 3000 : 30*1000;
+let runGap: number = isDevelopment === true? 15*1000 : 30*1000;
 
 export class Jobs {
     static start(): void {
         setTimeout(async ()=>{
-            await new Jobs().run()
-        }, 3*1000);
+            await new Jobs().run();
+        }, firstRun);
     }
 
     private run = async (): Promise<void> => {
@@ -18,58 +23,68 @@ export class Jobs {
             let db = new Db(undefined);
             let uqs = await db.uqDbs();
             for (let uqRow of uqs) {
-                let uq = uqRow.db;
-                await this.processQueue(uq);
+                let runner = await getRunner(uqRow.db);
+                if (runner === undefined) continue;
+                await runner.init();
+                await this.processQueue(runner);
+                await syncBus(runner);
+                await syncTuids(runner);
             }
         }
         catch (err) {
             console.error(err);
         }
         finally {
-            setTimeout(this.run, 30*1000);
+            setTimeout(this.run, runGap);
         }
     }
 
-    private async processQueue(uq: string): Promise<void> {
+    private async processQueue(runner: Runner): Promise<void> {
         try {
-            let runner = await getRunner(uq);
-            await runner.init();
             let start = 0;
-            let ret = await runner.call('$message_queue_get',  [start]);
-            let procMessageQueueSet = 'tv_$message_queue_set';
-            for (let row of ret) {
-                // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
-                let {$unit, id, action, subject, content, tries, update_time} = row;
-                if (!$unit) $unit = runner.uniqueUnit;
-                if (tries > 0 && new Date().getTime() - update_time.getTime() < tries * 10 * 60 * 10000) continue;
-                let finish:number;
-                try {
-                    switch (action) {
-                        default:
-                            await this.processItem(runner, $unit, id, action, subject, content, update_time);
-                            break;
-                        case 'email':
-                            await this.email(runner, $unit, id, content);
-                            finish = 1;
-                            break;
-                        case 'bus':
-                            await this.bus(runner, $unit, id, subject, content);
-                            finish = 1;
-                            break;
+            for (;;) {
+                let ret = await runner.call('$message_queue_get',  [start]);
+                if (ret.length === 0) break;
+                let procMessageQueueSet = 'tv_$message_queue_set';
+                for (let row of ret) {
+                    // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
+                    let {$unit, id, action, subject, content, tries, update_time, now} = row;
+                    start = id;
+                    if (!$unit) $unit = runner.uniqueUnit;
+                    if (tries > 0) {
+                        // 上次尝试之后十分钟内不尝试
+                        if (now - update_time < tries * 10 * 60) continue;
                     }
+                    let finish:number;
+                    try {
+                        switch (action) {
+                            default:
+                                await this.processItem(runner, $unit, id, action, subject, content, update_time);
+                                break;
+                            case 'email':
+                                await this.email(runner, $unit, id, content);
+                                finish = 1;
+                                break;
+                            case 'bus':
+                                await this.bus(runner, $unit, id, subject, content);
+                                finish = 1;
+                                break;
+                        }
+                    }
+                    catch (err) {
+                        if (tries < 5) {
+                            finish = 2; // retry
+                        }
+                        else {
+                            finish = 3;  // fail
+                        }
+                    }
+                    if (finish !== undefined) await runner.unitCall(procMessageQueueSet, $unit, id, finish); 
                 }
-                catch (err) {
-                    if (tries < 5) {
-                        finish = 2; // retry
-                    }
-                    else {
-                        finish = 3;  // fail
-                    }
-                }
-                if (finish !== undefined) await runner.unitCall(procMessageQueueSet, $unit, id, finish); 
             }
         }
         catch (err) {
+            //debugger;
             if (isDevelopment===true) console.log(err);
         }
     }

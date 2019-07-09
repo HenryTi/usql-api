@@ -2,7 +2,7 @@ import {Router, Request, Response, NextFunction} from 'express';
 import { Message, SheetMessage } from '../core/model';
 import { getRunner } from '../db/runner';
 //import { queueUnitxIn } from './unitxInQueue';
-import { processMessage } from './processMessage';
+import { messageProcesser } from './messageProcesser';
 import { consts } from '../core';
 
 export const unitxQueueRouter: Router = Router();
@@ -20,7 +20,8 @@ unitxQueueRouter.post('/', async (req: Request, res: Response, next: NextFunctio
             sheetMessage.to = tos;
         }
         //await queueUnitxIn(msg);
-        await processMessage(msg);
+        let mp = messageProcesser(msg);
+        await mp(msg);
         console.log('await queueUnitxIn(msg)', msg);
         res.json({
             ok: true,

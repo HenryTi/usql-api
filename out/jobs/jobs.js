@@ -12,6 +12,10 @@ const db_1 = require("../db");
 const db_2 = require("../db/db");
 const core_1 = require("../core");
 const sendToUnitx_1 = require("../core/sendToUnitx");
+const syncTuids_1 = require("./syncTuids");
+const syncBus_1 = require("./syncBus");
+let firstRun = db_2.isDevelopment === true ? 3000 : 60 * 1000;
+let runGap = db_2.isDevelopment === true ? 30 * 1000 : 60 * 1000;
 class Jobs {
     constructor() {
         this.run = () => __awaiter(this, void 0, void 0, function* () {
@@ -21,67 +25,79 @@ class Jobs {
                 let db = new db_2.Db(undefined);
                 let uqs = yield db.uqDbs();
                 for (let uqRow of uqs) {
-                    let uq = uqRow.db;
-                    yield this.processQueue(uq);
+                    let runner = yield db_1.getRunner(uqRow.db);
+                    if (runner === undefined)
+                        continue;
+                    yield runner.init();
+                    yield this.processQueue(runner);
+                    yield syncBus_1.syncBus(runner);
+                    yield syncTuids_1.syncTuids(runner);
                 }
             }
             catch (err) {
                 console.error(err);
             }
             finally {
-                setTimeout(this.run, 30 * 1000);
+                setTimeout(this.run, runGap);
             }
         });
     }
     static start() {
         setTimeout(() => __awaiter(this, void 0, void 0, function* () {
             yield new Jobs().run();
-        }), 3 * 1000);
+        }), firstRun);
     }
-    processQueue(uq) {
+    processQueue(runner) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                let runner = yield db_1.getRunner(uq);
-                yield runner.init();
                 let start = 0;
-                let ret = yield runner.call('$message_queue_get', [start]);
-                let procMessageQueueSet = 'tv_$message_queue_set';
-                for (let row of ret) {
-                    // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
-                    let { $unit, id, action, subject, content, tries, update_time } = row;
-                    if (!$unit)
-                        $unit = runner.uniqueUnit;
-                    if (tries > 0 && new Date().getTime() - update_time.getTime() < tries * 10 * 60 * 10000)
-                        continue;
-                    let finish;
-                    try {
-                        switch (action) {
-                            default:
-                                yield this.processItem(runner, $unit, id, action, subject, content, update_time);
-                                break;
-                            case 'email':
-                                yield this.email(runner, $unit, id, content);
-                                finish = 1;
-                                break;
-                            case 'bus':
-                                yield this.bus(runner, $unit, id, subject, content);
-                                finish = 1;
-                                break;
+                for (;;) {
+                    let ret = yield runner.call('$message_queue_get', [start]);
+                    if (ret.length === 0)
+                        break;
+                    let procMessageQueueSet = 'tv_$message_queue_set';
+                    for (let row of ret) {
+                        // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
+                        let { $unit, id, action, subject, content, tries, update_time, now } = row;
+                        start = id;
+                        if (!$unit)
+                            $unit = runner.uniqueUnit;
+                        if (tries > 0) {
+                            // 上次尝试之后十分钟内不尝试
+                            if (now - update_time < tries * 10 * 60)
+                                continue;
                         }
+                        let finish;
+                        try {
+                            switch (action) {
+                                default:
+                                    yield this.processItem(runner, $unit, id, action, subject, content, update_time);
+                                    break;
+                                case 'email':
+                                    yield this.email(runner, $unit, id, content);
+                                    finish = 1;
+                                    break;
+                                case 'bus':
+                                    yield this.bus(runner, $unit, id, subject, content);
+                                    finish = 1;
+                                    break;
+                            }
+                        }
+                        catch (err) {
+                            if (tries < 5) {
+                                finish = 2; // retry
+                            }
+                            else {
+                                finish = 3; // fail
+                            }
+                        }
+                        if (finish !== undefined)
+                            yield runner.unitCall(procMessageQueueSet, $unit, id, finish);
                     }
-                    catch (err) {
-                        if (tries < 5) {
-                            finish = 2; // retry
-                        }
-                        else {
-                            finish = 3; // fail
-                        }
-                    }
-                    if (finish !== undefined)
-                        yield runner.unitCall(procMessageQueueSet, $unit, id, finish);
                 }
             }
             catch (err) {
+                //debugger;
                 if (db_2.isDevelopment === true)
                     console.log(err);
             }

@@ -6,7 +6,7 @@ import { processSheetMessage } from './processSheetMessage';
 import { processBusMessage } from './processBusMessage';
 */
 import { Message } from '../core/model';
-import { processMessage } from './processMessage';
+import { messageProcesser } from './messageProcesser';
 
 const unitxInQueueName = 'unitx-in-queue';
 let unitxInQueue:bull.Queue<Message>;
@@ -23,7 +23,8 @@ export function startUnitxInQueue(redis:any) {
     unitxInQueue.process(async function(job, done) {
         try {
             let {data} = job;
-            await processMessage(data as Message);
+            let mp = messageProcesser(data as Message);
+            await mp(data as Message);
             done();
         }
         catch(err) {

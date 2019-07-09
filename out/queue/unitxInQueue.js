@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const bull = require("bull");
-const processMessage_1 = require("./processMessage");
+const messageProcesser_1 = require("./messageProcesser");
 const unitxInQueueName = 'unitx-in-queue';
 let unitxInQueue;
 function queueUnitxIn(msg) {
@@ -27,7 +27,8 @@ function startUnitxInQueue(redis) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let { data } = job;
-                yield processMessage_1.processMessage(data);
+                let mp = messageProcesser_1.messageProcesser(data);
+                yield mp(data);
                 done();
             }
             catch (err) {

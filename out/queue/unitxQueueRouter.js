@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const runner_1 = require("../db/runner");
 //import { queueUnitxIn } from './unitxInQueue';
-const processMessage_1 = require("./processMessage");
+const messageProcesser_1 = require("./messageProcesser");
 const core_1 = require("../core");
 exports.unitxQueueRouter = express_1.Router();
 exports.unitxQueueRouter.post('/', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -28,7 +28,8 @@ exports.unitxQueueRouter.post('/', (req, res, next) => __awaiter(this, void 0, v
             sheetMessage.to = tos;
         }
         //await queueUnitxIn(msg);
-        yield processMessage_1.processMessage(msg);
+        let mp = messageProcesser_1.messageProcesser(msg);
+        yield mp(msg);
         console.log('await queueUnitxIn(msg)', msg);
         res.json({
             ok: true,

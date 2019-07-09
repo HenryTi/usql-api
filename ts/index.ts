@@ -6,7 +6,7 @@ import {router, settingRouter, openRouter} from './router';
 import {router as resRouter, initResPath} from './res/router';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
 import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } from './queue';
-import { startSync } from './sync';
+//import { startSync } from './sync';
 import { authJoint } from './core/auth';
 import { initResDb } from './res/resDb';
 import { Runner, getRunner } from './db';
@@ -101,7 +101,6 @@ import { Jobs } from './jobs';
     //startUnitxInQueue(redis);
 
     app.listen(port, async ()=>{
-        startSync();
         await initResDb();
         console.log('UQ-API listening on port ' + port);
         let connection = config.get<any>("connection");
