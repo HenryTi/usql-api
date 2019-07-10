@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const queue_1 = require("../queue");
 const core_1 = require("../core");
 function actionProcess(unit, user, name, db, urlParams, runner, body, schema, run) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -19,12 +18,16 @@ function actionProcess(unit, user, name, db, urlParams, runner, body, schema, ru
         }
         console.log('action process param: ', data);
         let result = yield runner.action(name, unit, user, data);
-        let returns = schema.returns;
+        //let returns = schema.returns;
         //let {hasSend,  busFaces, templets} = run;
         //let actionReturn = await afterAction(db, runner, unit, returns, hasSend, busFaces, templets, result);
-        let { busFaces } = run;
-        let actionReturn = yield queue_1.afterAction(db, runner, unit, returns, busFaces, result);
-        return actionReturn;
+        //let {busFaces} = run;
+        //let actionReturn = await afterAction(db, runner, unit, returns, busFaces, result);
+        //return actionReturn;
+        let arr0 = result[0];
+        if (arr0 === undefined || arr0.length === 0)
+            return;
+        return arr0[0];
     });
 }
 exports.actionProcess = actionProcess;

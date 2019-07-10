@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const bull = require("bull");
 const runner_1 = require("../db/runner");
-const afterAction_1 = require("./afterAction");
 const toUnitxQueue_1 = require("./toUnitxQueue");
 const sheetQueueName = 'sheet-queue';
 let sheetQueue;
@@ -100,8 +99,8 @@ function doSheetAct(sheetAct) {
                 busFaces = actionRun.busFaces;
                 //templets = actionRun.templets;
             }
-            //await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, templets, result);
-            yield afterAction_1.afterAction(db, runner, unit, actionSchema.returns, busFaces, result);
+            //old 注释 await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, templets, result);
+            //await afterAction(db, runner, unit, actionSchema.returns, busFaces, result);
         }
         catch (err) {
             console.log('sheet Act error: ', err);

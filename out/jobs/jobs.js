@@ -14,8 +14,8 @@ const core_1 = require("../core");
 const sendToUnitx_1 = require("../core/sendToUnitx");
 const syncTuids_1 = require("./syncTuids");
 const syncBus_1 = require("./syncBus");
-let firstRun = db_2.isDevelopment === true ? 3000 : 60 * 1000;
-let runGap = db_2.isDevelopment === true ? 30 * 1000 : 60 * 1000;
+let firstRun = db_2.isDevelopment === true ? 3000 : 30 * 1000;
+let runGap = db_2.isDevelopment === true ? 15 * 1000 : 30 * 1000;
 class Jobs {
     constructor() {
         this.run = () => __awaiter(this, void 0, void 0, function* () {

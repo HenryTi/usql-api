@@ -68,6 +68,7 @@ export async function afterAction(
         }
     }
     */
+   /*
     if (busFaces !== undefined && busFaces.length > 0) {
         // 发送face消息，子系统间的数据交换
         for (let busFace of busFaces) {
@@ -103,6 +104,7 @@ export async function afterAction(
             }
         }
     }
+    */
     /*
     if (templetFaces !== undefined) {
         for (let templetFace of templetFaces) {

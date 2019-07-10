@@ -111,7 +111,7 @@ import { Jobs } from './jobs';
             user);
 
         //await importData();
-        Jobs.start();
+        //Jobs.start();
     });
 })();
 

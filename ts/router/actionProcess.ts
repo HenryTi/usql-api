@@ -10,10 +10,14 @@ export async function actionProcess(unit:number, user:number, name:string, db:st
     }
     console.log('action process param: ', data);
     let result = await runner.action(name, unit, user, data);
-    let returns = schema.returns;
+    //let returns = schema.returns;
     //let {hasSend,  busFaces, templets} = run;
     //let actionReturn = await afterAction(db, runner, unit, returns, hasSend, busFaces, templets, result);
-    let {busFaces} = run;
-    let actionReturn = await afterAction(db, runner, unit, returns, busFaces, result);
-    return actionReturn;
+    //let {busFaces} = run;
+    //let actionReturn = await afterAction(db, runner, unit, returns, busFaces, result);
+    //return actionReturn;
+
+    let arr0 = result[0];
+    if (arr0 === undefined || arr0.length === 0) return;
+    return arr0[0];
 };

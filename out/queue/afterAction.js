@@ -8,8 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = require("../core");
-const toUnitxQueue_1 = require("./toUnitxQueue");
 function afterAction(db, runner, unit, schemaReturns, 
 //hasMessage:boolean,
 busFaces, 
@@ -48,41 +46,43 @@ result) {
             }
         }
         */
-        if (busFaces !== undefined && busFaces.length > 0) {
-            // 发送face消息，子系统间的数据交换
-            for (let busFace of busFaces) {
-                let { name: busName, owner, bus, faces } = busFace;
-                let schema = runner.getSchema(busName);
-                for (let j in faces) {
-                    let { name, arr } = faces[j];
-                    let main = resArrs.shift();
-                    nFaceCount++;
-                    if (arr !== undefined) {
-                        for (let k of arr) {
-                            let slave = resArrs.shift();
-                            for (let row of main) {
-                                let id = row['$id'];
-                                row[k] = slave.filter(r => r['$id'] === id);
-                            }
-                            nFaceCount++;
-                        }
-                    }
-                    let busSchema = schema.call.schema[name];
-                    let packedBusData = core_1.packBus(busSchema, main);
-                    let from = (runner.uqOwner || 'unknown') + '/' + (runner.uq || 'unknown');
-                    let busMsg = {
-                        unit: unit,
-                        type: 'bus',
-                        from: from,
-                        busOwner: owner,
-                        bus: bus,
-                        face: name,
-                        body: packedBusData
-                    };
-                    yield toUnitxQueue_1.queueToUnitx(busMsg);
-                }
-            }
-        }
+        /*
+         if (busFaces !== undefined && busFaces.length > 0) {
+             // 发送face消息，子系统间的数据交换
+             for (let busFace of busFaces) {
+                 let {name:busName, owner, bus, faces} = busFace;
+                 let schema = runner.getSchema(busName);
+                 for (let j in faces) {
+                     let {name, arr} = faces[j];
+                     let main = resArrs.shift();
+                     nFaceCount++;
+                     if (arr !== undefined) {
+                         for (let k of arr) {
+                             let slave = resArrs.shift();
+                             for (let row of main) {
+                                 let id = row['$id'];
+                                 row[k] = slave.filter(r => r['$id'] === id);
+                             }
+                             nFaceCount++;
+                         }
+                     }
+                     let busSchema = schema.call.schema[name]
+                     let packedBusData = packBus(busSchema, main);
+                     let from = (runner.uqOwner || 'unknown') + '/' + (runner.uq || 'unknown');
+                     let busMsg: BusMessage = {
+                         unit: unit,
+                         type: 'bus',
+                         from: from,
+                         busOwner: owner,
+                         bus: bus,
+                         face: name,
+                         body: packedBusData
+                     }
+                     await queueToUnitx(busMsg);
+                 }
+             }
+         }
+         */
         /*
         if (templetFaces !== undefined) {
             for (let templetFace of templetFaces) {

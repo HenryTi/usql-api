@@ -91,8 +91,8 @@ async function doSheetAct(sheetAct:SheetAct):Promise<void> {
             busFaces = actionRun.busFaces;
             //templets = actionRun.templets;
         }
-        //await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, templets, result);
-        await afterAction(db, runner, unit, actionSchema.returns, busFaces, result);
+        //old 注释 await afterAction(db, runner, unit, actionSchema.returns, hasMessage, busFaces, templets, result);
+        //await afterAction(db, runner, unit, actionSchema.returns, busFaces, result);
     }
     catch(err) {
         console.log('sheet Act error: ', err);
