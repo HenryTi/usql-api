@@ -109,7 +109,6 @@ class Jobs {
                 }
             }
             catch (err) {
-                debugger;
                 if (db_2.isDevelopment === true)
                     console.log(err);
             }

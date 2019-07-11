@@ -96,7 +96,6 @@ export class Jobs {
             }
         }
         catch (err) {
-            debugger;
             if (isDevelopment===true) console.log(err);
         }
     }
