@@ -79,6 +79,7 @@ function doSheetAct(sheetAct) {
             if (sheetRet !== undefined) {
                 let sheetMsg = {
                     unit: unit,
+                    queueId: id,
                     type: 'sheet',
                     from: from,
                     db: db,

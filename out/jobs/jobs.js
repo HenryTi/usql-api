@@ -16,6 +16,12 @@ const syncTuids_1 = require("./syncTuids");
 const syncBus_1 = require("./syncBus");
 let firstRun = db_2.isDevelopment === true ? 3000 : 30 * 1000;
 let runGap = db_2.isDevelopment === true ? 15 * 1000 : 30 * 1000;
+var Finish;
+(function (Finish) {
+    Finish[Finish["succeed"] = 1] = "succeed";
+    Finish[Finish["retry"] = 2] = "retry";
+    Finish[Finish["fail"] = 3] = "fail";
+})(Finish || (Finish = {}));
 class Jobs {
     constructor() {
         this.run = () => __awaiter(this, void 0, void 0, function* () {
@@ -68,27 +74,33 @@ class Jobs {
                                 continue;
                         }
                         let finish;
-                        try {
-                            switch (action) {
-                                default:
-                                    yield this.processItem(runner, $unit, id, action, subject, content, update_time);
-                                    break;
-                                case 'email':
-                                    yield this.email(runner, $unit, id, content);
-                                    finish = 1;
-                                    break;
-                                case 'bus':
-                                    yield this.bus(runner, $unit, id, subject, content);
-                                    finish = 1;
-                                    break;
-                            }
+                        if (!content) {
+                            // 如果没有内容，直接进入failed
+                            finish = Finish.fail;
                         }
-                        catch (err) {
-                            if (tries < 5) {
-                                finish = 2; // retry
+                        else {
+                            try {
+                                switch (action) {
+                                    default:
+                                        yield this.processItem(runner, $unit, id, action, subject, content, update_time);
+                                        break;
+                                    case 'email':
+                                        yield this.email(runner, $unit, id, content);
+                                        finish = Finish.succeed;
+                                        break;
+                                    case 'bus':
+                                        yield this.bus(runner, $unit, id, subject, content);
+                                        finish = Finish.succeed;
+                                        break;
+                                }
                             }
-                            else {
-                                finish = 3; // fail
+                            catch (err) {
+                                if (tries < 5) {
+                                    finish = Finish.retry; // retry
+                                }
+                                else {
+                                    finish = Finish.fail; // fail
+                                }
                             }
                         }
                         if (finish !== undefined)
@@ -97,7 +109,7 @@ class Jobs {
                 }
             }
             catch (err) {
-                //debugger;
+                debugger;
                 if (db_2.isDevelopment === true)
                     console.log(err);
             }
@@ -166,6 +178,7 @@ class Jobs {
             let message = {
                 unit: unit,
                 type: 'bus',
+                queueId: id,
                 from: uqOwner + '/' + uq,
                 busOwner: busOwner,
                 bus: busName,
@@ -195,6 +208,8 @@ function stringFromSections(sections, values) {
     return ret.join('');
 }
 function toBusMessage(busSchema, face, content) {
+    if (!content)
+        return '';
     let faceSchema = busSchema[face];
     if (faceSchema === undefined) {
         debugger;
@@ -236,6 +251,8 @@ function toBusMessage(busSchema, face, content) {
     for (let item of data) {
         ret += item['$'];
         ret += '\n';
+        if (arrs === undefined)
+            continue;
         for (let arr of arrs) {
             let arrRows = item[arr.name];
             if (arrRows !== undefined) {

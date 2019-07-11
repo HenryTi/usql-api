@@ -66,7 +66,7 @@ function getFromId(runner, unit, from) {
         return fromId;
     });
 }
-function writeDataToBus(runner, face, unit, from, body) {
+function writeDataToBus(runner, face, unit, from, fromQueueId, body) {
     return __awaiter(this, void 0, void 0, function* () {
         let faceId = yield getFaceId(runner, unit, face);
         let fromId = yield getFromId(runner, unit, from);
@@ -76,8 +76,7 @@ function writeDataToBus(runner, face, unit, from, body) {
             lastHour = hour;
         }
         var now = new Date();
-        yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, faceId, fromId, body,
-            new Date(now.getTime() + now.getTimezoneOffset() * 60000)]);
+        yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, faceId, fromId, fromQueueId, body]);
     });
 }
 exports.writeDataToBus = writeDataToBus;
@@ -86,9 +85,9 @@ function processBusMessage(msg) {
         // 处理 bus message，发送到相应的uq服务器
         console.log('bus:', msg);
         let runner = yield db_1.getRunner(core_1.consts.$unitx);
-        let { unit, body, from, busOwner, bus, face } = msg;
+        let { unit, body, from, queueId, busOwner, bus, face } = msg;
         let faceUrl = busOwner + '/' + bus + '/' + face;
-        yield writeDataToBus(runner, faceUrl, unit, from, body);
+        yield writeDataToBus(runner, faceUrl, unit, from, queueId, body);
     });
 }
 exports.processBusMessage = processBusMessage;

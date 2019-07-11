@@ -19,6 +19,7 @@ const queue_1 = require("./queue");
 const auth_1 = require("./core/auth");
 const resDb_1 = require("./res/resDb");
 const db_1 = require("./db");
+const jobs_1 = require("./jobs");
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
         /*
@@ -104,7 +105,7 @@ const db_1 = require("./db");
             let { host, user } = connection;
             console.log('process.env.NODE_ENV: %s\nDB host: %s, user: %s', process.env.NODE_ENV, host, user);
             //await importData();
-            //Jobs.start();
+            jobs_1.Jobs.start();
         }));
     });
 })();

@@ -22,17 +22,18 @@ function default_1(router) {
         let result = yield runner.sheetSave(name, unit, user, app, discription, data);
         let sheetRet = result[0];
         if (sheetRet !== undefined) {
+            let { id, flow } = sheetRet;
             let sheetMsg = {
                 unit: unit,
                 type: constSheet,
                 from: user,
+                queueId: id,
                 db: db,
                 body: sheetRet,
                 to: [user],
                 subject: discription
             };
             yield queue_1.queueToUnitx(sheetMsg);
-            let { id, flow } = sheetRet;
             yield runner.sheetProcessing(id);
             yield queue_1.queueSheet({
                 db: db,

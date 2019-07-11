@@ -70,6 +70,7 @@ async function doSheetAct(sheetAct:SheetAct):Promise<void> {
         if (sheetRet !== undefined) {
             let sheetMsg:SheetMessage = {
                 unit: unit,
+                queueId: id,
                 type: 'sheet',
                 from: from,
                 db: db,

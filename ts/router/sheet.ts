@@ -17,17 +17,18 @@ export default function(router:Router) {
         let result = await runner.sheetSave(name, unit, user, app, discription, data);
         let sheetRet = result[0];
         if (sheetRet !== undefined) {
+            let {id, flow} = sheetRet;
             let sheetMsg:SheetMessage = {
                 unit: unit,
                 type: constSheet,
                 from: user,
+                queueId: id,
                 db: db,
                 body: sheetRet,
                 to: [user],
                 subject: discription
             };
             await queueToUnitx(sheetMsg);
-            let {id, flow} = sheetRet;
             await runner.sheetProcessing(id);
             await queueSheet({
                 db: db,

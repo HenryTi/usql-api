@@ -10,6 +10,12 @@ import { syncBus } from './syncBus';
 let firstRun: number = isDevelopment === true? 3000 : 30*1000;
 let runGap: number = isDevelopment === true? 15*1000 : 30*1000;
 
+enum Finish {
+    succeed = 1,
+    retry = 2,
+    fail = 3,
+}
+
 export class Jobs {
     static start(): void {
         setTimeout(async ()=>{
@@ -55,28 +61,34 @@ export class Jobs {
                         // 上次尝试之后十分钟内不尝试
                         if (now - update_time < tries * 10 * 60) continue;
                     }
-                    let finish:number;
-                    try {
-                        switch (action) {
-                            default:
-                                await this.processItem(runner, $unit, id, action, subject, content, update_time);
-                                break;
-                            case 'email':
-                                await this.email(runner, $unit, id, content);
-                                finish = 1;
-                                break;
-                            case 'bus':
-                                await this.bus(runner, $unit, id, subject, content);
-                                finish = 1;
-                                break;
-                        }
+                    let finish:Finish;
+                    if (!content) {
+                        // 如果没有内容，直接进入failed
+                        finish = Finish.fail;
                     }
-                    catch (err) {
-                        if (tries < 5) {
-                            finish = 2; // retry
+                    else {
+                        try {
+                            switch (action) {
+                                default:
+                                    await this.processItem(runner, $unit, id, action, subject, content, update_time);
+                                    break;
+                                case 'email':
+                                    await this.email(runner, $unit, id, content);
+                                    finish = Finish.succeed;
+                                    break;
+                                case 'bus':
+                                    await this.bus(runner, $unit, id, subject, content);
+                                    finish = Finish.succeed;
+                                    break;
+                            }
                         }
-                        else {
-                            finish = 3;  // fail
+                        catch (err) {
+                            if (tries < 5) {
+                                finish = Finish.retry; // retry
+                            }
+                            else {
+                                finish = Finish.fail;  // fail
+                            }
                         }
                     }
                     if (finish !== undefined) await runner.unitCall(procMessageQueueSet, $unit, id, finish); 
@@ -84,7 +96,7 @@ export class Jobs {
             }
         }
         catch (err) {
-            //debugger;
+            debugger;
             if (isDevelopment===true) console.log(err);
         }
     }
@@ -153,6 +165,7 @@ export class Jobs {
         let message: BusMessage = {
             unit: unit,
             type: 'bus',
+            queueId: id,
             from: uqOwner + '/' + uq,           // from uq
             busOwner: busOwner,
             bus: busName,
@@ -181,6 +194,7 @@ function stringFromSections(sections:string[], values: any):string {
 }
 
 function toBusMessage(busSchema:any, face:string, content:string):string {
+    if (!content) return '';
     let faceSchema = busSchema[face];
     if (faceSchema === undefined) {
         debugger;
@@ -219,6 +233,7 @@ function toBusMessage(busSchema:any, face:string, content:string):string {
     for (let item of data) {
         ret += item['$'];
         ret += '\n';
+        if (arrs === undefined) continue;
         for (let arr of arrs) {
             let arrRows = item[arr.name];
             if (arrRows !== undefined) {

@@ -509,6 +509,8 @@ class Runner {
             this.sheetRuns = {};
             for (let row of schemaTable) {
                 let { name, id, version, schema, run, from } = row;
+                if (!schema)
+                    continue;
                 name = name.toLowerCase();
                 let tuidFroms;
                 let schemaObj = JSON.parse(schema);

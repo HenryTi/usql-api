@@ -409,6 +409,7 @@ export class Runner {
         this.sheetRuns = {};
         for (let row of schemaTable) {
             let {name, id, version, schema, run, from} = row;
+            if (!schema) continue;
             name = name.toLowerCase();
             let tuidFroms:{[tuid:string]:{tuid?:string, maps?:string[], tuidObj?:any, mapObjs?:{[map:string]:any}}};
             let schemaObj = JSON.parse(schema);

@@ -38,7 +38,7 @@ export async function getOpenApi(uqFullName:string, unit:number):Promise<OpenApi
     let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
     if (uqUrl === undefined) return openApis[unit] = null;
     let {url, urlDebug} = uqUrl;
-    if (urlDebug !== undefined) {
+    if (urlDebug) {
         try {
             urlDebug = urlSetUqHost(urlDebug);
             urlDebug = urlSetUnitxHost(urlDebug);

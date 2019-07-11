@@ -17,6 +17,7 @@ export interface SheetAct {
 
 export interface Message {
     unit: number;
+    queueId: number;
     type: 'sheet'|'msg'|'bus';
     body: any;
 }

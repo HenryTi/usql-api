@@ -56,7 +56,7 @@ function getOpenApi(uqFullName, unit) {
         if (uqUrl === undefined)
             return openApis[unit] = null;
         let { url, urlDebug } = uqUrl;
-        if (urlDebug !== undefined) {
+        if (urlDebug) {
             try {
                 urlDebug = core_1.urlSetUqHost(urlDebug);
                 urlDebug = core_1.urlSetUnitxHost(urlDebug);
