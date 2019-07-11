@@ -32,9 +32,13 @@ const uqOpenApis: {[uqFullName:string]: {[unit:number]:OpenApi}} = {};
 export async function getOpenApi(uqFullName:string, unit:number):Promise<OpenApi> {
     let openApis = uqOpenApis[uqFullName];
     if (openApis === null) return null;
-    if (openApis === undefined) {
-        uqOpenApis[uqFullName] = openApis = {};
+    if (openApis !== undefined) {
+        let ret = openApis[unit];
+        if (ret === null) return null;
+        if (ret !== undefined) return ret;
     }
+    
+    uqOpenApis[uqFullName] = openApis = {};
     let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
     if (uqUrl === undefined) return openApis[unit] = null;
     let {url, urlDebug} = uqUrl;

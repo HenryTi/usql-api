@@ -49,9 +49,14 @@ function getOpenApi(uqFullName, unit) {
         let openApis = uqOpenApis[uqFullName];
         if (openApis === null)
             return null;
-        if (openApis === undefined) {
-            uqOpenApis[uqFullName] = openApis = {};
+        if (openApis !== undefined) {
+            let ret = openApis[unit];
+            if (ret === null)
+                return null;
+            if (ret !== undefined)
+                return ret;
         }
+        uqOpenApis[uqFullName] = openApis = {};
         let uqUrl = yield core_1.centerApi.urlFromUq(unit, uqFullName);
         if (uqUrl === undefined)
             return openApis[unit] = null;
