@@ -13,7 +13,10 @@ const core_1 = require("../core");
 function syncBus(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log('syncBus: ' + runner.getDb());
+            let db = runner.getDb();
+            if (db === 'salestask')
+                debugger;
+            console.log('syncBus: ' + db);
             for (;;) {
                 let syncFaces = yield getSyncFaces(runner);
                 if (syncFaces === undefined)
@@ -48,7 +51,13 @@ function syncBus(runner) {
 exports.syncBus = syncBus;
 function getSyncFaces(runner) {
     return __awaiter(this, void 0, void 0, function* () {
-        let syncFaces = yield runner.call('$sync_faces', []);
+        let syncFaces;
+        try {
+            syncFaces = yield runner.call('$sync_faces', []);
+        }
+        catch (err) {
+            syncFaces = yield runner.call('$sync_faces_dev', []);
+        }
         let arr0 = syncFaces[0];
         let arr1 = syncFaces[1];
         if (arr0.length === 0)

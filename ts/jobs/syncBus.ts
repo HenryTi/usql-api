@@ -22,7 +22,9 @@ interface SyncFaces {
 
 export async function syncBus(runner: Runner) {
     try {
-        console.log('syncBus: ' + runner.getDb());
+        let db = runner.getDb();
+        if (db === 'salestask') debugger;
+        console.log('syncBus: ' + db);
         for (;;) {
             let syncFaces = await getSyncFaces(runner);
             if (syncFaces === undefined) return;
@@ -51,7 +53,13 @@ export async function syncBus(runner: Runner) {
 }
 
 async function getSyncFaces(runner: Runner): Promise<SyncFaces> {
-    let syncFaces = await runner.call('$sync_faces', []);
+    let syncFaces:any;
+    try {
+        syncFaces = await runner.call('$sync_faces', []);
+    }
+    catch (err) {
+        syncFaces = await runner.call('$sync_faces_dev', []);
+    }
     let arr0:any[] = syncFaces[0];
     let arr1:any[] = syncFaces[1];
     if (arr0.length === 0) return;

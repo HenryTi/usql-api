@@ -50,7 +50,14 @@ export class Jobs {
         try {
             let start = 0;
             for (;;) {
-                let ret = await runner.call('$message_queue_get',  [start]);
+                if (runner.getDb() === 'order') debugger;
+                let ret:any;
+                try {
+                    ret = await runner.call('$message_queue_get',  [start]);
+                }
+                catch (err) {
+                    ret = await runner.call('$message_queue_get_dev',  [start]);
+                }
                 if (ret.length === 0) break;
                 let procMessageQueueSet = 'tv_$message_queue_set';
                 for (let row of ret) {
