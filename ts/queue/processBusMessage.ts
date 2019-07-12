@@ -59,7 +59,6 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
         await runner.call('$set_bus_queue_seed', ['busqueue', busQueueSeedFromHour(hour)]);
         lastHour = hour;
     }
-    var now = new Date();
     await runner.tuidSave(consts.BusQueue, unit, undefined, 
         [undefined, faceId, fromId, fromQueueId, body]);
 }

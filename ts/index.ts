@@ -5,7 +5,7 @@ import * as config from 'config';
 import {router, settingRouter, openRouter} from './router';
 import {router as resRouter, initResPath} from './res/router';
 import {Auth, authCheck, authDebug, authUnitx} from './core';
-import { unitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue } from './queue';
+import { unitxQueueRouter/*, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
 //import { startSync } from './sync';
 import { authJoint } from './core/auth';
 import { initResDb } from './res/resDb';

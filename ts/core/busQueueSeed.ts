@@ -11,3 +11,13 @@ export function busQueueSeedFromHour(hour:number):number {
 export function busQueueSeed():number {
     return Math.floor(Date.now()/(3600*1000)) * bigNumber;
 }
+
+export interface SheetQueueData {
+    sheet: string;
+    state: string;
+    action: string;
+    unit: number;
+    user: number;
+    id: number;
+    flow: number;
+}

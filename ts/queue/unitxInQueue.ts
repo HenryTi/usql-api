@@ -1,10 +1,11 @@
-import * as bull from 'bull';
+//import * as bull from 'bull';
 /*
 import { BusMessage, ClientMessage, Message, SheetMessage } from '../core/model';
 import { pushToClient } from './pushToClient';
 import { processSheetMessage } from './processSheetMessage';
 import { processBusMessage } from './processBusMessage';
 */
+/*
 import { Message } from '../core/model';
 import { messageProcesser } from './messageProcesser';
 
@@ -34,3 +35,4 @@ export function startUnitxInQueue(redis:any) {
     });
     console.log('QUEUE: ' + unitxInQueueName);
 }
+*/

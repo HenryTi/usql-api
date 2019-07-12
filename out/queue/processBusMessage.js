@@ -75,7 +75,6 @@ function writeDataToBus(runner, face, unit, from, fromQueueId, body) {
             yield runner.call('$set_bus_queue_seed', ['busqueue', busQueueSeed_1.busQueueSeedFromHour(hour)]);
             lastHour = hour;
         }
-        var now = new Date();
         yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, faceId, fromId, fromQueueId, body]);
     });
 }

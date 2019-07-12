@@ -8,11 +8,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const queue_1 = require("../queue");
 const entityProcess_1 = require("./entityProcess");
 const core_1 = require("../core");
 const constSheet = 'sheet';
 function default_1(router) {
+    function queueSheet(runner, unit, sheetId, content) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let ret = yield runner.unitTableFromProc('tv_$sheet_to_queue', unit, sheetId, JSON.stringify(content));
+            return (ret[0].ret === 1);
+        });
+    }
     entityProcess_1.entityPost(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { app, discription, data } = body;
         let verify = yield runner.sheetVerify(name, unit, user, data);
@@ -22,8 +27,28 @@ function default_1(router) {
         let result = yield runner.sheetSave(name, unit, user, app, discription, data);
         let sheetRet = result[0];
         if (sheetRet !== undefined) {
-            let { id, flow } = sheetRet;
-            let sheetMsg = {
+            let states = schema.states;
+            let startState = states.find(v => v.name === '$');
+            if (startState !== undefined) {
+                let actions = startState.actions;
+                if (actions !== undefined) {
+                    let $onsave = actions.find(v => v.name === '$onsave');
+                    if ($onsave !== undefined) {
+                        let { id, flow } = sheetRet;
+                        let retQueue = yield queueSheet(runner, unit, id, {
+                            sheet: name,
+                            state: '$',
+                            action: '$onsave',
+                            unit: unit,
+                            user: user,
+                            id: id,
+                            flow: flow,
+                        });
+                    }
+                }
+            }
+            /*
+            let sheetMsg:SheetMessage = {
                 unit: unit,
                 type: constSheet,
                 from: user,
@@ -32,10 +57,11 @@ function default_1(router) {
                 body: sheetRet,
                 to: [user],
                 subject: discription
-            };
-            yield queue_1.queueToUnitx(sheetMsg);
-            yield runner.sheetProcessing(id);
-            yield queue_1.queueSheet({
+            };*/
+            //await queueToUnitx(sheetMsg);
+            /*
+            await runner.sheetProcessing(id);
+            await queueSheet({
                 db: db,
                 from: user,
                 sheetHead: {
@@ -48,13 +74,27 @@ function default_1(router) {
                     flow: flow,
                 }
             });
+            */
         }
         return sheetRet;
     }));
     entityProcess_1.entityPut(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        yield runner.sheetProcessing(body.id);
         let { state, action, id, flow } = body;
-        yield queue_1.queueSheet({
+        let retQueue = yield queueSheet(runner, unit, id, {
+            sheet: name,
+            state: state,
+            action: action,
+            unit: unit,
+            user: user,
+            id: id,
+            flow: flow,
+        });
+        // 这个地方以后需要更多的判断和返回。提供给界面操作
+        if (retQueue === false)
+            throw '不可以同时操作单据';
+        /*
+        await runner.sheetProcessing(id);
+        await queueSheet({
             db: db,
             from: user,
             sheetHead: {
@@ -67,6 +107,7 @@ function default_1(router) {
                 flow: flow,
             }
         });
+        */
         return { msg: 'add to queue' };
     }));
     entityProcess_1.entityPost(router, constSheet, '/:name/states', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {

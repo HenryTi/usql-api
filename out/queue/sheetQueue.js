@@ -8,32 +8,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const bull = require("bull");
 const runner_1 = require("../db/runner");
-const toUnitxQueue_1 = require("./toUnitxQueue");
+//import { queueToUnitx } from './toUnitxQueue';
+/*
 const sheetQueueName = 'sheet-queue';
-let sheetQueue;
-function queueSheet(msg) {
-    return __awaiter(this, void 0, void 0, function* () {
-        return yield sheetQueue.add(msg);
-    });
+let sheetQueue:bull.Queue<SheetAct>;
+
+export async function queueSheet(msg:SheetAct):Promise<bull.Job> {
+    return await sheetQueue.add(msg);
 }
-exports.queueSheet = queueSheet;
-function startSheetQueue(redis) {
+
+export function startSheetQueue(redis:any) {
     sheetQueue = bull(sheetQueueName, redis);
-    sheetQueue.on("error", (error) => {
+    sheetQueue.on("error", (error: Error) => {
         console.log(sheetQueueName, error);
     });
-    sheetQueue.process(function (job, done) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let { data } = job;
-            yield doSheetAct(data);
-            done();
-        });
+    sheetQueue.process(async function(job, done) {
+        let {data} = job;
+        await doSheetAct(data);
+        done();
     });
     console.log('QUEUE: ' + sheetQueueName);
 }
-exports.startSheetQueue = startSheetQueue;
+*/
 function doSheetAct(sheetAct) {
     return __awaiter(this, void 0, void 0, function* () {
         let { db, sheetHead, from } = sheetAct;
@@ -76,8 +73,9 @@ function doSheetAct(sheetAct) {
             // sheet action返回的最后一个table，是单据消息，要传递给unitx
             let sheetArr = result.pop();
             let sheetRet = sheetArr[0];
+            /*
             if (sheetRet !== undefined) {
-                let sheetMsg = {
+                let sheetMsg:SheetMessage = {
                     unit: unit,
                     queueId: id,
                     type: 'sheet',
@@ -87,8 +85,9 @@ function doSheetAct(sheetAct) {
                     body: sheetRet,
                     to: undefined,
                 };
-                yield toUnitxQueue_1.queueToUnitx(sheetMsg);
+                await queueToUnitx(sheetMsg);
             }
+            */
             //let hasMessage:boolean, templets:any[];
             let busFaces;
             if (Array.isArray(actionRun) === true) {

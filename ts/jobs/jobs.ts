@@ -6,6 +6,7 @@ import { sendToUnitx } from '../core/sendToUnitx';
 import { BusMessage } from '../queue';
 import { syncTuids } from './syncTuids';
 import { syncBus } from './syncBus';
+import { SheetQueueData } from '../core/busQueueSeed';
 
 let firstRun: number = isDevelopment === true? 3000 : 30*1000;
 let runGap: number = isDevelopment === true? 15*1000 : 30*1000;
@@ -80,6 +81,10 @@ export class Jobs {
                                     await this.bus(runner, $unit, id, subject, content);
                                     finish = Finish.succeed;
                                     break;
+                                case 'sheet':
+                                    await this.sheet(runner, content);
+                                    finish = Finish.succeed;
+                                    break;
                             }
                         }
                         catch (err) {
@@ -144,7 +149,7 @@ export class Jobs {
         });
     }
 
-    async bus(runner:Runner, unit:number, id:number, subject:string, content:string): Promise<void> {
+    private async bus(runner:Runner, unit:number, id:number, subject:string, content:string): Promise<void> {
         if (!unit) return;
         
         let parts = subject.split('/');
@@ -172,6 +177,12 @@ export class Jobs {
             body: body,
         };
         await sendToUnitx(unit, message);
+    }
+
+    private async sheet(runner: Runner, content:string):Promise<void> {
+        let sheetQueueData:SheetQueueData = JSON.parse(content);
+        let {id, sheet, state, action, unit, user, flow} = sheetQueueData;
+        let result = await runner.sheetAct(sheet, state, action, unit, user, id, flow);
     }
 }
 

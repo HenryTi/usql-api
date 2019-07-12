@@ -3,7 +3,7 @@ import { packBus } from '../core';
 import { Runner } from '../db/runner';
 import { pushToClient } from './pushToClient';
 import { MsgMessage, BusMessage } from '../core/model';
-import { queueToUnitx } from './toUnitxQueue';
+//import { queueToUnitx } from './toUnitxQueue';
 
 // 2018-02-25
 // Bus face 数据保全的说明：
@@ -13,6 +13,7 @@ import { queueToUnitx } from './toUnitxQueue';
 // 当下为了快速写出程序，暂时先简单处理。数据库操作返回数据，直接发送unitx，可能会有数据丢失。
 // git
 
+/*
 export interface SchemaBusFace {
     name:string;
     owner:string;
@@ -38,6 +39,7 @@ export async function afterAction(
 {
     let nFaceCount:number = 0;
     let resArrs = result as any[][];
+*/
     /*
     if (hasMessage === true) {
         // 处理发送信息
@@ -117,12 +119,12 @@ export async function afterAction(
         }
     }
     */
-
+/*
     let arr0 = result[0];
     if (arr0 === undefined || arr0.length === 0) return;
     return arr0[0];
 }
-
+*/
 /*
 async function sendTemplet(templetRun: any, values:any) {
     let {subjectSections, sections} = templetRun;

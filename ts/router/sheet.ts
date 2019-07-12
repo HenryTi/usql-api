@@ -1,12 +1,18 @@
 import { Router } from 'express';
-import { queueSheet, queueToUnitx, SheetMessage } from '../queue';
+import { /*queueSheet, queueToUnitx, */SheetMessage } from '../queue';
 import { entityPost, entityPut, entityGet } from './entityProcess';
 import { Runner } from '../db';
 import { unpack } from '../core';
+import { SheetQueueData } from '../core/busQueueSeed';
 
 const constSheet = 'sheet';
 
 export default function(router:Router) {
+    async function queueSheet(runner: Runner, unit:number, sheetId: number, content: SheetQueueData): Promise<boolean> {
+        let ret = await runner.unitTableFromProc('tv_$sheet_to_queue', unit, sheetId, JSON.stringify(content));
+        return (ret[0].ret === 1);
+    }
+
     entityPost(router, constSheet, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {app, discription, data} = body;
@@ -17,7 +23,27 @@ export default function(router:Router) {
         let result = await runner.sheetSave(name, unit, user, app, discription, data);
         let sheetRet = result[0];
         if (sheetRet !== undefined) {
-            let {id, flow} = sheetRet;
+            let states:any[] = schema.states;
+            let startState = states.find(v => v.name === '$');
+            if (startState !== undefined) {
+                let actions:any[] = startState.actions;
+                if (actions !== undefined) {
+                    let $onsave = actions.find(v => v.name === '$onsave');
+                    if ($onsave !== undefined) {
+                        let {id, flow} = sheetRet;
+                        let retQueue = await queueSheet(runner, unit, id, {
+                            sheet: name,
+                            state: '$',
+                            action: '$onsave',
+                            unit: unit,
+                            user: user,
+                            id: id,
+                            flow: flow,
+                        });
+                    }
+                }
+            }
+            /*
             let sheetMsg:SheetMessage = {
                 unit: unit,
                 type: constSheet,
@@ -27,8 +53,9 @@ export default function(router:Router) {
                 body: sheetRet,
                 to: [user],
                 subject: discription
-            };
-            await queueToUnitx(sheetMsg);
+            };*/
+            //await queueToUnitx(sheetMsg);
+            /*
             await runner.sheetProcessing(id);
             await queueSheet({
                 db: db,
@@ -43,14 +70,27 @@ export default function(router:Router) {
                     flow: flow,
                 }
             });
+            */
         }
         return sheetRet;
     });
         
     entityPut(router, constSheet, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
-        await runner.sheetProcessing(body.id);
         let {state, action, id, flow} = body;
+        let retQueue = await queueSheet(runner, unit, id, {
+            sheet: name,
+            state: state,
+            action: action,
+            unit: unit,
+            user: user,
+            id: id,
+            flow: flow,
+        });
+        // 这个地方以后需要更多的判断和返回。提供给界面操作
+        if (retQueue === false) throw '不可以同时操作单据';
+        /*
+        await runner.sheetProcessing(id);
         await queueSheet({
             db: db,
             from: user,
@@ -64,6 +104,7 @@ export default function(router:Router) {
                 flow: flow,
             }
         });
+        */
         return {msg: 'add to queue'};
     });
 

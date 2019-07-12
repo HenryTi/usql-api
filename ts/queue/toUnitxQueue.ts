@@ -1,3 +1,4 @@
+/*
 import * as bull from 'bull';
 import { Message, SheetMessage } from '../core/model';
 import { sendToUnitx } from '../core/sendToUnitx';
@@ -47,3 +48,4 @@ async function sendMsgToUnitx(msg:Message): Promise<void> {
     await runner.sheetTo(unit, user, id, toArr);
     console.log('sheet to unitx', msg);
 }
+*/

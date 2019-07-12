@@ -104,7 +104,7 @@ export class Runner {
         return await this.db.callEx(proc, p);
     }
 
-    private async unitTableFromProc(proc:string, unit:number, ...params:any[]):Promise<any[]> {
+    async unitTableFromProc(proc:string, unit:number, ...params:any[]):Promise<any[]> {
         let p:any[] = [];
         if (this.hasUnit === true) p.push(unit);
         if (params !== undefined) p.push(...params);

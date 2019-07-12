@@ -92,6 +92,10 @@ class Jobs {
                                         yield this.bus(runner, $unit, id, subject, content);
                                         finish = Finish.succeed;
                                         break;
+                                    case 'sheet':
+                                        yield this.sheet(runner, content);
+                                        finish = Finish.succeed;
+                                        break;
                                 }
                             }
                             catch (err) {
@@ -185,6 +189,13 @@ class Jobs {
                 body: body,
             };
             yield sendToUnitx_1.sendToUnitx(unit, message);
+        });
+    }
+    sheet(runner, content) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sheetQueueData = JSON.parse(content);
+            let { id, sheet, state, action, unit, user, flow } = sheetQueueData;
+            let result = yield runner.sheetAct(sheet, state, action, unit, user, id, flow);
         });
     }
 }

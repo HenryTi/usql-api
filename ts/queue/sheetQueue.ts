@@ -1,10 +1,11 @@
-import * as bull from 'bull';
+//import * as bull from 'bull';
 import * as _ from 'lodash';
 import { getRunner } from '../db/runner';
-import { afterAction } from './afterAction';
+//import { afterAction } from './afterAction';
 import { SheetAct, SheetMessage } from '../core/model';
-import { queueToUnitx } from './toUnitxQueue';
+//import { queueToUnitx } from './toUnitxQueue';
 
+/*
 const sheetQueueName = 'sheet-queue';
 let sheetQueue:bull.Queue<SheetAct>;
 
@@ -24,7 +25,7 @@ export function startSheetQueue(redis:any) {
     });
     console.log('QUEUE: ' + sheetQueueName);
 }
-
+*/
 async function doSheetAct(sheetAct:SheetAct):Promise<void> {
     let {db, sheetHead, from} = sheetAct;
     let {id, sheet, state, action, unit, user, flow} = sheetHead;
@@ -67,6 +68,7 @@ async function doSheetAct(sheetAct:SheetAct):Promise<void> {
         // sheet action返回的最后一个table，是单据消息，要传递给unitx
         let sheetArr = result.pop();
         let sheetRet = sheetArr[0];
+        /*
         if (sheetRet !== undefined) {
             let sheetMsg:SheetMessage = {
                 unit: unit,
@@ -80,6 +82,7 @@ async function doSheetAct(sheetAct:SheetAct):Promise<void> {
             };
             await queueToUnitx(sheetMsg);
         }
+        */
 
         //let hasMessage:boolean, templets:any[];
         let busFaces:any[];
