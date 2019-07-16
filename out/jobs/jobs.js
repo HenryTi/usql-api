@@ -8,14 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const db_1 = require("../db");
-const db_2 = require("../db/db");
 const core_1 = require("../core");
-const sendToUnitx_1 = require("../core/sendToUnitx");
 const syncTuids_1 = require("./syncTuids");
 const syncBus_1 = require("./syncBus");
-let firstRun = db_2.isDevelopment === true ? 3000 : 30 * 1000;
-let runGap = db_2.isDevelopment === true ? 15 * 1000 : 30 * 1000;
+let firstRun = core_1.isDevelopment === true ? 3000 : 30 * 1000;
+let runGap = core_1.isDevelopment === true ? 15 * 1000 : 30 * 1000;
 var Finish;
 (function (Finish) {
     Finish[Finish["succeed"] = 1] = "succeed";
@@ -26,18 +23,27 @@ class Jobs {
     constructor() {
         this.run = () => __awaiter(this, void 0, void 0, function* () {
             try {
-                if (db_2.isDevelopment === true)
+                if (core_1.isDevelopment === true)
                     console.log('Jobs run at: ', new Date());
-                let db = new db_2.Db(undefined);
+                let db = new core_1.Db(undefined);
                 let uqs = yield db.uqDbs();
                 for (let uqRow of uqs) {
-                    let runner = yield db_1.getRunner(uqRow.db);
+                    let net;
+                    let dbName = uqRow.db;
+                    if (dbName.endsWith('$test') === true) {
+                        dbName = dbName.substr(0, dbName.length - 5);
+                        net = core_1.testNet;
+                    }
+                    else {
+                        net = core_1.prodNet;
+                    }
+                    let runner = yield net.getRunner(dbName);
                     if (runner === undefined)
                         continue;
                     yield runner.init();
-                    yield this.processQueue(runner);
-                    yield syncBus_1.syncBus(runner);
-                    yield syncTuids_1.syncTuids(runner);
+                    yield this.processQueue(runner, net);
+                    yield syncBus_1.syncBus(runner, net);
+                    yield syncTuids_1.syncTuids(runner, net);
                 }
             }
             catch (err) {
@@ -50,16 +56,16 @@ class Jobs {
     }
     static start() {
         setTimeout(() => __awaiter(this, void 0, void 0, function* () {
-            yield new Jobs().run();
+            let jobs = new Jobs;
+            yield jobs.run();
         }), firstRun);
     }
-    processQueue(runner) {
+    processQueue(runner, net) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let start = 0;
                 for (;;) {
-                    if (runner.getDb() === 'order')
-                        debugger;
+                    //if (runner.getDb() === 'order') debugger;
                     let ret;
                     try {
                         ret = yield runner.call('$message_queue_get', [start]);
@@ -97,7 +103,7 @@ class Jobs {
                                         finish = Finish.succeed;
                                         break;
                                     case 'bus':
-                                        yield this.bus(runner, $unit, id, subject, content);
+                                        yield this.bus(runner, net, $unit, id, subject, content);
                                         finish = Finish.succeed;
                                         break;
                                     case 'sheet':
@@ -121,7 +127,7 @@ class Jobs {
                 }
             }
             catch (err) {
-                if (db_2.isDevelopment === true)
+                if (core_1.isDevelopment === true)
                     console.log(err);
             }
         });
@@ -171,7 +177,7 @@ class Jobs {
             });
         });
     }
-    bus(runner, unit, id, subject, content) {
+    bus(runner, net, unit, id, subject, content) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!unit)
                 return;
@@ -196,7 +202,7 @@ class Jobs {
                 face: face,
                 body: body,
             };
-            yield sendToUnitx_1.sendToUnitx(unit, message);
+            yield net.sendToUnitx(unit, message);
         });
     }
     sheet(runner, content) {

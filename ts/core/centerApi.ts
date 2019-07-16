@@ -45,10 +45,6 @@ class CenterApi extends Fetch {
         return await this.post('push', msg);
     }
 
-    async unitxBuses(unit:number, busOwner:string, bus:string, face:string):Promise<any[]> {
-        return await this.get('open/unitx-buses', {unit:unit, busOwner:busOwner, bus:bus, face:face});
-    }
-
     async userIdFromName(user:string):Promise<number> {
         return await this.get('open/user-id-from-name', {user: user});
     }

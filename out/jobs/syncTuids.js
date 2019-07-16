@@ -9,8 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
-const openApi_1 = require("./openApi");
-function syncTuids(runner) {
+function syncTuids(runner, net) {
     return __awaiter(this, void 0, void 0, function* () {
         let { froms } = runner;
         if (froms === undefined)
@@ -42,7 +41,7 @@ function syncTuids(runner) {
                 for (let i in unitRows) {
                     let rows = unitRows[i];
                     let unit = Number(i);
-                    let openApi = yield openApi_1.getOpenApi(from, unit);
+                    let openApi = yield net.getOpenApi(from, unit);
                     if (!openApi)
                         continue;
                     let stamps = [];

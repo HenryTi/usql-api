@@ -8,14 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const openApi_1 = require("./openApi");
 const core_1 = require("../core");
-function syncBus(runner) {
+function syncBus(runner, net) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let db = runner.getDb();
-            if (db === 'salestask')
-                debugger;
+            //if (db === 'salestask') debugger;
             console.log('syncBus: ' + db);
             for (;;) {
                 let syncFaces = yield getSyncFaces(runner);
@@ -25,7 +23,7 @@ function syncBus(runner) {
                 let { faceColl, syncFaceArr } = syncFaces;
                 for (let syncFace of syncFaceArr) {
                     let { unit, faces, faceUnitMessages } = syncFace;
-                    let openApi = yield openApi_1.getOpenApi(core_1.consts.$$$unitx, unit);
+                    let openApi = yield net.getOpenApi(core_1.consts.$$$unitx, unit);
                     let ret = yield openApi.bus(unit, faces, faceUnitMessages);
                     let retLen = ret.length;
                     if (retLen === 0)
@@ -42,7 +40,7 @@ function syncBus(runner) {
             }
         }
         catch (err) {
-            debugger;
+            //debugger;
             if (err && err.message)
                 console.error(err.message);
         }

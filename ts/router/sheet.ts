@@ -1,19 +1,17 @@
 import { Router } from 'express';
-import { /*queueSheet, queueToUnitx, */SheetMessage } from '../queue';
-import { entityPost, entityPut, entityGet } from './entityProcess';
-import { Runner } from '../db';
-import { unpack } from '../core';
-import { SheetQueueData } from '../core/busQueueSeed';
+//import { /*queueSheet, queueToUnitx, */SheetMessage } from '../queue';
+//import { entityPost, entityPut, entityGet } from './entityProcess';
+import { Runner, unpack, RouterBuilder, SheetQueueData } from '../core';
 
 const constSheet = 'sheet';
 
-export default function(router:Router) {
+export function buildSheetRouter(router:Router, rb:RouterBuilder) {
     async function queueSheet(runner: Runner, unit:number, sheetId: number, content: SheetQueueData): Promise<boolean> {
         let ret = await runner.unitTableFromProc('tv_$sheet_to_queue', unit, sheetId, JSON.stringify(content));
         return (ret[0].ret === 1);
     }
 
-    entityPost(router, constSheet, '/:name', 
+    rb.entityPost(router, constSheet, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {app, discription, data} = body;
         let verify = await runner.sheetVerify(name, unit, user, data);
@@ -75,7 +73,7 @@ export default function(router:Router) {
         return sheetRet;
     });
         
-    entityPut(router, constSheet, '/:name', 
+    rb.entityPut(router, constSheet, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {state, action, id, flow} = body;
         let retQueue = await queueSheet(runner, unit, id, {
@@ -108,27 +106,27 @@ export default function(router:Router) {
         return {msg: 'add to queue'};
     });
 
-    entityPost(router, constSheet, '/:name/states', 
+    rb.entityPost(router, constSheet, '/:name/states', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {state, pageStart, pageSize} = body;
         let result = await runner.sheetStates(name, state, unit, user, pageStart, pageSize);
         return result;
     });
 
-    entityGet(router, constSheet, '/:name/statecount',
+    rb.entityGet(router, constSheet, '/:name/statecount',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let result = await runner.sheetStateCount(name, unit, user);
         return result;
     });
 
-    entityPost(router, constSheet, '/:name/my-sheets', 
+    rb.entityPost(router, constSheet, '/:name/my-sheets', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {state, pageStart, pageSize} = body;
         let result = await runner.mySheets(name, state, unit, user, pageStart, pageSize);
         return result;
     });
 
-    entityGet(router, constSheet, '-scan/:name/:id',
+    rb.entityGet(router, constSheet, '-scan/:name/:id',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id} = urlParams;
         let result = await runner.sheetScan(name, unit, user, id as any);
@@ -140,21 +138,21 @@ export default function(router:Router) {
         return main;
     });
 
-    entityGet(router, constSheet, '/:name/get/:id', 
+    rb.entityGet(router, constSheet, '/:name/get/:id', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id} = urlParams;
         let result = await runner.getSheet(name, unit, user, id as any);
         return result;
     });
 
-    entityPost(router, constSheet, '/:name/archives',
+    rb.entityPost(router, constSheet, '/:name/archives',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {pageStart, pageSize} = body;
         let result = await runner.sheetArchives(name, unit, user, pageStart, pageSize);
         return result;
     });
 
-    entityGet(router, constSheet, '/:name/archive/:id', 
+    rb.entityGet(router, constSheet, '/:name/archive/:id', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id} = urlParams;
         let result = await runner.sheetArchive(unit, user, name, id as any);

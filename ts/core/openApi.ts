@@ -1,5 +1,5 @@
-import fetch from "node-fetch";
-import { Fetch, centerApi, urlSetUqHost as urlSetUqHost, urlSetUnitxHost } from "../core";
+//import fetch from "node-fetch";
+import { Fetch } from ".";
 
 export class OpenApi extends Fetch {
     async fresh(unit:number, stamps:any):Promise<any> {
@@ -28,6 +28,7 @@ export class OpenApi extends Fetch {
     }
 }
 
+/*
 const uqOpenApis: {[uqFullName:string]: {[unit:number]:OpenApi}} = {};
 export async function getOpenApi(uqFullName:string, unit:number):Promise<OpenApi> {
     let openApis = uqOpenApis[uqFullName];
@@ -56,3 +57,4 @@ export async function getOpenApi(uqFullName:string, unit:number):Promise<OpenApi
     }
     return openApis[unit] = new OpenApi(url);
 }
+*/

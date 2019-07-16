@@ -1,12 +1,7 @@
 import * as _ from 'lodash';
-import { Runner, getRunner } from "../db";
-import { Db, isDevelopment } from "../db/db";
-import { centerApi } from "../core";
-import { sendToUnitx } from '../core/sendToUnitx';
-import { BusMessage } from '../queue';
+import { Net, SheetQueueData, Runner, Db, isDevelopment, centerApi, BusMessage, prodNet, testNet } from '../core';
 import { syncTuids } from './syncTuids';
 import { syncBus } from './syncBus';
-import { SheetQueueData } from '../core/busQueueSeed';
 
 let firstRun: number = isDevelopment === true? 3000 : 30*1000;
 let runGap: number = isDevelopment === true? 15*1000 : 30*1000;
@@ -20,22 +15,32 @@ enum Finish {
 export class Jobs {
     static start(): void {
         setTimeout(async ()=>{
-            await new Jobs().run();
+            let jobs = new Jobs;
+            await jobs.run();
         }, firstRun);
     }
 
     private run = async (): Promise<void> => {
         try {
-            if (isDevelopment===true) console.log('Jobs run at: ', new Date());
+            if (isDevelopment===true) console.log('Jobs run at: ', new Date());            
             let db = new Db(undefined);
             let uqs = await db.uqDbs();
             for (let uqRow of uqs) {
-                let runner = await getRunner(uqRow.db);
+                let net:Net;
+                let dbName:string = uqRow.db;
+                if (dbName.endsWith('$test') === true) {
+                    dbName = dbName.substr(0, dbName.length - 5);
+                    net = testNet;
+                }
+                else {
+                    net = prodNet;
+                }
+                let runner = await net.getRunner(dbName);
                 if (runner === undefined) continue;
                 await runner.init();
-                await this.processQueue(runner);
-                await syncBus(runner);
-                await syncTuids(runner);
+                await this.processQueue(runner, net);
+                await syncBus(runner, net);
+                await syncTuids(runner, net);
             }
         }
         catch (err) {
@@ -46,11 +51,11 @@ export class Jobs {
         }
     }
 
-    private async processQueue(runner: Runner): Promise<void> {
+    private async processQueue(runner: Runner, net: Net): Promise<void> {
         try {
             let start = 0;
             for (;;) {
-                if (runner.getDb() === 'order') debugger;
+                //if (runner.getDb() === 'order') debugger;
                 let ret:any;
                 try {
                     ret = await runner.call('$message_queue_get',  [start]);
@@ -85,7 +90,7 @@ export class Jobs {
                                     finish = Finish.succeed;
                                     break;
                                 case 'bus':
-                                    await this.bus(runner, $unit, id, subject, content);
+                                    await this.bus(runner, net, $unit, id, subject, content);
                                     finish = Finish.succeed;
                                     break;
                                 case 'sheet':
@@ -156,7 +161,7 @@ export class Jobs {
         });
     }
 
-    private async bus(runner:Runner, unit:number, id:number, subject:string, content:string): Promise<void> {
+    private async bus(runner:Runner, net:Net, unit:number, id:number, subject:string, content:string): Promise<void> {
         if (!unit) return;
         
         let parts = subject.split('/');
@@ -183,7 +188,7 @@ export class Jobs {
             face: face,
             body: body,
         };
-        await sendToUnitx(unit, message);
+        await net.sendToUnitx(unit, message);
     }
 
     private async sheet(runner: Runner, content:string):Promise<void> {

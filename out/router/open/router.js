@@ -8,21 +8,55 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const router_1 = require("../router");
-const busQueueSeed_1 = require("../../core/busQueueSeed");
-exports.router = express_1.Router({ mergeParams: true });
-(function (router) {
-    get(router, '/entities/:unit', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+const core_1 = require("../../core");
+//type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
+function buildOpenRouter(router, rb) {
+    /*
+    function post(router:Router, path:string, processer:Processer) {
+        router.post(path, async (req:Request, res:Response) => {
+            await process(req, res, processer, (req as any).body, req.params);
+        });
+    };
+    
+    function get(router:Router, path:string, processer:Processer) {
+        router.get(path, async (req:Request, res:Response) => {
+            await process(req, res, processer, req.query, req.params);
+        });
+    };
+    
+    function put(router:Router, path:string, processer:Processer) {
+        router.put(path, async (req:Request, res:Response) => {
+            await process(req, res, processer, (req as any).body, req.params);
+        });
+    };
+    
+    async function process(req:Request, res:Response, processer:Processer, queryOrBody:any, params:any):Promise<void> {
+        try {
+            let db = req.params.db;
+            let runner = await checkRunner(db, res);
+            if (runner === undefined) return;
+            //let body = (req as any).body;
+            let result = await processer(runner, queryOrBody, params);
+            res.json({
+                ok: true,
+                res: result
+            });
+        }
+        catch (err) {
+            res.json({error: err});
+        }
+    }
+    */
+    rb.get(router, '/entities/:unit', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         return yield runner.getEntities(params.unit);
     }));
-    get(router, '/entity/:entityName', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+    rb.get(router, '/entity/:entityName', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         return runner.getSchema(params.entityName);
     }));
-    post(router, '/entities/:unit', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+    rb.post(router, '/entities/:unit', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         return yield runner.getEntities(params.unit);
     }));
-    post(router, '/fresh', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+    rb.post(router, '/fresh', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, stamps } = body;
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
         let stampsText = stamps.map((v) => v.join('\t')).join('\n');
@@ -34,7 +68,7 @@ exports.router = express_1.Router({ mergeParams: true });
             console.log(err.message);
         }
     }));
-    post(router, '/tuid', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+    rb.post(router, '/tuid', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         body.$ = 'open/tuid';
         console.log(body);
         let { unit, id, tuid, maps } = body;
@@ -59,7 +93,7 @@ exports.router = express_1.Router({ mergeParams: true });
         }
         return ret;
     }));
-    post(router, '/tuid-main/:tuid', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+    rb.post(router, '/tuid-main/:tuid', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         body.$ = 'open/tuid-main/';
         console.log(body);
         let { tuid } = params;
@@ -71,7 +105,7 @@ exports.router = express_1.Router({ mergeParams: true });
         let ret = yield runner.unitUserCall('tv_' + tuid + suffix, unit, undefined, id);
         return ret;
     }));
-    post(router, '/tuid-div/:tuid/:div', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+    rb.post(router, '/tuid-div/:tuid/:div', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         body.$ = 'open/tuid-div/';
         console.log(body);
         let { tuid, div } = params;
@@ -82,22 +116,22 @@ exports.router = express_1.Router({ mergeParams: true });
         let suffix = (all === true ? '$id' : '$main');
         return yield runner.unitUserCall(`tv_${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
     }));
-    post(router, '/bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+    rb.post(router, '/bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, faces, faceUnitMessages } = body;
         let ret = yield runner.unitUserCall('tv_GetBusMessages', unit, undefined, faces, faceUnitMessages);
         console.log(`$unitx/open/bus - GetBusMessages - ${ret}`);
         return ret;
     }));
-    post(router, '/joint-read-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+    rb.post(router, '/joint-read-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, face, queue } = body;
         if (queue === undefined)
-            queue = busQueueSeed_1.busQueueSeed();
+            queue = core_1.busQueueSeed();
         let ret = yield runner.unitUserCall('tv_BusMessageFromQueue', unit, undefined, face, queue);
         if (ret.length === 0)
             return;
         return ret[0];
     }));
-    post(router, '/joint-write-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+    rb.post(router, '/joint-write-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, face, from, sourceId, body: message } = body;
         /*
         let data = '';
@@ -112,42 +146,9 @@ exports.router = express_1.Router({ mergeParams: true });
         let ret = yield runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
         return ret;
     }));
-})(exports.router);
-function post(router, path, processer) {
-    router.post(path, (req, res) => __awaiter(this, void 0, void 0, function* () {
-        yield process(req, res, processer, req.body, req.params);
-    }));
 }
+exports.buildOpenRouter = buildOpenRouter;
 ;
-function get(router, path, processer) {
-    router.get(path, (req, res) => __awaiter(this, void 0, void 0, function* () {
-        yield process(req, res, processer, req.query, req.params);
-    }));
-}
-;
-function put(router, path, processer) {
-    router.put(path, (req, res) => __awaiter(this, void 0, void 0, function* () {
-        yield process(req, res, processer, req.body, req.params);
-    }));
-}
-;
-function process(req, res, processer, queryOrBody, params) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            let db = req.params.db;
-            let runner = yield router_1.checkRunner(db, res);
-            if (runner === undefined)
-                return;
-            //let body = (req as any).body;
-            let result = yield processer(runner, queryOrBody, params);
-            res.json({
-                ok: true,
-                res: result
-            });
-        }
-        catch (err) {
-            res.json({ error: err });
-        }
-    });
-}
+//export const router: Router = Router({ mergeParams: true });
+//buildRouter(router);
 //# sourceMappingURL=router.js.map

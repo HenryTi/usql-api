@@ -1,1 +1,1 @@
-export {router as openRouter} from './router';
+export { buildOpenRouter } from './router';

@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 // 现在简单的把client message推送给center，由center来分发给client
 // 以后需要做client消息分发服务器
-function pushToClient(msg) {
+function pushToClient(unitxRunner, msg) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             yield core_1.centerApi.pushTo(msg);

@@ -9,8 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
-const db_1 = require("../db");
-const busQueueSeed_1 = require("../core/busQueueSeed");
 let faces;
 let froms;
 let lastHour;
@@ -70,23 +68,23 @@ function writeDataToBus(runner, face, unit, from, fromQueueId, body) {
     return __awaiter(this, void 0, void 0, function* () {
         let faceId = yield getFaceId(runner, unit, face);
         let fromId = yield getFromId(runner, unit, from);
-        let hour = busQueueSeed_1.busQueuehour();
+        let hour = core_1.busQueuehour();
         if (lastHour === undefined || hour > lastHour) {
-            yield runner.call('$set_bus_queue_seed', ['busqueue', busQueueSeed_1.busQueueSeedFromHour(hour)]);
+            yield runner.call('$set_bus_queue_seed', ['busqueue', core_1.busQueueSeedFromHour(hour)]);
             lastHour = hour;
         }
         yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, faceId, fromId, fromQueueId, body]);
     });
 }
 exports.writeDataToBus = writeDataToBus;
-function processBusMessage(msg) {
+function processBusMessage(unitxRunner, msg) {
     return __awaiter(this, void 0, void 0, function* () {
         // 处理 bus message，发送到相应的uq服务器
         console.log('bus:', msg);
-        let runner = yield db_1.getRunner(core_1.consts.$unitx);
+        //let unitxRunner = await getRunner(consts.$unitx);
         let { unit, body, from, queueId, busOwner, bus, face } = msg;
         let faceUrl = busOwner + '/' + bus + '/' + face;
-        yield writeDataToBus(runner, faceUrl, unit, from, queueId, body);
+        yield writeDataToBus(unitxRunner, faceUrl, unit, from, queueId, body);
     });
 }
 exports.processBusMessage = processBusMessage;

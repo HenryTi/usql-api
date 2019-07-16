@@ -1,12 +1,12 @@
-import {Router, Request, Response, NextFunction} from 'express';
-import { Runner } from '../../db';
-import { checkRunner } from '../router';
+import { Router } from 'express';
+//import { checkRunner } from '../router';
+import { Runner, RouterBuilder } from '../../core';
 //import { post } from '../process';
 
-export const router: Router = Router({ mergeParams: true });
+//export const router: Router = Router({ mergeParams: true });
 
-(function(router:Router) {
-    post(router, '/access-user',
+export function buildSettingRouter(router:Router, rb:RouterBuilder) {
+    rb.post(router, '/access-user',
     async (runner:Runner, body:any):Promise<any> => {
         body.$ = 'seting/access-user';
         console.log(body);
@@ -14,7 +14,7 @@ export const router: Router = Router({ mergeParams: true });
         await runner.unitCall('$set_access_user', unit, entity, users, undefined);
     });
 
-    post(router, '/access-entity',
+    rb.post(router, '/access-entity',
     async (runner:Runner, body:any):Promise<any> => {
         body.$ = 'seting/access-entity';
         console.log(body);
@@ -22,15 +22,15 @@ export const router: Router = Router({ mergeParams: true });
         await runner.unitCall('$set_access_entity', unit, entities);
     });
 
-    post(router, '/access-fully',
+    rb.post(router, '/access-fully',
     async (runner:Runner, body:any):Promise<any> => {
         body.$ = 'seting/access-fully *** ---';
         console.log(body);
         let {unit, user, flag} = body;
         await runner.unitUserCall('$set_access_fully', unit, user, flag);
     });
-})(router);
-
+};
+/*
 type Processer = (runner:Runner, body:any) => Promise<any>;
 
 function post(router:Router, path:string, processer:Processer) {
@@ -69,3 +69,4 @@ async function process(req:Request, res:Response, processer:Processer):Promise<v
         res.json({error: err});
     }
 }
+*/

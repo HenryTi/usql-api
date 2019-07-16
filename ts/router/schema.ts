@@ -1,16 +1,15 @@
 import { Router } from 'express';
-import { Runner } from '../db';
-import { get } from './process';
+import { Runner, RouterBuilder } from '../core';
 
-export default function(router:Router) {
-    get(router, '/schema/:name',
-    async (unit:number, user:number, urlParams:any, runner:Runner, body:any) => {
+export function buildSchemaRouter(router:Router, rb:RouterBuilder) {
+    rb.get(router, '/schema/:name',
+    async (runner:Runner, body:any, urlParams:any) => {
         let {name} = urlParams;
         let schema = runner.getSchema(name);
         return schema && schema.call;
     });
-    get(router, '/schema/:name/:version',
-    async (unit:number, user:number, urlParams:any, runner:Runner, body:any) => {
+    rb.get(router, '/schema/:name/:version',
+    async (runner:Runner, body:any, urlParams:any) => {
         let {name, version} = urlParams;
         let schemaVersion = await runner.loadSchemaVersion(name, version);
         return schemaVersion;

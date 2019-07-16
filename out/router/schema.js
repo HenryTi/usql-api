@@ -8,18 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const process_1 = require("./process");
-function default_1(router) {
-    process_1.get(router, '/schema/:name', (unit, user, urlParams, runner, body) => __awaiter(this, void 0, void 0, function* () {
+function buildSchemaRouter(router, rb) {
+    rb.get(router, '/schema/:name', (runner, body, urlParams) => __awaiter(this, void 0, void 0, function* () {
         let { name } = urlParams;
         let schema = runner.getSchema(name);
         return schema && schema.call;
     }));
-    process_1.get(router, '/schema/:name/:version', (unit, user, urlParams, runner, body) => __awaiter(this, void 0, void 0, function* () {
+    rb.get(router, '/schema/:name/:version', (runner, body, urlParams) => __awaiter(this, void 0, void 0, function* () {
         let { name, version } = urlParams;
         let schemaVersion = yield runner.loadSchemaVersion(name, version);
         return schemaVersion;
     }));
 }
-exports.default = default_1;
+exports.buildSchemaRouter = buildSchemaRouter;
 //# sourceMappingURL=schema.js.map

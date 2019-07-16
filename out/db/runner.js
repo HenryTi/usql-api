@@ -10,9 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
 const db_1 = require("./db");
-const packReturn_1 = require("../core/packReturn");
+const core_1 = require("../core");
 const importData_1 = require("./importData");
-const packParam_1 = require("../core/packParam");
 const runners = {};
 function getRunner(name) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -356,7 +355,7 @@ class Runner {
             for (let i = 0; i < length; i++) {
                 let t = ret[0];
                 if (t.length > 0) {
-                    return packReturn_1.packReturns(verify, ret);
+                    return core_1.packReturns(verify, ret);
                 }
             }
             return;
@@ -436,7 +435,7 @@ class Runner {
     actionFromObj(action, unit, user, obj) {
         return __awaiter(this, void 0, void 0, function* () {
             let schema = this.getSchema(action);
-            let data = packParam_1.packParam(schema.call, obj);
+            let data = core_1.packParam(schema.call, obj);
             let result = yield this.unitUserCallEx('tv_' + action, unit, user, data);
             return result;
         });

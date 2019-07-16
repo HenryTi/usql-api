@@ -1,27 +1,62 @@
-import {Router, Request, Response, static as Static} from 'express';
-import { Runner } from '../../db';
-import { checkRunner } from '../router';
-import { busQueueSeed } from '../../core/busQueueSeed';
+import { Router } from 'express';
+import { Runner, busQueueSeed, RouterBuilder } from '../../core';
 
-export const router: Router = Router({ mergeParams: true });
+//type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
 
-(function(router:Router) {
-    get(router, '/entities/:unit',
+export function buildOpenRouter(router:Router, rb: RouterBuilder) {
+    /*
+    function post(router:Router, path:string, processer:Processer) {
+        router.post(path, async (req:Request, res:Response) => {
+            await process(req, res, processer, (req as any).body, req.params);
+        });
+    };
+    
+    function get(router:Router, path:string, processer:Processer) {
+        router.get(path, async (req:Request, res:Response) => {
+            await process(req, res, processer, req.query, req.params);
+        });
+    };
+    
+    function put(router:Router, path:string, processer:Processer) {
+        router.put(path, async (req:Request, res:Response) => {
+            await process(req, res, processer, (req as any).body, req.params);
+        });
+    };
+    
+    async function process(req:Request, res:Response, processer:Processer, queryOrBody:any, params:any):Promise<void> {
+        try {
+            let db = req.params.db;
+            let runner = await checkRunner(db, res);
+            if (runner === undefined) return;
+            //let body = (req as any).body;
+            let result = await processer(runner, queryOrBody, params);
+            res.json({
+                ok: true,
+                res: result
+            });
+        }
+        catch (err) {
+            res.json({error: err});
+        }
+    }
+    */
+    
+    rb.get(router, '/entities/:unit',
     async (runner:Runner, body:any, params:any):Promise<any> => {
         return await runner.getEntities(params.unit);
     });
 
-    get(router, '/entity/:entityName',
+    rb.get(router, '/entity/:entityName',
     async (runner:Runner, body:any, params:any):Promise<any> => {
         return runner.getSchema(params.entityName);
     });
 
-    post(router, '/entities/:unit',
+    rb.post(router, '/entities/:unit',
     async (runner:Runner, body:any, params:any):Promise<any> => {
         return await runner.getEntities(params.unit);
     });
 
-    post(router, '/fresh',
+    rb.post(router, '/fresh',
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, stamps} = body;
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
@@ -35,7 +70,7 @@ export const router: Router = Router({ mergeParams: true });
         }
     });
 
-    post(router, '/tuid',
+    rb.post(router, '/tuid',
     async (runner:Runner, body:any):Promise<any> => {
         body.$ = 'open/tuid';
         console.log(body);
@@ -59,7 +94,7 @@ export const router: Router = Router({ mergeParams: true });
         return ret;
     });
 
-    post(router, '/tuid-main/:tuid',
+    rb.post(router, '/tuid-main/:tuid',
     async (runner:Runner, body:any, params:any):Promise<any> => {
         body.$ = 'open/tuid-main/';
         console.log(body);
@@ -72,7 +107,7 @@ export const router: Router = Router({ mergeParams: true });
         return ret;
     });
 
-    post(router, '/tuid-div/:tuid/:div',
+    rb.post(router, '/tuid-div/:tuid/:div',
     async (runner:Runner, body:any, params:any):Promise<any> => {
         body.$ = 'open/tuid-div/';
         console.log(body);
@@ -84,7 +119,7 @@ export const router: Router = Router({ mergeParams: true });
         return await runner.unitUserCall(`tv_${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
     });
 
-    post(router, '/bus',
+    rb.post(router, '/bus',
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, faces, faceUnitMessages} = body;
         let ret = await runner.unitUserCall('tv_GetBusMessages', unit, undefined, faces, faceUnitMessages);
@@ -92,7 +127,7 @@ export const router: Router = Router({ mergeParams: true });
         return ret;
     });
 
-    post(router, '/joint-read-bus',
+    rb.post(router, '/joint-read-bus',
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, face, queue} = body;
         if (queue === undefined) queue = busQueueSeed();
@@ -101,7 +136,7 @@ export const router: Router = Router({ mergeParams: true });
         return ret[0];
     });
 
-    post(router, '/joint-write-bus',
+    rb.post(router, '/joint-write-bus',
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, face, from, sourceId, body:message} = body;
         /*
@@ -117,41 +152,8 @@ export const router: Router = Router({ mergeParams: true });
         let ret = await runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
         return ret;
     });
-})(router);
-
-type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
-
-function post(router:Router, path:string, processer:Processer) {
-    router.post(path, async (req:Request, res:Response) => {
-        await process(req, res, processer, (req as any).body, req.params);
-    });
 };
 
-function get(router:Router, path:string, processer:Processer) {
-    router.get(path, async (req:Request, res:Response) => {
-        await process(req, res, processer, req.query, req.params);
-    });
-};
+//export const router: Router = Router({ mergeParams: true });
 
-function put(router:Router, path:string, processer:Processer) {
-    router.put(path, async (req:Request, res:Response) => {
-        await process(req, res, processer, (req as any).body, req.params);
-    });
-};
-
-async function process(req:Request, res:Response, processer:Processer, queryOrBody:any, params:any):Promise<void> {
-    try {
-        let db = req.params.db;
-        let runner = await checkRunner(db, res);
-        if (runner === undefined) return;
-        //let body = (req as any).body;
-        let result = await processer(runner, queryOrBody, params);
-        res.json({
-            ok: true,
-            res: result
-        });
-    }
-    catch (err) {
-        res.json({error: err});
-    }
-}
+//buildRouter(router);

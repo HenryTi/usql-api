@@ -1,6 +1,5 @@
-import { packParam } from '../core';
-import { Runner } from '../db';
-import { getOpenApi, OpenApi } from './openApi';
+import { Runner, packParam, Net } from '../core';
+import { OpenApi } from '../core/openApi';
 
 interface SyncRow {
     unit: number;
@@ -11,7 +10,7 @@ interface SyncRow {
     stamp: number;
 }
 
-export async function syncTuids(runner:Runner):Promise<void> {
+export async function syncTuids(runner:Runner, net:Net):Promise<void> {
     let {froms} = runner;
     if (froms === undefined) return;
     try {
@@ -37,7 +36,7 @@ export async function syncTuids(runner:Runner):Promise<void> {
             for (let i in unitRows) {
                 let rows = unitRows[i];
                 let unit = Number(i);
-                let openApi = await getOpenApi(from, unit);
+                let openApi = await net.getOpenApi(from, unit);
                 if (!openApi) continue;
                 let stamps:any[][] = [];
                 // 如果本tuid有新id了，去from端同步

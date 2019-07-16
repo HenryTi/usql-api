@@ -8,13 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const db_1 = require("../db");
-const db_2 = require("../db/db");
+const core_1 = require("../core");
 const resDbName = '$res';
 function initResDb() {
     return __awaiter(this, void 0, void 0, function* () {
-        let db = new db_2.Db(resDbName);
-        let runner = new db_1.Runner(db);
+        let db = new core_1.Db(resDbName);
+        let runner = new core_1.Runner(db);
         yield runner.initResDb(resDbName);
     });
 }
@@ -23,8 +22,8 @@ let resDbRunner;
 function getResDbRunner() {
     return __awaiter(this, void 0, void 0, function* () {
         if (resDbRunner === undefined) {
-            let db = new db_2.Db(resDbName);
-            resDbRunner = new db_1.Runner(db);
+            let db = new core_1.Db(resDbName);
+            resDbRunner = new core_1.Runner(db);
         }
         return resDbRunner;
     });

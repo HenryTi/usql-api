@@ -1,11 +1,9 @@
 import { Router } from 'express';
-import { packReturn } from '../core';
-import { entityPost } from './entityProcess';
-import { Runner } from '../db';
+import { Runner, packReturn, RouterBuilder } from '../core';
+//import { entityPost } from './entityProcess';
 
-export default function(router:Router) {
-    //router.post('/book/:name', async (req:Request, res:Response) => {
-    entityPost(router, 'book', '/:name',
+export function buildBookRouter(router:Router, rb:RouterBuilder) {
+    rb.entityPost(router, 'book', '/:name',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let pageStart = body['$pageStart'];
         let params:any[] = [pageStart, body['$pageSize']];

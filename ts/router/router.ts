@@ -1,5 +1,6 @@
+/*
 import {Router, Request, Response, NextFunction} from 'express';
-import {getRunner, Runner} from '../db/runner';
+import {getRunner, Runner} from '../core';
 
 export const router: Router = Router();
 
@@ -57,3 +58,4 @@ export function getTuidArr(schema:any, arrName:string):any {
     if (schemaArr !== undefined) return schemaArr;
     throw 'getTuidArr: ' + name + ' does not have arr ' + arrName + ' arrs:' + (arrs as any[]).map(v => v.name).join(',');
 }
+*/

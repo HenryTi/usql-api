@@ -1,1 +1,1 @@
-export {router as settingRouter} from './router';
+export {buildSettingRouter} from './router';

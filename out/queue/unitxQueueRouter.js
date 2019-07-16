@@ -8,46 +8,47 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const express_1 = require("express");
-const runner_1 = require("../db/runner");
+const core_1 = require("../core");
 //import { queueUnitxIn } from './unitxInQueue';
 const messageProcesser_1 = require("./messageProcesser");
-const core_1 = require("../core");
-exports.unitxQueueRouter = express_1.Router();
-exports.unitxQueueRouter.post('/', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
-    try {
-        let msg = req.body;
-        let tos = undefined;
-        let { type } = msg;
-        if (type === 'sheet') {
-            let sheetMessage = msg;
-            let { from } = sheetMessage;
-            tos = yield getSheetTos(sheetMessage);
-            if (tos === undefined || tos.length === 0)
-                tos = [from];
-            sheetMessage.to = tos;
+//export const unitxQueueRouter: Router = Router();
+function buildUnitxQueueRouter(router, rb) {
+    router.post('/', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            let msg = req.body;
+            let tos = undefined;
+            let { type } = msg;
+            let unitxRunner = yield rb.getRunner(core_1.consts.$unitx);
+            if (type === 'sheet') {
+                let sheetMessage = msg;
+                let { from } = sheetMessage;
+                tos = yield getSheetTos(unitxRunner, sheetMessage);
+                if (tos === undefined || tos.length === 0)
+                    tos = [from];
+                sheetMessage.to = tos;
+            }
+            //await queueUnitxIn(msg);
+            let mp = messageProcesser_1.messageProcesser(msg);
+            yield mp(unitxRunner, msg);
+            console.log('await queueUnitxIn(msg)', msg);
+            res.json({
+                ok: true,
+                res: tos,
+            });
         }
-        //await queueUnitxIn(msg);
-        let mp = messageProcesser_1.messageProcesser(msg);
-        yield mp(msg);
-        console.log('await queueUnitxIn(msg)', msg);
-        res.json({
-            ok: true,
-            res: tos,
-        });
-    }
-    catch (e) {
-        res.json({
-            ok: false,
-            error: JSON.stringify(e),
-        });
-    }
-}));
+        catch (e) {
+            res.json({
+                ok: false,
+                error: JSON.stringify(e),
+            });
+        }
+    }));
+}
+exports.buildUnitxQueueRouter = buildUnitxQueueRouter;
 // 之前用 getSheetTo 查询，现在改名为 getEntityAccess
 const uqGetSheetTo = 'getEntityAccess';
-function getSheetTos(sheetMessage) {
+function getSheetTos(unitxRunner, sheetMessage) {
     return __awaiter(this, void 0, void 0, function* () {
-        let runner = yield runner_1.getRunner(core_1.consts.$unitx);
         let { unit, body } = sheetMessage;
         let { state, user, name, no, discription, uq } = body;
         // 新单只能发给做单人
@@ -57,7 +58,7 @@ function getSheetTos(sheetMessage) {
         let sheetName = name;
         let stateName = state;
         let paramsGetSheetTo = [uq, sheetName, stateName];
-        let tos = yield runner.query(uqGetSheetTo, unit, user, paramsGetSheetTo);
+        let tos = yield unitxRunner.query(uqGetSheetTo, unit, user, paramsGetSheetTo);
         return tos.map(v => v.to);
     });
 }

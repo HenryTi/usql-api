@@ -1,10 +1,8 @@
 import {Router} from 'express';
-import {packReturn} from '../core';
-import { entityPost } from './entityProcess';
-import { Runner } from '../db';
+import {Runner, packReturn, RouterBuilder} from '../core';
 
-export default function(router:Router) {
-    entityPost(router, 'query', '/:name',
+export function buildQueryRouter(router:Router, rb:RouterBuilder) {
+    rb.entityPost(router, 'query', '/:name',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let params:any[] = [];
         let fields = schema.fields;
@@ -17,7 +15,7 @@ export default function(router:Router) {
         return data;
     });
 
-    entityPost(router, 'query', '-page/:name',
+    rb.entityPost(router, 'query', '-page/:name',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let pageStart = body['$pageStart'];
         if (pageStart !== undefined) {

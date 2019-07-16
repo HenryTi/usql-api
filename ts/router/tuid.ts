@@ -1,14 +1,12 @@
 import { Router } from 'express';
 import * as _ from 'lodash';
-import { getTuidArr } from './router';
-import { entityGet, entityPost } from './entityProcess';
-import { Runner } from '../db';
-import { packArr } from '../core/packReturn';
+//import { getTuidArr } from './router';
+import { Runner, RouterBuilder, packArr } from '../core';
 
 const tuidType = 'tuid';
 
-export default function(router: Router) {
-    entityGet(router, tuidType, '/:name/:id', 
+export function buildTuidRouter(router: Router, rb: RouterBuilder) {
+    rb.entityGet(router, tuidType, '/:name/:id', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id} = urlParams;
         let result = await runner.tuidGet(name, unit, user, id);
@@ -27,7 +25,7 @@ export default function(router: Router) {
         return value;
     });
 
-    entityGet(router, tuidType, '-arr/:name/:owner/:arr/:id/', 
+    rb.entityGet(router, tuidType, '-arr/:name/:owner/:arr/:id/', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id, owner, arr} = urlParams;
         let schemaArr = getTuidArr(schema, arr);
@@ -36,27 +34,27 @@ export default function(router: Router) {
         return row;
     });
 
-    entityGet(router, tuidType, '-all/:name/',
+    rb.entityGet(router, tuidType, '-all/:name/',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let result = await runner.tuidGetAll(name, unit, user);
         return result;
     });
 
-    entityGet(router, tuidType, '-vid/:name/',
+    rb.entityGet(router, tuidType, '-vid/:name/',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {u} = body;
         let result = await runner.tuidVid(name, unit, u);
         return result[0].id;
     });
 
-    entityGet(router, tuidType, '-arr-vid/:name/:arr',
+    rb.entityGet(router, tuidType, '-arr-vid/:name/:arr',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {u} = body;
         let result = await runner.tuidArrVid(name, urlParams.arr, unit, u);
         return result[0].id;
     });
 
-    entityGet(router, tuidType, '-arr-all/:name/:owner/:arr/', 
+    rb.entityGet(router, tuidType, '-arr-all/:name/:owner/:arr/', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {owner, arr} = urlParams;
         let schemaArr = getTuidArr(schema, arr);
@@ -64,7 +62,7 @@ export default function(router: Router) {
         return result;
     });
 
-    entityGet(router, tuidType, '-proxy/:name/:type/:id',
+    rb.entityGet(router, tuidType, '-proxy/:name/:type/:id',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id, type} = urlParams;
         let result = await runner.tuidProxyGet(name, unit, user, id, type);
@@ -72,7 +70,7 @@ export default function(router: Router) {
         return row;
     });
 
-    entityPost(router, tuidType, '/:name', 
+    rb.entityPost(router, tuidType, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let id = body["$id"];
         let dbParams:any[] = [id];
@@ -107,7 +105,7 @@ export default function(router: Router) {
         return row;
     });
 
-    entityPost(router, tuidType, '-arr/:name/:owner/:arr/', 
+    rb.entityPost(router, tuidType, '-arr/:name/:owner/:arr/', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {owner, arr} = urlParams;
         let schemaArr = getTuidArr(schema, arr);
@@ -123,7 +121,7 @@ export default function(router: Router) {
         return row;
     });
 
-    entityPost(router, tuidType, '-arr-pos/:name/:owner/:arr/', 
+    rb.entityPost(router, tuidType, '-arr-pos/:name/:owner/:arr/', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {owner, arr} = urlParams;
         let {$id, $order} = body;
@@ -132,7 +130,7 @@ export default function(router: Router) {
         return undefined;
     });
 
-    entityPost(router, tuidType, 'ids/:name/:arr', 
+    rb.entityPost(router, tuidType, 'ids/:name/:arr', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {arr} = urlParams;
         let ids = (body as number[]).join(',');
@@ -158,7 +156,7 @@ export default function(router: Router) {
         return result;
     });
 
-    entityPost(router, tuidType, 's/:name', 
+    rb.entityPost(router, tuidType, 's/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {arr, owner, key, pageStart, pageSize} = body;
         let result = arr === undefined?
@@ -170,7 +168,7 @@ export default function(router: Router) {
         return rows;
     });
 
-    entityPost(router, tuidType, 'import/:name/:arr',
+    rb.entityPost(router, tuidType, 'import/:name/:arr',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {arr} = urlParams;
         let entity = arr !== undefined? name + '.' + arr : name;
@@ -179,3 +177,12 @@ export default function(router: Router) {
         return;
     });
 };
+
+function getTuidArr(schema:any, arrName:string):any {
+    let {name, type, arrs} = schema;
+    if (type !== 'tuid') throw name + ' is not tuid';
+    let an = arrName.toLowerCase();
+    let schemaArr = (arrs as any[]).find(v => v.name === an);
+    if (schemaArr !== undefined) return schemaArr;
+    throw 'getTuidArr: ' + name + ' does not have arr ' + arrName + ' arrs:' + (arrs as any[]).map(v => v.name).join(',');
+}

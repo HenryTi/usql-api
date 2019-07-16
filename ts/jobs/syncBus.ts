@@ -1,6 +1,5 @@
-import { Runner } from "../db";
-import { getOpenApi } from "./openApi";
-import { consts } from "../core";
+import { Runner, consts, Net } from "../core";
+//import { getOpenApi } from "./openApi";
 
 interface SyncFace {
     unit: number;
@@ -20,10 +19,10 @@ interface SyncFaces {
     syncFaceArr: SyncFace[];
 }
 
-export async function syncBus(runner: Runner) {
+export async function syncBus(runner: Runner, net: Net) {
     try {
         let db = runner.getDb();
-        if (db === 'salestask') debugger;
+        //if (db === 'salestask') debugger;
         console.log('syncBus: ' + db);
         for (;;) {
             let syncFaces = await getSyncFaces(runner);
@@ -32,7 +31,7 @@ export async function syncBus(runner: Runner) {
             let {faceColl, syncFaceArr} = syncFaces;
             for (let syncFace of syncFaceArr) {
                 let {unit, faces, faceUnitMessages} = syncFace;
-                let openApi = await getOpenApi(consts.$$$unitx, unit);
+                let openApi = await net.getOpenApi(consts.$$$unitx, unit);
                 let ret = await openApi.bus(unit, faces, faceUnitMessages);
                 let retLen = ret.length
                 if (retLen === 0) continue;
@@ -47,7 +46,7 @@ export async function syncBus(runner: Runner) {
         }
     }
     catch (err) {
-        debugger;
+        //debugger;
         if (err && err.message) console.error(err.message);
     }
 }

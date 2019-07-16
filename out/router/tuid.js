@@ -8,12 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const router_1 = require("./router");
-const entityProcess_1 = require("./entityProcess");
-const packReturn_1 = require("../core/packReturn");
+//import { getTuidArr } from './router';
+const core_1 = require("../core");
 const tuidType = 'tuid';
-function default_1(router) {
-    entityProcess_1.entityGet(router, tuidType, '/:name/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+function buildTuidRouter(router, rb) {
+    rb.entityGet(router, tuidType, '/:name/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id } = urlParams;
         let result = yield runner.tuidGet(name, unit, user, id);
         let arr0 = result[0];
@@ -30,40 +29,40 @@ function default_1(router) {
         }
         return value;
     }));
-    entityProcess_1.entityGet(router, tuidType, '-arr/:name/:owner/:arr/:id/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityGet(router, tuidType, '-arr/:name/:owner/:arr/:id/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id, owner, arr } = urlParams;
-        let schemaArr = router_1.getTuidArr(schema, arr);
+        let schemaArr = getTuidArr(schema, arr);
         let result = yield runner.tuidArrGet(name, arr, unit, user, owner, id);
         let row = result[0];
         return row;
     }));
-    entityProcess_1.entityGet(router, tuidType, '-all/:name/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityGet(router, tuidType, '-all/:name/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.tuidGetAll(name, unit, user);
         return result;
     }));
-    entityProcess_1.entityGet(router, tuidType, '-vid/:name/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityGet(router, tuidType, '-vid/:name/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { u } = body;
         let result = yield runner.tuidVid(name, unit, u);
         return result[0].id;
     }));
-    entityProcess_1.entityGet(router, tuidType, '-arr-vid/:name/:arr', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityGet(router, tuidType, '-arr-vid/:name/:arr', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { u } = body;
         let result = yield runner.tuidArrVid(name, urlParams.arr, unit, u);
         return result[0].id;
     }));
-    entityProcess_1.entityGet(router, tuidType, '-arr-all/:name/:owner/:arr/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityGet(router, tuidType, '-arr-all/:name/:owner/:arr/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { owner, arr } = urlParams;
-        let schemaArr = router_1.getTuidArr(schema, arr);
+        let schemaArr = getTuidArr(schema, arr);
         let result = yield runner.tuidGetArrAll(name, arr, unit, user, owner);
         return result;
     }));
-    entityProcess_1.entityGet(router, tuidType, '-proxy/:name/:type/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityGet(router, tuidType, '-proxy/:name/:type/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id, type } = urlParams;
         let result = yield runner.tuidProxyGet(name, unit, user, id, type);
         let row = result[0];
         return row;
     }));
-    entityProcess_1.entityPost(router, tuidType, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, tuidType, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let id = body["$id"];
         let dbParams = [id];
         let fields = schema.fields;
@@ -99,9 +98,9 @@ function default_1(router) {
         }
         return row;
     }));
-    entityProcess_1.entityPost(router, tuidType, '-arr/:name/:owner/:arr/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, tuidType, '-arr/:name/:owner/:arr/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { owner, arr } = urlParams;
-        let schemaArr = router_1.getTuidArr(schema, arr);
+        let schemaArr = getTuidArr(schema, arr);
         let id = body["$id"];
         let dbParams = [owner, id];
         let fields = schemaArr.fields;
@@ -113,14 +112,14 @@ function default_1(router) {
         let row = result[0];
         return row;
     }));
-    entityProcess_1.entityPost(router, tuidType, '-arr-pos/:name/:owner/:arr/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, tuidType, '-arr-pos/:name/:owner/:arr/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { owner, arr } = urlParams;
         let { $id, $order } = body;
         let dbParams = [owner, $id, $order];
         let result = yield runner.tuidArrPos(name, arr, unit, user, dbParams);
         return undefined;
     }));
-    entityProcess_1.entityPost(router, tuidType, 'ids/:name/:arr', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, tuidType, 'ids/:name/:arr', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { arr } = urlParams;
         let ids = body.join(',');
         let result = yield runner.tuidIds(name, arr, unit, user, ids);
@@ -128,7 +127,7 @@ function default_1(router) {
             let { mainFields } = schema;
             if (mainFields !== undefined) {
                 let ret = [];
-                packReturn_1.packArr(ret, mainFields, result);
+                core_1.packArr(ret, mainFields, result);
                 return ret.join('');
             }
         }
@@ -138,13 +137,13 @@ function default_1(router) {
             let { mainFields } = arrSchema;
             if (mainFields !== undefined) {
                 let ret = [];
-                packReturn_1.packArr(ret, mainFields, result);
+                core_1.packArr(ret, mainFields, result);
                 return ret.join('');
             }
         }
         return result;
     }));
-    entityProcess_1.entityPost(router, tuidType, 's/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, tuidType, 's/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { arr, owner, key, pageStart, pageSize } = body;
         let result = arr === undefined ?
             yield runner.tuidSeach(name, unit, user, arr, key, pageStart, pageSize)
@@ -153,7 +152,7 @@ function default_1(router) {
         let rows = result[0];
         return rows;
     }));
-    entityProcess_1.entityPost(router, tuidType, 'import/:name/:arr', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, tuidType, 'import/:name/:arr', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { arr } = urlParams;
         let entity = arr !== undefined ? name + '.' + arr : name;
         let filePath = 'C:/Users/Henry/Desktop/Results.csv';
@@ -161,6 +160,16 @@ function default_1(router) {
         return;
     }));
 }
-exports.default = default_1;
+exports.buildTuidRouter = buildTuidRouter;
 ;
+function getTuidArr(schema, arrName) {
+    let { name, type, arrs } = schema;
+    if (type !== 'tuid')
+        throw name + ' is not tuid';
+    let an = arrName.toLowerCase();
+    let schemaArr = arrs.find(v => v.name === an);
+    if (schemaArr !== undefined)
+        return schemaArr;
+    throw 'getTuidArr: ' + name + ' does not have arr ' + arrName + ' arrs:' + arrs.map(v => v.name).join(',');
+}
 //# sourceMappingURL=tuid.js.map

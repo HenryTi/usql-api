@@ -3,29 +3,31 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("./router"));
+//export * from './router';
 __export(require("./setting"));
-var open_1 = require("./open");
-exports.openRouter = open_1.openRouter;
-const router_1 = require("./router");
+__export(require("./open"));
 const access_1 = require("./access");
-const schema_1 = require("./schema");
-const tuid_1 = require("./tuid");
-const sheet_1 = require("./sheet");
 const action_1 = require("./action");
 const book_1 = require("./book");
 const history_1 = require("./history");
 const query_1 = require("./query");
+const schema_1 = require("./schema");
+const tuid_1 = require("./tuid");
+const sheet_1 = require("./sheet");
+//import {router} from './router';
 const import_1 = require("./import");
 //import settingRouter from './setting';
-access_1.default(router_1.router);
-schema_1.default(router_1.router);
-tuid_1.default(router_1.router);
-sheet_1.default(router_1.router);
-action_1.default(router_1.router);
-book_1.default(router_1.router);
-history_1.default(router_1.router);
-query_1.default(router_1.router);
-import_1.default(router_1.router);
+function buildEntityRouter(router, rb) {
+    access_1.buildAccessRouter(router, rb);
+    action_1.buildActionRouter(router, rb);
+    book_1.buildBookRouter(router, rb);
+    history_1.buildHistoryRouter(router, rb);
+    query_1.buildQueryRouter(router, rb);
+    schema_1.buildSchemaRouter(router, rb);
+    tuid_1.buildTuidRouter(router, rb);
+    sheet_1.buildSheetRouter(router, rb);
+    import_1.buildImportRouter(router, rb);
+}
+exports.buildEntityRouter = buildEntityRouter;
 //settingRouter(router);
 //# sourceMappingURL=index.js.map

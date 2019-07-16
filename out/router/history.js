@@ -9,10 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
-const entityProcess_1 = require("./entityProcess");
-function default_1(router) {
+function buildHistoryRouter(router, rb) {
     //router.post('/history/:name', async (req:Request, res:Response) => {
-    entityProcess_1.entityPost(router, 'history', '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, 'history', '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let pageStart = body['$pageStart'];
         if (pageStart !== undefined) {
             pageStart = new Date(pageStart);
@@ -28,5 +27,5 @@ function default_1(router) {
         return data;
     }));
 }
-exports.default = default_1;
+exports.buildHistoryRouter = buildHistoryRouter;
 //# sourceMappingURL=history.js.map

@@ -8,17 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const entityProcess_1 = require("./entityProcess");
+//import { /*queueSheet, queueToUnitx, */SheetMessage } from '../queue';
+//import { entityPost, entityPut, entityGet } from './entityProcess';
 const core_1 = require("../core");
 const constSheet = 'sheet';
-function default_1(router) {
+function buildSheetRouter(router, rb) {
     function queueSheet(runner, unit, sheetId, content) {
         return __awaiter(this, void 0, void 0, function* () {
             let ret = yield runner.unitTableFromProc('tv_$sheet_to_queue', unit, sheetId, JSON.stringify(content));
             return (ret[0].ret === 1);
         });
     }
-    entityProcess_1.entityPost(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { app, discription, data } = body;
         let verify = yield runner.sheetVerify(name, unit, user, data);
         if (verify !== undefined) {
@@ -78,7 +79,7 @@ function default_1(router) {
         }
         return sheetRet;
     }));
-    entityProcess_1.entityPut(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPut(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { state, action, id, flow } = body;
         let retQueue = yield queueSheet(runner, unit, id, {
             sheet: name,
@@ -110,21 +111,21 @@ function default_1(router) {
         */
         return { msg: 'add to queue' };
     }));
-    entityProcess_1.entityPost(router, constSheet, '/:name/states', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, constSheet, '/:name/states', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { state, pageStart, pageSize } = body;
         let result = yield runner.sheetStates(name, state, unit, user, pageStart, pageSize);
         return result;
     }));
-    entityProcess_1.entityGet(router, constSheet, '/:name/statecount', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityGet(router, constSheet, '/:name/statecount', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.sheetStateCount(name, unit, user);
         return result;
     }));
-    entityProcess_1.entityPost(router, constSheet, '/:name/my-sheets', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, constSheet, '/:name/my-sheets', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { state, pageStart, pageSize } = body;
         let result = yield runner.mySheets(name, state, unit, user, pageStart, pageSize);
         return result;
     }));
-    entityProcess_1.entityGet(router, constSheet, '-scan/:name/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityGet(router, constSheet, '-scan/:name/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id } = urlParams;
         let result = yield runner.sheetScan(name, unit, user, id);
         let main = result[0];
@@ -135,21 +136,21 @@ function default_1(router) {
         main.data = json;
         return main;
     }));
-    entityProcess_1.entityGet(router, constSheet, '/:name/get/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityGet(router, constSheet, '/:name/get/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id } = urlParams;
         let result = yield runner.getSheet(name, unit, user, id);
         return result;
     }));
-    entityProcess_1.entityPost(router, constSheet, '/:name/archives', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, constSheet, '/:name/archives', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { pageStart, pageSize } = body;
         let result = yield runner.sheetArchives(name, unit, user, pageStart, pageSize);
         return result;
     }));
-    entityProcess_1.entityGet(router, constSheet, '/:name/archive/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityGet(router, constSheet, '/:name/archive/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id } = urlParams;
         let result = yield runner.sheetArchive(unit, user, name, id);
         return result;
     }));
 }
-exports.default = default_1;
+exports.buildSheetRouter = buildSheetRouter;
 //# sourceMappingURL=sheet.js.map

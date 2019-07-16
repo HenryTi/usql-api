@@ -1,28 +1,33 @@
-export * from './router';
+//export * from './router';
 export * from './setting';
-export {openRouter} from './open';
+export * from './open';
 
-import {router} from './router';
-import accessRouter from './access';
-import schemaRouter from './schema';
-import tuidRouter from './tuid';
-import sheetRouter from './sheet';
-import actionRouter from './action';
-import bookRouter from './book';
-import historyRouter from './history';
-import queryRouter from './query';
-import importRouter from './import';
+import { Router } from 'express';
+import {buildAccessRouter} from './access';
+import {buildActionRouter} from './action';
+import {buildBookRouter} from './book';
+import {buildHistoryRouter} from './history';
+import {buildQueryRouter} from './query';
+import {buildSchemaRouter} from './schema';
+import {buildTuidRouter} from './tuid';
+import {buildSheetRouter} from './sheet';
+//import {router} from './router';
+import {buildImportRouter} from './import';
+import { RouterBuilder } from '../core';
 
 //import settingRouter from './setting';
 
-accessRouter(router);
-schemaRouter(router);
-tuidRouter(router);
-sheetRouter(router);
-actionRouter(router);
-bookRouter(router);
-historyRouter(router);
-queryRouter(router);
-importRouter(router);
+export function buildEntityRouter(router:Router, rb: RouterBuilder) {
+    buildAccessRouter(router, rb);
+    buildActionRouter(router, rb);
+    buildBookRouter(router, rb);
+    buildHistoryRouter(router, rb);
+    buildQueryRouter(router, rb);
+    buildSchemaRouter(router, rb);
+    buildTuidRouter(router, rb);
+    buildSheetRouter(router, rb);
+    buildImportRouter(router, rb);
+}
+
 
 //settingRouter(router);

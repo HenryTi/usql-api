@@ -8,10 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const entityProcess_1 = require("./entityProcess");
 const accessType = 'access';
-function default_1(router) {
-    entityProcess_1.entityGet(router, accessType, '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+function buildAccessRouter(router, rb) {
+    rb.entityGet(router, accessType, '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         try {
             let { acc } = body;
             let accs = undefined;
@@ -29,10 +28,10 @@ function default_1(router) {
             debugger;
         }
     }));
-    entityProcess_1.entityGet(router, 'entities', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityGet(router, 'entities', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let entities = yield runner.getEntities(unit);
         return entities;
     }));
 }
-exports.default = default_1;
+exports.buildAccessRouter = buildAccessRouter;
 //# sourceMappingURL=access.js.map

@@ -1,7 +1,4 @@
-import { BusMessage } from "../core/model";
-import { consts } from '../core';
-import { getRunner, Runner } from "../db";
-import { busQueuehour, busQueueSeedFromHour } from "../core/busQueueSeed";
+import { Runner, consts, BusMessage, busQueuehour, busQueueSeedFromHour } from '../core';
 
 let faces:{[face:string]:number};
 let froms:{[from:string]:number};
@@ -63,11 +60,11 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
         [undefined, faceId, fromId, fromQueueId, body]);
 }
 
-export async function processBusMessage(msg:BusMessage):Promise<void> {
+export async function processBusMessage(unitxRunner:Runner, msg:BusMessage):Promise<void> {
     // 处理 bus message，发送到相应的uq服务器
     console.log('bus:', msg);
-    let runner = await getRunner(consts.$unitx);
+    //let unitxRunner = await getRunner(consts.$unitx);
     let {unit, body, from, queueId, busOwner, bus, face} = msg;
     let faceUrl = busOwner + '/' + bus + '/' + face;
-    await writeDataToBus(runner, faceUrl, unit, from, queueId, body);
+    await writeDataToBus(unitxRunner, faceUrl, unit, from, queueId, body);
 }

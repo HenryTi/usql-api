@@ -11,20 +11,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const fs = require("fs");
 const config = require("config");
 const multer = require("multer");
-const router_1 = require("./router");
-function default_1(router) {
+//import { User, checkRunner } from './router';
+function buildImportRouter(router, rb) {
     router.post('/import/', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        yield uploadImport(req, res);
-    }));
-}
-exports.default = default_1;
-const uploadPath = config.get("uploadPath");
-var upload = multer({ dest: uploadPath });
-function uploadImport(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
         let userToken = req.user;
         let { db, id: userId, unit } = userToken;
-        let runner = yield router_1.checkRunner(db, res);
+        let runner = yield this.checkRunner(db, res);
         if (runner === undefined)
             return;
         let body = req.body;
@@ -71,8 +63,59 @@ function uploadImport(req, res) {
                 }
             });
         });
+    }));
+}
+exports.buildImportRouter = buildImportRouter;
+const uploadPath = config.get("uploadPath");
+var upload = multer({ dest: uploadPath });
+/*
+async function uploadImport(req:Request, res:Response) {
+    let userToken:User = (req as any).user;
+    let {db, id:userId, unit} = userToken;
+    let runner = await checkRunner(db, res);
+    if (runner === undefined) return;
+    let body = (req as any).body;
+    let {source, entity} = body;
+    if (!source) source = '#';
+
+    let out = true;
+    function log(log?:string):boolean {
+        if (out === false) return true;
+        if (log === undefined) log = '\n';
+        else log += '\n';
+        if (res.write(log) === false) {
+            throw 'response error';
+        }
+        return true;
+    }
+
+    upload.any()(req, res, async function(err) {
+        if (err) {
+          res.json({'error': 'error'});
+          return;
+        }
+        try {
+            let parseResult = await eachUploadSourceFile(uploadPath, req.files, (fileContent:string, file:string) => {
+                try {
+                    res.write('parsing ' + file + '\r\n');
+                    res.write(fileContent);
+                    //uqUpdator.parse(fileContent, file);
+                }
+                catch (err) {
+                    res.write('parse error ' + JSON.stringify(err));
+                }
+            });
+        }
+        catch (err) {
+            log('import error: ');
+            log(err);
+        }
+        finally {
+            res.end();
+        }
     });
 }
+*/
 function eachUploadSourceFile(uploadPath, files, callback) {
     return __awaiter(this, void 0, void 0, function* () {
         for (let f of files) {

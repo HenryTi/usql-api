@@ -1,8 +1,7 @@
 import * as _ from 'lodash';
 import {getDb, Db, isDevelopment} from './db';
-import { packReturns } from '../core/packReturn';
+import { packReturns, packParam } from '.';
 import { ImportData } from './importData';
-import { packParam } from '../core/packParam';
 
 const runners: {[name:string]: Runner} = {};
 

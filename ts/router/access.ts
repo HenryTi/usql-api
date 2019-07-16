@@ -1,11 +1,10 @@
 import { Router } from 'express';
-import { entityGet } from './entityProcess';
-import { Runner } from '../db';
+import { Runner, RouterBuilder } from '../core';
 
 const accessType = 'access';
 
-export default function(router:Router) {
-    entityGet(router, accessType, '', 
+export function buildAccessRouter(router:Router, rb:RouterBuilder) {
+    rb.entityGet(router, accessType, '', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         try {
             let {acc} = body;
@@ -24,7 +23,7 @@ export default function(router:Router) {
         }
     });
 
-    entityGet(router, 'entities', '', 
+    rb.entityGet(router, 'entities', '', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let entities = await runner.getEntities(unit);
         return entities;

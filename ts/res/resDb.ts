@@ -1,5 +1,4 @@
-import { getRunner, Runner } from "../db";
-import { Db } from "../db/db";
+import { Runner, Db } from "../core";
 
 const resDbName = '$res';
 

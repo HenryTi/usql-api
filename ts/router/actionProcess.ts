@@ -1,6 +1,5 @@
 //import { afterAction } from '../queue';
-import { Runner } from '../db';
-import { packParam } from '../core';
+import { Runner, packParam } from '../core';
 
 export async function actionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
     let {data} = body;

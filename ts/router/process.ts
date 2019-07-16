@@ -1,5 +1,6 @@
-import { Runner } from "../db";
+/*
 import { Router, Request, Response } from "express";
+import { Runner } from '../core';
 import { checkRunner, User, unknownEntity, validEntity } from "./router";
 
 type Processer = (unit:number, user:number, urlParams:any, runner:Runner, body:any) => Promise<any>;
@@ -39,3 +40,4 @@ async function process(req:Request, res:Response, processer:Processer):Promise<v
         res.json({error: err});
     }
 }
+*/

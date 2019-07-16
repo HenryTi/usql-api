@@ -9,7 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const node_fetch_1 = require("node-fetch");
-const _1 = require(".");
+const centerApi_1 = require("./centerApi");
+const fetch_1 = require("./fetch");
+const setHostUrl_1 = require("./setHostUrl");
 function sendToUnitx(unit, msg) {
     return __awaiter(this, void 0, void 0, function* () {
         let unitxApi = yield getUnitxApi(unit);
@@ -22,7 +24,7 @@ function sendToUnitx(unit, msg) {
     });
 }
 exports.sendToUnitx = sendToUnitx;
-class UnitxApi extends _1.Fetch {
+class UnitxApi extends fetch_1.Fetch {
     send(msg) {
         return __awaiter(this, void 0, void 0, function* () {
             let ret = yield this.post('unitx', msg);
@@ -38,13 +40,13 @@ function getUnitxApi(unit) {
             return null;
         if (unitxApi !== undefined)
             return unitxApi;
-        let unitx = yield _1.centerApi.unitx(unit);
+        let unitx = yield centerApi_1.centerApi.unitx(unit);
         if (unitx === undefined)
             return unitxApis[unit] = null;
         let { url, urlDebug } = unitx;
         if (urlDebug !== undefined) {
             try {
-                urlDebug = _1.urlSetUnitxHost(urlDebug);
+                urlDebug = setHostUrl_1.urlSetUnitxHost(urlDebug);
                 let ret = yield node_fetch_1.default(urlDebug + 'hello');
                 if (ret.status !== 200)
                     throw 'not ok';

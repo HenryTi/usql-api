@@ -1,5 +1,5 @@
 import { Runner } from "../runner";
-import { centerApi } from "../../core";
+import { centerApi } from "..";
 
 export interface Header {
 	[name:string]: number;
