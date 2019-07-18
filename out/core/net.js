@@ -28,7 +28,8 @@ class Net {
             if (runner === null)
                 return;
             if (runner === undefined) {
-                let db = db_1.getDb(name);
+                let dbName = this.getDbName(name);
+                let db = db_1.getDb(dbName);
                 let isExists = yield db.exists();
                 if (isExists === false) {
                     this.runners[name] = null;
@@ -57,20 +58,22 @@ class Net {
             let uqUrl = yield centerApi_1.centerApi.urlFromUq(unit, uqFullName);
             if (uqUrl === undefined)
                 return openApis[unit] = null;
-            let { url, urlDebug } = uqUrl;
+            let url = yield this.getUqUrl(uqUrl);
+            /*
+            let {url, urlDebug, urlTest} = uqUrl;
             if (urlDebug) {
                 try {
-                    urlDebug = setHostUrl_1.urlSetUqHost(urlDebug);
-                    urlDebug = setHostUrl_1.urlSetUnitxHost(urlDebug);
-                    let ret = yield node_fetch_1.default(urlDebug + 'hello');
-                    if (ret.status !== 200)
-                        throw 'not ok';
-                    let text = yield ret.text();
+                    urlDebug = urlSetUqHost(urlDebug);
+                    urlDebug = urlSetUnitxHost(urlDebug);
+                    let ret = await fetch(urlDebug + 'hello');
+                    if (ret.status !== 200) throw 'not ok';
+                    let text = await ret.text();
                     url = urlDebug;
                 }
                 catch (err) {
                 }
             }
+            */
             return openApis[unit] = new openApi_1.OpenApi(url);
         });
     }
@@ -84,19 +87,21 @@ class Net {
             let unitx = yield centerApi_1.centerApi.unitx(unit);
             if (unitx === undefined)
                 return this.unitxApis[unit] = null;
-            let { url, urlDebug } = unitx;
+            let url = yield this.getUqUrl(unitx);
+            /*
+            let {url, urlDebug, urlTest} = unitx;
             if (urlDebug !== undefined) {
                 try {
-                    urlDebug = setHostUrl_1.urlSetUnitxHost(urlDebug);
-                    let ret = yield node_fetch_1.default(urlDebug + 'hello');
-                    if (ret.status !== 200)
-                        throw 'not ok';
-                    let text = yield ret.text();
+                    urlDebug = urlSetUnitxHost(urlDebug);
+                    let ret = await fetch(urlDebug + 'hello');
+                    if (ret.status !== 200) throw 'not ok';
+                    let text = await ret.text();
                     url = urlDebug;
                 }
                 catch (err) {
                 }
             }
+            */
             return this.unitxApis[unit] = new unitxApi_1.UnitxApi(url);
         });
     }
@@ -111,11 +116,85 @@ class Net {
             return toArr;
         });
     }
+    uqUrl(unit, uq) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let uqUrl = yield centerApi_1.centerApi.uqUrl(unit, uq);
+            return yield this.getUqUrl(uqUrl);
+            /*
+            let {url, urlDebug, urlTest} = uqUrl;
+            if (urlDebug !== undefined) {
+                // 这个地方会有问题，urlDebug也许指向错误
+                try {
+                    urlDebug = urlSetUqHost(urlDebug);
+                    let ret = await fetch(urlDebug + 'hello');
+                    if (ret.status !== 200) throw 'not ok';
+                    let text = await ret.text();
+                    url = urlDebug;
+                }
+                catch (err) {
+                }
+            }
+            return url;
+            */
+        });
+    }
+    getUqUrl(urls) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { db, url, urlDebug, urlTest } = urls;
+            if (urlDebug) {
+                urlDebug = yield this.getUqUrlDebug(urlDebug);
+                if (urlDebug !== undefined)
+                    return urlDebug;
+            }
+            return this.getUrl(db, url, urlTest);
+        });
+    }
+    getUqUrlDebug(urlDebug) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                urlDebug = setHostUrl_1.urlSetUqHost(urlDebug);
+                urlDebug = setHostUrl_1.urlSetUnitxHost(urlDebug);
+                let ret = yield node_fetch_1.default(urlDebug + 'hello');
+                if (ret.status !== 200)
+                    throw 'not ok';
+                let text = yield ret.text();
+                return urlDebug;
+            }
+            catch (err) {
+            }
+        });
+    }
 }
 exports.Net = Net;
 class ProdNet extends Net {
+    getDbName(name) { return name; }
+    getUrl(db, url, urlTest) {
+        if (!url)
+            url = urlTest;
+        url = url.toLowerCase();
+        let p = url.indexOf('/uq/');
+        if (p < 0) {
+            if (url.endsWith('/') === false)
+                url += '/';
+            url += 'uq/' + db + '/';
+        }
+        return url;
+    }
 }
 class TestNet extends Net {
+    getDbName(name) { return name; } // + '$test'}
+    getUrl(db, url, urlTest) {
+        if (!urlTest)
+            urlTest = url;
+        urlTest = urlTest.toLowerCase();
+        let p = urlTest.indexOf('/uq/');
+        if (p >= 0)
+            urlTest = urlTest.substr(0, p + 1);
+        if (urlTest.endsWith('/') === false)
+            urlTest += '/';
+        urlTest += 'uq-test/' + db + '/';
+        return urlTest;
+    }
 }
 exports.prodNet = new ProdNet;
 exports.testNet = new TestNet;

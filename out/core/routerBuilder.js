@@ -10,16 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const consts_1 = require("./consts");
 const net_1 = require("./net");
-const apiErrors = {
-    databaseNotExists: -1,
-};
 ;
 class RouterBuilder {
     constructor(net) {
         this.process = (req, res, processer, queryOrBody, params) => __awaiter(this, void 0, void 0, function* () {
             try {
                 let db = req.params.db;
-                let runner = yield this.checkRunner(db, res);
+                let runner = yield this.checkRunner(db);
                 if (runner === undefined)
                     return;
                 //let body = (req as any).body;
@@ -39,7 +36,7 @@ class RouterBuilder {
                 let { db, id: userId, unit } = userToken;
                 if (db === undefined)
                     db = consts_1.consts.$unitx;
-                let runner = yield this.checkRunner(db, res);
+                let runner = yield this.checkRunner(db);
                 if (runner === undefined)
                     return;
                 let { params } = req;
@@ -55,7 +52,7 @@ class RouterBuilder {
                         return;
                 }
                 let body = isGet === true ? req.query : req.body;
-                let result = yield processer(unit, userId, name, db, params, runner, body, call, run);
+                let result = yield processer(unit, userId, name, db, params, runner, body, call, run, this.net);
                 res.json({
                     ok: true,
                     res: result
@@ -103,17 +100,20 @@ class RouterBuilder {
         }));
     }
     ;
-    checkRunner(db, res) {
+    checkRunner(db) {
         return __awaiter(this, void 0, void 0, function* () {
             let runner = yield this.net.getRunner(db);
             if (runner !== undefined)
                 return runner;
+            throw `Database ${this.net.getDbName(db)} 不存在`;
+            /*
             res.json({
                 error: {
                     no: apiErrors.databaseNotExists,
-                    message: 'Database ' + db + ' 不存在'
+                    message:
                 }
             });
+            */
         });
     }
     getRunner(name) {

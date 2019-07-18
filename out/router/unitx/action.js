@@ -8,48 +8,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const node_fetch_1 = require("node-fetch");
 const core_1 = require("../../core");
 const actionProcess_1 = require("../actionProcess");
-function unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run) {
+function unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run, net) {
     return __awaiter(this, void 0, void 0, function* () {
         switch (name) {
             case 'saveentityoppost':
-                return yield saveEntityOpPost(unit, user, name, db, urlParams, runner, body, schema, run);
+                return yield saveEntityOpPost(unit, user, name, db, urlParams, runner, body, schema, run, net);
             case 'saveentityopforall':
-                yield setAccessEntity(unit, body, schema);
+                yield setAccessEntity(net, unit, body, schema);
                 break;
             case 'entityOpUserFully$add$':
-                yield entityOpUserFully$add$(unit, body, schema);
+                yield entityOpUserFully$add$(net, unit, body, schema);
                 break;
             case 'entityOpUserFully$del$':
-                yield entityOpUserFully$del$(unit, body, schema);
+                yield entityOpUserFully$del$(net, unit, body, schema);
                 break;
         }
         return yield actionProcess_1.actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
     });
 }
 exports.unitxActionProcess = unitxActionProcess;
-function uqUrl(unit, uq) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let urqUrl = yield core_1.centerApi.uqUrl(unit, uq);
-        let { url, urlDebug } = urqUrl;
-        if (urlDebug !== undefined) {
-            // 这个地方会有问题，urlDebug也许指向错误
-            try {
-                urlDebug = core_1.urlSetUqHost(urlDebug);
-                let ret = yield node_fetch_1.default(urlDebug + 'hello');
-                if (ret.status !== 200)
-                    throw 'not ok';
-                let text = yield ret.text();
-                url = urlDebug;
-            }
-            catch (err) {
-            }
-        }
-        return url;
-    });
-}
 // ????????????????????????
 // 这里的问题，记录在ondrive/同花待实现功能点.docx 文件中
 // ????????????????????????
@@ -75,11 +54,11 @@ if (opName === '$') {
 }
 return await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
 */
-function saveEntityOpPost(unit, user, name, db, urlParams, runner, body, schema, run) {
+function saveEntityOpPost(unit, user, name, db, urlParams, runner, body, schema, run, net) {
     return __awaiter(this, void 0, void 0, function* () {
         let actionParam = core_1.unpack(schema, body.data);
         let { uq, entityName, opName } = actionParam;
-        let url = yield uqUrl(unit, uq);
+        let url = yield net.uqUrl(unit, uq);
         let ret = yield actionProcess_1.actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
         if (opName === '$') {
             let users = yield runner.query('getEntityAccess', unit, user, [uq, entityName, opName]);
@@ -90,40 +69,40 @@ function saveEntityOpPost(unit, user, name, db, urlParams, runner, body, schema,
         return ret;
     });
 }
-function buildUqApi(unit, uq) {
+function buildUqApi(net, unit, uq) {
     return __awaiter(this, void 0, void 0, function* () {
-        let url = yield uqUrl(unit, uq);
+        let url = yield net.uqUrl(unit, uq);
         let uqApi = new UqApi(url);
         return uqApi;
     });
 }
-function setAccessFully(unit, body, schema, flag) {
+function setAccessFully(net, unit, body, schema, flag) {
     return __awaiter(this, void 0, void 0, function* () {
         let actionParam = core_1.unpack(schema, body.data);
         let { _uq, arr1 } = actionParam;
-        let uqApi = yield buildUqApi(unit, _uq);
+        let uqApi = yield buildUqApi(net, unit, _uq);
         for (let arr of arr1) {
             let { _user } = arr;
             yield uqApi.setAccessFully(unit, _user, flag);
         }
     });
 }
-function entityOpUserFully$add$(unit, body, schema) {
+function entityOpUserFully$add$(net, unit, body, schema) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield setAccessFully(unit, body, schema, 1);
+        yield setAccessFully(net, unit, body, schema, 1);
     });
 }
-function entityOpUserFully$del$(unit, body, schema) {
+function entityOpUserFully$del$(net, unit, body, schema) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield setAccessFully(unit, body, schema, 0);
+        yield setAccessFully(net, unit, body, schema, 0);
     });
 }
-function setAccessEntity(unit, body, schema) {
+function setAccessEntity(net, unit, body, schema) {
     return __awaiter(this, void 0, void 0, function* () {
         let actionParam = core_1.unpack(schema, body.data);
         let { uq, entities } = actionParam;
         let entityNames = entities.map(v => v.entity).join(',');
-        let uqApi = yield buildUqApi(unit, uq);
+        let uqApi = yield buildUqApi(net, unit, uq);
         yield uqApi.setAccessEntity(unit, entityNames);
     });
 }

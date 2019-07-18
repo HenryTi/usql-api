@@ -12,28 +12,6 @@ const _ = require("lodash");
 const db_1 = require("./db");
 const _1 = require(".");
 const importData_1 = require("./importData");
-const runners = {};
-function getRunner(name) {
-    return __awaiter(this, void 0, void 0, function* () {
-        name = name.toLowerCase();
-        let runner = runners[name];
-        if (runner === null)
-            return;
-        if (runner === undefined) {
-            let db = db_1.getDb(name);
-            let isExists = yield db.exists();
-            if (isExists === false) {
-                runners[name] = null;
-                return;
-            }
-            runner = new Runner(db);
-            runners[name] = runner;
-        }
-        yield runner.init();
-        return runner;
-    });
-}
-exports.getRunner = getRunner;
 class Runner {
     constructor(db) {
         this.db = db;

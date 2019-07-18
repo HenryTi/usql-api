@@ -1,40 +1,22 @@
 import fetch from 'node-fetch';
-import { Runner, centerApi, unpack, packParam, Fetch, urlSetUqHost } from '../../core';
+import { Runner, centerApi, unpack, packParam, Fetch, urlSetUqHost, Net } from '../../core';
 import { actionProcess } from '../actionProcess';
 
-export async function unitxActionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
+export async function unitxActionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any, net:Net):Promise<any> {
     switch (name) {
         case 'saveentityoppost':
-            return await saveEntityOpPost(unit, user, name, db, urlParams, runner, body, schema, run);
+            return await saveEntityOpPost(unit, user, name, db, urlParams, runner, body, schema, run, net);
         case 'saveentityopforall':
-            await setAccessEntity(unit, body, schema);
+            await setAccessEntity(net, unit, body, schema);
             break;
         case 'entityOpUserFully$add$':
-            await entityOpUserFully$add$(unit, body, schema);
+            await entityOpUserFully$add$(net, unit, body, schema);
             break;
         case 'entityOpUserFully$del$':
-            await entityOpUserFully$del$(unit, body, schema);
+            await entityOpUserFully$del$(net, unit, body, schema);
             break;
     }
     return await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
-}
-
-async function uqUrl(unit:number, uq:number):Promise<string> {
-    let urqUrl = await centerApi.uqUrl(unit, uq);
-    let {url, urlDebug} = urqUrl;
-    if (urlDebug !== undefined) {
-        // 这个地方会有问题，urlDebug也许指向错误
-        try {
-            urlDebug = urlSetUqHost(urlDebug);
-            let ret = await fetch(urlDebug + 'hello');
-            if (ret.status !== 200) throw 'not ok';
-            let text = await ret.text();
-            url = urlDebug;
-        }
-        catch (err) {
-        }
-    }
-    return url;
 }
 
 // ????????????????????????
@@ -63,11 +45,11 @@ if (opName === '$') {
 return await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
 */
 
-async function saveEntityOpPost(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any) {
+async function saveEntityOpPost(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any, net:Net) {
     let actionParam = unpack(schema, body.data);
     let {uq, entityName, opName} = actionParam;
 
-    let url = await uqUrl(unit, uq);
+    let url = await net.uqUrl(unit, uq);
     let ret = await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
     if (opName === '$') {
         let users:{to:number}[] = await runner.query(
@@ -80,35 +62,35 @@ async function saveEntityOpPost(unit:number, user:number, name:string, db:string
     return ret;
 }
 
-async function buildUqApi(unit:number, uq:number):Promise<UqApi> {
-    let url = await uqUrl(unit, uq);
+async function buildUqApi(net:Net, unit:number, uq:number):Promise<UqApi> {
+    let url = await net.uqUrl(unit, uq);
     let uqApi = new UqApi(url);
     return uqApi;
 }
 
-async function setAccessFully(unit:number, body:any, schema:any, flag:number) {
+async function setAccessFully(net:Net, unit:number, body:any, schema:any, flag:number) {
     let actionParam = unpack(schema, body.data);
     let {_uq, arr1} = actionParam;
-    let uqApi = await buildUqApi(unit, _uq);
+    let uqApi = await buildUqApi(net, unit, _uq);
     for (let arr of arr1) {
         let {_user} = arr;
         await uqApi.setAccessFully(unit, _user, flag);
     }
 }
 
-async function entityOpUserFully$add$(unit:number, body:any, schema:any) {
-    await setAccessFully(unit, body, schema, 1);
+async function entityOpUserFully$add$(net:Net, unit:number, body:any, schema:any) {
+    await setAccessFully(net, unit, body, schema, 1);
 }
 
-async function entityOpUserFully$del$(unit:number, body:any, schema:any) {
-    await setAccessFully(unit, body, schema, 0);
+async function entityOpUserFully$del$(net:Net, unit:number, body:any, schema:any) {
+    await setAccessFully(net, unit, body, schema, 0);
 }
 
-async function setAccessEntity(unit:number, body:any, schema:any) {
+async function setAccessEntity(net:Net, unit:number, body:any, schema:any) {
     let actionParam = unpack(schema, body.data);
     let {uq, entities} = actionParam;
     let entityNames:string = (entities as {entity:number}[]).map(v=>v.entity).join(',');
-    let uqApi = await buildUqApi(unit, uq);
+    let uqApi = await buildUqApi(net, unit, uq);
     await uqApi.setAccessEntity(unit, entityNames);
 }
 

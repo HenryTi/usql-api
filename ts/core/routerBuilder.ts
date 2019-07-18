@@ -1,15 +1,18 @@
 import { Router, Request, Response } from 'express';
 import { Runner } from './runner';
-import { getDb } from './db';
 import { consts } from "./consts";
 import { prodNet, testNet, Net } from './net';
 //import { checkRunner, User, unknownEntity, validEntity } from "../router/router";
 
 type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
-type EntityProcesser = (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any) => Promise<any>;
+type EntityProcesser = (unit:number, user:number, name:string, db:string, urlParams:any, 
+    runner:Runner, body:any, schema:any, run:any, net?:Net) => Promise<any>;
+
+/*
 const apiErrors = {
     databaseNotExists: -1,
 }
+*/
 
 export interface User {
     db: string;
@@ -45,7 +48,7 @@ export class RouterBuilder {
     private process = async (req:Request, res:Response, processer:Processer, queryOrBody:any, params:any):Promise<void> => {
         try {
             let db = req.params.db;
-            let runner = await this.checkRunner(db, res);
+            let runner = await this.checkRunner(db);
             if (runner === undefined) return;
             //let body = (req as any).body;
             let result = await processer(runner, queryOrBody, params);
@@ -82,7 +85,7 @@ export class RouterBuilder {
             let userToken:User = (req as any).user;
             let {db, id:userId, unit} = userToken;
             if (db === undefined) db = consts.$unitx;
-            let runner = await this.checkRunner(db, res);
+            let runner = await this.checkRunner(db);
             if (runner === undefined) return;
             let {params} = req;
             let {name} = params;
@@ -95,7 +98,7 @@ export class RouterBuilder {
                 if (this.validEntity(res, call, entityType) === false) return;
             }
             let body = isGet === true? (req as any).query : (req as any).body;
-            let result = await processer(unit, userId, name, db, params, runner, body, call, run);
+            let result = await processer(unit, userId, name, db, params, runner, body, call, run, this.net);
             res.json({
                 ok: true,
                 res: result
@@ -106,15 +109,18 @@ export class RouterBuilder {
         }
     }
 
-    private async checkRunner(db:string, res:Response):Promise<Runner> {
+    private async checkRunner(db:string):Promise<Runner> {
         let runner = await this.net.getRunner(db);
         if (runner !== undefined) return runner;
+        throw `Database ${this.net.getDbName(db)} 不存在`;
+        /*
         res.json({
             error: {
                 no: apiErrors.databaseNotExists,
-                message: 'Database ' + db + ' 不存在'
+                message: 
             }
         });
+        */
     }
 
     async getRunner(name:string):Promise<Runner> {

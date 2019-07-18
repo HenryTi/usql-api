@@ -1,8 +1,9 @@
 import * as _ from 'lodash';
-import {getDb, Db, isDevelopment} from './db';
+import { Db, isDevelopment } from './db';
 import { packReturns, packParam } from '.';
 import { ImportData } from './importData';
 
+/*
 const runners: {[name:string]: Runner} = {};
 
 export async function getRunner(name:string):Promise<Runner> {
@@ -22,6 +23,7 @@ export async function getRunner(name:string):Promise<Runner> {
     await runner.init();
     return runner;
 }
+*/
 
 interface EntityAccess {
     name: string;

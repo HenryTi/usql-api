@@ -15,14 +15,14 @@ const unitx_1 = require("./unitx");
 //import { packParam } from '../core/packParam';
 const actionType = 'action';
 function buildActionRouter(router, rb) {
-    rb.entityPost(router, actionType, '/:name', (unit, user, name, db, urlParams, runner, body, schema, run) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, actionType, '/:name', (unit, user, name, db, urlParams, runner, body, schema, run, net) => __awaiter(this, void 0, void 0, function* () {
         if (db === core_1.consts.$unitx)
-            return yield unitx_1.unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
+            return yield unitx_1.unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run, net);
         return yield actionProcess_1.actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
     }));
-    rb.entityPost(router, actionType, '-json/:name', (unit, user, name, db, urlParams, runner, body, schema, run) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, actionType, '-json/:name', (unit, user, name, db, urlParams, runner, body, schema, run, net) => __awaiter(this, void 0, void 0, function* () {
         if (db === core_1.consts.$unitx)
-            return yield unitx_1.unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
+            return yield unitx_1.unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run, net);
         return yield actionProcess_1.actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
     }));
 }
