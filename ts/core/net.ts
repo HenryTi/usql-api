@@ -1,8 +1,8 @@
 import fetch from "node-fetch";
 import { Runner } from "./runner";
-import { getDb } from "./db";
+import { getDb, isDevelopment } from "./db";
 import { OpenApi } from "./openApi";
-import { urlSetUqHost, urlSetUnitxHost } from "./setHostUrl";
+import { urlSetUqHost } from "./setHostUrl";
 import { centerApi } from "./centerApi";
 import { Message } from "./model";
 import { UnitxApi } from "./unitxApi";
@@ -45,21 +45,6 @@ export abstract class Net {
         let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
         if (uqUrl === undefined) return openApis[unit] = null;
         let url = await this.getUqUrl(uqUrl);
-        /*
-        let {url, urlDebug, urlTest} = uqUrl;
-        if (urlDebug) {
-            try {
-                urlDebug = urlSetUqHost(urlDebug);
-                urlDebug = urlSetUnitxHost(urlDebug);
-                let ret = await fetch(urlDebug + 'hello');
-                if (ret.status !== 200) throw 'not ok';
-                let text = await ret.text();
-                url = urlDebug;
-            }
-            catch (err) {
-            }
-        }
-        */
         return openApis[unit] = new OpenApi(url);
     }
 
@@ -71,20 +56,6 @@ export abstract class Net {
         let unitx = await centerApi.unitx(unit);
         if (unitx === undefined) return this.unitxApis[unit] = null;
         let url = await this.getUqUrl(unitx);
-        /*
-        let {url, urlDebug, urlTest} = unitx;
-        if (urlDebug !== undefined) {
-            try {
-                urlDebug = urlSetUnitxHost(urlDebug);
-                let ret = await fetch(urlDebug + 'hello');
-                if (ret.status !== 200) throw 'not ok';
-                let text = await ret.text();
-                url = urlDebug;
-            }
-            catch (err) {
-            }
-        }
-        */
         return this.unitxApis[unit] = new UnitxApi(url);
     }
 
@@ -101,39 +72,23 @@ export abstract class Net {
     async uqUrl(unit:number, uq:number):Promise<string> {
         let uqUrl = await centerApi.uqUrl(unit, uq);
         return await this.getUqUrl(uqUrl);
-        /*
-        let {url, urlDebug, urlTest} = uqUrl;
-        if (urlDebug !== undefined) {
-            // 这个地方会有问题，urlDebug也许指向错误
-            try {
-                urlDebug = urlSetUqHost(urlDebug);
-                let ret = await fetch(urlDebug + 'hello');
-                if (ret.status !== 200) throw 'not ok';
-                let text = await ret.text();
-                url = urlDebug;
-            }
-            catch (err) {
-            }
-        }
-        return url;
-        */
     }
 
-    private async getUqUrl(urls: {db:string, url:string; urlDebug:string; urlTest:string}):Promise<string> {
-        let {db, url, urlDebug, urlTest} = urls;
-        if (urlDebug) {
-            urlDebug = await this.getUqUrlDebug(urlDebug);
+    private async getUqUrl(urls: {db:string, url:string;}):Promise<string> {
+        let {db, url} = urls;
+        if (isDevelopment === true) {
+            let urlDebug = await this.getUqUrlDebug();
             if (urlDebug !== undefined) return urlDebug;
         }
-        return this.getUrl(db, url, urlTest);
+        return this.getUrl(db, url);
     }
 
-    protected abstract getUrl(db:string, url:string, urlTest:string):string;
+    protected abstract getUrl(db:string, url:string):string;
 
-    private async getUqUrlDebug(urlDebug:string):Promise<string> {
+    private async getUqUrlDebug():Promise<string> {
         try {
-            urlDebug = urlSetUqHost(urlDebug);
-            urlDebug = urlSetUnitxHost(urlDebug);
+            let urlDebug = urlSetUqHost();
+            //urlDebug = urlSetUnitxHost(urlDebug);
             let ret = await fetch(urlDebug + 'hello');
             if (ret.status !== 200) throw 'not ok';
             let text = await ret.text();
@@ -146,28 +101,15 @@ export abstract class Net {
 
 class ProdNet extends Net {
     getDbName(name:string):string {return name}
-    protected getUrl(db:string, url:string, urlTest:string):string {
-        if (!url) url = urlTest;
-        url = url.toLowerCase();
-        let p = url.indexOf('/uq/');
-        if (p < 0) {
-            if (url.endsWith('/') === false) url += '/';
-            url += 'uq/' + db + '/';
-        }
-        return url;
+    protected getUrl(db:string, url:string):string {
+        return url + 'uq/' + db + '/';
     }
 }
 
 class TestNet extends Net {
-    getDbName(name:string):string {return name} // + '$test'}
-    protected getUrl(db:string, url:string, urlTest:string):string {
-        if (!urlTest) urlTest = url;
-        urlTest = urlTest.toLowerCase();
-        let p = urlTest.indexOf('/uq/');
-        if (p>=0) urlTest = urlTest.substr(0, p+1);
-        if (urlTest.endsWith('/') === false) urlTest += '/';
-        urlTest += 'uq-test/' + db + '/';
-        return urlTest;
+    getDbName(name:string):string {return name + '$test'}
+    protected getUrl(db:string, url:string):string {
+        return url + 'uq-test/' + db + '/';
     }
 }
 

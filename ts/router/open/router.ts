@@ -120,9 +120,9 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
     });
 
     rb.post(router, '/bus',
-    async (runner:Runner, body:any):Promise<any> => {
-        let {unit, faces, faceUnitMessages} = body;
-        let ret = await runner.unitUserCall('tv_GetBusMessages', unit, undefined, faces, faceUnitMessages);
+    async (runner:Runner, body:any):Promise<any[][]> => {
+        let {unit, msgStart, faces} = body;
+        let ret = await runner.unitUserTablesFromProc('tv_GetBusMessages', unit, undefined, msgStart, faces);
         console.log(`$unitx/open/bus - GetBusMessages - ${ret}`);
         return ret;
     });

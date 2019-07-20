@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction, Router } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
 import {buildSettingRouter, buildOpenRouter, buildEntityRouter} from './router';
@@ -32,7 +32,7 @@ export async function start() {
     var cors = require('cors')
     let app = express();
     app.use(express.static('public'));
-    app.use(function(err, req, res, next) {
+    app.use((err: any, req: Request, res: Response, next: NextFunction) => {
         res.status(err.status || 500);
         res.render('error', {
             message: err.message,
@@ -46,7 +46,7 @@ export async function start() {
         return value;
     });
 
-    app.use(async (req:express.Request, res:express.Response, next:express.NextFunction) => {
+    app.use(async (req:Request, res:Response, next:NextFunction) => {
         let s= req.socket;
         let p = '';
         if (req.method !== 'GET') p = JSON.stringify(req.body);
@@ -109,23 +109,23 @@ function dbHello(req:Request, res:Response) {
     res.json({"hello": 'uq-api: hello, db is ' + db});
 }
 
-function buildUqRouter(rb: RouterBuilder): express.Router {
+function buildUqRouter(rb: RouterBuilder): Router {
     // 正常的tonva uq接口 uqRouter
-    let uqRouter = express.Router({ mergeParams: true });
+    let uqRouter = Router({ mergeParams: true });
 
-    let openRouter = express.Router({ mergeParams: true });
+    let openRouter = Router({ mergeParams: true });
     buildOpenRouter(openRouter, rb);
     uqRouter.use('/open', [authUnitx, openRouter]);
 
-    let settingRouter = express.Router({ mergeParams: true });
+    let settingRouter = Router({ mergeParams: true });
     buildSettingRouter(settingRouter, rb);
     uqRouter.use('/setting', [settingRouter]); // unitx set access
 
-    let unitxQueueRouter = express.Router({ mergeParams: true });
+    let unitxQueueRouter = Router({ mergeParams: true });
     buildUnitxQueueRouter(unitxQueueRouter, rb);
     uqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
 
-    let router = express.Router({ mergeParams: true });
+    let router = Router({ mergeParams: true });
     buildEntityRouter(router, rb);
     uqRouter.use('/tv', [authCheck, router]);
     uqRouter.use('/joint', [authJoint, router]);

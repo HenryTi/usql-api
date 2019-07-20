@@ -1,5 +1,5 @@
 import fetch from 'node-fetch';
-import { Runner, centerApi, unpack, packParam, Fetch, urlSetUqHost, Net } from '../../core';
+import { Runner, centerApi, unpack, packParam, Fetch, Net } from '../../core';
 import { actionProcess } from '../actionProcess';
 
 export async function unitxActionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any, net:Net):Promise<any> {

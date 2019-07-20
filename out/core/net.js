@@ -59,21 +59,6 @@ class Net {
             if (uqUrl === undefined)
                 return openApis[unit] = null;
             let url = yield this.getUqUrl(uqUrl);
-            /*
-            let {url, urlDebug, urlTest} = uqUrl;
-            if (urlDebug) {
-                try {
-                    urlDebug = urlSetUqHost(urlDebug);
-                    urlDebug = urlSetUnitxHost(urlDebug);
-                    let ret = await fetch(urlDebug + 'hello');
-                    if (ret.status !== 200) throw 'not ok';
-                    let text = await ret.text();
-                    url = urlDebug;
-                }
-                catch (err) {
-                }
-            }
-            */
             return openApis[unit] = new openApi_1.OpenApi(url);
         });
     }
@@ -88,20 +73,6 @@ class Net {
             if (unitx === undefined)
                 return this.unitxApis[unit] = null;
             let url = yield this.getUqUrl(unitx);
-            /*
-            let {url, urlDebug, urlTest} = unitx;
-            if (urlDebug !== undefined) {
-                try {
-                    urlDebug = urlSetUnitxHost(urlDebug);
-                    let ret = await fetch(urlDebug + 'hello');
-                    if (ret.status !== 200) throw 'not ok';
-                    let text = await ret.text();
-                    url = urlDebug;
-                }
-                catch (err) {
-                }
-            }
-            */
             return this.unitxApis[unit] = new unitxApi_1.UnitxApi(url);
         });
     }
@@ -120,40 +91,24 @@ class Net {
         return __awaiter(this, void 0, void 0, function* () {
             let uqUrl = yield centerApi_1.centerApi.uqUrl(unit, uq);
             return yield this.getUqUrl(uqUrl);
-            /*
-            let {url, urlDebug, urlTest} = uqUrl;
-            if (urlDebug !== undefined) {
-                // 这个地方会有问题，urlDebug也许指向错误
-                try {
-                    urlDebug = urlSetUqHost(urlDebug);
-                    let ret = await fetch(urlDebug + 'hello');
-                    if (ret.status !== 200) throw 'not ok';
-                    let text = await ret.text();
-                    url = urlDebug;
-                }
-                catch (err) {
-                }
-            }
-            return url;
-            */
         });
     }
     getUqUrl(urls) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { db, url, urlDebug, urlTest } = urls;
-            if (urlDebug) {
-                urlDebug = yield this.getUqUrlDebug(urlDebug);
+            let { db, url } = urls;
+            if (db_1.isDevelopment === true) {
+                let urlDebug = yield this.getUqUrlDebug();
                 if (urlDebug !== undefined)
                     return urlDebug;
             }
-            return this.getUrl(db, url, urlTest);
+            return this.getUrl(db, url);
         });
     }
-    getUqUrlDebug(urlDebug) {
+    getUqUrlDebug() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                urlDebug = setHostUrl_1.urlSetUqHost(urlDebug);
-                urlDebug = setHostUrl_1.urlSetUnitxHost(urlDebug);
+                let urlDebug = setHostUrl_1.urlSetUqHost();
+                //urlDebug = urlSetUnitxHost(urlDebug);
                 let ret = yield node_fetch_1.default(urlDebug + 'hello');
                 if (ret.status !== 200)
                     throw 'not ok';
@@ -168,32 +123,14 @@ class Net {
 exports.Net = Net;
 class ProdNet extends Net {
     getDbName(name) { return name; }
-    getUrl(db, url, urlTest) {
-        if (!url)
-            url = urlTest;
-        url = url.toLowerCase();
-        let p = url.indexOf('/uq/');
-        if (p < 0) {
-            if (url.endsWith('/') === false)
-                url += '/';
-            url += 'uq/' + db + '/';
-        }
-        return url;
+    getUrl(db, url) {
+        return url + 'uq/' + db + '/';
     }
 }
 class TestNet extends Net {
-    getDbName(name) { return name; } // + '$test'}
-    getUrl(db, url, urlTest) {
-        if (!urlTest)
-            urlTest = url;
-        urlTest = urlTest.toLowerCase();
-        let p = urlTest.indexOf('/uq/');
-        if (p >= 0)
-            urlTest = urlTest.substr(0, p + 1);
-        if (urlTest.endsWith('/') === false)
-            urlTest += '/';
-        urlTest += 'uq-test/' + db + '/';
-        return urlTest;
+    getDbName(name) { return name + '$test'; }
+    getUrl(db, url) {
+        return url + 'uq-test/' + db + '/';
     }
 }
 exports.prodNet = new ProdNet;

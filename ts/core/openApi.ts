@@ -18,11 +18,11 @@ export class OpenApi extends Fetch {
         });
         return ret;
     }
-    async bus(unit:number, faces:string, faceUnitMessages:string) {
+    async bus(unit:number, msgStart:number, faces:string):Promise<any[][]> {
         let ret = await this.post('open/bus', {
             unit: unit,
+            msgStart: msgStart,
             faces: faces,
-            faceUnitMessages: faceUnitMessages,
         });
         return ret;
     }

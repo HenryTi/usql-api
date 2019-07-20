@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express = require("express");
+const express_1 = require("express");
 const bodyParser = require("body-parser");
 const config = require("config");
 const router_1 = require("./router");
@@ -38,7 +39,7 @@ function start() {
         var cors = require('cors');
         let app = express();
         app.use(express.static('public'));
-        app.use(function (err, req, res, next) {
+        app.use((err, req, res, next) => {
             res.status(err.status || 500);
             res.render('error', {
                 message: err.message,
@@ -108,17 +109,17 @@ function dbHello(req, res) {
 }
 function buildUqRouter(rb) {
     // 正常的tonva uq接口 uqRouter
-    let uqRouter = express.Router({ mergeParams: true });
-    let openRouter = express.Router({ mergeParams: true });
+    let uqRouter = express_1.Router({ mergeParams: true });
+    let openRouter = express_1.Router({ mergeParams: true });
     router_1.buildOpenRouter(openRouter, rb);
     uqRouter.use('/open', [core_1.authUnitx, openRouter]);
-    let settingRouter = express.Router({ mergeParams: true });
+    let settingRouter = express_1.Router({ mergeParams: true });
     router_1.buildSettingRouter(settingRouter, rb);
     uqRouter.use('/setting', [settingRouter]); // unitx set access
-    let unitxQueueRouter = express.Router({ mergeParams: true });
+    let unitxQueueRouter = express_1.Router({ mergeParams: true });
     queue_1.buildUnitxQueueRouter(unitxQueueRouter, rb);
     uqRouter.use('/unitx', [core_1.authUnitx, unitxQueueRouter]);
-    let router = express.Router({ mergeParams: true });
+    let router = express_1.Router({ mergeParams: true });
     router_1.buildEntityRouter(router, rb);
     uqRouter.use('/tv', [core_1.authCheck, router]);
     uqRouter.use('/joint', [auth_1.authJoint, router]);

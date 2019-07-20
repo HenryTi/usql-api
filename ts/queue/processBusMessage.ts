@@ -57,7 +57,7 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
         lastHour = hour;
     }
     await runner.tuidSave(consts.BusQueue, unit, undefined, 
-        [undefined, faceId, fromId, fromQueueId, body]);
+        [undefined, unit, faceId, fromId, fromQueueId, body]);
 }
 
 export async function processBusMessage(unitxRunner:Runner, msg:BusMessage):Promise<void> {

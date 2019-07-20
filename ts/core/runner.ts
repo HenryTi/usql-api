@@ -112,7 +112,7 @@ export class Runner {
         let ret = await this.db.tableFromProc(proc, p);
         return ret;
     }
-    private async unitUserTableFromProc(proc:string, unit:number, user:number, ...params:any[]):Promise<any[]> {
+    async unitUserTableFromProc(proc:string, unit:number, user:number, ...params:any[]):Promise<any[]> {
         let p:any[] = [];
         if (this.hasUnit === true) p.push(unit);
         p.push(user);
@@ -121,14 +121,14 @@ export class Runner {
         return ret;
     }
 
-    private async unitTablesFromProc(proc:string, unit:number, ...params:any[]):Promise<any[][]> {
+    async unitTablesFromProc(proc:string, unit:number, ...params:any[]):Promise<any[][]> {
         let p:any[] = [];
         if (this.hasUnit === true) p.push(unit);
         if (params !== undefined) p.push(...params);
         let ret = await this.db.tablesFromProc(proc, p);
         return ret;
     }
-    private async unitUserTablesFromProc(proc:string, unit:number, user:number, ...params:any[]):Promise<any[][]> {
+    async unitUserTablesFromProc(proc:string, unit:number, user:number, ...params:any[]):Promise<any[][]> {
         let p:any[] = [];
         if (this.hasUnit === true) p.push(unit);
         p.push(user);
@@ -353,9 +353,9 @@ export class Runner {
 
     // msgId: bus message id
     // body: bus message body
-    async bus(bus:string, face:string, unit:number, faceId:number, msgId:number, body:string): Promise<void> {
+    async bus(bus:string, face:string, unit:number, msgId:number, body:string): Promise<void> {
         let sql = 'tv_' + bus + '_' + face;
-        return await this.unitUserCall(sql, unit, 0, faceId, msgId, body);
+        return await this.unitUserCall(sql, unit, 0, msgId, body);
     }
 
     async importData(unit:number, user:number, source:string, entity:string, filePath: string): Promise<void> {
