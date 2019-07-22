@@ -11,7 +11,8 @@ interface SyncRow {
 }
 
 export async function syncTuids(runner:Runner, net:Net):Promise<void> {
-    let {froms} = runner;
+    let {froms, hasSyncTuids} = runner;
+    if (hasSyncTuids === false) return;
     if (froms === undefined) return;
     try {
         let syncTuids = await runner.call('$sync_tuids', []);

@@ -3,28 +3,6 @@ import { Db, isDevelopment } from './db';
 import { packReturns, packParam } from '.';
 import { ImportData } from './importData';
 
-/*
-const runners: {[name:string]: Runner} = {};
-
-export async function getRunner(name:string):Promise<Runner> {
-    name = name.toLowerCase();
-    let runner = runners[name];
-    if (runner === null) return;
-    if (runner === undefined) {
-        let db = getDb(name);
-        let isExists = await db.exists();
-        if (isExists === false) {
-            runners[name] = null;
-            return;
-        }
-        runner = new Runner(db);
-        runners[name] = runner;
-    }
-    await runner.init();
-    return runner;
-}
-*/
-
 interface EntityAccess {
     name: string;
     access: any;
@@ -35,13 +13,25 @@ interface SheetRun {
     verify: any[];      // returns;
 }
 
+interface Buses {
+    faces: string;
+    outCount: number;
+    coll: {[url:string]:Face}
+    hasError: boolean;
+}
+
+interface Face {
+    bus: string;
+    faceName: string;
+}
+
 export class Runner {
     protected db:Db;
     private access:any;
     private schemas: {[entity:string]: {type:string, call:any; run:any;}};
     private accessSchemaArr: any[];
     private tuids: {[name:string]: any};
-    private buses:{[url:string]:any}; // 直接查找bus
+    private busArr: any[];
     private setting: {[name:string]: any};
     private entityColl: {[id:number]: EntityAccess};
     private sheetRuns: {[sheet:string]: SheetRun};
@@ -56,6 +46,8 @@ export class Runner {
     hasUnit: boolean;
     uqId: number;
     uniqueUnit: number;
+    buses:Buses; //{[url:string]:any}; // 直接查找bus
+    hasSyncTuids: boolean = false;
 
     constructor(db:Db) {
         this.db = db;
@@ -358,8 +350,17 @@ export class Runner {
         return await this.unitUserCall(sql, unit, 0, msgId, body);
     }
 
+    async busSyncMax(unit:number, maxId:number): Promise<void> {
+        return await this.call('$sync_busmax', [unit, maxId]);
+    }
+
     async importData(unit:number, user:number, source:string, entity:string, filePath: string): Promise<void> {
         await ImportData.exec(this, unit, this.db, source, entity, filePath);
+    }
+
+    async reset() {
+        if (this.buses) this.buses.hasError = false;
+        this.schemas = undefined;
     }
 
     async init() {
@@ -404,7 +405,7 @@ export class Runner {
         this.schemas = {};
         this.accessSchemaArr = [];
         this.tuids = {};
-        this.buses = {};
+        this.busArr = [];
         this.entityColl = {};
         this.froms = {};
         this.sheetRuns = {};
@@ -417,8 +418,8 @@ export class Runner {
             let runObj = JSON.parse(run);
             schemaObj.typeId = id;
             schemaObj.version = version;
-            let {type, url} = schemaObj;
-            if (url !== undefined) url = url.toLowerCase();
+            let {type, sync} = schemaObj;
+            //if (url !== undefined) url = url.toLowerCase();
             this.schemas[name] = {
                 type: type,
                 call: schemaObj,
@@ -429,11 +430,12 @@ export class Runner {
                     this.accessSchemaArr.push(schemaObj); 
                     break;
                 case 'bus':
-                    this.buses[url] = schemaObj;
+                    this.busArr.push(schemaObj);
                     break;
                 case 'tuid':
                     this.tuids[name] = schemaObj; 
                     if (from) {
+                        if (!(sync === false)) this.hasSyncTuids = true;
                         tuidFroms = this.froms[from];
                         if (tuidFroms === undefined) tuidFroms = this.froms[from] = {};
                         let tuidFrom = tuidFroms[name];
@@ -533,6 +535,39 @@ export class Runner {
             }
         }
 
+        let faces:string[] = [];
+        let outCount = 0;
+        let coll:{[url:string]:Face} = {};
+        for (let busSchema of this.busArr) {
+            let {name:bus, busOwner, busName, schema} = busSchema;
+            let hasAccept:boolean = false;
+            for (let i in schema) {
+                let {accept} = schema[i];
+                if (accept === true) {
+                    let faceName = i.toLowerCase();
+                    let url = busOwner.toLowerCase() + '/' + busName.toLowerCase() + '/' + faceName;
+                    if (coll[url]) continue;
+                    faces.push(url);
+                    coll[url] = {
+                        bus: bus,
+                        faceName: faceName,
+                    };
+                    hasAccept = true;
+                }
+            }
+            if (hasAccept === false) ++outCount;
+        }
+        let faceText:string;
+        if (faces.length > 0) faceText = faces.join('\n');
+        if (faceText !== undefined && outCount > 0) {
+            this.buses = {
+                faces: faces.join('\n'), 
+                outCount: outCount,
+                coll: coll,
+                hasError: false,
+            };
+        }
+
         //console.log('schema: %s', JSON.stringify(this.schemas));
         this.buildAccesses();
     }
@@ -618,13 +653,13 @@ export class Runner {
         return ret;
     }
     async getAccesses(unit:number, user:number, acc:string[]):Promise<any> {
-        let reload:number = await this.getSetting(0, 'reloadSchemas');
+        //let reload:number = await this.getSetting(0, 'reloadSchemas');
 
-        if (reload === 1) {
-            this.schemas = undefined;
+        //if (this.reload === 1) {
+            //this.schemas = undefined;
             await this.init();
-            await this.setSetting(0, 'reloadSchemas', '0');
-        }
+            //await this.setSetting(0, 'reloadSchemas', '0');
+        //}
         //await this.initSchemas();
         let access = {} as any;
         function merge(src:any) {
@@ -666,13 +701,13 @@ export class Runner {
     }
 
     async getEntities(unit:number):Promise<any> {
-        let reload:number = await this.getSetting(0, 'reloadSchemas');
+        //let reload:number = await this.getSetting(0, 'reloadSchemas');
 
-        if (reload === 1) {
-            this.schemas = undefined;
+        //if (reload === 1) {
+            //this.schemas = undefined;
             await this.init();
-            await this.setSetting(0, 'reloadSchemas', '0');
-        }
+            //await this.setSetting(0, 'reloadSchemas', '0');
+        //}
         let entityAccess: {[name:string]: any} = {};
         for (let entityId in this.entityColl) {
             let entity = this.entityColl[entityId];

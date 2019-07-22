@@ -44,7 +44,7 @@ export abstract class Fetch {
             }
         );
         if (res.status !== 200) {
-            console.error(res.statusText, res.status);
+            console.error(this.baseUrl + url, res.statusText, res.status);
             throw {
                 error: res.statusText,
                 code: res.status,

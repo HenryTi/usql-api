@@ -1,17 +1,16 @@
-import {Router, Request, Response, NextFunction} from 'express';
-import { Message, SheetMessage, consts, Runner, RouterBuilder, busQueueSeed } from '../core';
-//import { queueUnitxIn } from './unitxInQueue';
-import { messageProcesser } from './messageProcesser';
+import { Router, Request, Response, NextFunction } from "express";
+import { RouterBuilder, Runner, busQueueSeed, SheetMessage, Message } from "../../core";
+import { messageProcesser } from "./messageProcesser";
 
-//export const unitxQueueRouter: Router = Router();
+export function buildUnitxRouter(rb: RouterBuilder):Router {
+    let router = Router();
 
-/*export*/ function buildUnitxQueueRouter(router:Router, rb:RouterBuilder) {
     router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         try {
             let msg:Message = req.body;
             let tos:number[] = undefined;
             let {type} = msg;
-            let unitxRunner = await rb.getRunner(consts.$unitx);
+            let unitxRunner = await rb.getUnitxRunner();
             if (type === 'sheet') {
                 let sheetMessage = msg as SheetMessage;
                 let {from} = sheetMessage;
@@ -36,11 +35,11 @@ import { messageProcesser } from './messageProcesser';
         }
     });
     
-    rb.post(router, '/bus',
+    rb.post(router, '/fetch-bus',
     async (runner:Runner, body:any):Promise<any[][]> => {
         let {unit, msgStart, faces} = body;
         let ret = await runner.unitUserTablesFromProc('tv_GetBusMessages', unit, undefined, msgStart, faces);
-        console.log(`$unitx/open/bus - GetBusMessages - ${ret}`);
+        console.log(`unitx/fetch-bus - GetBusMessages - ${ret}`);
         return ret;
     });
 
@@ -69,6 +68,8 @@ import { messageProcesser } from './messageProcesser';
         let ret = await runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
         return ret;
     });
+    
+    return router;
 }
 
 // 之前用 getSheetTo 查询，现在改名为 getEntityAccess

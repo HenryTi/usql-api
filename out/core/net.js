@@ -30,15 +30,57 @@ class Net {
             if (runner === undefined) {
                 let dbName = this.getDbName(name);
                 let db = db_1.getDb(dbName);
-                let isExists = yield db.exists();
+                runner = yield this.createRunnerFromDb(name, db);
+                if (runner === undefined)
+                    return;
+                /*
+                let isExists = await db.exists();
                 if (isExists === false) {
                     this.runners[name] = null;
                     return;
                 }
-                runner = new runner_1.Runner(db);
+                runner = new Runner(db);
                 this.runners[name] = runner;
+                */
             }
             yield runner.init();
+            return runner;
+        });
+    }
+    getUnitxRunner() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let name = '$unitx';
+            let runner = this.runners[name];
+            if (runner === null)
+                return;
+            if (runner === undefined) {
+                let db = this.getUnitxDb();
+                runner = yield this.createRunnerFromDb(name, db);
+                if (runner === undefined)
+                    return;
+                /*
+                let isExists = await db.exists();
+                if (isExists === false) {
+                    this.runners[name] = null;
+                    return;
+                }
+                runner = new Runner(db);
+                this.runners[name] = runner;
+                */
+            }
+            yield runner.init();
+            return runner;
+        });
+    }
+    createRunnerFromDb(name, db) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let isExists = yield db.exists();
+            if (isExists === false) {
+                this.runners[name] = null;
+                return;
+            }
+            let runner = new runner_1.Runner(db);
+            this.runners[name] = runner;
             return runner;
         });
     }
@@ -54,7 +96,9 @@ class Net {
                 if (ret !== undefined)
                     return ret;
             }
-            this.uqOpenApis[uqFullName] = openApis = {};
+            else {
+                this.uqOpenApis[uqFullName] = openApis = {};
+            }
             let uqUrl = yield centerApi_1.centerApi.urlFromUq(unit, uqFullName);
             if (uqUrl === undefined)
                 return openApis[unit] = null;
@@ -72,7 +116,7 @@ class Net {
             let unitx = yield centerApi_1.centerApi.unitx(unit);
             if (unitx === undefined)
                 return this.unitxApis[unit] = null;
-            let url = yield this.getUqUrl(unitx);
+            let url = yield this.getUnitxUrl(unitx);
             return this.unitxApis[unit] = new unitxApi_1.UnitxApi(url);
         });
     }
@@ -97,14 +141,14 @@ class Net {
         return __awaiter(this, void 0, void 0, function* () {
             let { db, url } = urls;
             if (db_1.isDevelopment === true) {
-                let urlDebug = yield this.getUqUrlDebug();
+                let urlDebug = yield this.getUrlDebug();
                 if (urlDebug !== undefined)
-                    return urlDebug;
+                    url = urlDebug;
             }
             return this.getUrl(db, url);
         });
     }
-    getUqUrlDebug() {
+    getUrlDebug() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 let urlDebug = setHostUrl_1.urlSetUqHost();
@@ -119,19 +163,36 @@ class Net {
             }
         });
     }
+    getUnitxUrl(urls) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { db, url } = urls;
+            if (db_1.isDevelopment === true) {
+                let urlDebug = yield this.getUrlDebug();
+                if (urlDebug !== undefined)
+                    url = urlDebug;
+            }
+            return this.unitxUrl(url);
+        });
+    }
 }
 exports.Net = Net;
 class ProdNet extends Net {
     getDbName(name) { return name; }
+    getUnitxDb() { return db_1.getUnitxDb(false); }
     getUrl(db, url) {
-        return url + 'uq/' + db + '/';
+        return url + 'uq/prod/' + db + '/';
     }
+    unitxUrl(url) { return url + 'uq/unitx-prod/'; }
+    ;
 }
 class TestNet extends Net {
     getDbName(name) { return name + '$test'; }
+    getUnitxDb() { return db_1.getUnitxDb(true); }
     getUrl(db, url) {
-        return url + 'uq-test/' + db + '/';
+        return url + 'uq/test/' + db + '/';
     }
+    unitxUrl(url) { return url + 'uq/unitx-test/'; }
+    ;
 }
 exports.prodNet = new ProdNet;
 exports.testNet = new TestNet;

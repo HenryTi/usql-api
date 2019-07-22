@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import { Runner, centerApi, unpack, packParam, Fetch, Net } from '../../core';
 import { actionProcess } from '../actionProcess';
 

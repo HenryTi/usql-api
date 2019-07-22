@@ -8,7 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = require("../../core");
 //type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
 function buildOpenRouter(router, rb) {
     /*
@@ -116,39 +115,20 @@ function buildOpenRouter(router, rb) {
         let suffix = (all === true ? '$id' : '$main');
         return yield runner.unitUserCall(`tv_${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
     }));
-    rb.post(router, '/bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        let { unit, faces, faceUnitMessages } = body;
-        let ret = yield runner.unitUserCall('tv_GetBusMessages', unit, undefined, faces, faceUnitMessages);
-        console.log(`$unitx/open/bus - GetBusMessages - ${ret}`);
-        return ret;
-    }));
-    rb.post(router, '/joint-read-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        let { unit, face, queue } = body;
-        if (queue === undefined)
-            queue = core_1.busQueueSeed();
-        let ret = yield runner.unitUserCall('tv_BusMessageFromQueue', unit, undefined, face, queue);
-        if (ret.length === 0)
-            return;
-        return ret[0];
-    }));
-    rb.post(router, '/joint-write-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        let { unit, face, from, sourceId, body: message } = body;
-        /*
-        let data = '';
-        if (face !== null && face !== undefined) data += face;
-        data += '\t';
-        if (from !== null && from !== undefined) data += from;
-        data += '\t';
-        if (sourceId !== null && sourceId !== undefined) data += sourceId;
-        data += '\t';
-        data += message + '\n';
-        */
-        let ret = yield runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
-        return ret;
+    rb.post(router, '/uq-built', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+        let { uqId } = runner;
+        let { uqId: paramUqId } = body;
+        if (!uqId) {
+            yield runner.setSetting(0, 'uqId', String(paramUqId));
+            uqId = paramUqId;
+        }
+        if (uqId !== Number(paramUqId)) {
+            debugger;
+            throw 'error uqId';
+        }
+        runner.reset();
     }));
 }
 exports.buildOpenRouter = buildOpenRouter;
 ;
-//export const router: Router = Router({ mergeParams: true });
-//buildRouter(router);
 //# sourceMappingURL=router.js.map

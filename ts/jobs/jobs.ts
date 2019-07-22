@@ -13,8 +13,9 @@ enum Finish {
 }
 
 export class Jobs {
+    private 
+
     static start(): void {
-        return;
         setTimeout(async ()=>{
             let jobs = new Jobs;
             await jobs.run();
@@ -38,9 +39,16 @@ export class Jobs {
                 }
                 let runner = await net.getRunner(dbName);
                 if (runner === undefined) continue;
-                await runner.init();
-                await this.processQueue(runner, net);
-                await syncBus(runner, net);
+                let {buses} = runner;
+                if (buses !== undefined) {
+                    let {outCount, faces} = buses;
+                    if (outCount > 0) {
+                        await this.processQueue(runner, net);
+                    }
+                    if (faces !== undefined) {
+                        await syncBus(runner, net);
+                    }
+                }
                 await syncTuids(runner, net);
             }
         }
@@ -56,7 +64,6 @@ export class Jobs {
         try {
             let start = 0;
             for (;;) {
-                //if (runner.getDb() === 'order') debugger;
                 let ret:any;
                 try {
                     ret = await runner.call('$message_queue_get',  [start]);

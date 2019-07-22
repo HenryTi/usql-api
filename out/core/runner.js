@@ -14,6 +14,7 @@ const _1 = require(".");
 const importData_1 = require("./importData");
 class Runner {
     constructor(db) {
+        this.hasSyncTuids = false;
         this.db = db;
         this.setting = {};
     }
@@ -426,15 +427,27 @@ class Runner {
     }
     // msgId: bus message id
     // body: bus message body
-    bus(bus, face, unit, faceId, msgId, body) {
+    bus(bus, face, unit, msgId, body) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = 'tv_' + bus + '_' + face;
-            return yield this.unitUserCall(sql, unit, 0, faceId, msgId, body);
+            return yield this.unitUserCall(sql, unit, 0, msgId, body);
+        });
+    }
+    busSyncMax(unit, maxId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.call('$sync_busmax', [unit, maxId]);
         });
     }
     importData(unit, user, source, entity, filePath) {
         return __awaiter(this, void 0, void 0, function* () {
             yield importData_1.ImportData.exec(this, unit, this.db, source, entity, filePath);
+        });
+    }
+    reset() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.buses)
+                this.buses.hasError = false;
+            this.schemas = undefined;
         });
     }
     init() {
@@ -480,7 +493,7 @@ class Runner {
             this.schemas = {};
             this.accessSchemaArr = [];
             this.tuids = {};
-            this.buses = {};
+            this.busArr = [];
             this.entityColl = {};
             this.froms = {};
             this.sheetRuns = {};
@@ -494,9 +507,8 @@ class Runner {
                 let runObj = JSON.parse(run);
                 schemaObj.typeId = id;
                 schemaObj.version = version;
-                let { type, url } = schemaObj;
-                if (url !== undefined)
-                    url = url.toLowerCase();
+                let { type, sync } = schemaObj;
+                //if (url !== undefined) url = url.toLowerCase();
                 this.schemas[name] = {
                     type: type,
                     call: schemaObj,
@@ -507,11 +519,13 @@ class Runner {
                         this.accessSchemaArr.push(schemaObj);
                         break;
                     case 'bus':
-                        this.buses[url] = schemaObj;
+                        this.busArr.push(schemaObj);
                         break;
                     case 'tuid':
                         this.tuids[name] = schemaObj;
                         if (from) {
+                            if (!(sync === false))
+                                this.hasSyncTuids = true;
                             tuidFroms = this.froms[from];
                             if (tuidFroms === undefined)
                                 tuidFroms = this.froms[from] = {};
@@ -617,6 +631,41 @@ class Runner {
                     schema.call = newCall;
                 }
             }
+            let faces = [];
+            let outCount = 0;
+            let coll = {};
+            for (let busSchema of this.busArr) {
+                let { name: bus, busOwner, busName, schema } = busSchema;
+                let hasAccept = false;
+                for (let i in schema) {
+                    let { accept } = schema[i];
+                    if (accept === true) {
+                        let faceName = i.toLowerCase();
+                        let url = busOwner.toLowerCase() + '/' + busName.toLowerCase() + '/' + faceName;
+                        if (coll[url])
+                            continue;
+                        faces.push(url);
+                        coll[url] = {
+                            bus: bus,
+                            faceName: faceName,
+                        };
+                        hasAccept = true;
+                    }
+                }
+                if (hasAccept === false)
+                    ++outCount;
+            }
+            let faceText;
+            if (faces.length > 0)
+                faceText = faces.join('\n');
+            if (faceText !== undefined && outCount > 0) {
+                this.buses = {
+                    faces: faces.join('\n'),
+                    outCount: outCount,
+                    coll: coll,
+                    hasError: false,
+                };
+            }
             //console.log('schema: %s', JSON.stringify(this.schemas));
             this.buildAccesses();
         });
@@ -714,12 +763,12 @@ class Runner {
     }
     getAccesses(unit, user, acc) {
         return __awaiter(this, void 0, void 0, function* () {
-            let reload = yield this.getSetting(0, 'reloadSchemas');
-            if (reload === 1) {
-                this.schemas = undefined;
-                yield this.init();
-                yield this.setSetting(0, 'reloadSchemas', '0');
-            }
+            //let reload:number = await this.getSetting(0, 'reloadSchemas');
+            //if (this.reload === 1) {
+            //this.schemas = undefined;
+            yield this.init();
+            //await this.setSetting(0, 'reloadSchemas', '0');
+            //}
             //await this.initSchemas();
             let access = {};
             function merge(src) {
@@ -764,12 +813,12 @@ class Runner {
     }
     getEntities(unit) {
         return __awaiter(this, void 0, void 0, function* () {
-            let reload = yield this.getSetting(0, 'reloadSchemas');
-            if (reload === 1) {
-                this.schemas = undefined;
-                yield this.init();
-                yield this.setSetting(0, 'reloadSchemas', '0');
-            }
+            //let reload:number = await this.getSetting(0, 'reloadSchemas');
+            //if (reload === 1) {
+            //this.schemas = undefined;
+            yield this.init();
+            //await this.setSetting(0, 'reloadSchemas', '0');
+            //}
             let entityAccess = {};
             for (let entityId in this.entityColl) {
                 let entity = this.entityColl[entityId];

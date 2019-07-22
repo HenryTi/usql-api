@@ -119,41 +119,19 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
         return await runner.unitUserCall(`tv_${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
     });
 
-    rb.post(router, '/bus',
-    async (runner:Runner, body:any):Promise<any[][]> => {
-        let {unit, msgStart, faces} = body;
-        let ret = await runner.unitUserTablesFromProc('tv_GetBusMessages', unit, undefined, msgStart, faces);
-        console.log(`$unitx/open/bus - GetBusMessages - ${ret}`);
-        return ret;
-    });
+    rb.post(router, '/uq-built',
+    async (runner:Runner, body:any, params:any):Promise<any> => {
+        let {uqId} = runner;
+        let {uqId:paramUqId} = body;
+        if (!uqId) {
+            await runner.setSetting(0, 'uqId', String(paramUqId));
+            uqId = paramUqId;
+        }
 
-    rb.post(router, '/joint-read-bus',
-    async (runner:Runner, body:any):Promise<any> => {
-        let {unit, face, queue} = body;
-        if (queue === undefined) queue = busQueueSeed();
-        let ret = await runner.unitUserCall('tv_BusMessageFromQueue', unit, undefined, face, queue);
-        if (ret.length === 0) return;
-        return ret[0];
-    });
-
-    rb.post(router, '/joint-write-bus',
-    async (runner:Runner, body:any):Promise<any> => {
-        let {unit, face, from, sourceId, body:message} = body;
-        /*
-        let data = '';
-        if (face !== null && face !== undefined) data += face;
-        data += '\t';
-        if (from !== null && from !== undefined) data += from;
-        data += '\t';
-        if (sourceId !== null && sourceId !== undefined) data += sourceId;
-        data += '\t';
-        data += message + '\n';
-        */
-        let ret = await runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
-        return ret;
+        if (uqId !== Number(paramUqId)) {
+            debugger;
+            throw 'error uqId';
+        }
+        runner.reset();
     });
 };
-
-//export const router: Router = Router({ mergeParams: true });
-
-//buildRouter(router);

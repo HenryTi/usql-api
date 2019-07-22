@@ -8,17 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = require("../core");
-//import { queueUnitxIn } from './unitxInQueue';
+const express_1 = require("express");
+const core_1 = require("../../core");
 const messageProcesser_1 = require("./messageProcesser");
-//export const unitxQueueRouter: Router = Router();
-/*export*/ function buildUnitxQueueRouter(router, rb) {
+function buildUnitxRouter(rb) {
+    let router = express_1.Router();
     router.post('/', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
         try {
             let msg = req.body;
             let tos = undefined;
             let { type } = msg;
-            let unitxRunner = yield rb.getRunner(core_1.consts.$unitx);
+            let unitxRunner = yield rb.getUnitxRunner();
             if (type === 'sheet') {
                 let sheetMessage = msg;
                 let { from } = sheetMessage;
@@ -43,10 +43,10 @@ const messageProcesser_1 = require("./messageProcesser");
             });
         }
     }));
-    rb.post(router, '/bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+    rb.post(router, '/fetch-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, msgStart, faces } = body;
         let ret = yield runner.unitUserTablesFromProc('tv_GetBusMessages', unit, undefined, msgStart, faces);
-        console.log(`$unitx/open/bus - GetBusMessages - ${ret}`);
+        console.log(`unitx/fetch-bus - GetBusMessages - ${ret}`);
         return ret;
     }));
     rb.post(router, '/joint-read-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
@@ -73,7 +73,9 @@ const messageProcesser_1 = require("./messageProcesser");
         let ret = yield runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
         return ret;
     }));
+    return router;
 }
+exports.buildUnitxRouter = buildUnitxRouter;
 // 之前用 getSheetTo 查询，现在改名为 getEntityAccess
 const uqGetSheetTo = 'getEntityAccess';
 function getSheetTos(unitxRunner, sheetMessage) {
@@ -91,4 +93,4 @@ function getSheetTos(unitxRunner, sheetMessage) {
         return tos.map(v => v.to);
     });
 }
-//# sourceMappingURL=unitxQueueRouter.js.map
+//# sourceMappingURL=router.js.map

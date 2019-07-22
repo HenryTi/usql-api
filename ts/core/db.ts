@@ -23,17 +23,13 @@ export class Db {
         this.isExists = false;
     }
     getDbName():string {return this.dbName}
+    protected getDbConfig() {
+        return config.get<any>(const_connection);
+    }
     private createDbServer() {
         let sqlType = config.get<string>('sqlType');
-        let dbConfig:any;
-        if (this.dbName === const_unitx && isDevelopment === true) {
-            if (config.has(const_connectionUnitx) === true) {
-                dbConfig = config.get<any>(const_connectionUnitx);
-            }
-        }
-        if (dbConfig === undefined) {
-            dbConfig = config.get<any>(const_connection);
-        }
+        let dbConfig:any = this.getDbConfig();
+        if (dbConfig === undefined) throw 'this server not support unitx';
         switch (sqlType) {
             case 'mysql': return new MyDbServer(dbConfig);
             case 'mssql': return new MsDbServer(dbConfig);
@@ -79,6 +75,14 @@ export class Db {
     }
 }
 
+class UnitxDb extends Db {
+    protected getDbConfig() {
+        if (config.has(const_connectionUnitx) === true) {
+            return config.get<any>(const_connectionUnitx);
+        }
+    }
+}
+
 const dbs:{[name:string]:Db} = {
 }
 
@@ -99,16 +103,25 @@ const dbCollection:{[name:string]:string} = (function () {
 })();
 
 export function getDb(name:string):Db {
-    let db = dbs[name];
+    let db = getCacheDb(name);
     if (db !== undefined) return db;
-    let dbName = dbCollection[name];
-    if (dbName === undefined) dbName = name;
-    //let dbName = dbNameFromProject(name);
-    //if (dbName === undefined) return;
-    // 开发用户定义uqdb之后，直接用uqdb的dbname，所以，dbname不能有符号什么的，因为会通过url上传
-    //if (dbName === undefined) 
-    //let dbName = name;
-    //if (dbServer === undefined) dbServer = createDbServer();
-    dbs[name] = db = new Db(dbName);
-    return db;
+    let dbName = getDbName(name);
+    return dbs[name] = new Db(dbName);
+}
+
+export function getUnitxDb(testing:boolean):Db {
+    let name = const_unitx;
+    if (testing === true) name += '$test';
+    let db = getCacheDb(name);
+    if (db !== undefined) return db;
+    let dbName = getDbName(name);
+    return dbs[name] = new UnitxDb(dbName);
+}
+
+function getDbName(name:string): string {
+    return dbCollection[name] || name;
+}
+
+function getCacheDb(name:string):Db {
+    return dbs[name];
 }

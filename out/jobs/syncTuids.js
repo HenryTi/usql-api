@@ -11,7 +11,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 function syncTuids(runner, net) {
     return __awaiter(this, void 0, void 0, function* () {
-        let { froms } = runner;
+        let { froms, hasSyncTuids } = runner;
+        if (hasSyncTuids === false)
+            return;
         if (froms === undefined)
             return;
         try {

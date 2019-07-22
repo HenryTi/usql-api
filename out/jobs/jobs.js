@@ -40,9 +40,16 @@ class Jobs {
                     let runner = yield net.getRunner(dbName);
                     if (runner === undefined)
                         continue;
-                    yield runner.init();
-                    yield this.processQueue(runner, net);
-                    yield syncBus_1.syncBus(runner, net);
+                    let { buses } = runner;
+                    if (buses !== undefined) {
+                        let { outCount, faces } = buses;
+                        if (outCount > 0) {
+                            yield this.processQueue(runner, net);
+                        }
+                        if (faces !== undefined) {
+                            yield syncBus_1.syncBus(runner, net);
+                        }
+                    }
                     yield syncTuids_1.syncTuids(runner, net);
                 }
             }
@@ -55,7 +62,6 @@ class Jobs {
         });
     }
     static start() {
-        return;
         setTimeout(() => __awaiter(this, void 0, void 0, function* () {
             let jobs = new Jobs;
             yield jobs.run();
@@ -66,7 +72,6 @@ class Jobs {
             try {
                 let start = 0;
                 for (;;) {
-                    //if (runner.getDb() === 'order') debugger;
                     let ret;
                     try {
                         ret = yield runner.call('$message_queue_get', [start]);

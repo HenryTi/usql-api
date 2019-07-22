@@ -15,11 +15,9 @@ class RouterBuilder {
     constructor(net) {
         this.process = (req, res, processer, queryOrBody, params) => __awaiter(this, void 0, void 0, function* () {
             try {
-                let db = req.params.db;
-                let runner = yield this.checkRunner(db);
+                let runner = yield this.routerRunner(req);
                 if (runner === undefined)
                     return;
-                //let body = (req as any).body;
                 let result = yield processer(runner, queryOrBody, params);
                 res.json({
                     ok: true,
@@ -82,6 +80,15 @@ class RouterBuilder {
         }));
     }
     ;
+    routerRunner(req) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let db = req.params.db;
+            if (db.endsWith('$test') === true)
+                debugger;
+            let runner = yield this.checkRunner(db);
+            return runner;
+        });
+    }
     entityPost(router, entityType, path, processer) {
         router.post(`/${entityType}${path}`, (req, res) => __awaiter(this, void 0, void 0, function* () {
             yield this.entityProcess(req, res, entityType, processer, false);
@@ -121,6 +128,11 @@ class RouterBuilder {
             return yield this.net.getRunner(name);
         });
     }
+    getUnitxRunner() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.net.getUnitxRunner();
+        });
+    }
     /*
     private runners: {[name:string]: Runner} = {};
 
@@ -155,6 +167,18 @@ class RouterBuilder {
     }
 }
 exports.RouterBuilder = RouterBuilder;
-exports.prodRouterBuilder = new RouterBuilder(net_1.prodNet);
-exports.testRouterBuilder = new RouterBuilder(net_1.testNet);
+class UnitxRouterBuilder extends RouterBuilder {
+    routerRunner(req) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let runner = yield this.net.getUnitxRunner();
+            if (runner !== undefined)
+                return runner;
+            throw `Database ${this.net.getDbName('$unitx')} 不存在`;
+        });
+    }
+}
+exports.uqProdRouterBuilder = new RouterBuilder(net_1.prodNet);
+exports.uqTestRouterBuilder = new RouterBuilder(net_1.testNet);
+exports.unitxProdRouterBuilder = new UnitxRouterBuilder(net_1.prodNet);
+exports.unitxTestRouterBuilder = new UnitxRouterBuilder(net_1.testNet);
 //# sourceMappingURL=routerBuilder.js.map

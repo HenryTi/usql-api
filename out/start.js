@@ -15,7 +15,7 @@ const config = require("config");
 const router_1 = require("./router");
 const res_1 = require("./res");
 const core_1 = require("./core");
-const queue_1 = require("./queue");
+//import { /*buildUnitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
 const auth_1 = require("./core/auth");
 const jobs_1 = require("./jobs");
 //import { importData } from './import';
@@ -81,8 +81,10 @@ function start() {
         // debug tonva uq, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
         uqRouter.use('/debug', [authCheck, router]);
         */
-        app.use('/uq/:db/', buildUqRouter(core_1.prodRouterBuilder));
-        app.use('/uq-test/:db/', buildUqRouter(core_1.testRouterBuilder));
+        app.use('/uq/prod/:db/', buildUqRouter(core_1.uqProdRouterBuilder));
+        app.use('/uq/test/:db/', buildUqRouter(core_1.uqTestRouterBuilder));
+        app.use('/uq/unitx-prod/', router_1.buildUnitxRouter(core_1.unitxProdRouterBuilder));
+        app.use('/uq/unitx-test/', router_1.buildUnitxRouter(core_1.unitxTestRouterBuilder));
         let port = config.get('port');
         console.log('port=', port);
         //let redisConfig = config.get<any>('redis');
@@ -113,12 +115,15 @@ function buildUqRouter(rb) {
     let openRouter = express_1.Router({ mergeParams: true });
     router_1.buildOpenRouter(openRouter, rb);
     uqRouter.use('/open', [core_1.authUnitx, openRouter]);
+    // 这个是不是也要放到只有unitx里面
     let settingRouter = express_1.Router({ mergeParams: true });
     router_1.buildSettingRouter(settingRouter, rb);
     uqRouter.use('/setting', [settingRouter]); // unitx set access
-    let unitxQueueRouter = express_1.Router({ mergeParams: true });
-    queue_1.buildUnitxQueueRouter(unitxQueueRouter, rb);
-    uqRouter.use('/unitx', [core_1.authUnitx, unitxQueueRouter]);
+    /* 直接放到/unitx名下了
+    let unitxQueueRouter = Router({ mergeParams: true });
+    buildUnitxQueueRouter(unitxQueueRouter, rb);
+    uqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
+    */
     let router = express_1.Router({ mergeParams: true });
     router_1.buildEntityRouter(router, rb);
     uqRouter.use('/tv', [core_1.authCheck, router]);

@@ -22,7 +22,7 @@ export interface User {
 };
 
 export class RouterBuilder {
-    private net: Net;
+    protected net: Net;
     constructor(net: Net) {
         this.net = net;
     }
@@ -45,12 +45,17 @@ export class RouterBuilder {
         });
     };
 
+    protected async routerRunner(req:Request):Promise<Runner> {
+        let db:string = req.params.db;
+        if (db.endsWith('$test') === true) debugger;
+        let runner = await this.checkRunner(db);
+        return runner;
+    }
+
     private process = async (req:Request, res:Response, processer:Processer, queryOrBody:any, params:any):Promise<void> => {
         try {
-            let db = req.params.db;
-            let runner = await this.checkRunner(db);
+            let runner = await this.routerRunner(req);
             if (runner === undefined) return;
-            //let body = (req as any).body;
             let result = await processer(runner, queryOrBody, params);
             res.json({
                 ok: true,
@@ -127,6 +132,10 @@ export class RouterBuilder {
         return await this.net.getRunner(name);
     }
 
+    async getUnitxRunner():Promise<Runner> {
+        return await this.net.getUnitxRunner();
+    }
+
     /*
     private runners: {[name:string]: Runner} = {};
 
@@ -162,5 +171,15 @@ export class RouterBuilder {
     
 }
 
-export const prodRouterBuilder = new RouterBuilder(prodNet);
-export const testRouterBuilder = new RouterBuilder(testNet);
+class UnitxRouterBuilder extends RouterBuilder {
+    protected async routerRunner(req:Request):Promise<Runner> {
+        let runner = await this.net.getUnitxRunner();
+        if (runner !== undefined) return runner;
+        throw `Database ${this.net.getDbName('$unitx')} 不存在`;
+    }
+}
+
+export const uqProdRouterBuilder = new RouterBuilder(prodNet);
+export const uqTestRouterBuilder = new RouterBuilder(testNet);
+export const unitxProdRouterBuilder = new UnitxRouterBuilder(prodNet);
+export const unitxTestRouterBuilder = new UnitxRouterBuilder(testNet);

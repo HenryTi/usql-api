@@ -2,10 +2,10 @@ import * as express from 'express';
 import { Request, Response, NextFunction, Router } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import {buildSettingRouter, buildOpenRouter, buildEntityRouter} from './router';
+import {buildSettingRouter, buildOpenRouter, buildEntityRouter, buildUnitxRouter} from './router';
 import {initResDb, router as resRouter, initResPath} from './res';
-import {Auth, authCheck, authDebug, authUnitx, RouterBuilder, prodRouterBuilder, testRouterBuilder} from './core';
-import { buildUnitxQueueRouter/*, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
+import {Auth, authCheck, authDebug, authUnitx, RouterBuilder, uqProdRouterBuilder, uqTestRouterBuilder, unitxTestRouterBuilder, unitxProdRouterBuilder} from './core';
+//import { /*buildUnitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
 import { authJoint } from './core/auth';
 import { Jobs } from './jobs';
 //import { importData } from './import';
@@ -75,8 +75,10 @@ export async function start() {
     // debug tonva uq, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
     uqRouter.use('/debug', [authCheck, router]);
     */
-   app.use('/uq/:db/', buildUqRouter(prodRouterBuilder));
-   app.use('/uq-test/:db/', buildUqRouter(testRouterBuilder));
+    app.use('/uq/prod/:db/', buildUqRouter(uqProdRouterBuilder));
+    app.use('/uq/test/:db/', buildUqRouter(uqTestRouterBuilder));
+    app.use('/uq/unitx-prod/', buildUnitxRouter(unitxProdRouterBuilder));
+    app.use('/uq/unitx-test/', buildUnitxRouter(unitxTestRouterBuilder));
 
     let port = config.get<number>('port');
     console.log('port=', port);
@@ -117,13 +119,16 @@ function buildUqRouter(rb: RouterBuilder): Router {
     buildOpenRouter(openRouter, rb);
     uqRouter.use('/open', [authUnitx, openRouter]);
 
+    // 这个是不是也要放到只有unitx里面
     let settingRouter = Router({ mergeParams: true });
     buildSettingRouter(settingRouter, rb);
     uqRouter.use('/setting', [settingRouter]); // unitx set access
 
+    /* 直接放到/unitx名下了
     let unitxQueueRouter = Router({ mergeParams: true });
     buildUnitxQueueRouter(unitxQueueRouter, rb);
     uqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
+    */
 
     let router = Router({ mergeParams: true });
     buildEntityRouter(router, rb);

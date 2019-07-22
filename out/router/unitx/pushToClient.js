@@ -8,24 +8,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const fetch_1 = require("./fetch");
-class UnitxApi extends fetch_1.Fetch {
-    send(msg) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.post('', msg);
-            return ret;
-        });
-    }
-    fetchBus(unit, msgStart, faces) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.post('fetch-bus', {
-                unit: unit,
-                msgStart: msgStart,
-                faces: faces,
-            });
-            return ret;
-        });
-    }
+const core_1 = require("../../core");
+// 现在简单的把client message推送给center，由center来分发给client
+// 以后需要做client消息分发服务器
+function pushToClient(unitxRunner, msg) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield core_1.centerApi.pushTo(msg);
+        }
+        catch (err) {
+            console.error(err);
+        }
+    });
 }
-exports.UnitxApi = UnitxApi;
-//# sourceMappingURL=unitxApi.js.map
+exports.pushToClient = pushToClient;
+//# sourceMappingURL=pushToClient.js.map
