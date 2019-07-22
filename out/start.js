@@ -124,12 +124,12 @@ function buildUqRouter(rb) {
     buildUnitxQueueRouter(unitxQueueRouter, rb);
     uqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
     */
-    let router = express_1.Router({ mergeParams: true });
-    router_1.buildEntityRouter(router, rb);
-    uqRouter.use('/tv', [core_1.authCheck, router]);
-    uqRouter.use('/joint', [auth_1.authJoint, router]);
+    let entityRouter = express_1.Router({ mergeParams: true });
+    router_1.buildEntityRouter(entityRouter, rb);
+    uqRouter.use('/tv', [core_1.authCheck, entityRouter]);
+    uqRouter.use('/joint', [auth_1.authJoint, entityRouter]);
     // debug tonva uq, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
-    uqRouter.use('/debug', [core_1.authCheck, router]);
+    uqRouter.use('/debug', [core_1.authCheck, entityRouter]);
     uqRouter.use('/', dbHello);
     uqRouter.use('/hello', dbHello);
     return uqRouter;
