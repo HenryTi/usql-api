@@ -185,7 +185,7 @@ export class Jobs {
 
         let {uqOwner, uq} = runner;
 
-        let body = toBusMessage(busSchema, face, content);
+        let {body, version} = toBusMessage(busSchema, face, content);
         let message: BusMessage = {
             unit: unit,
             type: 'bus',
@@ -194,6 +194,7 @@ export class Jobs {
             busOwner: busOwner,
             bus: busName,
             face: face,
+            version: version,
             body: body,
         };
         await net.sendToUnitx(unit, message);
@@ -223,8 +224,8 @@ function stringFromSections(sections:string[], values: any):string {
     return ret.join('');
 }
 
-function toBusMessage(busSchema:any, face:string, content:string):string {
-    if (!content) return '';
+function toBusMessage(busSchema:any, face:string, content:string):{body:string;version:number} {
+    if (!content) return undefined;
     let faceSchema = busSchema[face];
     if (faceSchema === undefined) {
         debugger;
@@ -233,6 +234,7 @@ function toBusMessage(busSchema:any, face:string, content:string):string {
     let data:{[key:string]: string[]}[] = [];
     let p = 0;
     let part:{[key:string]: string[]};
+    let busVersion:number;
     for (;;) {
         let t = content.indexOf('\t', p);
         if (t<0) break;
@@ -240,7 +242,10 @@ function toBusMessage(busSchema:any, face:string, content:string):string {
         ++t;
         let n = content.indexOf('\n', t);
         let sec = content.substring(t, n<0? undefined: n);
-        if (key === '$') {
+        if (key === '#') {
+            busVersion = Number(sec);
+        }
+        else if (key === '$') {
             if (part !== undefined) data.push(part);
             part = {$: [sec]};
         }
@@ -277,5 +282,5 @@ function toBusMessage(busSchema:any, face:string, content:string):string {
         ret += '\n';
     }
 
-    return ret;
+    return {body:ret, version:busVersion};
 }

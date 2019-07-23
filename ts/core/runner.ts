@@ -23,6 +23,7 @@ interface Buses {
 interface Face {
     bus: string;
     faceName: string;
+    version: number;
 }
 
 export class Runner {
@@ -542,7 +543,7 @@ export class Runner {
             let {name:bus, busOwner, busName, schema} = busSchema;
             let hasAccept:boolean = false;
             for (let i in schema) {
-                let {accept} = schema[i];
+                let {accept, version} = schema[i];
                 if (accept === true) {
                     let faceName = i.toLowerCase();
                     let url = busOwner.toLowerCase() + '/' + busName.toLowerCase() + '/' + faceName;
@@ -551,6 +552,7 @@ export class Runner {
                     coll[url] = {
                         bus: bus,
                         faceName: faceName,
+                        version: version,
                     };
                     hasAccept = true;
                 }

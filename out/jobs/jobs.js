@@ -197,7 +197,7 @@ class Jobs {
             }
             let { schema: busSchema, busOwner, busName } = schema.call;
             let { uqOwner, uq } = runner;
-            let body = toBusMessage(busSchema, face, content);
+            let { body, version } = toBusMessage(busSchema, face, content);
             let message = {
                 unit: unit,
                 type: 'bus',
@@ -206,6 +206,7 @@ class Jobs {
                 busOwner: busOwner,
                 bus: busName,
                 face: face,
+                version: version,
                 body: body,
             };
             yield net.sendToUnitx(unit, message);
@@ -239,7 +240,7 @@ function stringFromSections(sections, values) {
 }
 function toBusMessage(busSchema, face, content) {
     if (!content)
-        return '';
+        return undefined;
     let faceSchema = busSchema[face];
     if (faceSchema === undefined) {
         debugger;
@@ -248,6 +249,7 @@ function toBusMessage(busSchema, face, content) {
     let data = [];
     let p = 0;
     let part;
+    let busVersion;
     for (;;) {
         let t = content.indexOf('\t', p);
         if (t < 0)
@@ -256,7 +258,10 @@ function toBusMessage(busSchema, face, content) {
         ++t;
         let n = content.indexOf('\n', t);
         let sec = content.substring(t, n < 0 ? undefined : n);
-        if (key === '$') {
+        if (key === '#') {
+            busVersion = Number(sec);
+        }
+        else if (key === '$') {
             if (part !== undefined)
                 data.push(part);
             part = { $: [sec] };
@@ -295,6 +300,6 @@ function toBusMessage(busSchema, face, content) {
         }
         ret += '\n';
     }
-    return ret;
+    return { body: ret, version: busVersion };
 }
 //# sourceMappingURL=jobs.js.map

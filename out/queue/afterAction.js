@@ -1,5 +1,6 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+//import * as _ from 'lodash';
+//import { Runner, packBus, MsgMessage, BusMessage } from '../core';
+//import { pushToClient } from './pushToClient';
 //import { queueToUnitx } from './toUnitxQueue';
 // 2018-02-25
 // Bus face 数据保全的说明：

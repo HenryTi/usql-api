@@ -45,4 +45,5 @@ export interface BusMessage extends Message {
     busOwner: string,
     bus: string,
     face: string,
+    version: number,
 }

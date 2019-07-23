@@ -1,11 +1,13 @@
-import {Router, Request, Response, NextFunction} from 'express';
-import { Message, SheetMessage, consts, Runner, RouterBuilder, busQueueSeed } from '../core';
+//import {Router, Request, Response, NextFunction} from 'express';
+//import { Message, SheetMessage, consts, Runner, RouterBuilder, busQueueSeed } from '../core';
 //import { queueUnitxIn } from './unitxInQueue';
-import { messageProcesser } from './messageProcesser';
+//import { messageProcesser } from './messageProcesser';
 
 //export const unitxQueueRouter: Router = Router();
 
-/*export*/ function buildUnitxQueueRouter(router:Router, rb:RouterBuilder) {
+/*export*/ 
+/*
+function buildUnitxQueueRouter(router:Router, rb:RouterBuilder) {
     router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         try {
             let msg:Message = req.body;
@@ -56,16 +58,6 @@ import { messageProcesser } from './messageProcesser';
     rb.post(router, '/joint-write-bus',
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, face, from, sourceId, body:message} = body;
-        /*
-        let data = '';
-        if (face !== null && face !== undefined) data += face;
-        data += '\t';
-        if (from !== null && from !== undefined) data += from;
-        data += '\t';
-        if (sourceId !== null && sourceId !== undefined) data += sourceId;
-        data += '\t';
-        data += message + '\n';
-        */
         let ret = await runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
         return ret;
     });
@@ -85,3 +77,4 @@ async function getSheetTos(unitxRunner:Runner, sheetMessage:SheetMessage):Promis
     let tos:{to:number}[] = await unitxRunner.query(uqGetSheetTo, unit, user, paramsGetSheetTo);
     return tos.map(v=>v.to);
 }
+*/

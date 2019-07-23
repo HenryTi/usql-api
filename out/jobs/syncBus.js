@@ -36,10 +36,16 @@ function syncBus(runner, net) {
                     let { maxMsgId, maxRows } = ret[0][0];
                     let messages = ret[1];
                     for (let row of messages) {
-                        let { face: faceUrl, id: msgId, body } = row;
+                        let { face: faceUrl, id: msgId, body, version } = row;
                         let face = coll[faceUrl];
-                        let { bus, faceName } = face;
+                        let { bus, faceName, version: runnerBusVersion } = face;
                         try {
+                            if (runnerBusVersion !== version) {
+                                // 也就是说，bus消息的version，跟runner本身的bus version有可能不同
+                                // 不同需要做数据转换
+                                // 但是，现在先不处理
+                                // 2019-07-23
+                            }
                             yield runner.bus(bus, faceName, unit, msgId, body);
                         }
                         catch (busErr) {

@@ -1,17 +1,19 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const processSheetMessage_1 = require("./processSheetMessage");
-const pushToClient_1 = require("./pushToClient");
-const processBusMessage_1 = require("./processBusMessage");
-function messageProcesser(msg) {
+/*
+import { Message, SheetMessage, ClientMessage, BusMessage } from "../core/model";
+import { processSheetMessage } from "./processSheetMessage";
+import { pushToClient } from "./pushToClient";
+import { processBusMessage } from "./processBusMessage";
+import { Runner } from "../core";
+
+type MessageProcesser = (unitxRunner:Runner, msg: Message) => Promise<void>;
+
+export function messageProcesser(msg:Message):MessageProcesser  {
     switch (msg.type) {
-        default:
-            debugger;
-            throw 'unknown message type ' + msg.type;
-        case 'sheet': return processSheetMessage_1.processSheetMessage;
-        case 'msg': return pushToClient_1.pushToClient;
-        case 'bus': return processBusMessage_1.processBusMessage;
+        default: debugger; throw 'unknown message type ' + msg.type;
+        case 'sheet': return processSheetMessage;
+        case 'msg': return pushToClient;
+        case 'bus': return processBusMessage;
     }
 }
-exports.messageProcesser = messageProcesser;
+*/ 
 //# sourceMappingURL=messageProcesser.js.map

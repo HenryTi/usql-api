@@ -1,3 +1,4 @@
+/*
 import { centerApi, Runner, ClientMessage } from "../core";
 
 // 现在简单的把client message推送给center，由center来分发给client
@@ -10,3 +11,4 @@ export async function pushToClient(unitxRunner:Runner, msg: ClientMessage):Promi
         console.error(err);
     }
 }
+*/
