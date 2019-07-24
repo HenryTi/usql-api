@@ -3,10 +3,10 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-//export * from './router';
 __export(require("./setting"));
 __export(require("./open"));
 __export(require("./unitx"));
+__export(require("./build"));
 const access_1 = require("./access");
 const action_1 = require("./action");
 const book_1 = require("./book");
@@ -15,7 +15,6 @@ const query_1 = require("./query");
 const schema_1 = require("./schema");
 const tuid_1 = require("./tuid");
 const sheet_1 = require("./sheet");
-//import {router} from './router';
 const import_1 = require("./import");
 //import settingRouter from './setting';
 function buildEntityRouter(router, rb) {
@@ -30,5 +29,4 @@ function buildEntityRouter(router, rb) {
     import_1.buildImportRouter(router, rb);
 }
 exports.buildEntityRouter = buildEntityRouter;
-//settingRouter(router);
 //# sourceMappingURL=index.js.map

@@ -58,7 +58,13 @@ export class Runner {
     getDb():string {return this.db.getDbName()}
 
     async sql(sql:string, params:any[]): Promise<any> {
-        return await this.db.sql(sql, params);
+        try {
+            return await this.db.sql(sql, params || []);
+        }
+        catch (err) {
+            debugger;
+            throw err;
+        }
     }
     async procCall(proc:string, params:any[]): Promise<any> {
         return await this.db.call(proc, params);
@@ -68,6 +74,9 @@ export class Runner {
     }    
     async createDatabase(): Promise<void> {
         return await this.db.createDatabase();
+    }
+    async existsDatabase(): Promise<boolean> {
+        return await this.db.exists();
     }
 
     async unitCall(proc:string, unit:number, ...params:any[]): Promise<any> {
@@ -164,14 +173,14 @@ export class Runner {
         return v;
     }
 
-    async loadSchemas(hasSource:boolean): Promise<any[][]> {
-        return await this.db.tablesFromProc('tv_$entitys', [hasSource===true?1:0]);
+    async loadSchemas(hasSource:number): Promise<any[][]> {
+        return await this.db.tablesFromProc('tv_$entitys', [hasSource]);
     }
-    async saveSchema(unit:number, user:number, id:number, name:string, type:number, schema:string, run:string):Promise<any> {
-        return await this.unitUserCall('tv_$entity', unit, user, id, name, type, schema, run);
+    async saveSchema(unit:number, user:number, id:number, name:string, type:number, schema:string, run:string, source:string, from:string, open:number):Promise<any> {
+        return await this.unitUserCall('tv_$entity', unit, user, id, name, type, schema, run, source, from, open);
     }
     async loadConstStrs(): Promise<{[name:string]:number}[]> {
-        return await this.db.call('tv_$const_strs', undefined);
+        return await this.db.call('tv_$const_strs', []);
     }
     async saveConstStr(type:string): Promise<number> {
         return await this.db.call('tv_$const_str', [type]);
@@ -179,6 +188,13 @@ export class Runner {
     async loadSchemaVersion(name:string, version:string): Promise<string> {
         return await this.db.call('tv_$entity_version', [name, version]);
     } 
+    async setEntityValid(entities:string):Promise<any[]> {
+        let ret = await this.db.call('tv_$entity_validate', [entities]);
+        return ret;
+    }
+    async saveFace(bus:string, busOwner:string, busName:string, faceName:string) {
+        await this.db.call('tv_$save_face', [bus, busOwner, busName, faceName]);
+    }
 
     isTuidOpen(tuid:string) {
         tuid = tuid.toLowerCase();
@@ -377,7 +393,7 @@ export class Runner {
     }
 
     private async initInternal() {
-        let rows = await this.loadSchemas(false);
+        let rows = await this.loadSchemas(0);
         let schemaTable:{id:number, name:string, type:number, version:number, schema:string, run:string, from:string}[] = rows[0];
         let settingTable:{name:string, value:string}[] = rows[1];
         let setting:{[name:string]:string|number} = {};

@@ -14,6 +14,7 @@ enum Finish {
 
 export class Jobs {
     static start(): void {
+        return;
         setTimeout(async ()=>{
             let jobs = new Jobs;
             await jobs.run();

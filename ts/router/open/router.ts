@@ -118,20 +118,4 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
         let suffix = (all===true? '$id':'$main');
         return await runner.unitUserCall(`tv_${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
     });
-
-    rb.post(router, '/uq-built',
-    async (runner:Runner, body:any, params:any):Promise<any> => {
-        let {uqId} = runner;
-        let {uqId:paramUqId} = body;
-        if (!uqId) {
-            await runner.setSetting(0, 'uqId', String(paramUqId));
-            uqId = paramUqId;
-        }
-
-        if (uqId !== Number(paramUqId)) {
-            debugger;
-            throw 'error uqId';
-        }
-        runner.reset();
-    });
 };

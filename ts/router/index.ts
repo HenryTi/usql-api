@@ -1,7 +1,7 @@
-//export * from './router';
 export * from './setting';
 export * from './open';
 export * from './unitx';
+export * from './build';
 
 import { Router } from 'express';
 import {buildAccessRouter} from './access';
@@ -12,7 +12,6 @@ import {buildQueryRouter} from './query';
 import {buildSchemaRouter} from './schema';
 import {buildTuidRouter} from './tuid';
 import {buildSheetRouter} from './sheet';
-//import {router} from './router';
 import {buildImportRouter} from './import';
 import { RouterBuilder } from '../core';
 
@@ -29,6 +28,3 @@ export function buildEntityRouter(router:Router, rb: RouterBuilder) {
     buildSheetRouter(router, rb);
     buildImportRouter(router, rb);
 }
-
-
-//settingRouter(router);

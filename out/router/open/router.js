@@ -115,19 +115,6 @@ function buildOpenRouter(router, rb) {
         let suffix = (all === true ? '$id' : '$main');
         return yield runner.unitUserCall(`tv_${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
     }));
-    rb.post(router, '/uq-built', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
-        let { uqId } = runner;
-        let { uqId: paramUqId } = body;
-        if (!uqId) {
-            yield runner.setSetting(0, 'uqId', String(paramUqId));
-            uqId = paramUqId;
-        }
-        if (uqId !== Number(paramUqId)) {
-            debugger;
-            throw 'error uqId';
-        }
-        runner.reset();
-    }));
 }
 exports.buildOpenRouter = buildOpenRouter;
 ;

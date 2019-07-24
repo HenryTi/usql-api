@@ -115,6 +115,9 @@ function buildUqRouter(rb) {
     let openRouter = express_1.Router({ mergeParams: true });
     router_1.buildOpenRouter(openRouter, rb);
     uqRouter.use('/open', [core_1.authUnitx, openRouter]);
+    let buildRouter = express_1.Router({ mergeParams: true });
+    router_1.buildBuildRouter(buildRouter, rb);
+    uqRouter.use('/build', [auth_1.authUpBuild, buildRouter]);
     // 这个是不是也要放到只有unitx里面
     let settingRouter = express_1.Router({ mergeParams: true });
     router_1.buildSettingRouter(settingRouter, rb);

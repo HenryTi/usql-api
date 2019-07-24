@@ -1,4 +1,4 @@
-export {default as Auth, AuthUser, authCheck, authDebug, authUnitx} from './auth';
+export {default as Auth, AuthUser, authCheck, authDebug, authUnitx, authUpBuild, setUqBuildSecret} from './auth';
 export {centerApi} from './centerApi';
 //export {UnitxApi, urlSetUnitxHost} from '../tv/unitxApi';
 export {packReturnsFromSchema as packReturn, packBus, packParam, unpack, packReturns, packArr} from './packReturn';

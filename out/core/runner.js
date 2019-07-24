@@ -21,7 +21,13 @@ class Runner {
     getDb() { return this.db.getDbName(); }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.sql(sql, params);
+            try {
+                return yield this.db.sql(sql, params || []);
+            }
+            catch (err) {
+                debugger;
+                throw err;
+            }
         });
     }
     procCall(proc, params) {
@@ -37,6 +43,11 @@ class Runner {
     createDatabase() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.createDatabase();
+        });
+    }
+    existsDatabase() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.exists();
         });
     }
     unitCall(proc, unit, ...params) {
@@ -173,17 +184,17 @@ class Runner {
     }
     loadSchemas(hasSource) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.tablesFromProc('tv_$entitys', [hasSource === true ? 1 : 0]);
+            return yield this.db.tablesFromProc('tv_$entitys', [hasSource]);
         });
     }
-    saveSchema(unit, user, id, name, type, schema, run) {
+    saveSchema(unit, user, id, name, type, schema, run, source, from, open) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.unitUserCall('tv_$entity', unit, user, id, name, type, schema, run);
+            return yield this.unitUserCall('tv_$entity', unit, user, id, name, type, schema, run, source, from, open);
         });
     }
     loadConstStrs() {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.call('tv_$const_strs', undefined);
+            return yield this.db.call('tv_$const_strs', []);
         });
     }
     saveConstStr(type) {
@@ -194,6 +205,17 @@ class Runner {
     loadSchemaVersion(name, version) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.call('tv_$entity_version', [name, version]);
+        });
+    }
+    setEntityValid(entities) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let ret = yield this.db.call('tv_$entity_validate', [entities]);
+            return ret;
+        });
+    }
+    saveFace(bus, busOwner, busName, faceName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.call('tv_$save_face', [bus, busOwner, busName, faceName]);
         });
     }
     isTuidOpen(tuid) {
@@ -466,7 +488,7 @@ class Runner {
     }
     initInternal() {
         return __awaiter(this, void 0, void 0, function* () {
-            let rows = yield this.loadSchemas(false);
+            let rows = yield this.loadSchemas(0);
             let schemaTable = rows[0];
             let settingTable = rows[1];
             let setting = {};

@@ -2,11 +2,11 @@ import * as express from 'express';
 import { Request, Response, NextFunction, Router } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import {buildSettingRouter, buildOpenRouter, buildEntityRouter, buildUnitxRouter} from './router';
+import {buildSettingRouter, buildOpenRouter, buildEntityRouter, buildUnitxRouter, buildBuildRouter} from './router';
 import {initResDb, router as resRouter, initResPath} from './res';
 import {Auth, authCheck, authDebug, authUnitx, RouterBuilder, uqProdRouterBuilder, uqTestRouterBuilder, unitxTestRouterBuilder, unitxProdRouterBuilder} from './core';
 //import { /*buildUnitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
-import { authJoint } from './core/auth';
+import { authJoint, authUpBuild } from './core/auth';
 import { Jobs } from './jobs';
 //import { importData } from './import';
 
@@ -118,6 +118,10 @@ function buildUqRouter(rb: RouterBuilder): Router {
     let openRouter = Router({ mergeParams: true });
     buildOpenRouter(openRouter, rb);
     uqRouter.use('/open', [authUnitx, openRouter]);
+
+    let buildRouter = Router({ mergeParams: true });
+    buildBuildRouter(buildRouter, rb);
+    uqRouter.use('/build', [authUpBuild, buildRouter]);
 
     // 这个是不是也要放到只有unitx里面
     let settingRouter = Router({ mergeParams: true });

@@ -8,6 +8,8 @@ exports.Auth = auth_1.default;
 exports.authCheck = auth_1.authCheck;
 exports.authDebug = auth_1.authDebug;
 exports.authUnitx = auth_1.authUnitx;
+exports.authUpBuild = auth_1.authUpBuild;
+exports.setUqBuildSecret = auth_1.setUqBuildSecret;
 var centerApi_1 = require("./centerApi");
 exports.centerApi = centerApi_1.centerApi;
 //export {UnitxApi, urlSetUnitxHost} from '../tv/unitxApi';
