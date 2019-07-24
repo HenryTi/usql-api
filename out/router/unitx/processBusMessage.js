@@ -64,7 +64,7 @@ function getFromId(runner, unit, from) {
         return fromId;
     });
 }
-function writeDataToBus(runner, face, unit, from, fromQueueId, body) {
+function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
     return __awaiter(this, void 0, void 0, function* () {
         let faceId = yield getFaceId(runner, unit, face);
         let fromId = yield getFromId(runner, unit, from);
@@ -73,7 +73,7 @@ function writeDataToBus(runner, face, unit, from, fromQueueId, body) {
             yield runner.call('$set_bus_queue_seed', ['busqueue', core_1.busQueueSeedFromHour(hour)]);
             lastHour = hour;
         }
-        yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, faceId, fromId, fromQueueId, body]);
+        yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, faceId, fromId, fromQueueId, version, body]);
     });
 }
 exports.writeDataToBus = writeDataToBus;
@@ -82,9 +82,9 @@ function processBusMessage(unitxRunner, msg) {
         // 处理 bus message，发送到相应的uq服务器
         console.log('bus:', msg);
         //let unitxRunner = await getRunner(consts.$unitx);
-        let { unit, body, from, queueId, busOwner, bus, face } = msg;
+        let { unit, body, from, queueId, busOwner, bus, face, version } = msg;
         let faceUrl = busOwner + '/' + bus + '/' + face;
-        yield writeDataToBus(unitxRunner, faceUrl, unit, from, queueId, body);
+        yield writeDataToBus(unitxRunner, faceUrl, unit, from, queueId, version, body);
     });
 }
 exports.processBusMessage = processBusMessage;

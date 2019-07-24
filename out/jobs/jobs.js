@@ -125,6 +125,10 @@ class Jobs {
                                 else {
                                     finish = Finish.fail; // fail
                                 }
+                                let errSubject = `error on ${action}:  ${subject}`;
+                                let error = typeof (err) === 'object' ?
+                                    err.message : err;
+                                yield runner.unitCall('tv_$log', $unit, errSubject, error);
                             }
                         }
                         if (finish !== undefined)

@@ -48,7 +48,7 @@ async function getFromId(runner:Runner, unit:number, from:string):Promise<number
     return fromId;
 }
 
-export async function writeDataToBus(runner:Runner, face:string, unit:number, from:string, fromQueueId:number, body:string) {
+export async function writeDataToBus(runner:Runner, face:string, unit:number, from:string, fromQueueId:number, version:number, body:string) {
     let faceId = await getFaceId(runner, unit, face);
     let fromId = await getFromId(runner, unit, from);
     let hour = busQueuehour();
@@ -57,14 +57,14 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
         lastHour = hour;
     }
     await runner.tuidSave(consts.BusQueue, unit, undefined, 
-        [undefined, faceId, fromId, fromQueueId, body]);
+        [undefined, faceId, fromId, fromQueueId, version, body]);
 }
 
 export async function processBusMessage(unitxRunner:Runner, msg:BusMessage):Promise<void> {
     // 处理 bus message，发送到相应的uq服务器
     console.log('bus:', msg);
     //let unitxRunner = await getRunner(consts.$unitx);
-    let {unit, body, from, queueId, busOwner, bus, face} = msg;
+    let {unit, body, from, queueId, busOwner, bus, face, version} = msg;
     let faceUrl = busOwner + '/' + bus + '/' + face;
-    await writeDataToBus(unitxRunner, faceUrl, unit, from, queueId, body);
+    await writeDataToBus(unitxRunner, faceUrl, unit, from, queueId, version, body);
 }

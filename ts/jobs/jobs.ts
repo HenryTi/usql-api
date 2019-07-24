@@ -13,8 +13,6 @@ enum Finish {
 }
 
 export class Jobs {
-    private 
-
     static start(): void {
         setTimeout(async ()=>{
             let jobs = new Jobs;
@@ -114,6 +112,10 @@ export class Jobs {
                             else {
                                 finish = Finish.fail;  // fail
                             }
+                            let errSubject = `error on ${action}:  ${subject}`;
+                            let error = typeof(err)==='object'?
+                                err.message : err;
+                            await runner.unitCall('tv_$log', $unit, errSubject, error);
                         }
                     }
                     if (finish !== undefined) await runner.unitCall(procMessageQueueSet, $unit, id, finish); 
