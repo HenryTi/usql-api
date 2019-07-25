@@ -57,7 +57,12 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
         lastHour = hour;
     }
     else if (hour > lastHour) {
-        await runner.call('$set_bus_queue_seed', ['busqueue', busQueueSeedFromHour(hour)]);
+        let seed = busQueueSeedFromHour(hour);
+        let seedRet = await runner.call('$get_table_seed', ['busqueue']);
+        let s = seedRet[0].seed;
+        if (seed > s) {
+            await runner.call('$set_bus_queue_seed', ['busqueue', seed]);
+        }
         lastHour = hour;
     }
     

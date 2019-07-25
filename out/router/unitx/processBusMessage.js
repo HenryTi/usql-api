@@ -73,7 +73,12 @@ function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
             lastHour = hour;
         }
         else if (hour > lastHour) {
-            yield runner.call('$set_bus_queue_seed', ['busqueue', core_1.busQueueSeedFromHour(hour)]);
+            let seed = core_1.busQueueSeedFromHour(hour);
+            let seedRet = yield runner.call('$get_table_seed', ['busqueue']);
+            let s = seedRet[0].seed;
+            if (seed > s) {
+                yield runner.call('$set_bus_queue_seed', ['busqueue', seed]);
+            }
             lastHour = hour;
         }
         yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, faceId, fromId, fromQueueId, version, body]);
