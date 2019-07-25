@@ -14,6 +14,10 @@ enum Finish {
 
 export class Jobs {
     static start(): void {
+        if (isDevelopment === true) {
+            // 只有在开发状态下，才可以屏蔽jobs
+            // return;
+        }
         setTimeout(async ()=>{
             let jobs = new Jobs;
             await jobs.run();
