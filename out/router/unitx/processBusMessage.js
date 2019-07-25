@@ -68,13 +68,14 @@ function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
     return __awaiter(this, void 0, void 0, function* () {
         let faceId = yield getFaceId(runner, unit, face);
         let fromId = yield getFromId(runner, unit, from);
-        /*
-        let hour = busQueuehour();
-        if (lastHour === undefined || hour > lastHour) {
-            await runner.call('$set_bus_queue_seed', ['busqueue', busQueueSeedFromHour(hour)]);
+        let hour = core_1.busQueuehour();
+        if (lastHour === undefined) {
             lastHour = hour;
         }
-        */
+        else if (hour > lastHour) {
+            yield runner.call('$set_bus_queue_seed', ['busqueue', core_1.busQueueSeedFromHour(hour)]);
+            lastHour = hour;
+        }
         yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, faceId, fromId, fromQueueId, version, body]);
     });
 }

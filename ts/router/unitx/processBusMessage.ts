@@ -51,13 +51,16 @@ async function getFromId(runner:Runner, unit:number, from:string):Promise<number
 export async function writeDataToBus(runner:Runner, face:string, unit:number, from:string, fromQueueId:number, version:number, body:string) {
     let faceId = await getFaceId(runner, unit, face);
     let fromId = await getFromId(runner, unit, from);
-    /*
+    
     let hour = busQueuehour();
-    if (lastHour === undefined || hour > lastHour) {
+    if (lastHour === undefined) {
+        lastHour = hour;
+    }
+    else if (hour > lastHour) {
         await runner.call('$set_bus_queue_seed', ['busqueue', busQueueSeedFromHour(hour)]);
         lastHour = hour;
     }
-    */
+    
     await runner.tuidSave(consts.BusQueue, unit, undefined, 
         [undefined, faceId, fromId, fromQueueId, version, body]);
 }
