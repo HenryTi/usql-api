@@ -23,6 +23,8 @@ class Jobs {
     constructor() {
         this.run = () => __awaiter(this, void 0, void 0, function* () {
             try {
+                if (Jobs.paused === true)
+                    return;
                 if (core_1.isDevelopment === true)
                     console.log('Jobs run at: ', new Date());
                 let db = new core_1.Db(undefined);
@@ -61,6 +63,8 @@ class Jobs {
             }
         });
     }
+    static pause() { Jobs.paused = true; }
+    static resume() { Jobs.paused = false; }
     static start() {
         if (core_1.isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
@@ -228,6 +232,7 @@ class Jobs {
         });
     }
 }
+Jobs.paused = false;
 exports.Jobs = Jobs;
 function stringFromSections(sections, values) {
     if (sections === undefined)

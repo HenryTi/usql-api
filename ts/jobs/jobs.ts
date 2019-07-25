@@ -13,6 +13,10 @@ enum Finish {
 }
 
 export class Jobs {
+    private static paused: boolean = false;
+    static pause() { Jobs.paused = true; }
+    static resume() { Jobs.paused = false; }
+
     static start(): void {
         if (isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
@@ -26,6 +30,7 @@ export class Jobs {
 
     private run = async (): Promise<void> => {
         try {
+            if (Jobs.paused === true) return;
             if (isDevelopment===true) console.log('Jobs run at: ', new Date());            
             let db = new Db(undefined);
             let uqs = await db.uqDbs();
