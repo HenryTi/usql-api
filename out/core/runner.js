@@ -158,6 +158,11 @@ class Runner {
             yield this.db.initResDb(resDbName);
         });
     }
+    initSetting() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.call('tv_$init_setting', []);
+        });
+    }
     setSetting(unit, name, value) {
         return __awaiter(this, void 0, void 0, function* () {
             name = name.toLowerCase();
@@ -786,13 +791,7 @@ class Runner {
     }
     getAccesses(unit, user, acc) {
         return __awaiter(this, void 0, void 0, function* () {
-            //let reload:number = await this.getSetting(0, 'reloadSchemas');
-            //if (this.reload === 1) {
-            //this.schemas = undefined;
             yield this.init();
-            //await this.setSetting(0, 'reloadSchemas', '0');
-            //}
-            //await this.initSchemas();
             let access = {};
             function merge(src) {
                 for (let i in src) {
@@ -836,12 +835,7 @@ class Runner {
     }
     getEntities(unit) {
         return __awaiter(this, void 0, void 0, function* () {
-            //let reload:number = await this.getSetting(0, 'reloadSchemas');
-            //if (reload === 1) {
-            //this.schemas = undefined;
             yield this.init();
-            //await this.setSetting(0, 'reloadSchemas', '0');
-            //}
             let entityAccess = {};
             for (let entityId in this.entityColl) {
                 let entity = this.entityColl[entityId];

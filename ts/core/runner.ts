@@ -152,6 +152,9 @@ export class Runner {
     async initResDb(resDbName:string): Promise<void> {
         await this.db.initResDb(resDbName);
     }
+    async initSetting():Promise<void> {
+        await this.db.call('tv_$init_setting', []);
+    }
     async setSetting(unit:number, name: string, value: string): Promise<void> {
         name = name.toLowerCase();
         await this.unitCall('tv_$set_setting', unit, name, value);
@@ -671,14 +674,7 @@ export class Runner {
         return ret;
     }
     async getAccesses(unit:number, user:number, acc:string[]):Promise<any> {
-        //let reload:number = await this.getSetting(0, 'reloadSchemas');
-
-        //if (this.reload === 1) {
-            //this.schemas = undefined;
-            await this.init();
-            //await this.setSetting(0, 'reloadSchemas', '0');
-        //}
-        //await this.initSchemas();
+        await this.init();
         let access = {} as any;
         function merge(src:any) {
             for (let i in src) {
@@ -719,13 +715,7 @@ export class Runner {
     }
 
     async getEntities(unit:number):Promise<any> {
-        //let reload:number = await this.getSetting(0, 'reloadSchemas');
-
-        //if (reload === 1) {
-            //this.schemas = undefined;
-            await this.init();
-            //await this.setSetting(0, 'reloadSchemas', '0');
-        //}
+        await this.init();
         let entityAccess: {[name:string]: any} = {};
         for (let entityId in this.entityColl) {
             let entity = this.entityColl[entityId];

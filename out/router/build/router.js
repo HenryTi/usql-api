@@ -18,6 +18,7 @@ function buildBuildRouter(router, rb) {
         let { uqId } = runner;
         let { uqId: paramUqId } = body;
         if (!uqId) {
+            yield runner.initSetting();
             yield runner.setSetting(0, 'uqId', String(paramUqId));
             uqId = paramUqId;
         }
