@@ -32,7 +32,7 @@ class Db {
         let sqlType = config.get('sqlType');
         let dbConfig = this.getDbConfig();
         if (dbConfig === undefined)
-            throw 'this server not support unitx';
+            throw 'dbConfig not defined';
         switch (sqlType) {
             case 'mysql': return new my_1.MyDbServer(dbConfig);
             case 'mssql': return new ms_1.MsDbServer(dbConfig);
@@ -106,6 +106,9 @@ class UnitxDb extends Db {
     getDbConfig() {
         if (config.has(const_connectionUnitx) === true) {
             return config.get(const_connectionUnitx);
+        }
+        else {
+            throw `server '${config.get('servername')}' has no connection_$unitx defined in config.json`;
         }
     }
 }

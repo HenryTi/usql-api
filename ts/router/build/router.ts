@@ -93,9 +93,11 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
         return await runner.setEntityValid(body.entities);
     });
 
+    /*
     rb.post(router, '/save-face',
     async (runner:Runner, body:{bus:string, busOwner:string, busName:string, faceName:string}) => {
         let {bus, busOwner, busName, faceName} = body;
         await runner.saveFace(bus, busOwner, busName, faceName);
     });
+    */
 };

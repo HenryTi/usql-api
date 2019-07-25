@@ -29,7 +29,7 @@ export class Db {
     private createDbServer() {
         let sqlType = config.get<string>('sqlType');
         let dbConfig:any = this.getDbConfig();
-        if (dbConfig === undefined) throw 'this server not support unitx';
+        if (dbConfig === undefined) throw 'dbConfig not defined';
         switch (sqlType) {
             case 'mysql': return new MyDbServer(dbConfig);
             case 'mssql': return new MsDbServer(dbConfig);
@@ -79,6 +79,9 @@ class UnitxDb extends Db {
     protected getDbConfig() {
         if (config.has(const_connectionUnitx) === true) {
             return config.get<any>(const_connectionUnitx);
+        }
+        else {
+            throw `server '${config.get<string>('servername')}' has no connection_$unitx defined in config.json`;
         }
     }
 }

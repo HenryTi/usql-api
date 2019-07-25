@@ -75,10 +75,13 @@ function buildBuildRouter(router, rb) {
     rb.post(router, '/entity-validate', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         return yield runner.setEntityValid(body.entities);
     }));
-    rb.post(router, '/save-face', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        let { bus, busOwner, busName, faceName } = body;
-        yield runner.saveFace(bus, busOwner, busName, faceName);
-    }));
+    /*
+    rb.post(router, '/save-face',
+    async (runner:Runner, body:{bus:string, busOwner:string, busName:string, faceName:string}) => {
+        let {bus, busOwner, busName, faceName} = body;
+        await runner.saveFace(bus, busOwner, busName, faceName);
+    });
+    */
 }
 exports.buildBuildRouter = buildBuildRouter;
 ;
