@@ -6,8 +6,8 @@ import { Runner, unpack, RouterBuilder, SheetQueueData } from '../core';
 const constSheet = 'sheet';
 
 export function buildSheetRouter(router:Router, rb:RouterBuilder) {
-    async function queueSheet(runner: Runner, unit:number, sheetId: number, content: SheetQueueData): Promise<boolean> {
-        let ret = await runner.unitTableFromProc('tv_$sheet_to_queue', unit, sheetId, JSON.stringify(content));
+    async function queueSheet(runner: Runner, unit:number, name:string, sheetId: number, content: SheetQueueData): Promise<boolean> {
+        let ret = await runner.unitTableFromProc('tv_$sheet_to_queue', unit, name, sheetId, JSON.stringify(content));
         return (ret[0].ret === 1);
     }
 
@@ -29,7 +29,7 @@ export function buildSheetRouter(router:Router, rb:RouterBuilder) {
                     let $onsave = actions.find(v => v.name === '$onsave');
                     if ($onsave !== undefined) {
                         let {id, flow} = sheetRet;
-                        let retQueue = await queueSheet(runner, unit, id, {
+                        let retQueue = await queueSheet(runner, unit, name, id, {
                             sheet: name,
                             state: '$',
                             action: '$onsave',
@@ -76,7 +76,7 @@ export function buildSheetRouter(router:Router, rb:RouterBuilder) {
     rb.entityPut(router, constSheet, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {state, action, id, flow} = body;
-        let retQueue = await queueSheet(runner, unit, id, {
+        let retQueue = await queueSheet(runner, unit, name, id, {
             sheet: name,
             state: state,
             action: action,

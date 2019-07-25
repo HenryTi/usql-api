@@ -13,9 +13,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const constSheet = 'sheet';
 function buildSheetRouter(router, rb) {
-    function queueSheet(runner, unit, sheetId, content) {
+    function queueSheet(runner, unit, name, sheetId, content) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield runner.unitTableFromProc('tv_$sheet_to_queue', unit, sheetId, JSON.stringify(content));
+            let ret = yield runner.unitTableFromProc('tv_$sheet_to_queue', unit, name, sheetId, JSON.stringify(content));
             return (ret[0].ret === 1);
         });
     }
@@ -36,7 +36,7 @@ function buildSheetRouter(router, rb) {
                     let $onsave = actions.find(v => v.name === '$onsave');
                     if ($onsave !== undefined) {
                         let { id, flow } = sheetRet;
-                        let retQueue = yield queueSheet(runner, unit, id, {
+                        let retQueue = yield queueSheet(runner, unit, name, id, {
                             sheet: name,
                             state: '$',
                             action: '$onsave',
@@ -81,7 +81,7 @@ function buildSheetRouter(router, rb) {
     }));
     rb.entityPut(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { state, action, id, flow } = body;
-        let retQueue = yield queueSheet(runner, unit, id, {
+        let retQueue = yield queueSheet(runner, unit, name, id, {
             sheet: name,
             state: state,
             action: action,
