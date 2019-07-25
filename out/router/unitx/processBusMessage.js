@@ -77,6 +77,7 @@ function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
             let seedRet = yield runner.call('$get_table_seed', ['busqueue']);
             let s = seedRet[0].seed;
             if (seed > s) {
+                seed = s;
                 yield runner.call('$set_bus_queue_seed', ['busqueue', seed]);
             }
             lastHour = hour;
