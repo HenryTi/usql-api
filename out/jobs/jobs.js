@@ -62,7 +62,6 @@ class Jobs {
         });
     }
     static start() {
-        return;
         setTimeout(() => __awaiter(this, void 0, void 0, function* () {
             let jobs = new Jobs;
             yield jobs.run();
