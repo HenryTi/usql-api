@@ -18,10 +18,10 @@ function buildBuildRouter(router, rb) {
         let { uqId } = runner;
         let { uqId: paramUqId } = body;
         if (!uqId) {
-            yield runner.initSetting();
             yield runner.setSetting(0, 'uqId', String(paramUqId));
             uqId = paramUqId;
         }
+        yield runner.initSetting();
         if (uqId !== Number(paramUqId)) {
             debugger;
             throw 'error uqId';

@@ -13,10 +13,10 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
         let {uqId} = runner;
         let {uqId:paramUqId} = body;
         if (!uqId) {
-            await runner.initSetting();
             await runner.setSetting(0, 'uqId', String(paramUqId));
             uqId = paramUqId;
         }
+        await runner.initSetting();
 
         if (uqId !== Number(paramUqId)) {
             debugger;
