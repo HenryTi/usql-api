@@ -29,7 +29,7 @@ interface Face {
 export class Runner {
     protected db:Db;
     private access:any;
-    private schemas: {[entity:string]: {type:string, call:any; run:any;}};
+    private schemas: {[entity:string]: {type:string; from:string; call:any; run:any;}};
     private accessSchemaArr: any[];
     private tuids: {[name:string]: any};
     private busArr: any[];
@@ -78,7 +78,9 @@ export class Runner {
     async existsDatabase(): Promise<boolean> {
         return await this.db.exists();
     }
-
+    async tableFromProc(proc:string, params:any[]): Promise<any[]> {
+        return await this.db.tableFromProc('tv_' + proc, params);
+    }
     async unitCall(proc:string, unit:number, ...params:any[]): Promise<any> {
         let p:any[] = [];
         if (this.hasUnit === true) p.push(unit);
@@ -442,6 +444,7 @@ export class Runner {
             //if (url !== undefined) url = url.toLowerCase();
             this.schemas[name] = {
                 type: type,
+                from: from,
                 call: schemaObj,
                 run: runObj,
             }

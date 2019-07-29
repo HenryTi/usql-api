@@ -17,63 +17,62 @@ function syncTuids(runner, net) {
         if (froms === undefined)
             return;
         try {
-            let syncTuids = yield runner.call('$sync_tuids', []);
-            if (syncTuids.length === 0)
+            let db = runner.getDb();
+            let uqs = [/*'order', */ 'salestask'];
+            if (uqs.indexOf(db) < 0)
                 return;
-            let fromRows = {};
+            debugger;
+            yield syncNew(runner, net);
+            yield syncModify(runner, net);
+            /*
+            let syncTuids = await runner.call('$sync_tuids', []);
+            if (syncTuids.length === 0) return;
+            let fromRows: {[from:string]: {[unit:number]: SyncRow[]}} = {};
             for (let row of syncTuids) {
-                let { from, unit, tuid } = row;
+                let {from, unit, tuid} = row as SyncRow;
                 let f = froms[from];
-                if (f === undefined)
-                    continue;
+                if (f === undefined) continue;
                 let st = f[tuid];
-                if (st === undefined)
-                    continue;
+                if (st === undefined) continue;
                 let unitRows = fromRows[from];
-                if (unitRows === undefined)
-                    fromRows[from] = unitRows = {};
+                if (unitRows === undefined) fromRows[from] = unitRows = {};
                 let rows = unitRows[unit];
-                if (rows === undefined)
-                    unitRows[unit] = rows = [];
+                if (rows === undefined) unitRows[unit] = rows = [];
                 rows.push(row);
             }
+    
             for (let from in fromRows) {
                 let unitRows = fromRows[from];
                 let fromSchemas = froms[from];
                 for (let i in unitRows) {
                     let rows = unitRows[i];
                     let unit = Number(i);
-                    let openApi = yield net.getOpenApi(from, unit);
-                    if (!openApi)
-                        continue;
-                    let stamps = [];
+                    let openApi = await net.getOpenApi(from, unit);
+                    if (!openApi) continue;
+                    let stamps:any[][] = [];
                     // 如果本tuid有新id了，去from端同步
                     for (let row of rows) {
-                        let { tuid, id, hasNew, stamp } = row;
-                        if (stamp === null)
-                            stamp = 0;
-                        if (id === null)
-                            id = 0;
+                        let {tuid, id, hasNew, stamp} = row;
+                        if (stamp === null) stamp = 0;
+                        if (id === null) id = 0;
                         let tuidSchema = runner.getTuid(tuid);
                         // 只有import from all的tuid才同步
                         if (tuidSchema.from.all === true) {
                             stamps.push([tuid, stamp, id]);
                         }
                         if (hasNew === 1) {
-                            if (fromSchemas === undefined)
-                                continue;
+                            if (fromSchemas === undefined) continue;
                             let syncTuid = fromSchemas[tuid];
-                            let { maps } = syncTuid; // tuid, 随后 tab 分隔的 map
+                            let {maps} = syncTuid; // tuid, 随后 tab 分隔的 map
                             try {
                                 for (;;) {
-                                    let ids = yield runner.unitCall(tuid + '$sync0', unit);
-                                    if (ids.length === 0)
-                                        break;
+                                    let ids = await runner.unitCall(tuid + '$sync0', unit);
+                                    if (ids.length === 0) break;
                                     for (let idRet of ids) {
-                                        yield syncId(runner, openApi, unit, idRet.id, tuid, maps);
+                                        await syncId(runner, openApi, unit, idRet.id, tuid, maps);
                                     }
                                 }
-                                yield runner.unitUserCall(tuid + '$sync_set', unit, undefined, undefined, 0);
+                                await runner.unitUserCall(tuid + '$sync_set', unit, undefined, undefined, 0);
                             }
                             catch (err) {
                                 debugger;
@@ -81,17 +80,17 @@ function syncTuids(runner, net) {
                             let s = null;
                         }
                     }
-                    if (stamps.length === 0)
-                        continue;
+                    if (stamps.length === 0) continue;
                     // 如果from端更新了tuid，同步过来。
-                    let fresh = yield openApi.fresh(unit, stamps);
+                    let fresh = await openApi.fresh(unit, stamps);
                     let len = stamps.length;
-                    for (let i = 0; i < len; i++) {
+                    for (let i=0; i<len; i++) {
                         let stampRow = stamps[i];
                         let tuid = stampRow[0];
                         let syncTuid = fromSchemas[tuid];
-                        let { maps } = syncTuid; // tuid, 随后 tab 分隔的 map
-                        let tuidIdTable;
+                        let {maps} = syncTuid; // tuid, 随后 tab 分隔的 map
+                        let tuidIdTable:any[];
+    
                         if (len === 1) {
                             tuidIdTable = fresh;
                         }
@@ -102,11 +101,10 @@ function syncTuids(runner, net) {
                         try {
                             if (tuidIdTable !== undefined) {
                                 for (let row of tuidIdTable) {
-                                    let { id, stamp } = row;
-                                    yield syncId(runner, openApi, unit, id, tuid, maps);
-                                    if (stamp > stampMax)
-                                        stampMax = stamp;
-                                    yield runner.unitCall(tuid + '$sync_set', unit, stampMax, id, undefined);
+                                    let {id, stamp} = row;
+                                    await syncId(runner, openApi, unit, id, tuid, maps);
+                                    if (stamp > stampMax) stampMax = stamp;
+                                    await runner.unitCall(tuid + '$sync_set', unit, stampMax, id, undefined);
                                 }
                             }
                         }
@@ -117,6 +115,7 @@ function syncTuids(runner, net) {
                     }
                 }
             }
+            */
         }
         catch (err) {
             debugger;
@@ -126,9 +125,127 @@ function syncTuids(runner, net) {
     });
 }
 exports.syncTuids = syncTuids;
+function syncNew(runner, net) {
+    return __awaiter(this, void 0, void 0, function* () {
+        for (;;) {
+            let items = yield runner.tableFromProc('$from_new', []);
+            if (items.length === 0) {
+                debugger;
+                break;
+            }
+            for (let item of items) {
+                let { id, unit, entity, key } = item;
+                if (unit === undefined)
+                    unit = runner.uniqueUnit;
+                let schema = runner.getSchema(entity);
+                if (schema === undefined)
+                    continue;
+                let { from } = schema;
+                let openApi = yield net.getOpenApi(from, unit);
+                if (!openApi)
+                    continue;
+                /*
+                let ret = await openApi.fromEntity(unit, entity, key);
+                if (type === 'tuid') {
+                    await setTuid(runner, entity, unit, id, ret);
+                }
+                else if (type === 'map') {
+                    await setMap(runner, entity, unit, id, ret);
+                }
+                */
+                yield syncEntity(runner, openApi, unit, entity, key);
+                yield runner.call('$from_new_finished', [unit, id]);
+            }
+        }
+    });
+}
+function syncModify(runner, net) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let items = yield runner.tableFromProc('$sync_from', []);
+        if (items.length === 0)
+            return;
+        let unitOpenApiItems = {};
+        // 把访问同一个openApi的整理到一起
+        for (let item of items) {
+            let { unit, entity, modifyMax } = item;
+            if (!unit)
+                unit = runner.uniqueUnit;
+            let schema = runner.getSchema(entity);
+            if (schema === undefined)
+                debugger;
+            let { type, from } = schema;
+            let openApi = yield yield net.getOpenApi(from, unit);
+            if (!openApi)
+                continue;
+            let openApiItems = unitOpenApiItems[unit];
+            if (openApiItems === undefined) {
+                unitOpenApiItems[unit] = openApiItems = [{
+                        openApi: openApi,
+                        entities: [entity],
+                        modifyMax: modifyMax
+                    }];
+            }
+            else {
+                let openApiItem = openApiItems.find(v => v.openApi === openApi);
+                if (openApiItem === undefined) {
+                    openApiItems.push({
+                        openApi: openApi,
+                        entities: [entity],
+                        modifyMax: modifyMax,
+                    });
+                }
+                else {
+                    openApiItem.entities.push(entity);
+                    if (modifyMax > openApiItem.modifyMax) {
+                        openApiItem.modifyMax = modifyMax;
+                    }
+                }
+            }
+        }
+        // 从from uq获取数据
+        let page = 100;
+        for (let unit in unitOpenApiItems) {
+            let openApiItems = unitOpenApiItems[unit];
+            for (let openApiItem of openApiItems) {
+                try {
+                    let { openApi, entities, modifyMax } = openApiItem;
+                    let ret = yield openApi.queueModify(unit, modifyMax, page, entities.join('\t'));
+                    let { queue, queueMax } = ret;
+                    for (let item of queue) {
+                        let { id, entity, key } = item;
+                        yield syncEntity(runner, openApi, unit, entity, key);
+                        yield runner.call('$sync_from_set', [unit, entity, id]);
+                    }
+                    if (queue.length < page) {
+                        for (let item of queue) {
+                            let { entity } = item;
+                            yield runner.call('$sync_from_set', [unit, entity, queueMax]);
+                        }
+                    }
+                }
+                catch (err) {
+                    console.error(err);
+                }
+            }
+        }
+    });
+}
+function syncEntity(runner, openApi, unit, entity, key) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let ret = yield openApi.fromEntity(unit, entity, key);
+        let schema = runner.getSchema(entity);
+        let { type } = schema;
+        if (type === 'tuid') {
+            yield setTuid(runner, entity, unit, /*id, */ ret);
+        }
+        else if (type === 'map') {
+            yield setMap(runner, entity, unit, /*id, */ ret);
+        }
+    });
+}
 function syncId(runner, openApi, unit, id, tuid, maps) {
     return __awaiter(this, void 0, void 0, function* () {
-        let ret = yield openApi.tuid(unit, id, tuid, maps);
+        let ret = undefined; //await openApi.tuid(unit, id, tuid, maps);
         if (ret === undefined)
             return;
         if (maps !== undefined) {
@@ -136,13 +253,13 @@ function syncId(runner, openApi, unit, id, tuid, maps) {
                 let mapValues = ret[map];
                 if (mapValues === undefined)
                     continue;
-                yield setMap(runner, map, unit, id, mapValues);
+                yield setMap(runner, map, unit, /*id, */ mapValues);
             }
         }
-        yield setTuid(runner, tuid, unit, id, ret[tuid]);
+        yield setTuid(runner, tuid, unit, /*id, */ ret[tuid]);
     });
 }
-function setMap(runner, mapName, unit, id, values) {
+function setMap(runner, mapName, unit, /*id:number, */ values) {
     return __awaiter(this, void 0, void 0, function* () {
         let map = runner.getMap(mapName);
         if (map === undefined)
@@ -150,7 +267,7 @@ function setMap(runner, mapName, unit, id, values) {
         let { actions } = map.call;
         let { sync } = actions;
         let data = {
-            __id: id,
+            //__id: id,
             arr1: values
         };
         let param = core_1.packParam(sync, data);
@@ -158,7 +275,7 @@ function setMap(runner, mapName, unit, id, values) {
         return;
     });
 }
-function setTuid(runner, tuidName, unit, id, values) {
+function setTuid(runner, tuidName, unit, /*id:number, */ values) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let user = undefined;
@@ -168,7 +285,7 @@ function setTuid(runner, tuidName, unit, id, values) {
             if (Array.isArray(main))
                 main = main[0];
             if (main === undefined) {
-                yield runner.tuidSetStamp(tuidName, unit, [id, -2]);
+                //await runner.tuidSetStamp(tuidName, unit, [id, -2]);
                 return;
             }
             let idVal = main[idFieldName];

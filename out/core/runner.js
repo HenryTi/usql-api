@@ -50,6 +50,11 @@ class Runner {
             return yield this.db.exists();
         });
     }
+    tableFromProc(proc, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.tableFromProc('tv_' + proc, params);
+        });
+    }
     unitCall(proc, unit, ...params) {
         return __awaiter(this, void 0, void 0, function* () {
             let p = [];
@@ -538,6 +543,7 @@ class Runner {
                 //if (url !== undefined) url = url.toLowerCase();
                 this.schemas[name] = {
                     type: type,
+                    from: from,
                     call: schemaObj,
                     run: runObj,
                 };

@@ -67,30 +67,29 @@ function buildOpenRouter(router, rb) {
             console.log(err.message);
         }
     }));
-    rb.post(router, '/tuid', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        body.$ = 'open/tuid';
+    rb.post(router, '/from-entity', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        //body.$ = 'open/tuid';
         console.log(body);
-        let { unit, id, tuid, maps } = body;
-        if (runner.isTuidOpen(tuid) === false)
-            return;
-        // maps: tab分隔的map名字
-        let ret = {};
-        let tuidRet = yield runner.unitUserCall(tuid, unit, undefined, id);
-        ret[tuid] = tuidRet;
-        if (maps !== undefined) {
-            for (let m of maps) {
-                let map = runner.getMap(m);
-                if (map === undefined)
-                    continue;
-                let { keys } = map.call;
-                let params = [unit, undefined, id];
-                for (let i = 1; i < keys.length; i++)
-                    params.push(undefined);
-                let mapRet = yield runner.call(m + '$query$', params);
-                ret[m] = mapRet;
-            }
+        let { unit, entity, key } = body;
+        let schema = runner.getSchema(entity);
+        let { type } = schema;
+        if (type === 'tuid') {
+            let tuidRet = yield runner.unitUserCall('tv_' + entity, unit, undefined, key);
+            return tuidRet;
         }
-        return ret;
+        if (type === 'map') {
+            let mapRet = yield runner.unitUserCall('tv_' + entity + '_$query', unit, undefined, key.split('\t'));
+            return mapRet;
+        }
+    }));
+    rb.post(router, '/queue-modify', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        let { unit, start, page, entities } = body;
+        let ret = yield runner.unitTablesFromProc('tv_$modify_queue', unit, start, page, entities);
+        let ret1 = ret[1];
+        return {
+            queue: ret[0],
+            queueMax: ret1.length === 0 ? 0 : ret1[0].max
+        };
     }));
     rb.post(router, '/tuid-main/:tuid', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         body.$ = 'open/tuid-main/';

@@ -70,28 +70,32 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
         }
     });
 
-    rb.post(router, '/tuid',
+    rb.post(router, '/from-entity',
     async (runner:Runner, body:any):Promise<any> => {
-        body.$ = 'open/tuid';
+        //body.$ = 'open/tuid';
         console.log(body);
-        let {unit, id, tuid, maps} = body;
-        if (runner.isTuidOpen(tuid) === false) return;
-        // maps: tab分隔的map名字
-        let ret:{[key:string]: any} = {};
-        let tuidRet = await runner.unitUserCall(tuid, unit, undefined, id);
-        ret[tuid] = tuidRet;
-        if (maps !== undefined) {
-            for (let m of maps) {
-                let map = runner.getMap(m);
-                if (map === undefined) continue;
-                let {keys} = map.call;
-                let params = [unit, undefined, id]
-                for (let i=1;i<keys.length; i++) params.push(undefined);
-                let mapRet = await runner.call(m + '$query$', params);
-                ret[m] = mapRet;
-            }
+        let {unit, entity, key} = body;
+        let schema = runner.getSchema(entity);
+        let {type} = schema;
+        if (type === 'tuid') {
+            let tuidRet = await runner.unitUserCall('tv_' + entity, unit, undefined, key);
+            return tuidRet;
         }
-        return ret;
+        if (type === 'map') {
+            let mapRet = await runner.unitUserCall('tv_' + entity + '_$query', unit, undefined, key.split('\t'));
+            return mapRet;
+        }
+    });
+
+    rb.post(router, '/queue-modify',
+    async (runner:Runner, body:any):Promise<any> => {
+        let {unit, start, page, entities} = body;
+        let ret = await runner.unitTablesFromProc('tv_$modify_queue', unit, start, page, entities);
+        let ret1 = ret[1];
+        return {
+            queue: ret[0],
+            queueMax: ret1.length===0? 0: ret1[0].max
+        };
     });
 
     rb.post(router, '/tuid-main/:tuid',

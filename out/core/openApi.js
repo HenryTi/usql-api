@@ -20,13 +20,25 @@ class OpenApi extends _1.Fetch {
             return ret;
         });
     }
-    tuid(unit, id, tuid, maps) {
+    fromEntity(unit, entity, key) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.post('open/tuid', {
+            let ret = yield this.post('open/from-entity', {
                 unit: unit,
-                id: id,
-                tuid: tuid,
-                maps: maps,
+                entity: entity,
+                key: key,
+            });
+            return ret;
+        });
+    }
+    queueModify(unit, start, page, entities) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (start === undefined || start === null)
+                start = 0;
+            let ret = yield this.post('open/queue-modify', {
+                unit: unit,
+                start: start,
+                page: page,
+                entities: entities,
             });
             return ret;
         });

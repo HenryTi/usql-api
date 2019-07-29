@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const syncTuids_1 = require("./syncTuids");
-const syncBus_1 = require("./syncBus");
 let firstRun = core_1.isDevelopment === true ? 3000 : 30 * 1000;
 let runGap = core_1.isDevelopment === true ? 15 * 1000 : 30 * 1000;
 var Finish;
@@ -42,16 +41,18 @@ class Jobs {
                     let runner = yield net.getRunner(dbName);
                     if (runner === undefined)
                         continue;
-                    let { buses } = runner;
+                    /*
+                    let {buses} = runner;
                     if (buses !== undefined) {
-                        let { outCount, faces } = buses;
+                        let {outCount, faces} = buses;
                         if (outCount > 0) {
-                            yield this.processQueue(runner, net);
+                            await this.processQueue(runner, net);
                         }
                         if (faces !== undefined) {
-                            yield syncBus_1.syncBus(runner, net);
+                            await syncBus(runner, net);
                         }
                     }
+                    */
                     yield syncTuids_1.syncTuids(runner, net);
                 }
             }
