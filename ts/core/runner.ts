@@ -71,7 +71,10 @@ export class Runner {
     }
     async call(proc:string, params:any[]): Promise<any> {
         return await this.db.call('tv_' + proc, params);
-    }    
+    }
+    async buildDatabase(): Promise<boolean> {
+        return await this.db.buildDatabase();
+    }
     async createDatabase(): Promise<void> {
         return await this.db.createDatabase();
     }
@@ -391,7 +394,7 @@ export class Runner {
             await this.initInternal();
         }
         catch (err) {
-            this.schemas = {};
+            this.schemas = undefined;
             console.error(err.message);
             debugger;
         }

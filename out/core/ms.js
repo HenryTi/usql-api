@@ -20,6 +20,7 @@ class MsDbServer extends dbServer_1.DbServer {
     callEx(db, proc, params) { return; }
     tableFromProc(db, proc, params) { return; }
     tablesFromProc(db, proc, params) { return; }
+    buildDatabase(db) { return; }
     createDatabase(db) { return; }
     existsDatabase(db) { return; }
     uqDbs() { return; }

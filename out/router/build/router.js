@@ -33,6 +33,9 @@ function buildBuildRouter(router, rb) {
         let { sql, params } = body;
         return yield runner.sql(sql, params);
     }));
+    rb.post(router, '/build-database', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        yield runner.buildDatabase();
+    }));
     rb.post(router, '/create-database', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         yield runner.createDatabase();
     }));

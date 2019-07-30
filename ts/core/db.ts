@@ -66,6 +66,9 @@ export class Db {
     async createDatabase(): Promise<void> {
         return await this.dbServer.createDatabase(this.dbName);
     }
+    async buildDatabase(): Promise<boolean> {
+        return await this.dbServer.buildDatabase(this.dbName);
+    }
     async uqDbs():Promise<any[]> {
         return await this.dbServer.uqDbs();
     }

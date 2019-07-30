@@ -32,6 +32,11 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
         return await runner.sql(sql, params);
     });
 
+    rb.post(router, '/build-database',
+    async (runner:Runner, body:any): Promise<void> => {
+        await runner.buildDatabase();
+    });
+
     rb.post(router, '/create-database',
     async (runner:Runner, body:any): Promise<void> => {
         await runner.createDatabase();

@@ -4,8 +4,9 @@ export abstract class DbServer {
     abstract callEx(db:string, proc:string, params:any[]): Promise<any>;
     abstract tableFromProc(db:string, proc:string, params:any[]): Promise<any[]>;
     abstract tablesFromProc(db:string, proc:string, params:any[]): Promise<any[][]>;
-    abstract createDatabase(db:string): Promise<void>;
+    abstract buildDatabase(db:string): Promise<boolean>;
     abstract existsDatabase(db:string): Promise<boolean>;
+    abstract createDatabase(db:string): Promise<void>;
     abstract uqDbs():Promise<any[]>;
     abstract initResDb(resDbName:string):Promise<void>;
 }

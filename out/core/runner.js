@@ -40,6 +40,11 @@ class Runner {
             return yield this.db.call('tv_' + proc, params);
         });
     }
+    buildDatabase() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.db.buildDatabase();
+        });
+    }
     createDatabase() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.createDatabase();
@@ -490,7 +495,7 @@ class Runner {
                 yield this.initInternal();
             }
             catch (err) {
-                this.schemas = {};
+                this.schemas = undefined;
                 console.error(err.message);
                 debugger;
             }

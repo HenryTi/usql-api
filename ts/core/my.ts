@@ -125,6 +125,43 @@ export class MyDbServer extends DbServer {
         result.pop();
         return result;
     }
+    async buildDatabase(db:string): Promise<boolean> {
+        let sql = 'CREATE DATABASE IF NOT EXISTS `'+db+'` default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
+        await this.exec(sql, undefined);
+        await this.build$Uq(db);
+        return;
+    }
+    private async build$Uq(db:string): Promise<void> {
+        let exists = 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'$uq\'';
+        let rows:any[] = await this.exec(exists, undefined);
+        if (rows.length > 0) return;
+        let sql = 'CREATE DATABASE IF NOT EXISTS $uq default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
+        await this.exec(sql, undefined);
+        await this.exec('USE $uq;', undefined);
+        let createUqDb = 'CREATE TABLE IF NOT EXISTS uq (id int not null auto_increment, `name` varchar(50), create_time timestamp not null default current_timestamp, primary key(`id`))';
+        await this.exec(createUqDb, undefined);
+        let insertUqDb = `insert into uq (\`name\`) values ('${db}') on duplicate key update create_time=current_timestamp();`;
+        await this.exec(insertUqDb, undefined);
+
+        let createLog = 'CREATE TABLE IF NOT EXISTS log (`time` timestamp(6) not null, uq int, unit int, subject varchar(100), content text, primary key(`time`))';
+        await this.exec(createLog, undefined);
+
+        let writeLog = `
+create procedure log(_unit int, _uq varchar(50), _subject varchar(100), _content text) begin
+declare _time timestamp(6);
+    set _time=current_timestamp(6);
+    _exit: loop
+        if not exists(select \`unit\` from \`log\` where \`time\`=_time) then
+            insert into \`log\` (\`time\`, unit, uq, subject, content) values (_time, _unit, (select id from uq where \`name\`=_uq), _subject, _content);
+            leave _exit;
+		else
+			set _time = ADDDATE(_time,interval 1 microsecond );
+		end if;
+	end loop;
+end;
+        `;
+        await this.exec(writeLog, undefined);
+    }
     async createDatabase(db:string): Promise<void> {
         let sql = 'CREATE DATABASE IF NOT EXISTS `'+db+'` default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
         await this.exec(sql, undefined);
@@ -135,7 +172,7 @@ export class MyDbServer extends DbServer {
         return rows.length > 0;
     }
     async uqDbs():Promise<any[]> {
-        let sql = `select a.schema_name as db from information_schema.schemata a join information_schema.tables b on a.schema_name=b.table_schema where b.table_name='tv_$entity';`;
+        let sql = `select uq as db from $uq.uq;`;
         let rows:any[] = await this.exec(sql, undefined);
         return rows;
     }

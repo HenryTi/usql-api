@@ -9,6 +9,7 @@ export class MsDbServer extends DbServer {
     callEx(db:string, proc:string, params:any[]): Promise<any> {return}
     tableFromProc(db:string, proc:string, params:any[]): Promise<any[]> {return}
     tablesFromProc(db:string, proc:string, params:any[]): Promise<any[][]> {return}
+    buildDatabase(db:string): Promise<boolean> {return}
     createDatabase(db:string): Promise<void> {return}
     existsDatabase(db:string): Promise<boolean> {return}
     uqDbs():Promise<any[]> {return}

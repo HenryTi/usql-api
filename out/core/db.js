@@ -90,6 +90,11 @@ class Db {
             return yield this.dbServer.createDatabase(this.dbName);
         });
     }
+    buildDatabase() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.dbServer.buildDatabase(this.dbName);
+        });
+    }
     uqDbs() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.dbServer.uqDbs();

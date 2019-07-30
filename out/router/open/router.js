@@ -78,7 +78,7 @@ function buildOpenRouter(router, rb) {
             return tuidRet;
         }
         if (type === 'map') {
-            let mapRet = yield runner.unitUserCall('tv_' + entity + '$query', unit, undefined, key.split('\t'));
+            let mapRet = yield runner.unitUserCall('tv_' + entity + '$query$', unit, undefined, key.split('\t'));
             return mapRet;
         }
     }));

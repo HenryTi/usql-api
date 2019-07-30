@@ -82,7 +82,7 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
             return tuidRet;
         }
         if (type === 'map') {
-            let mapRet = await runner.unitUserCall('tv_' + entity + '$query', unit, undefined, key.split('\t'));
+            let mapRet = await runner.unitUserCall('tv_' + entity + '$query$', unit, undefined, key.split('\t'));
             return mapRet;
         }
     });
