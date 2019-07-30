@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const config = require("config");
 const core_1 = require("../core");
 const syncTuids_1 = require("./syncTuids");
 let firstRun = core_1.isDevelopment === true ? 3000 : 30 * 1000;
@@ -67,6 +68,8 @@ class Jobs {
     static pause() { Jobs.paused = true; }
     static resume() { Jobs.paused = false; }
     static start() {
+        if (config.get("stopJobs") === true)
+            return;
         if (core_1.isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
             // return;

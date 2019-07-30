@@ -18,10 +18,9 @@ function syncTuids(runner, net) {
             return;
         try {
             let db = runner.getDb();
-            let uqs = [/*'order', */ 'salestask'];
+            let uqs = ['order', 'salestask'];
             if (uqs.indexOf(db) < 0)
                 return;
-            debugger;
             yield syncNew(runner, net);
             yield syncModify(runner, net);
             /*
@@ -130,7 +129,6 @@ function syncNew(runner, net) {
         for (;;) {
             let items = yield runner.tableFromProc('$from_new', []);
             if (items.length === 0) {
-                debugger;
                 break;
             }
             for (let item of items) {
@@ -166,6 +164,8 @@ function syncModify(runner, net) {
             return;
         let unitOpenApiItems = {};
         // 把访问同一个openApi的整理到一起
+        let promises = [];
+        let params = [];
         for (let item of items) {
             let { unit, entity, modifyMax } = item;
             if (!unit)
@@ -174,9 +174,17 @@ function syncModify(runner, net) {
             if (schema === undefined)
                 debugger;
             let { type, from } = schema;
-            let openApi = yield yield net.getOpenApi(from, unit);
+            let openApiPromise = net.getOpenApi(from, unit);
+            promises.push(openApiPromise);
+            params.push({ from: from, unit: unit, modifyMax: modifyMax, entity: entity });
+        }
+        let openApis = yield Promise.all(promises);
+        let len = openApis.length;
+        for (let i = 0; i < len; i++) {
+            let openApi = openApis[i];
             if (!openApi)
                 continue;
+            let { from, unit, modifyMax, entity } = params[i];
             let openApiItems = unitOpenApiItems[unit];
             if (openApiItems === undefined) {
                 unitOpenApiItems[unit] = openApiItems = [{
@@ -216,7 +224,7 @@ function syncModify(runner, net) {
                         yield syncEntity(runner, openApi, unit, entity, key);
                         yield runner.call('$sync_from_set', [unit, entity, id]);
                     }
-                    if (queue.length < page) {
+                    if (queue.length < page && modifyMax < queueMax) {
                         for (let item of queue) {
                             let { entity } = item;
                             yield runner.call('$sync_from_set', [unit, entity, queueMax]);

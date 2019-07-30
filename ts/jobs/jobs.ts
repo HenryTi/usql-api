@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import * as config from 'config';
 import { Net, SheetQueueData, Runner, Db, isDevelopment, centerApi, BusMessage, prodNet, testNet } from '../core';
 import { syncTuids } from './syncTuids';
 import { syncBus } from './syncBus';
@@ -18,6 +19,7 @@ export class Jobs {
     static resume() { Jobs.paused = false; }
 
     static start(): void {
+        if (config.get<boolean>("stopJobs") === true) return;
         if (isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
             // return;

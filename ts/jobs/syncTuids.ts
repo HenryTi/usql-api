@@ -16,7 +16,7 @@ export async function syncTuids(runner:Runner, net:Net):Promise<void> {
     if (froms === undefined) return;
     try {
         let db = runner.getDb();
-        let uqs = [/*'order', */'salestask'];
+        let uqs = ['order', 'salestask'];
         if (uqs.indexOf(db) < 0) return;
         await syncNew(runner, net);
         await syncModify(runner, net);
@@ -162,14 +162,24 @@ async function syncModify(runner:Runner, net:Net) {
     if (items.length === 0) return;
     let unitOpenApiItems:UnitOpenApiItems = {};
     // 把访问同一个openApi的整理到一起
+    let promises:Promise<OpenApi>[] = [];
+    let params:{from:any, unit:any, modifyMax:number, entity:string}[] = [];
     for (let item of items) {
         let {unit, entity, modifyMax} = item;
         if (!unit) unit = runner.uniqueUnit;
         let schema = runner.getSchema(entity);
         if (schema === undefined) debugger;
         let {type, from} = schema;
-        let openApi = await await net.getOpenApi(from, unit);
+        let openApiPromise = net.getOpenApi(from, unit);
+        promises.push(openApiPromise);
+        params.push({from:from, unit:unit, modifyMax:modifyMax, entity:entity});
+    }
+    let openApis = await Promise.all(promises);
+    let len = openApis.length;
+    for (let i=0; i<len; i++) {
+        let openApi = openApis[i];
         if (!openApi) continue;
+        let {from, unit, modifyMax, entity} = params[i];
         let openApiItems = unitOpenApiItems[unit];
         if (openApiItems === undefined) {
             unitOpenApiItems[unit] = openApiItems = [{
@@ -210,7 +220,7 @@ async function syncModify(runner:Runner, net:Net) {
                     await syncEntity(runner, openApi, unit, entity, key);
                     await runner.call('$sync_from_set', [unit, entity, id]);
                 }
-                if (queue.length < page) {
+                if (queue.length < page && modifyMax<queueMax) {
                     for (let item of queue) {
                         let {entity} = item;
                         await runner.call('$sync_from_set', [unit, entity, queueMax]);

@@ -18,6 +18,7 @@ const unitxApi_1 = require("./unitxApi");
 class Net {
     constructor() {
         this.runners = {};
+        this.openApiColl = {};
         this.uqOpenApis = {};
         this.unitxApis = {};
     }
@@ -103,7 +104,14 @@ class Net {
             if (uqUrl === undefined)
                 return openApis[unit] = null;
             let url = yield this.getUqUrl(uqUrl);
-            return openApis[unit] = new openApi_1.OpenApi(url);
+            url = url.toLowerCase();
+            let openApi = this.openApiColl[url];
+            if (openApi === undefined) {
+                openApi = new openApi_1.OpenApi(url);
+                this.openApiColl[url] = openApi;
+            }
+            openApis[unit] = openApi;
+            return openApi;
         });
     }
     getUnitxApi(unit) {

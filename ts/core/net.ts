@@ -69,6 +69,7 @@ export abstract class Net {
     abstract getDbName(name:string):string;
     protected abstract getUnitxDb(): Db;
 
+    private openApiColl: {[url:string]: OpenApi} = {};
     private uqOpenApis: {[uqFullName:string]: {[unit:number]:OpenApi}} = {};
     async getOpenApi(uqFullName:string, unit:number):Promise<OpenApi> {
         let openApis = this.uqOpenApis[uqFullName];
@@ -80,11 +81,18 @@ export abstract class Net {
         }
         else {
             this.uqOpenApis[uqFullName] = openApis = {};
-        }        
+        }
         let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
         if (uqUrl === undefined) return openApis[unit] = null;
         let url = await this.getUqUrl(uqUrl);
-        return openApis[unit] = new OpenApi(url);
+        url = url.toLowerCase();
+        let openApi = this.openApiColl[url];
+        if (openApi === undefined) {
+            openApi = new OpenApi(url);
+            this.openApiColl[url] = openApi;
+        }
+        openApis[unit] = openApi;
+        return openApi;
     }
 
     private unitxApis: {[unit:number]:UnitxApi} = {};
