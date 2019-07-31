@@ -20,6 +20,7 @@ var Finish;
     Finish[Finish["retry"] = 2] = "retry";
     Finish[Finish["fail"] = 3] = "fail";
 })(Finish || (Finish = {}));
+const stopJobs = "stopJobs";
 class Jobs {
     constructor() {
         this.run = () => __awaiter(this, void 0, void 0, function* () {
@@ -67,7 +68,7 @@ class Jobs {
     static pause() { Jobs.paused = true; }
     static resume() { Jobs.paused = false; }
     static start() {
-        if (config.get("stopJobs") === true)
+        if (config.has(stopJobs) === true && config.get(stopJobs) === true)
             return;
         if (core_1.isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs

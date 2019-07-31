@@ -13,13 +13,15 @@ enum Finish {
     fail = 3,
 }
 
+const stopJobs = "stopJobs";
+
 export class Jobs {
     private static paused: boolean = false;
     static pause() { Jobs.paused = true; }
     static resume() { Jobs.paused = false; }
 
     static start(): void {
-        if (config.get<boolean>("stopJobs") === true) return;
+        if (config.has(stopJobs) === true && config.get<boolean>(stopJobs) === true) return;
         if (isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
             // return;
