@@ -63,8 +63,8 @@ class Runner {
     unitCall(proc, unit, ...params) {
         return __awaiter(this, void 0, void 0, function* () {
             let p = [];
-            if (this.hasUnit === true)
-                p.push(unit);
+            //if (this.hasUnit === true) 
+            p.push(unit);
             if (params !== undefined)
                 p.push(...params);
             return yield this.db.call(proc, p);
@@ -73,8 +73,8 @@ class Runner {
     unitUserCall(proc, unit, user, ...params) {
         return __awaiter(this, void 0, void 0, function* () {
             let p = [];
-            if (this.hasUnit === true)
-                p.push(unit);
+            //if (this.hasUnit === true) 
+            p.push(unit);
             p.push(user);
             if (params !== undefined)
                 p.push(...params);
@@ -84,8 +84,8 @@ class Runner {
     unitCallEx(proc, unit, ...params) {
         return __awaiter(this, void 0, void 0, function* () {
             let p = [];
-            if (this.hasUnit === true)
-                p.push(unit);
+            //if (this.hasUnit === true) 
+            p.push(unit);
             if (params !== undefined)
                 p.push(...params);
             return yield this.db.callEx(proc, p);
@@ -94,8 +94,8 @@ class Runner {
     unitUserCallEx(proc, unit, user, ...params) {
         return __awaiter(this, void 0, void 0, function* () {
             let p = [];
-            if (this.hasUnit === true)
-                p.push(unit);
+            //if (this.hasUnit === true) 
+            p.push(unit);
             p.push(user);
             if (params !== undefined)
                 p.push(...params);
@@ -105,8 +105,8 @@ class Runner {
     unitTableFromProc(proc, unit, ...params) {
         return __awaiter(this, void 0, void 0, function* () {
             let p = [];
-            if (this.hasUnit === true)
-                p.push(unit);
+            //if (this.hasUnit === true) 
+            p.push(unit);
             if (params !== undefined)
                 p.push(...params);
             let ret = yield this.db.tableFromProc(proc, p);
@@ -116,8 +116,8 @@ class Runner {
     unitUserTableFromProc(proc, unit, user, ...params) {
         return __awaiter(this, void 0, void 0, function* () {
             let p = [];
-            if (this.hasUnit === true)
-                p.push(unit);
+            //if (this.hasUnit === true) 
+            p.push(unit);
             p.push(user);
             if (params !== undefined)
                 p.push(...params);
@@ -128,8 +128,8 @@ class Runner {
     unitTablesFromProc(proc, unit, ...params) {
         return __awaiter(this, void 0, void 0, function* () {
             let p = [];
-            if (this.hasUnit === true)
-                p.push(unit);
+            //if (this.hasUnit === true) 
+            p.push(unit);
             if (params !== undefined)
                 p.push(...params);
             let ret = yield this.db.tablesFromProc(proc, p);
@@ -139,8 +139,8 @@ class Runner {
     unitUserTablesFromProc(proc, unit, user, ...params) {
         return __awaiter(this, void 0, void 0, function* () {
             let p = [];
-            if (this.hasUnit === true)
-                p.push(unit);
+            //if (this.hasUnit === true) 
+            p.push(unit);
             p.push(user);
             if (params !== undefined)
                 p.push(...params);

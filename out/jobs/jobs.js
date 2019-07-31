@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const config = require("config");
 const core_1 = require("../core");
 const syncTuids_1 = require("./syncTuids");
+const syncBus_1 = require("./syncBus");
 let firstRun = core_1.isDevelopment === true ? 3000 : 30 * 1000;
 let runGap = core_1.isDevelopment === true ? 15 * 1000 : 30 * 1000;
 var Finish;
@@ -42,18 +43,16 @@ class Jobs {
                     let runner = yield net.getRunner(dbName);
                     if (runner === undefined)
                         continue;
-                    /*
-                    let {buses} = runner;
+                    let { buses } = runner;
                     if (buses !== undefined) {
-                        let {outCount, faces} = buses;
+                        let { outCount, faces } = buses;
                         if (outCount > 0) {
-                            await this.processQueue(runner, net);
+                            yield this.processQueue(runner, net);
                         }
                         if (faces !== undefined) {
-                            await syncBus(runner, net);
+                            yield syncBus_1.syncBus(runner, net);
                         }
                     }
-                    */
                     yield syncTuids_1.syncTuids(runner, net);
                 }
             }

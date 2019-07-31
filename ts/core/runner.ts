@@ -86,13 +86,15 @@ export class Runner {
     }
     async unitCall(proc:string, unit:number, ...params:any[]): Promise<any> {
         let p:any[] = [];
-        if (this.hasUnit === true) p.push(unit);
+        //if (this.hasUnit === true) 
+        p.push(unit);
         if (params !== undefined) p.push(...params);
         return await this.db.call(proc, p);
     }
     async unitUserCall(proc:string, unit:number, user:number, ...params:any[]): Promise<any> {
         let p:any[] = [];
-        if (this.hasUnit === true) p.push(unit);
+        //if (this.hasUnit === true) 
+        p.push(unit);
         p.push(user);
         if (params !== undefined) p.push(...params);
         return await this.db.call(proc, p);
@@ -100,13 +102,15 @@ export class Runner {
 
     private async unitCallEx(proc:string, unit:number, ...params:any[]): Promise<any> {
         let p:any[] = [];
-        if (this.hasUnit === true) p.push(unit);
+        //if (this.hasUnit === true) 
+        p.push(unit);
         if (params !== undefined) p.push(...params);
         return await this.db.callEx(proc, p);
     }
     private async unitUserCallEx(proc:string, unit:number, user:number, ...params:any[]): Promise<any> {
         let p:any[] = [];
-        if (this.hasUnit === true) p.push(unit);
+        //if (this.hasUnit === true) 
+        p.push(unit);
         p.push(user);
         if (params !== undefined) p.push(...params);
         return await this.db.callEx(proc, p);
@@ -114,14 +118,16 @@ export class Runner {
 
     async unitTableFromProc(proc:string, unit:number, ...params:any[]):Promise<any[]> {
         let p:any[] = [];
-        if (this.hasUnit === true) p.push(unit);
+        //if (this.hasUnit === true) 
+        p.push(unit);
         if (params !== undefined) p.push(...params);
         let ret = await this.db.tableFromProc(proc, p);
         return ret;
     }
     async unitUserTableFromProc(proc:string, unit:number, user:number, ...params:any[]):Promise<any[]> {
         let p:any[] = [];
-        if (this.hasUnit === true) p.push(unit);
+        //if (this.hasUnit === true) 
+        p.push(unit);
         p.push(user);
         if (params !== undefined) p.push(...params);
         let ret = await this.db.tableFromProc(proc, p);
@@ -130,14 +136,16 @@ export class Runner {
 
     async unitTablesFromProc(proc:string, unit:number, ...params:any[]):Promise<any[][]> {
         let p:any[] = [];
-        if (this.hasUnit === true) p.push(unit);
+        //if (this.hasUnit === true) 
+        p.push(unit);
         if (params !== undefined) p.push(...params);
         let ret = await this.db.tablesFromProc(proc, p);
         return ret;
     }
     async unitUserTablesFromProc(proc:string, unit:number, user:number, ...params:any[]):Promise<any[][]> {
         let p:any[] = [];
-        if (this.hasUnit === true) p.push(unit);
+        //if (this.hasUnit === true) 
+        p.push(unit);
         p.push(user);
         if (params !== undefined) p.push(...params);
         let ret = await this.db.tablesFromProc(proc, p);

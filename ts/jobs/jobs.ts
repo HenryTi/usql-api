@@ -48,7 +48,6 @@ export class Jobs {
                 }
                 let runner = await net.getRunner(dbName);
                 if (runner === undefined) continue;
-                /*
                 let {buses} = runner;
                 if (buses !== undefined) {
                     let {outCount, faces} = buses;
@@ -59,7 +58,6 @@ export class Jobs {
                         await syncBus(runner, net);
                     }
                 }
-                */
                 await syncTuids(runner, net);
             }
         }
