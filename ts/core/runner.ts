@@ -204,8 +204,8 @@ export class Runner {
     async loadSchemaVersion(name:string, version:string): Promise<string> {
         return await this.db.call('tv_$entity_version', [name, version]);
     } 
-    async setEntityValid(entities:string):Promise<any[]> {
-        let ret = await this.db.call('tv_$entity_validate', [entities]);
+    async setEntityValid(entities:string, valid:number):Promise<any[]> {
+        let ret = await this.db.call('tv_$entity_validate', [entities, valid]);
         return ret;
     }
     async saveFace(bus:string, busOwner:string, busName:string, faceName:string) {

@@ -95,8 +95,9 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
     });
 
     rb.post(router, '/entity-validate',
-    async (runner:Runner, body: {entities:string}):Promise<any[]> => {
-        return await runner.setEntityValid(body.entities);
+    async (runner:Runner, body: {entities:string, valid:number}):Promise<any[]> => {
+        let {entities, valid} = body;
+        return await runner.setEntityValid(entities, valid);
     });
 
     /*

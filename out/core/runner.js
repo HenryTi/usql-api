@@ -222,9 +222,9 @@ class Runner {
             return yield this.db.call('tv_$entity_version', [name, version]);
         });
     }
-    setEntityValid(entities) {
+    setEntityValid(entities, valid) {
         return __awaiter(this, void 0, void 0, function* () {
-            let ret = yield this.db.call('tv_$entity_validate', [entities]);
+            let ret = yield this.db.call('tv_$entity_validate', [entities, valid]);
             return ret;
         });
     }

@@ -77,7 +77,8 @@ function buildBuildRouter(router, rb) {
         return yield runner.loadSchemaVersion(name, version);
     }));
     rb.post(router, '/entity-validate', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        return yield runner.setEntityValid(body.entities);
+        let { entities, valid } = body;
+        return yield runner.setEntityValid(entities, valid);
     }));
     /*
     rb.post(router, '/save-face',
