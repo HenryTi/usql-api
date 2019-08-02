@@ -55,18 +55,21 @@ function buildOpenRouter(router, rb) {
     rb.post(router, '/entities/:unit', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         return yield runner.getEntities(params.unit);
     }));
-    rb.post(router, '/fresh', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        let { unit, stamps } = body;
+    /*
+    rb.post(router, '/fresh',
+    async (runner:Runner, body:any):Promise<any> => {
+        let {unit, stamps} = body;
         // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
-        let stampsText = stamps.map((v) => v.join('\t')).join('\n');
+        let stampsText = stamps.map((v:string[]) => v.join('\t')).join('\n');
         try {
-            let ret = yield runner.$$openFresh(unit, stampsText);
+            let ret = await runner.$$openFresh(unit, stampsText);
             return ret;
         }
         catch (err) {
             console.log(err.message);
         }
-    }));
+    });
+    */
     rb.post(router, '/from-entity', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         //body.$ = 'open/tuid';
         console.log(body);

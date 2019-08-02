@@ -18,6 +18,7 @@ const core_1 = require("./core");
 //import { /*buildUnitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
 const auth_1 = require("./core/auth");
 const jobs_1 = require("./jobs");
+const _uq_1 = require("./$uq");
 //import { importData } from './import';
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -95,6 +96,7 @@ function start() {
         //startUnitxInQueue(redis);
         app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
             yield res_1.initResDb();
+            yield _uq_1.init$UqDb();
             console.log('UQ-API listening on port ' + port);
             let connection = config.get("connection");
             let { host, user } = connection;

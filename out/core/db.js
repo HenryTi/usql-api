@@ -105,6 +105,11 @@ class Db {
             yield this.dbServer.initResDb(resDbName);
         });
     }
+    init$UqDb() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.dbServer.init$UqDb();
+        });
+    }
 }
 exports.Db = Db;
 class UnitxDb extends Db {

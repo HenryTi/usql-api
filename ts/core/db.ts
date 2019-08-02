@@ -76,6 +76,9 @@ export class Db {
     async initResDb(resDbName:string):Promise<void> {
         await this.dbServer.initResDb(resDbName);
     }
+    async init$UqDb():Promise<void> {
+        await this.dbServer.init$UqDb();
+    }
 }
 
 class UnitxDb extends Db {

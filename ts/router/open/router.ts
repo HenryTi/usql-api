@@ -56,6 +56,7 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
         return await runner.getEntities(params.unit);
     });
 
+    /*
     rb.post(router, '/fresh',
     async (runner:Runner, body:any):Promise<any> => {
         let {unit, stamps} = body;
@@ -69,6 +70,7 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
             console.log(err.message);
         }
     });
+    */
 
     rb.post(router, '/from-entity',
     async (runner:Runner, body:any):Promise<any> => {

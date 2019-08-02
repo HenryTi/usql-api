@@ -8,24 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const dbServer_1 = require("./dbServer");
-class MsDbServer extends dbServer_1.DbServer {
-    constructor(dbConfig) {
-        super();
-    }
-    sql(db, sql, params) { return; }
-    call(db, proc, params) {
-        return __awaiter(this, void 0, void 0, function* () { return; });
-    }
-    callEx(db, proc, params) { return; }
-    tableFromProc(db, proc, params) { return; }
-    tablesFromProc(db, proc, params) { return; }
-    buildDatabase(db) { return; }
-    createDatabase(db) { return; }
-    existsDatabase(db) { return; }
-    uqDbs() { return; }
-    initResDb(resDbName) { return; }
-    init$UqDb() { return; }
+const core_1 = require("../core");
+function init$UqDb() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let db = new core_1.Db('$uq');
+        let runner = new core_1.Runner(db);
+        yield runner.init$UqDb();
+    });
 }
-exports.MsDbServer = MsDbServer;
-//# sourceMappingURL=ms.js.map
+exports.init$UqDb = init$UqDb;
+//# sourceMappingURL=$uqDb.js.map

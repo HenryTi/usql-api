@@ -9,4 +9,5 @@ export abstract class DbServer {
     abstract createDatabase(db:string): Promise<void>;
     abstract uqDbs():Promise<any[]>;
     abstract initResDb(resDbName:string):Promise<void>;
+    abstract init$UqDb():Promise<void>;
 }

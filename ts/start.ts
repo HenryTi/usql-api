@@ -8,6 +8,7 @@ import {Auth, authCheck, authDebug, authUnitx, RouterBuilder, uqProdRouterBuilde
 //import { /*buildUnitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
 import { authJoint, authUpBuild } from './core/auth';
 import { Jobs } from './jobs';
+import { init$UqDb } from './$uq';
 //import { importData } from './import';
 
 export async function start() {
@@ -93,6 +94,7 @@ export async function start() {
 
     app.listen(port, async ()=>{
         await initResDb();
+        await init$UqDb();
         console.log('UQ-API listening on port ' + port);
         let connection = config.get<any>("connection");
         let {host, user} = connection;

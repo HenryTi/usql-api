@@ -148,16 +148,15 @@ class Runner {
             return ret;
         });
     }
-    $$openFresh(unit, stampsText) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.unitCall('tv_$$open_fresh', unit, stampsText);
-        });
+    /*
+    async $$openFresh(unit:number, stampsText:string) {
+        return await this.unitCall('tv_$$open_fresh', unit, stampsText);
     }
-    setTimezone(unit, user) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.unitUserCall('tv_$set_timezone', unit, user);
-        });
+
+    async setTimezone(unit:number, user:number): Promise<void> {
+        return await this.unitUserCall('tv_$set_timezone', unit, user);
     }
+    */
     start(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.unitUserCall('tv_$start', unit, user);
@@ -166,6 +165,11 @@ class Runner {
     initResDb(resDbName) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.db.initResDb(resDbName);
+        });
+    }
+    init$UqDb() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.init$UqDb();
         });
     }
     initSetting() {

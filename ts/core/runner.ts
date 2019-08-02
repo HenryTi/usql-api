@@ -152,6 +152,7 @@ export class Runner {
         return ret;
     }
 
+    /*
     async $$openFresh(unit:number, stampsText:string) {
         return await this.unitCall('tv_$$open_fresh', unit, stampsText);
     }
@@ -159,11 +160,16 @@ export class Runner {
     async setTimezone(unit:number, user:number): Promise<void> {
         return await this.unitUserCall('tv_$set_timezone', unit, user);
     }
+    */
+
     async start(unit:number, user:number): Promise<void> {
         return await this.unitUserCall('tv_$start', unit, user);
     }
     async initResDb(resDbName:string): Promise<void> {
         await this.db.initResDb(resDbName);
+    }
+    async init$UqDb(): Promise<void> {
+        await this.db.init$UqDb();
     }
     async initSetting():Promise<void> {
         await this.db.call('tv_$init_setting', []);
