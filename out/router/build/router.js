@@ -10,8 +10,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../../core");
 function buildBuildRouter(router, rb) {
-    rb.post(router, '/start', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        let { enc } = body;
+    /*
+    rb.post(router, '/start',
+    async (runner:Runner, body:{enc:string}):Promise<void> => {
+        let {enc} = body;
+        setUqBuildSecret(enc);
+    });
+    */
+    router.post('/start', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        let { enc } = req.body;
         core_1.setUqBuildSecret(enc);
     }));
     rb.post(router, '/finish', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {

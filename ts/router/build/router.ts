@@ -1,10 +1,16 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { Runner, RouterBuilder, setUqBuildSecret } from '../../core';
 
 export function buildBuildRouter(router:Router, rb: RouterBuilder) {
+    /*
     rb.post(router, '/start',
     async (runner:Runner, body:{enc:string}):Promise<void> => {
         let {enc} = body;
+        setUqBuildSecret(enc);
+    });
+    */
+    router.post('/start', async (req:Request, res:Response) => {
+        let {enc} = req.body;
         setUqBuildSecret(enc);
     });
 
