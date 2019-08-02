@@ -20,6 +20,10 @@ function buildBuildRouter(router, rb) {
     router.post('/start', (req, res) => __awaiter(this, void 0, void 0, function* () {
         let { enc } = req.body;
         core_1.setUqBuildSecret(enc);
+        res.json({
+            ok: true,
+            res: undefined
+        });
     }));
     rb.post(router, '/finish', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         let { uqId } = runner;

@@ -12,7 +12,11 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
     router.post('/start', async (req:Request, res:Response) => {
         let {enc} = req.body;
         setUqBuildSecret(enc);
-    });
+        res.json({
+            ok: true,
+            res: undefined
+        });
+});
 
     rb.post(router, '/finish',
     async (runner:Runner, body:any, params:any):Promise<any> => {
