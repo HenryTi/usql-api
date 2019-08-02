@@ -25,6 +25,16 @@ function buildBuildRouter(router, rb) {
             res: undefined
         });
     }));
+    router.post('/build-database', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        let dbName = req.params.db;
+        let db = new core_1.Db(dbName);
+        let runner = new core_1.Runner(db);
+        yield runner.buildDatabase();
+        res.json({
+            ok: true,
+            res: undefined
+        });
+    }));
     rb.post(router, '/finish', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         let { uqId } = runner;
         let { uqId: paramUqId } = body;
@@ -33,7 +43,7 @@ function buildBuildRouter(router, rb) {
             uqId = paramUqId;
         }
         yield runner.initSetting();
-        if (uqId !== Number(paramUqId)) {
+        if (String(uqId) !== String(paramUqId)) {
             debugger;
             throw 'error uqId';
         }
@@ -43,9 +53,6 @@ function buildBuildRouter(router, rb) {
         //return this.db.sql(sql, params);
         let { sql, params } = body;
         return yield runner.sql(sql, params);
-    }));
-    rb.post(router, '/build-database', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        yield runner.buildDatabase();
     }));
     rb.post(router, '/create-database', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         yield runner.createDatabase();

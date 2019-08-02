@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { Runner } from './runner';
 import { consts } from "./consts";
-import { prodNet, testNet, Net } from './net';
+import { prodNet, testNet, Net, prodCompileNet, testCompileNet } from './net';
 //import { checkRunner, User, unknownEntity, validEntity } from "../router/router";
 
 type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
@@ -171,6 +171,9 @@ export class RouterBuilder {
     
 }
 
+export class CompileRouterBuilder extends RouterBuilder {
+}
+
 class UnitxRouterBuilder extends RouterBuilder {
     protected async routerRunner(req:Request):Promise<Runner> {
         let runner = await this.net.getUnitxRunner();
@@ -183,3 +186,7 @@ export const uqProdRouterBuilder = new RouterBuilder(prodNet);
 export const uqTestRouterBuilder = new RouterBuilder(testNet);
 export const unitxProdRouterBuilder = new UnitxRouterBuilder(prodNet);
 export const unitxTestRouterBuilder = new UnitxRouterBuilder(testNet);
+
+
+export const compileProdRouterBuilder = new CompileRouterBuilder(prodCompileNet);
+export const compileTestRouterBuilder = new CompileRouterBuilder(testCompileNet);

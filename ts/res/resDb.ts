@@ -3,7 +3,7 @@ import { Runner, Db } from "../core";
 const resDbName = '$res';
 
 export async function initResDb() {
-    let db = new Db(resDbName);        
+    let db = new Db(resDbName);
     let runner = new Runner(db);
     await runner.initResDb(resDbName);
 }

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { Runner, RouterBuilder, setUqBuildSecret } from '../../core';
+import { Runner, RouterBuilder, setUqBuildSecret, Db } from '../../core';
 
 export function buildBuildRouter(router:Router, rb: RouterBuilder) {
     /*
@@ -16,7 +16,18 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
             ok: true,
             res: undefined
         });
-});
+    });
+
+    router.post('/build-database', async (req:Request, res:Response) => {
+        let dbName:string = req.params.db;
+        let db = new Db(dbName);
+        let runner = new Runner(db);
+        await runner.buildDatabase();
+        res.json({
+            ok: true,
+            res: undefined
+        });
+    });
 
     rb.post(router, '/finish',
     async (runner:Runner, body:any, params:any):Promise<any> => {
@@ -28,7 +39,7 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
         }
         await runner.initSetting();
 
-        if (uqId !== Number(paramUqId)) {
+        if (String(uqId) !== String(paramUqId)) {
             debugger;
             throw 'error uqId';
         }
@@ -40,11 +51,6 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
         //return this.db.sql(sql, params);
         let {sql, params} = body;
         return await runner.sql(sql, params);
-    });
-
-    rb.post(router, '/build-database',
-    async (runner:Runner, body:any): Promise<void> => {
-        await runner.buildDatabase();
     });
 
     rb.post(router, '/create-database',

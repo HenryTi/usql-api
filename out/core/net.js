@@ -22,7 +22,7 @@ class Net {
         this.uqOpenApis = {};
         this.unitxApis = {};
     }
-    getRunner(name) {
+    innerRunner(name) {
         return __awaiter(this, void 0, void 0, function* () {
             name = name.toLowerCase();
             let runner = this.runners[name];
@@ -44,6 +44,12 @@ class Net {
                 this.runners[name] = runner;
                 */
             }
+            return runner;
+        });
+    }
+    getRunner(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let runner = yield this.innerRunner(name);
             yield runner.init();
             return runner;
         });
@@ -202,6 +208,24 @@ class TestNet extends Net {
     unitxUrl(url) { return url + 'uq/unitx-test/'; }
     ;
 }
+class ProdCompileNet extends ProdNet {
+    getRunner(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let runner = yield this.innerRunner(name);
+            return runner;
+        });
+    }
+}
+class TestCompileNet extends TestNet {
+    getRunner(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let runner = yield this.innerRunner(name);
+            return runner;
+        });
+    }
+}
 exports.prodNet = new ProdNet;
 exports.testNet = new TestNet;
+exports.prodCompileNet = new ProdCompileNet;
+exports.testCompileNet = new TestCompileNet;
 //# sourceMappingURL=net.js.map

@@ -24,7 +24,7 @@ export class Jobs {
         if (config.has(stopJobs) === true && config.get<boolean>(stopJobs) === true) return;
         if (isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
-            // return;
+            return;
         }
         setTimeout(async ()=>{
             let jobs = new Jobs;

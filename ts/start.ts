@@ -4,7 +4,7 @@ import * as bodyParser from 'body-parser';
 import * as config from 'config';
 import {buildSettingRouter, buildOpenRouter, buildEntityRouter, buildUnitxRouter, buildBuildRouter} from './router';
 import {initResDb, router as resRouter, initResPath} from './res';
-import {Auth, authCheck, authDebug, authUnitx, RouterBuilder, uqProdRouterBuilder, uqTestRouterBuilder, unitxTestRouterBuilder, unitxProdRouterBuilder} from './core';
+import {Auth, authCheck, authDebug, authUnitx, RouterBuilder, uqProdRouterBuilder, uqTestRouterBuilder, unitxTestRouterBuilder, unitxProdRouterBuilder, compileProdRouterBuilder, compileTestRouterBuilder, CompileRouterBuilder} from './core';
 //import { /*buildUnitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
 import { authJoint, authUpBuild } from './core/auth';
 import { Jobs } from './jobs';
@@ -76,8 +76,8 @@ export async function start() {
     // debug tonva uq, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
     uqRouter.use('/debug', [authCheck, router]);
     */
-    app.use('/uq/prod/:db/', buildUqRouter(uqProdRouterBuilder));
-    app.use('/uq/test/:db/', buildUqRouter(uqTestRouterBuilder));
+    app.use('/uq/prod/:db/', buildUqRouter(uqProdRouterBuilder, compileProdRouterBuilder));
+    app.use('/uq/test/:db/', buildUqRouter(uqTestRouterBuilder, compileTestRouterBuilder));
     app.use('/uq/unitx-prod/', buildUnitxRouter(unitxProdRouterBuilder));
     app.use('/uq/unitx-test/', buildUnitxRouter(unitxTestRouterBuilder));
 
@@ -113,7 +113,7 @@ function dbHello(req:Request, res:Response) {
     res.json({"hello": 'uq-api: hello, db is ' + db});
 }
 
-function buildUqRouter(rb: RouterBuilder): Router {
+function buildUqRouter(rb: RouterBuilder, rbCompile: CompileRouterBuilder): Router {
     // 正常的tonva uq接口 uqRouter
     let uqRouter = Router({ mergeParams: true });
 
@@ -122,7 +122,7 @@ function buildUqRouter(rb: RouterBuilder): Router {
     uqRouter.use('/open', [authUnitx, openRouter]);
 
     let buildRouter = Router({ mergeParams: true });
-    buildBuildRouter(buildRouter, rb);
+    buildBuildRouter(buildRouter, rbCompile);
     uqRouter.use('/build', [authUpBuild, buildRouter]);
 
     // 这个是不是也要放到只有unitx里面

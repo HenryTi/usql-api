@@ -167,6 +167,9 @@ class RouterBuilder {
     }
 }
 exports.RouterBuilder = RouterBuilder;
+class CompileRouterBuilder extends RouterBuilder {
+}
+exports.CompileRouterBuilder = CompileRouterBuilder;
 class UnitxRouterBuilder extends RouterBuilder {
     routerRunner(req) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -181,4 +184,6 @@ exports.uqProdRouterBuilder = new RouterBuilder(net_1.prodNet);
 exports.uqTestRouterBuilder = new RouterBuilder(net_1.testNet);
 exports.unitxProdRouterBuilder = new UnitxRouterBuilder(net_1.prodNet);
 exports.unitxTestRouterBuilder = new UnitxRouterBuilder(net_1.testNet);
+exports.compileProdRouterBuilder = new CompileRouterBuilder(net_1.prodCompileNet);
+exports.compileTestRouterBuilder = new CompileRouterBuilder(net_1.testCompileNet);
 //# sourceMappingURL=routerBuilder.js.map

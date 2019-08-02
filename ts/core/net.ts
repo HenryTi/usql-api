@@ -10,7 +10,7 @@ import { UnitxApi } from "./unitxApi";
 export abstract class Net {
     private runners: {[name:string]: Runner} = {};
 
-    async getRunner(name:string):Promise<Runner> {
+    protected async innerRunner(name:string):Promise<Runner> {
         name = name.toLowerCase();
         let runner = this.runners[name];
         if (runner === null) return;
@@ -29,6 +29,11 @@ export abstract class Net {
             this.runners[name] = runner;
             */
         }
+        return runner;
+    }
+
+    async getRunner(name:string):Promise<Runner> {
+        let runner = await this.innerRunner(name);
         await runner.init();
         return runner;
     }
@@ -55,7 +60,7 @@ export abstract class Net {
         return runner;
     }
 
-    private async createRunnerFromDb(name:string, db:Db):Promise<Runner> {
+    protected async createRunnerFromDb(name:string, db:Db):Promise<Runner> {
         let isExists = await db.exists();
         if (isExists === false) {
             this.runners[name] = null;
@@ -174,5 +179,21 @@ class TestNet extends Net {
     protected unitxUrl(url:string):string {return url + 'uq/unitx-test/'};
 }
 
+class ProdCompileNet extends ProdNet {
+    async getRunner(name:string):Promise<Runner> {
+        let runner = await this.innerRunner(name);
+        return runner;
+    }
+}
+
+class TestCompileNet extends TestNet {
+    async getRunner(name:string):Promise<Runner> {
+        let runner = await this.innerRunner(name);
+        return runner;
+    }
+}
+
 export const prodNet = new ProdNet;
 export const testNet = new TestNet;
+export const prodCompileNet = new ProdCompileNet;
+export const testCompileNet = new TestCompileNet;

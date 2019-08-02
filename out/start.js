@@ -82,8 +82,8 @@ function start() {
         // debug tonva uq, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
         uqRouter.use('/debug', [authCheck, router]);
         */
-        app.use('/uq/prod/:db/', buildUqRouter(core_1.uqProdRouterBuilder));
-        app.use('/uq/test/:db/', buildUqRouter(core_1.uqTestRouterBuilder));
+        app.use('/uq/prod/:db/', buildUqRouter(core_1.uqProdRouterBuilder, core_1.compileProdRouterBuilder));
+        app.use('/uq/test/:db/', buildUqRouter(core_1.uqTestRouterBuilder, core_1.compileTestRouterBuilder));
         app.use('/uq/unitx-prod/', router_1.buildUnitxRouter(core_1.unitxProdRouterBuilder));
         app.use('/uq/unitx-test/', router_1.buildUnitxRouter(core_1.unitxTestRouterBuilder));
         let port = config.get('port');
@@ -111,14 +111,14 @@ function dbHello(req, res) {
     let db = req.params.db;
     res.json({ "hello": 'uq-api: hello, db is ' + db });
 }
-function buildUqRouter(rb) {
+function buildUqRouter(rb, rbCompile) {
     // 正常的tonva uq接口 uqRouter
     let uqRouter = express_1.Router({ mergeParams: true });
     let openRouter = express_1.Router({ mergeParams: true });
     router_1.buildOpenRouter(openRouter, rb);
     uqRouter.use('/open', [core_1.authUnitx, openRouter]);
     let buildRouter = express_1.Router({ mergeParams: true });
-    router_1.buildBuildRouter(buildRouter, rb);
+    router_1.buildBuildRouter(buildRouter, rbCompile);
     uqRouter.use('/build', [auth_1.authUpBuild, buildRouter]);
     // 这个是不是也要放到只有unitx里面
     let settingRouter = express_1.Router({ mergeParams: true });
