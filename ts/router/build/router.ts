@@ -2,13 +2,16 @@ import { Router, Request, Response } from 'express';
 import { Runner, RouterBuilder, setUqBuildSecret, Db } from '../../core';
 
 export function buildBuildRouter(router:Router, rb: RouterBuilder) {
-    /*
     rb.post(router, '/start',
     async (runner:Runner, body:{enc:string}):Promise<void> => {
         let {enc} = body;
         setUqBuildSecret(enc);
     });
-    */
+    rb.post(router, '/build-database',
+    async (runner:Runner, body:any):Promise<void> => {
+        await runner.buildDatabase();
+    });
+    /*
     router.post('/start', async (req:Request, res:Response) => {
         let {enc} = req.body;
         setUqBuildSecret(enc);
@@ -17,7 +20,6 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
             res: undefined
         });
     });
-
     router.post('/build-database', async (req:Request, res:Response) => {
         let dbName:string = req.params.db;
         let db = new Db(dbName);
@@ -28,6 +30,7 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
             res: undefined
         });
     });
+    */
 
     rb.post(router, '/finish',
     async (runner:Runner, body:any, params:any):Promise<any> => {

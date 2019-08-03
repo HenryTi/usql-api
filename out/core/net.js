@@ -16,11 +16,12 @@ const setHostUrl_1 = require("./setHostUrl");
 const centerApi_1 = require("./centerApi");
 const unitxApi_1 = require("./unitxApi");
 class Net {
-    constructor() {
+    constructor(initRunner) {
         this.runners = {};
         this.openApiColl = {};
         this.uqOpenApis = {};
         this.unitxApis = {};
+        this.initRunner = initRunner;
     }
     innerRunner(name) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -50,7 +51,8 @@ class Net {
     getRunner(name) {
         return __awaiter(this, void 0, void 0, function* () {
             let runner = yield this.innerRunner(name);
-            yield runner.init();
+            if (this.initRunner === true)
+                yield runner.init();
             return runner;
         });
     }
@@ -208,24 +210,25 @@ class TestNet extends Net {
     unitxUrl(url) { return url + 'uq/unitx-test/'; }
     ;
 }
+/*
 class ProdCompileNet extends ProdNet {
-    getRunner(name) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let runner = yield this.innerRunner(name);
-            return runner;
-        });
+    async getRunner(name:string):Promise<Runner> {
+        let runner = await this.innerRunner(name);
+        return runner;
     }
 }
+
 class TestCompileNet extends TestNet {
-    getRunner(name) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let runner = yield this.innerRunner(name);
-            return runner;
-        });
+    async getRunner(name:string):Promise<Runner> {
+        let runner = await this.innerRunner(name);
+        return runner;
     }
 }
-exports.prodNet = new ProdNet;
-exports.testNet = new TestNet;
-exports.prodCompileNet = new ProdCompileNet;
-exports.testCompileNet = new TestCompileNet;
+*/
+// 在entity正常状态下，每个runner都需要init，loadSchema
+exports.prodNet = new ProdNet(true);
+exports.testNet = new TestNet(true);
+// runner在编译状态下，database可能还没有创建，不需要init，也就是不需要loadSchema
+exports.prodCompileNet = new ProdNet(false);
+exports.testCompileNet = new TestNet(false);
 //# sourceMappingURL=net.js.map

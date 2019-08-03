@@ -9,6 +9,11 @@ import { UnitxApi } from "./unitxApi";
 
 export abstract class Net {
     private runners: {[name:string]: Runner} = {};
+    private initRunner: boolean;
+
+    constructor(initRunner: boolean) {
+        this.initRunner = initRunner;
+    }
 
     protected async innerRunner(name:string):Promise<Runner> {
         name = name.toLowerCase();
@@ -34,7 +39,7 @@ export abstract class Net {
 
     async getRunner(name:string):Promise<Runner> {
         let runner = await this.innerRunner(name);
-        await runner.init();
+        if (this.initRunner === true) await runner.init();
         return runner;
     }
 
@@ -178,7 +183,7 @@ class TestNet extends Net {
     }
     protected unitxUrl(url:string):string {return url + 'uq/unitx-test/'};
 }
-
+/*
 class ProdCompileNet extends ProdNet {
     async getRunner(name:string):Promise<Runner> {
         let runner = await this.innerRunner(name);
@@ -192,8 +197,12 @@ class TestCompileNet extends TestNet {
         return runner;
     }
 }
+*/
 
-export const prodNet = new ProdNet;
-export const testNet = new TestNet;
-export const prodCompileNet = new ProdCompileNet;
-export const testCompileNet = new TestCompileNet;
+// 在entity正常状态下，每个runner都需要init，loadSchema
+export const prodNet = new ProdNet(true);
+export const testNet = new TestNet(true);
+
+// runner在编译状态下，database可能还没有创建，不需要init，也就是不需要loadSchema
+export const prodCompileNet = new ProdNet(false);
+export const testCompileNet = new TestNet(false);
