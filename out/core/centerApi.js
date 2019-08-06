@@ -79,6 +79,11 @@ class CenterApi extends fetch_1.Fetch {
             return yield this.post('send', param);
         });
     }
+    queueOut(start, page) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.get('open/queue-out', { start: start, page: page });
+        });
+    }
 }
 ;
 exports.centerApi = new CenterApi();

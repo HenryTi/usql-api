@@ -62,6 +62,10 @@ class CenterApi extends Fetch {
     async send(param: SendParameter):Promise<void> {
         return await this.post('send', param);
     }
+
+    async queueOut(start:number, page:number):Promise<any> {
+        return await this.get('open/queue-out', {start:start, page:page});
+    }
 }
 
 interface SendParameter {
