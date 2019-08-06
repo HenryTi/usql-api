@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Runner, busQueueSeed, RouterBuilder } from '../../core';
+import { Runner, busQueueSeed, RouterBuilder, testNet } from '../../core';
 
 //type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
 
@@ -98,6 +98,16 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
             queue: ret[0],
             queueMax: ret1.length===0? 0: ret1[0].max
         };
+    });
+
+    rb.post(router, '/bus-query',
+    async (runner:Runner, body:any):Promise<any> => {
+        let {unit, busOwner, busName, face:faceName, params} = body;
+        let faceUrl = `${busOwner}/${busName}/${faceName}`;
+        let face = runner.buses.coll[faceUrl];
+        let {bus} = face;
+        let ret = await runner.tablesFromProc(bus + '_' + faceName, [unit, 0, ...params])
+        return ret;
     });
 
     rb.post(router, '/tuid-main/:tuid',

@@ -9,7 +9,7 @@ import { UnitxApi } from "./unitxApi";
 
 export abstract class Net {
     private runners: {[name:string]: Runner} = {};
-    private initRunner: boolean;
+    private initRunner: boolean;    
 
     constructor(initRunner: boolean) {
         this.initRunner = initRunner;
@@ -71,7 +71,7 @@ export abstract class Net {
             this.runners[name] = null;
             return;
         }
-        let runner = new Runner(db);
+        let runner = new Runner(db, this);
         this.runners[name] = runner;
         return runner;
     }
@@ -79,9 +79,9 @@ export abstract class Net {
     abstract getDbName(name:string):string;
     protected abstract getUnitxDb(): Db;
 
-    private openApiColl: {[url:string]: OpenApi} = {};
+    //private openApiColl: {[url:string]: OpenApi} = {};
     private uqOpenApis: {[uqFullName:string]: {[unit:number]:OpenApi}} = {};
-    async getOpenApi(uqFullName:string, unit:number):Promise<OpenApi> {
+    private getOpenApiFromCache(uqFullName:string, unit:number):OpenApi {
         let openApis = this.uqOpenApis[uqFullName];
         if (openApis === null) return null;
         if (openApis !== undefined) {
@@ -92,16 +92,48 @@ export abstract class Net {
         else {
             this.uqOpenApis[uqFullName] = openApis = {};
         }
-        let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
-        if (uqUrl === undefined) return openApis[unit] = null;
+        return undefined;
+    }
+    private async buildOpenApiFrom(uqFullName:string, unit:number, uqUrl:{db:string, url:string, urlTest:string}):Promise<OpenApi> {
+        let openApis = this.uqOpenApis[uqFullName];
+        //if (uqUrl === undefined) return openApis[unit] = null;
         let url = await this.getUqUrl(uqUrl);
         url = url.toLowerCase();
+        /*
         let openApi = this.openApiColl[url];
         if (openApi === undefined) {
             openApi = new OpenApi(url);
             this.openApiColl[url] = openApi;
         }
+        */
+        let openApi = new OpenApi(url);
         openApis[unit] = openApi;
+        return openApi;
+    }
+    async openApiUnitUq(unit:number, uqFullName:string):Promise<OpenApi> {
+        let openApi = this.getOpenApiFromCache(uqFullName, unit);
+        if (openApi !== undefined) return openApi;
+        let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
+        return await this.buildOpenApiFrom(uqFullName, unit, uqUrl);
+    }
+
+    async openApiUnitFace(unit:number, busOwner:string, busName:string, face:string):Promise<OpenApi> {
+        let ret = await centerApi.unitFaceUrl(unit, busOwner, busName, face);
+        if (ret === undefined) {
+            throw `openApi unit face not exists: unit=${unit}, face=${busOwner}/${busName}/${face}`;
+        }
+        switch (ret.length) {
+            case 0:
+                throw 'unit-face-url return no result';
+            case 1: break;
+            default:
+                throw 'unit-face-url return multiple results';
+        }
+        let uqUrl = ret[0];
+        let {uq} = uqUrl;
+        let openApi = this.getOpenApiFromCache(uq, unit);
+        if (openApi !== undefined) return openApi;
+        openApi = await this.buildOpenApiFrom(uq, unit, uqUrl);
         return openApi;
     }
 
@@ -131,7 +163,7 @@ export abstract class Net {
         return await this.getUqUrl(uqUrl);
     }
 
-    private async getUqUrl(urls: {db:string, url:string;}):Promise<string> {
+    private async getUqUrl(urls: {db:string; url:string; urlTest:string}):Promise<string> {
         let {db, url} = urls;
         if (isDevelopment === true) {
             let urlDebug = await this.getUrlDebug();

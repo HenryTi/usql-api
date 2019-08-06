@@ -2,6 +2,8 @@ import * as _ from 'lodash';
 import { Db, isDevelopment } from './db';
 import { packReturns, packParam } from '.';
 import { ImportData } from './importData';
+import { Action } from './actionBus';
+import { Net } from './net';
 
 interface EntityAccess {
     name: string;
@@ -24,6 +26,8 @@ interface Face {
     bus: string;
     faceName: string;
     version: number;
+    accept?: boolean;
+    query?: boolean;
 }
 
 export class Runner {
@@ -49,9 +53,11 @@ export class Runner {
     uniqueUnit: number;
     buses:Buses; //{[url:string]:any}; // 直接查找bus
     hasSyncTuids: boolean = false;
+    net: Net;
 
-    constructor(db:Db) {
+    constructor(db:Db, net:Net = undefined) {
         this.db = db;
+        this.net = net;
         this.setting = {};
     }
 
@@ -83,6 +89,14 @@ export class Runner {
     }
     async tableFromProc(proc:string, params:any[]): Promise<any[]> {
         return await this.db.tableFromProc('tv_' + proc, params);
+    }
+    async tablesFromProc(proc:string, params:any[]): Promise<any[][]> {
+        let ret = await this.db.tablesFromProc('tv_' + proc, params);
+        let len = ret.length;
+        if (len === 0) return ret;
+        let pl = ret[len-1];
+        if (Array.isArray(pl) === false) ret.pop();
+        return ret;
     }
     async unitCall(proc:string, unit:number, ...params:any[]): Promise<any> {
         let p:any[] = [];
@@ -365,15 +379,24 @@ export class Runner {
         return await this.unitUserCall(sql, unit, user, sheet, id);
     }
 
-    async action(action:string, unit:number, user:number, data:string): Promise<any> {
-        let result = await this.unitUserCallEx('tv_' + action, unit, user, data);
+    private actions:{[actionName:string]:Action} = {}
+    private getAction(actionName:string):Action {
+        let action = this.actions[actionName];
+        if (action !== undefined) return action;
+        action = new Action(actionName, this);
+        return this.actions[actionName] = action;
+    }
+    async action(actionName:string, unit:number, user:number, data:string): Promise<any[][]> {
+        let action = this.getAction(actionName);
+        let actionData = await action.buildData(unit, user, data);
+        let result = await this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
         return result;
     }
 
-    async actionFromObj(action:string, unit:number, user:number, obj:any): Promise<any> {
-        let schema = this.getSchema(action);
-        let data = packParam(schema.call, obj);
-        let result = await this.unitUserCallEx('tv_' + action, unit, user, data);
+    async actionFromObj(actionName:string, unit:number, user:number, obj:any): Promise<any[][]> {
+        let action = this.getAction(actionName);
+        let actionData = await action.buildDataFromObj(unit, user, obj);
+        let result = await this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
         return result;
     }
 
@@ -582,18 +605,27 @@ export class Runner {
             let {name:bus, busOwner, busName, schema} = busSchema;
             let hasAccept:boolean = false;
             for (let i in schema) {
-                let {accept, version} = schema[i];
+                let {version, accept, query} = schema[i];
+                let faceName = i.toLowerCase();
+                let url = busOwner.toLowerCase() + '/' + busName.toLowerCase() + '/' + faceName;
+                if (coll[url]) continue;
                 if (accept === true) {
-                    let faceName = i.toLowerCase();
-                    let url = busOwner.toLowerCase() + '/' + busName.toLowerCase() + '/' + faceName;
-                    if (coll[url]) continue;
                     faces.push(url);
                     coll[url] = {
                         bus: bus,
                         faceName: faceName,
                         version: version,
+                        accept: true,
                     };
                     hasAccept = true;
+                }
+                else if (query === true) {
+                    coll[url] = {
+                        bus: bus,
+                        faceName: faceName,
+                        version: version,
+                        query: true,
+                    };
                 }
             }
             if (hasAccept === false) ++outCount;

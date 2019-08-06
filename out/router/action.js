@@ -20,6 +20,11 @@ function buildActionRouter(router, rb) {
             return yield unitx_1.unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run, net);
         return yield actionProcess_1.actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
     }));
+    rb.entityPost(router, actionType, '/:name/returns', (unit, user, name, db, urlParams, runner, body, schema, run, net) => __awaiter(this, void 0, void 0, function* () {
+        if (db === core_1.consts.$unitx)
+            return yield unitx_1.unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run, net);
+        return yield actionProcess_1.actionReturns(unit, user, name, db, urlParams, runner, body, schema, run);
+    }));
     rb.entityPost(router, actionType, '-json/:name', (unit, user, name, db, urlParams, runner, body, schema, run, net) => __awaiter(this, void 0, void 0, function* () {
         if (db === core_1.consts.$unitx)
             return yield unitx_1.unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run, net);

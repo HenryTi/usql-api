@@ -46,7 +46,12 @@ class CenterApi extends fetch_1.Fetch {
     }
     urlFromUq(unit, uqFullName) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.get('open/url-from-uq', { unit: unit, uq: uqFullName });
+            return yield this.post('open/url-from-uq', { unit: unit, uq: uqFullName });
+        });
+    }
+    unitFaceUrl(unit, busOwner, busName, face) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.post('open/unit-face-url', { unit: unit, busOwner: busOwner, busName: busName, face: face });
         });
     }
     uqDb(name) {

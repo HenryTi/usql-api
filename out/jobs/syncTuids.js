@@ -139,7 +139,7 @@ function syncNew(runner, net) {
                 if (schema === undefined)
                     continue;
                 let { from } = schema;
-                let openApi = yield net.getOpenApi(from, unit);
+                let openApi = yield net.openApiUnitUq(unit, from);
                 if (!openApi)
                     continue;
                 /*
@@ -174,7 +174,7 @@ function syncModify(runner, net) {
             if (schema === undefined)
                 debugger;
             let { type, from } = schema;
-            let openApiPromise = net.getOpenApi(from, unit);
+            let openApiPromise = net.openApiUnitUq(unit, from);
             promises.push(openApiPromise);
             params.push({ from: from, unit: unit, modifyMax: modifyMax, entity: entity });
         }

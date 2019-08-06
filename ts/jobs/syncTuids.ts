@@ -131,7 +131,7 @@ async function syncNew(runner:Runner, net:Net) {
             let schema = runner.getSchema(entity);
             if (schema === undefined) continue;
             let {from} = schema;
-            let openApi = await net.getOpenApi(from, unit);
+            let openApi = await net.openApiUnitUq(unit, from);
             if (!openApi) continue;
             /*
             let ret = await openApi.fromEntity(unit, entity, key);
@@ -170,7 +170,7 @@ async function syncModify(runner:Runner, net:Net) {
         let schema = runner.getSchema(entity);
         if (schema === undefined) debugger;
         let {type, from} = schema;
-        let openApiPromise = net.getOpenApi(from, unit);
+        let openApiPromise = net.openApiUnitUq(unit, from);
         promises.push(openApiPromise);
         params.push({from:from, unit:unit, modifyMax:modifyMax, entity:entity});
     }

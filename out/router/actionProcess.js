@@ -12,13 +12,16 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 function actionProcess(unit, user, name, db, urlParams, runner, body, schema, run) {
     return __awaiter(this, void 0, void 0, function* () {
-        let { data } = body;
+        let result = yield actionReturns(unit, user, name, db, urlParams, runner, body, schema, run);
+        /*
+        let {data} = body;
         if (data === undefined) {
             console.log('action process data: ', body);
-            data = core_1.packParam(schema, body);
+            data = packParam(schema, body);
         }
         console.log('action process param: ', data);
-        let result = yield runner.action(name, unit, user, data);
+        let result = await runner.action(name, unit, user, data);
+        */
         //let returns = schema.returns;
         //let {hasSend,  busFaces, templets} = run;
         //let actionReturn = await afterAction(db, runner, unit, returns, hasSend, busFaces, templets, result);
@@ -33,4 +36,17 @@ function actionProcess(unit, user, name, db, urlParams, runner, body, schema, ru
 }
 exports.actionProcess = actionProcess;
 ;
+function actionReturns(unit, user, name, db, urlParams, runner, body, schema, run) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let { data } = body;
+        if (data === undefined) {
+            console.log('action process data: ', body);
+            data = core_1.packParam(schema, body);
+        }
+        console.log('action process param: ', data);
+        let result = yield runner.action(name, unit, user, data);
+        return result;
+    });
+}
+exports.actionReturns = actionReturns;
 //# sourceMappingURL=actionProcess.js.map

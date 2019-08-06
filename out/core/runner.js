@@ -12,10 +12,13 @@ const _ = require("lodash");
 const db_1 = require("./db");
 const _1 = require(".");
 const importData_1 = require("./importData");
+const actionBus_1 = require("./actionBus");
 class Runner {
-    constructor(db) {
+    constructor(db, net = undefined) {
         this.hasSyncTuids = false;
+        this.actions = {};
         this.db = db;
+        this.net = net;
         this.setting = {};
     }
     getDb() { return this.db.getDbName(); }
@@ -58,6 +61,18 @@ class Runner {
     tableFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.tableFromProc('tv_' + proc, params);
+        });
+    }
+    tablesFromProc(proc, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let ret = yield this.db.tablesFromProc('tv_' + proc, params);
+            let len = ret.length;
+            if (len === 0)
+                return ret;
+            let pl = ret[len - 1];
+            if (Array.isArray(pl) === false)
+                ret.pop();
+            return ret;
         });
     }
     unitCall(proc, unit, ...params) {
@@ -446,17 +461,26 @@ class Runner {
             return yield this.unitUserCall(sql, unit, user, sheet, id);
         });
     }
-    action(action, unit, user, data) {
+    getAction(actionName) {
+        let action = this.actions[actionName];
+        if (action !== undefined)
+            return action;
+        action = new actionBus_1.Action(actionName, this);
+        return this.actions[actionName] = action;
+    }
+    action(actionName, unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            let result = yield this.unitUserCallEx('tv_' + action, unit, user, data);
+            let action = this.getAction(actionName);
+            let actionData = yield action.buildData(unit, user, data);
+            let result = yield this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
             return result;
         });
     }
-    actionFromObj(action, unit, user, obj) {
+    actionFromObj(actionName, unit, user, obj) {
         return __awaiter(this, void 0, void 0, function* () {
-            let schema = this.getSchema(action);
-            let data = _1.packParam(schema.call, obj);
-            let result = yield this.unitUserCallEx('tv_' + action, unit, user, data);
+            let action = this.getAction(actionName);
+            let actionData = yield action.buildDataFromObj(unit, user, obj);
+            let result = yield this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
             return result;
         });
     }
@@ -680,19 +704,28 @@ class Runner {
                 let { name: bus, busOwner, busName, schema } = busSchema;
                 let hasAccept = false;
                 for (let i in schema) {
-                    let { accept, version } = schema[i];
+                    let { version, accept, query } = schema[i];
+                    let faceName = i.toLowerCase();
+                    let url = busOwner.toLowerCase() + '/' + busName.toLowerCase() + '/' + faceName;
+                    if (coll[url])
+                        continue;
                     if (accept === true) {
-                        let faceName = i.toLowerCase();
-                        let url = busOwner.toLowerCase() + '/' + busName.toLowerCase() + '/' + faceName;
-                        if (coll[url])
-                            continue;
                         faces.push(url);
                         coll[url] = {
                             bus: bus,
                             faceName: faceName,
                             version: version,
+                            accept: true,
                         };
                         hasAccept = true;
+                    }
+                    else if (query === true) {
+                        coll[url] = {
+                            bus: bus,
+                            faceName: faceName,
+                            version: version,
+                            query: true,
+                        };
                     }
                 }
                 if (hasAccept === false)

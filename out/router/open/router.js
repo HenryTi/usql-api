@@ -94,6 +94,14 @@ function buildOpenRouter(router, rb) {
             queueMax: ret1.length === 0 ? 0 : ret1[0].max
         };
     }));
+    rb.post(router, '/bus-query', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        let { unit, busOwner, busName, face: faceName, params } = body;
+        let faceUrl = `${busOwner}/${busName}/${faceName}`;
+        let face = runner.buses.coll[faceUrl];
+        let { bus } = face;
+        let ret = yield runner.tablesFromProc(bus + '_' + faceName, [unit, 0, ...params]);
+        return ret;
+    }));
     rb.post(router, '/tuid-main/:tuid', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         body.$ = 'open/tuid-main/';
         console.log(body);

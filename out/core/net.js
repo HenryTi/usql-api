@@ -18,7 +18,7 @@ const unitxApi_1 = require("./unitxApi");
 class Net {
     constructor(initRunner) {
         this.runners = {};
-        this.openApiColl = {};
+        //private openApiColl: {[url:string]: OpenApi} = {};
         this.uqOpenApis = {};
         this.unitxApis = {};
         this.initRunner = initRunner;
@@ -88,37 +88,73 @@ class Net {
                 this.runners[name] = null;
                 return;
             }
-            let runner = new runner_1.Runner(db);
+            let runner = new runner_1.Runner(db, this);
             this.runners[name] = runner;
             return runner;
         });
     }
-    getOpenApi(uqFullName, unit) {
+    getOpenApiFromCache(uqFullName, unit) {
+        let openApis = this.uqOpenApis[uqFullName];
+        if (openApis === null)
+            return null;
+        if (openApis !== undefined) {
+            let ret = openApis[unit];
+            if (ret === null)
+                return null;
+            if (ret !== undefined)
+                return ret;
+        }
+        else {
+            this.uqOpenApis[uqFullName] = openApis = {};
+        }
+        return undefined;
+    }
+    buildOpenApiFrom(uqFullName, unit, uqUrl) {
         return __awaiter(this, void 0, void 0, function* () {
             let openApis = this.uqOpenApis[uqFullName];
-            if (openApis === null)
-                return null;
-            if (openApis !== undefined) {
-                let ret = openApis[unit];
-                if (ret === null)
-                    return null;
-                if (ret !== undefined)
-                    return ret;
-            }
-            else {
-                this.uqOpenApis[uqFullName] = openApis = {};
-            }
-            let uqUrl = yield centerApi_1.centerApi.urlFromUq(unit, uqFullName);
-            if (uqUrl === undefined)
-                return openApis[unit] = null;
+            //if (uqUrl === undefined) return openApis[unit] = null;
             let url = yield this.getUqUrl(uqUrl);
             url = url.toLowerCase();
+            /*
             let openApi = this.openApiColl[url];
             if (openApi === undefined) {
-                openApi = new openApi_1.OpenApi(url);
+                openApi = new OpenApi(url);
                 this.openApiColl[url] = openApi;
             }
+            */
+            let openApi = new openApi_1.OpenApi(url);
             openApis[unit] = openApi;
+            return openApi;
+        });
+    }
+    openApiUnitUq(unit, uqFullName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let openApi = this.getOpenApiFromCache(uqFullName, unit);
+            if (openApi !== undefined)
+                return openApi;
+            let uqUrl = yield centerApi_1.centerApi.urlFromUq(unit, uqFullName);
+            return yield this.buildOpenApiFrom(uqFullName, unit, uqUrl);
+        });
+    }
+    openApiUnitFace(unit, busOwner, busName, face) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let ret = yield centerApi_1.centerApi.unitFaceUrl(unit, busOwner, busName, face);
+            if (ret === undefined) {
+                throw `openApi unit face not exists: unit=${unit}, face=${busOwner}/${busName}/${face}`;
+            }
+            switch (ret.length) {
+                case 0:
+                    throw 'unit-face-url return no result';
+                case 1: break;
+                default:
+                    throw 'unit-face-url return multiple results';
+            }
+            let uqUrl = ret[0];
+            let { uq } = uqUrl;
+            let openApi = this.getOpenApiFromCache(uq, unit);
+            if (openApi !== undefined)
+                return openApi;
+            openApi = yield this.buildOpenApiFrom(uq, unit, uqUrl);
             return openApi;
         });
     }
