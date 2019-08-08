@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { Db, isDevelopment } from './db';
 import { packReturns, packParam } from '.';
 import { ImportData } from './importData';
-import { Action } from './actionBus';
+import { InBusAction } from './inBusAction';
 import { Net } from './net';
 
 interface EntityAccess {
@@ -379,23 +379,23 @@ export class Runner {
         return await this.unitUserCall(sql, unit, user, sheet, id);
     }
 
-    private actions:{[actionName:string]:Action} = {}
-    private getAction(actionName:string):Action {
-        let action = this.actions[actionName];
-        if (action !== undefined) return action;
-        action = new Action(actionName, this);
-        return this.actions[actionName] = action;
+    private inBusActions:{[actionName:string]:InBusAction} = {}
+    private getInBusAction(actionName:string):InBusAction {
+        let inBusAction = this.inBusActions[actionName];
+        if (inBusAction !== undefined) return inBusAction;
+        inBusAction = new InBusAction(actionName, this);
+        return this.inBusActions[actionName] = inBusAction;
     }
     async action(actionName:string, unit:number, user:number, data:string): Promise<any[][]> {
-        let action = this.getAction(actionName);
-        let actionData = await action.buildData(unit, user, data);
+        let inBusAction = this.getInBusAction(actionName);
+        let actionData = await inBusAction.buildData(unit, user, data);
         let result = await this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
         return result;
     }
 
     async actionFromObj(actionName:string, unit:number, user:number, obj:any): Promise<any[][]> {
-        let action = this.getAction(actionName);
-        let actionData = await action.buildDataFromObj(unit, user, obj);
+        let inBusAction = this.getInBusAction(actionName);
+        let actionData = await inBusAction.buildDataFromObj(unit, user, obj);
         let result = await this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
         return result;
     }

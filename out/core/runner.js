@@ -12,11 +12,11 @@ const _ = require("lodash");
 const db_1 = require("./db");
 const _1 = require(".");
 const importData_1 = require("./importData");
-const actionBus_1 = require("./actionBus");
+const inBusAction_1 = require("./inBusAction");
 class Runner {
     constructor(db, net = undefined) {
         this.hasSyncTuids = false;
-        this.actions = {};
+        this.inBusActions = {};
         this.db = db;
         this.net = net;
         this.setting = {};
@@ -461,25 +461,25 @@ class Runner {
             return yield this.unitUserCall(sql, unit, user, sheet, id);
         });
     }
-    getAction(actionName) {
-        let action = this.actions[actionName];
-        if (action !== undefined)
-            return action;
-        action = new actionBus_1.Action(actionName, this);
-        return this.actions[actionName] = action;
+    getInBusAction(actionName) {
+        let inBusAction = this.inBusActions[actionName];
+        if (inBusAction !== undefined)
+            return inBusAction;
+        inBusAction = new inBusAction_1.InBusAction(actionName, this);
+        return this.inBusActions[actionName] = inBusAction;
     }
     action(actionName, unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            let action = this.getAction(actionName);
-            let actionData = yield action.buildData(unit, user, data);
+            let inBusAction = this.getInBusAction(actionName);
+            let actionData = yield inBusAction.buildData(unit, user, data);
             let result = yield this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
             return result;
         });
     }
     actionFromObj(actionName, unit, user, obj) {
         return __awaiter(this, void 0, void 0, function* () {
-            let action = this.getAction(actionName);
-            let actionData = yield action.buildDataFromObj(unit, user, obj);
+            let inBusAction = this.getInBusAction(actionName);
+            let actionData = yield inBusAction.buildDataFromObj(unit, user, obj);
             let result = yield this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
             return result;
         });

@@ -18,38 +18,40 @@ interface InBus {
     returns: {fields:SchemaField[]; arrs:{name:string; fields:SchemaField[]}[]},
 }
 
-export class Action {
+export class InBusAction {
     private action: string;
     private runner: Runner;
     private schema: any;
     private inBuses:InBus[];
-    //private urlApis: {[url:string]:OpenApi} = {};
 
     constructor(action:string, runner:Runner) {
         this.action = action;
         this.runner = runner;
         let schema = this.runner.getSchema(action);
         this.schema = schema.call;
+        this.initInBuses();
+    }
+
+    private initInBuses() {
         let {inBuses} = this.schema;
-        if (inBuses !== undefined) {
-            this.inBuses = (inBuses as string[]).map(v => {
-                let parts = v.split('/');
-                let schema = this.runner.getSchema(parts[0]);
-                if (schema === undefined) return;
-                let bus = schema.call;
-                let {busOwner, busName} = bus;
-                let face = parts[1];
-                let {param, returns} = bus.schema[face];
-                return {
-                    bus: bus,
-                    busOwner: busOwner,
-                    busName: busName,
-                    face: face,
-                    param: param,
-                    returns: returns,
-                }
-            });
-        }
+        if (inBuses === undefined) return;
+        this.inBuses = (inBuses as string[]).map(v => {
+            let parts = v.split('/');
+            let schema = this.runner.getSchema(parts[0]);
+            if (schema === undefined) return;
+            let bus = schema.call;
+            let {busOwner, busName} = bus;
+            let face = parts[1];
+            let {param, returns} = bus.schema[face];
+            return {
+                bus: bus,
+                busOwner: busOwner,
+                busName: busName,
+                face: face,
+                param: param,
+                returns: returns,
+            }
+        });
     }
 
     async buildData(unit:number, user:number, data:string):Promise<string> {
