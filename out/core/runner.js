@@ -378,7 +378,10 @@ class Runner {
             let { verify } = sheetRun;
             if (verify === undefined)
                 return;
-            let ret = yield this.unitUserCall(`tv_${sheet}_$verify`, unit, user, data);
+            let inBusActionName = sheet + '$verify';
+            let inBusAction = this.getInBusAction(inBusActionName);
+            let inBusActionData = inBusAction.buildData(unit, user, data);
+            let ret = yield this.unitUserCall('tv_' + inBusActionName, unit, user, inBusActionData);
             let { length } = verify;
             if (length === 0) {
                 if (ret === undefined)
@@ -413,10 +416,10 @@ class Runner {
     }
     sheetAct(sheet, state, action, unit, user, id, flow) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = state === '$' ?
-                'tv_' + sheet + '_' + action :
-                'tv_' + sheet + '_' + state + '_' + action;
-            return yield this.unitUserCallEx(sql, unit, user, id, flow, action);
+            let inBusActionName = sheet + '_' + (state === '$' ? action : state + '_' + action);
+            let inBusAction = this.getInBusAction(inBusActionName);
+            let inBusActionData = inBusAction.buildData(unit, user, action);
+            return yield this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, inBusActionData);
         });
     }
     sheetStates(sheet, state, unit, user, pageStart, pageSize) {
@@ -494,8 +497,10 @@ class Runner {
     // body: bus message body
     bus(bus, face, unit, msgId, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = 'tv_' + bus + '_' + face;
-            return yield this.unitUserCall(sql, unit, 0, msgId, body);
+            let inBusActionName = bus + '_' + face;
+            let inBusAction = this.getInBusAction(inBusActionName);
+            let data = yield inBusAction.buildData(unit, 0, body);
+            return yield this.unitUserCall('tv_' + inBusActionName, unit, 0, msgId, data);
         });
     }
     busSyncMax(unit, maxId) {

@@ -317,7 +317,10 @@ export class Runner {
         if (sheetRun === undefined) return;
         let {verify} = sheetRun;
         if (verify === undefined) return;
-        let ret = await this.unitUserCall(`tv_${sheet}_$verify`, unit, user, data);
+        let inBusActionName = sheet + '$verify';
+        let inBusAction = this.getInBusAction(inBusActionName);
+        let inBusActionData = inBusAction.buildData(unit, user, data);
+        let ret = await this.unitUserCall('tv_' + inBusActionName, unit, user, inBusActionData);
         let {length} = verify;
         if (length === 0) {
             if (ret === undefined) return 'fail';
@@ -342,10 +345,10 @@ export class Runner {
         await this.db.call('tv_$sheet_processing', [sheetId]);
     }
     async sheetAct(sheet:string, state:string, action:string, unit:number, user:number, id:number, flow:number): Promise<any[]> {
-        let sql = state === '$'?
-            'tv_' + sheet + '_' + action :
-            'tv_' + sheet + '_' + state + '_' + action;
-        return await this.unitUserCallEx(sql, unit, user, id, flow, action);
+        let inBusActionName = sheet + '_' + (state === '$'?  action : state + '_' + action);
+        let inBusAction = this.getInBusAction(inBusActionName);        
+        let inBusActionData = inBusAction.buildData(unit, user, action);
+        return await this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, inBusActionData);
     }
     async sheetStates(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
         let sql = 'tv_$sheet_state';
@@ -408,8 +411,10 @@ export class Runner {
     // msgId: bus message id
     // body: bus message body
     async bus(bus:string, face:string, unit:number, msgId:number, body:string): Promise<void> {
-        let sql = 'tv_' + bus + '_' + face;
-        return await this.unitUserCall(sql, unit, 0, msgId, body);
+        let inBusActionName = bus + '_' + face;
+        let inBusAction = this.getInBusAction(inBusActionName);
+        let data = await inBusAction.buildData(unit, 0, body);
+        return await this.unitUserCall('tv_' + inBusActionName, unit, 0, msgId, data);
     }
 
     async busSyncMax(unit:number, maxId:number): Promise<void> {
