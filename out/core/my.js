@@ -154,7 +154,7 @@ class MyDbServer extends dbServer_1.DbServer {
             let ret = yield this.exec(exists, []);
             if (ret.length > 0)
                 return true;
-            let sql = 'CREATE DATABASE IF NOT EXISTS `' + db + '` default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
+            let sql = `CREATE DATABASE IF NOT EXISTS \`${db}\` default CHARACTER SET utf8 COLLATE utf8_unicode_ci`;
             yield this.exec(sql, undefined);
             yield this.build$Uq(db);
             return false;
