@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { Runner, RouterBuilder, setUqBuildSecret, Db } from '../../core';
 
 export function buildBuildRouter(router:Router, rb: RouterBuilder) {
+    /*
     rb.post(router, '/start',
     async (runner:Runner, body:{enc:string}):Promise<void> => {
         let {enc} = body;
@@ -11,26 +12,38 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
     async (runner:Runner, body:any):Promise<void> => {
         await runner.buildDatabase();
     });
-    /*
+    */
+    
     router.post('/start', async (req:Request, res:Response) => {
-        let {enc} = req.body;
-        setUqBuildSecret(enc);
-        res.json({
-            ok: true,
-            res: undefined
-        });
+        try {
+            let {enc} = req.body;
+            setUqBuildSecret(enc);
+            res.json({
+                ok: true,
+                res: undefined
+            });
+        }
+        catch (err) {
+            res.json({error: err});
+        }
     });
     router.post('/build-database', async (req:Request, res:Response) => {
-        let dbName:string = req.params.db;
-        let db = new Db(dbName);
-        let runner = new Runner(db);
-        await runner.buildDatabase();
-        res.json({
-            ok: true,
-            res: undefined
-        });
+        try {
+            let dbName:string = req.params.db;
+            let db = new Db(rb.getDbName(dbName));
+            let runner = new Runner(db);
+            let exists = await runner.buildDatabase();
+            res.json({
+                ok: true,
+                res: {
+                    exists: exists,
+                }
+            });
+        }
+        catch (err) {
+            res.json({error: err});
+        }
     });
-    */
 
     rb.post(router, '/finish',
     async (runner:Runner, body:any, params:any):Promise<any> => {

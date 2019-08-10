@@ -49,7 +49,7 @@ class InBusAction {
                 let ret = yield this.busQuery(inBus, unit, user, data);
                 retBusQuery.push(ret);
             }
-            return data + retBusQuery.join('\n\n');
+            return data + retBusQuery.join('\n\n') + '\n\n';
         });
     }
     buildDataFromObj(unit, user, obj) {

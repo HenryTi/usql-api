@@ -10,7 +10,7 @@ interface SyncFace {
 }
 */
 
-export async function syncBus(runner: Runner,  net: Net) {
+export async function syncInBus(runner: Runner,  net: Net) {
     try {
         let {buses} = runner;
         let {faces, coll, hasError} = buses;
@@ -25,6 +25,7 @@ export async function syncBus(runner: Runner,  net: Net) {
                 let ret = await openApi.fetchBus(unit, maxId, faces);
                 let {maxMsgId, maxRows} = ret[0][0];
                 let messages = ret[1];
+                /* 原来版本，bus消息读来，直接调用accept操作。
                 for (let row of messages) {
                     let {face:faceUrl, id:msgId, body, version} = row;
                     let face = coll[faceUrl];
@@ -45,6 +46,28 @@ export async function syncBus(runner: Runner,  net: Net) {
                     }
                     ++msgCount;
                 }
+                */
+                // 新版：bus读来，直接写入queue_in。然后在队列里面处理
+                for (let row of messages) {
+                    let {face:faceUrl, id:msgId, body, version} = row;
+                    let face = coll[faceUrl];
+                    let {bus, faceName, version:runnerBusVersion} = face;
+                    try {
+                        if (runnerBusVersion !== version) {
+                            // 也就是说，bus消息的version，跟runner本身的bus version有可能不同
+                            // 不同需要做数据转换
+                            // 但是，现在先不处理
+                            // 2019-07-23
+                        }
+                        await runner.call('$queue_in_add', [unit, msgId, bus, faceName, body]);
+                    }
+                    catch (toQueueInErr) {
+                        hasError = buses.hasError = true;
+                        console.error(toQueueInErr);
+                        break;
+                    }
+                    ++msgCount;
+                }
                 if (hasError === true) break;
                 if (messages.length < maxRows && maxId < maxMsgId) {
                     // 如果unit的所有mssage都处理完成了，则设为unit的最大msg，下次查找可以快些
@@ -53,25 +76,6 @@ export async function syncBus(runner: Runner,  net: Net) {
             }
             // 如果没有处理任何消息，则退出，等待下一个循环
             if (msgCount === 0) break;
-
-            /*
-            let count = 0;
-            let {faceColl, syncFaceArr} = syncFaces;
-            for (let syncFace of syncFaceArr) {
-                let {unit, faces, faceUnitMessages} = syncFace;
-                let openApi = await net.getOpenApi(consts.$$$unitx, unit);
-                let ret = await openApi.bus(unit, faces, faceUnitMessages);
-                let retLen = ret.length
-                if (retLen === 0) continue;
-                count += retLen;
-                for (let row of ret) {
-                    let {face:faceUrl, id:msgId, body} = row;
-                    let {bus, face, id:faceId} = faceColl[faceUrl];
-                    await runner.bus(bus, face, unit, faceId, msgId, body);
-                }
-            }
-            if (count === 0) break;
-            */
         }
     }
     catch (err) {

@@ -125,11 +125,15 @@ export class MyDbServer extends DbServer {
         result.pop();
         return result;
     }
+    // return exists
     async buildDatabase(db:string): Promise<boolean> {
+        let exists = `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
+        let ret = await this.exec(exists, []);
+        if (ret.length > 0) return true;
         let sql = 'CREATE DATABASE IF NOT EXISTS `'+db+'` default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
         await this.exec(sql, undefined);
         await this.build$Uq(db);
-        return;
+        return false;
     }
     async init$UqDb():Promise<void> {
         let exists = 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'$uq\'';

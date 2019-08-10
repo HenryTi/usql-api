@@ -72,6 +72,9 @@ export class Runner {
             throw err;
         }
     }
+    async log(unit:number, subject:string, content:string):Promise<void> {
+        await this.db.log(unit, this.uq, subject, content);
+    }
     async procCall(proc:string, params:any[]): Promise<any> {
         return await this.db.call(proc, params);
     }
@@ -317,10 +320,10 @@ export class Runner {
         if (sheetRun === undefined) return;
         let {verify} = sheetRun;
         if (verify === undefined) return;
-        let inBusActionName = sheet + '$verify';
-        let inBusAction = this.getInBusAction(inBusActionName);
+        let actionName = sheet + '$verify';
+        let inBusAction = this.getInBusAction(actionName);
         let inBusActionData = inBusAction.buildData(unit, user, data);
-        let ret = await this.unitUserCall('tv_' + inBusActionName, unit, user, inBusActionData);
+        let ret = await this.unitUserCall('tv_' + actionName, unit, user, inBusActionData);
         let {length} = verify;
         if (length === 0) {
             if (ret === undefined) return 'fail';
@@ -328,7 +331,7 @@ export class Runner {
         }
         if (length === 1) ret = [ret];
         for (let i=0; i<length; i++) {
-            let t = ret[0];
+            let t = ret[i];
             if (t.length > 0) {
                 return packReturns(verify, ret);
             }
@@ -411,10 +414,10 @@ export class Runner {
     // msgId: bus message id
     // body: bus message body
     async bus(bus:string, face:string, unit:number, msgId:number, body:string): Promise<void> {
-        let inBusActionName = bus + '_' + face;
-        let inBusAction = this.getInBusAction(inBusActionName);
+        let actionName = bus + '_' + face;
+        let inBusAction = this.getInBusAction(actionName);
         let data = await inBusAction.buildData(unit, 0, body);
-        return await this.unitUserCall('tv_' + inBusActionName, unit, 0, msgId, data);
+        return await this.unitUserCall('tv_' + actionName, unit, 0, msgId, data);
     }
 
     async busSyncMax(unit:number, maxId:number): Promise<void> {
@@ -637,14 +640,14 @@ export class Runner {
         }
         let faceText:string;
         if (faces.length > 0) faceText = faces.join('\n');
-        if (faceText !== undefined && outCount > 0) {
-            this.buses = {
-                faces: faces.join('\n'), 
-                outCount: outCount,
-                coll: coll,
-                hasError: false,
-            };
-        }
+        //if (faceText !== undefined && outCount > 0) {
+        this.buses = {
+            faces: faceText, 
+            outCount: outCount,
+            coll: coll,
+            hasError: false,
+        };
+        //}
 
         //console.log('schema: %s', JSON.stringify(this.schemas));
         this.buildAccesses();

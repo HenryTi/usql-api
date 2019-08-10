@@ -78,7 +78,13 @@ export abstract class Net {
 
     abstract getDbName(name:string):string;
     protected abstract getUnitxDb(): Db;
-
+    /*
+    public getDb(name:string):Db {
+        let dbName = this.getDbName(name);
+        let db = getDb(dbName);
+        return db;
+    }
+    */
     //private openApiColl: {[url:string]: OpenApi} = {};
     private uqOpenApis: {[uqFullName:string]: {[unit:number]:OpenApi}} = {};
     private getOpenApiFromCache(uqFullName:string, unit:number):OpenApi {

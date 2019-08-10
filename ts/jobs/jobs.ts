@@ -1,18 +1,21 @@
 import * as _ from 'lodash';
 import * as config from 'config';
-import { Net, SheetQueueData, Runner, Db, isDevelopment, centerApi, BusMessage, prodNet, testNet } from '../core';
+import { Net, Db, isDevelopment, prodNet, testNet } from '../core';
 import { syncTuids } from './syncTuids';
-import { syncBus } from './syncBus';
+import { syncInBus } from './syncInBus';
+import { queueIn } from './queueIn';
+import { queueOut } from './queueOut';
 
 let firstRun: number = isDevelopment === true? 3000 : 30*1000;
 let runGap: number = isDevelopment === true? 15*1000 : 30*1000;
 
+/*
 enum Finish {
     succeed = 1,
     retry = 2,
     fail = 3,
 }
-
+*/
 const stopJobs = "stopJobs";
 
 export class Jobs {
@@ -54,10 +57,11 @@ export class Jobs {
                 if (buses !== undefined) {
                     let {outCount, faces} = buses;
                     if (outCount > 0) {
-                        await this.processQueue(runner, net);
+                        await queueOut(runner, net);
                     }
                     if (faces !== undefined) {
-                        await syncBus(runner, net);
+                        await syncInBus(runner, net);
+                        //await queueIn(runner, net);
                     }
                 }
                 await syncTuids(runner, net);
@@ -70,18 +74,12 @@ export class Jobs {
             setTimeout(this.run, runGap);
         }
     }
-
+    /*
     private async processQueue(runner: Runner, net: Net): Promise<void> {
         try {
             let start = 0;
             for (;;) {
-                let ret:any;
-                try {
-                    ret = await runner.call('$message_queue_get',  [start]);
-                }
-                catch (err) {
-                    ret = await runner.call('$message_queue_get_dev',  [start]);
-                }
+                let ret = await runner.call('$message_queue_get',  [start]);
                 if (ret.length === 0) break;
                 let procMessageQueueSet = 'tv_$message_queue_set';
                 for (let row of ret) {
@@ -220,8 +218,9 @@ export class Jobs {
         let {id, sheet, state, action, unit, user, flow} = sheetQueueData;
         let result = await runner.sheetAct(sheet, state, action, unit, user, id, flow);
     }
+    */
 }
-
+/*
 function stringFromSections(sections:string[], values: any):string {
     if (sections === undefined) return;
     let ret:string[] = [];
@@ -299,3 +298,4 @@ function toBusMessage(busSchema:any, face:string, content:string):{body:string;v
 
     return {body:ret, version:busVersion};
 }
+*/

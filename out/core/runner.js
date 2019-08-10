@@ -33,6 +33,11 @@ class Runner {
             }
         });
     }
+    log(unit, subject, content) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.log(unit, this.uq, subject, content);
+        });
+    }
     procCall(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.call(proc, params);
@@ -378,10 +383,10 @@ class Runner {
             let { verify } = sheetRun;
             if (verify === undefined)
                 return;
-            let inBusActionName = sheet + '$verify';
-            let inBusAction = this.getInBusAction(inBusActionName);
+            let actionName = sheet + '$verify';
+            let inBusAction = this.getInBusAction(actionName);
             let inBusActionData = inBusAction.buildData(unit, user, data);
-            let ret = yield this.unitUserCall('tv_' + inBusActionName, unit, user, inBusActionData);
+            let ret = yield this.unitUserCall('tv_' + actionName, unit, user, inBusActionData);
             let { length } = verify;
             if (length === 0) {
                 if (ret === undefined)
@@ -391,7 +396,7 @@ class Runner {
             if (length === 1)
                 ret = [ret];
             for (let i = 0; i < length; i++) {
-                let t = ret[0];
+                let t = ret[i];
                 if (t.length > 0) {
                     return _1.packReturns(verify, ret);
                 }
@@ -497,10 +502,10 @@ class Runner {
     // body: bus message body
     bus(bus, face, unit, msgId, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            let inBusActionName = bus + '_' + face;
-            let inBusAction = this.getInBusAction(inBusActionName);
+            let actionName = bus + '_' + face;
+            let inBusAction = this.getInBusAction(actionName);
             let data = yield inBusAction.buildData(unit, 0, body);
-            return yield this.unitUserCall('tv_' + inBusActionName, unit, 0, msgId, data);
+            return yield this.unitUserCall('tv_' + actionName, unit, 0, msgId, data);
         });
     }
     busSyncMax(unit, maxId) {
@@ -739,14 +744,14 @@ class Runner {
             let faceText;
             if (faces.length > 0)
                 faceText = faces.join('\n');
-            if (faceText !== undefined && outCount > 0) {
-                this.buses = {
-                    faces: faces.join('\n'),
-                    outCount: outCount,
-                    coll: coll,
-                    hasError: false,
-                };
-            }
+            //if (faceText !== undefined && outCount > 0) {
+            this.buses = {
+                faces: faceText,
+                outCount: outCount,
+                coll: coll,
+                hasError: false,
+            };
+            //}
             //console.log('schema: %s', JSON.stringify(this.schemas));
             this.buildAccesses();
         });

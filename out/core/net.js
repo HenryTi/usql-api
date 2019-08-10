@@ -18,6 +18,13 @@ const unitxApi_1 = require("./unitxApi");
 class Net {
     constructor(initRunner) {
         this.runners = {};
+        /*
+        public getDb(name:string):Db {
+            let dbName = this.getDbName(name);
+            let db = getDb(dbName);
+            return db;
+        }
+        */
         //private openApiColl: {[url:string]: OpenApi} = {};
         this.uqOpenApis = {};
         this.unitxApis = {};

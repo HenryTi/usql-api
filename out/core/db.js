@@ -57,6 +57,11 @@ class Db {
             return yield this.dbServer.sql(this.dbName, sql, params);
         });
     }
+    log(unit, uq, subject, content) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.dbServer.call('$uq', 'log', [unit, uq, subject, content]);
+        });
+    }
     call(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             if (exports.isDevelopment === true)

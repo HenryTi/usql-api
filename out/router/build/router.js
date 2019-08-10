@@ -10,33 +10,47 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../../core");
 function buildBuildRouter(router, rb) {
-    rb.post(router, '/start', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        let { enc } = body;
-        core_1.setUqBuildSecret(enc);
-    }));
-    rb.post(router, '/build-database', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        yield runner.buildDatabase();
-    }));
     /*
-    router.post('/start', async (req:Request, res:Response) => {
-        let {enc} = req.body;
+    rb.post(router, '/start',
+    async (runner:Runner, body:{enc:string}):Promise<void> => {
+        let {enc} = body;
         setUqBuildSecret(enc);
-        res.json({
-            ok: true,
-            res: undefined
-        });
     });
-    router.post('/build-database', async (req:Request, res:Response) => {
-        let dbName:string = req.params.db;
-        let db = new Db(dbName);
-        let runner = new Runner(db);
+    rb.post(router, '/build-database',
+    async (runner:Runner, body:any):Promise<void> => {
         await runner.buildDatabase();
-        res.json({
-            ok: true,
-            res: undefined
-        });
     });
     */
+    router.post('/start', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            let { enc } = req.body;
+            core_1.setUqBuildSecret(enc);
+            res.json({
+                ok: true,
+                res: undefined
+            });
+        }
+        catch (err) {
+            res.json({ error: err });
+        }
+    }));
+    router.post('/build-database', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            let dbName = req.params.db;
+            let db = new core_1.Db(rb.getDbName(dbName));
+            let runner = new core_1.Runner(db);
+            let exists = yield runner.buildDatabase();
+            res.json({
+                ok: true,
+                res: {
+                    exists: exists,
+                }
+            });
+        }
+        catch (err) {
+            res.json({ error: err });
+        }
+    }));
     rb.post(router, '/finish', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         let { uqId } = runner;
         let { uqId: paramUqId } = body;

@@ -147,12 +147,17 @@ class MyDbServer extends dbServer_1.DbServer {
             return result;
         });
     }
+    // return exists
     buildDatabase(db) {
         return __awaiter(this, void 0, void 0, function* () {
+            let exists = `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
+            let ret = yield this.exec(exists, []);
+            if (ret.length > 0)
+                return true;
             let sql = 'CREATE DATABASE IF NOT EXISTS `' + db + '` default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
             yield this.exec(sql, undefined);
             yield this.build$Uq(db);
-            return;
+            return false;
         });
     }
     init$UqDb() {

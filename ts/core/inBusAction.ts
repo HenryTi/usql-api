@@ -1,7 +1,5 @@
 import { Runner } from "./runner";
 import { packParam } from "./packParam";
-//import { OpenApi } from "./openApi";
-//import { centerApi } from "./centerApi";
 
 interface SchemaField {
     name:string;
@@ -62,7 +60,7 @@ export class InBusAction {
             let ret = await this.busQuery(inBus, unit, user, data);
             retBusQuery.push(ret);
         }
-        return data + retBusQuery.join('\n\n');
+        return data + retBusQuery.join('\n\n') + '\n\n';
     }
 
     async buildDataFromObj(unit:number, user:number, obj:any):Promise<string> {

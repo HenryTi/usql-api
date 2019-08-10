@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { Runner } from './runner';
 import { consts } from "./consts";
 import { prodNet, testNet, Net, prodCompileNet, testCompileNet } from './net';
+import { Db } from './db';
 //import { checkRunner, User, unknownEntity, validEntity } from "../router/router";
 
 type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
@@ -44,10 +45,10 @@ export class RouterBuilder {
             await this.process(req, res, processer, (req as any).body, req.params);
         });
     };
-
+    getDbName(name:string):string {return this.net.getDbName(name);}
     protected async routerRunner(req:Request):Promise<Runner> {
         let db:string = req.params.db;
-        if (db.endsWith('$test') === true) debugger;
+        //if (db.endsWith('$test') === true) debugger;
         let runner = await this.checkRunner(db);
         return runner;
     }

@@ -80,11 +80,11 @@ class RouterBuilder {
         }));
     }
     ;
+    getDbName(name) { return this.net.getDbName(name); }
     routerRunner(req) {
         return __awaiter(this, void 0, void 0, function* () {
             let db = req.params.db;
-            if (db.endsWith('$test') === true)
-                debugger;
+            //if (db.endsWith('$test') === true) debugger;
             let runner = yield this.checkRunner(db);
             return runner;
         });

@@ -47,6 +47,9 @@ export class Db {
         if (isDevelopment===true) console.log(this.dbName, ' sql: ', params.join(','))
         return await this.dbServer.sql(this.dbName, sql, params);
     }
+    async log(unit:number, uq:string, subject:string, content:string):Promise<void> {
+        return await this.dbServer.call('$uq', 'log', [unit, uq, subject, content]);
+    }
     async call(proc:string, params:any[]): Promise<any> {
         if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params.join(','))
         return await this.dbServer.call(this.dbName, proc, params);
