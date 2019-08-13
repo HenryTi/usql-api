@@ -2,8 +2,6 @@ import { Router, Request, Response } from 'express';
 import { Runner } from './runner';
 import { consts } from "./consts";
 import { prodNet, testNet, Net, prodCompileNet, testCompileNet } from './net';
-import { Db } from './db';
-//import { checkRunner, User, unknownEntity, validEntity } from "../router/router";
 
 type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
 type EntityProcesser = (unit:number, user:number, name:string, db:string, urlParams:any, 

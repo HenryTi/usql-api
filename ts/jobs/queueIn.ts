@@ -34,7 +34,10 @@ export async function queueIn(runner: Runner,  net: Net) {
                         err.message : err;
                     await runner.log(unit, errSubject, error);
                 }
-                if (finish !== undefined) await runner.call('$queue_in_set', [id, finish]); 
+                if (finish !== Finish.done) {
+                    // 操作错误，retry++ or bad
+                    await runner.call('$queue_in_set', [id, finish]); 
+                }
             }
         }
         catch (err) {

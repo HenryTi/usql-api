@@ -16,7 +16,7 @@ const inBusAction_1 = require("./inBusAction");
 class Runner {
     constructor(db, net = undefined) {
         this.hasSyncTuids = false;
-        this.inBusActions = {};
+        this.parametersBusCache = {};
         this.db = db;
         this.net = net;
         this.setting = {};
@@ -375,6 +375,15 @@ class Runner {
             return ret[0].vid;
         });
     }
+    getSheetVerifyParametersBus(sheetName) {
+        let name = sheetName + '$verify';
+        let inBusAction = this.parametersBusCache[name];
+        if (inBusAction === undefined) {
+            inBusAction = this.parametersBusCache[name] = new inBusAction_1.SheetVerifyParametersBus(this, sheetName);
+            inBusAction.init();
+        }
+        return inBusAction;
+    }
     sheetVerify(sheet, unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let sheetRun = this.sheetRuns[sheet];
@@ -383,13 +392,14 @@ class Runner {
             let { verify } = sheetRun;
             if (verify === undefined)
                 return;
-            let actionName = sheet + '$verify';
-            let inBusAction = this.getInBusAction(actionName);
-            let inBusActionData = inBusAction.buildData(unit, user, data);
-            let ret = yield this.unitUserCall('tv_' + actionName, unit, user, inBusActionData);
-            let { length } = verify;
+            //let actionName = sheet + '$verify';
+            let inBusAction = this.getSheetVerifyParametersBus(sheet);
+            let inBusActionData = yield inBusAction.buildData(unit, user, data);
+            let ret = yield this.unitUserCall('tv_' + sheet + '$verify', unit, user, inBusActionData);
+            let { returns } = verify;
+            let { length } = returns;
             if (length === 0) {
-                if (ret === undefined)
+                if (ret === undefined || ret.length === 0)
                     return 'fail';
                 return;
             }
@@ -398,7 +408,7 @@ class Runner {
             for (let i = 0; i < length; i++) {
                 let t = ret[i];
                 if (t.length > 0) {
-                    return _1.packReturns(verify, ret);
+                    return _1.packReturns(returns, ret);
                 }
             }
             return;
@@ -419,11 +429,20 @@ class Runner {
             yield this.db.call('tv_$sheet_processing', [sheetId]);
         });
     }
+    getSheetActionParametersBus(sheetName, actionName) {
+        let name = sheetName + '_' + actionName;
+        let inBusAction = this.parametersBusCache[name];
+        if (inBusAction === undefined) {
+            inBusAction = this.parametersBusCache[name] = new inBusAction_1.SheetActionParametersBus(this, sheetName, actionName);
+            inBusAction.init();
+        }
+        return inBusAction;
+    }
     sheetAct(sheet, state, action, unit, user, id, flow) {
         return __awaiter(this, void 0, void 0, function* () {
             let inBusActionName = sheet + '_' + (state === '$' ? action : state + '_' + action);
-            let inBusAction = this.getInBusAction(inBusActionName);
-            let inBusActionData = inBusAction.buildData(unit, user, action);
+            let inBusAction = this.getSheetActionParametersBus(sheet, action);
+            let inBusActionData = yield inBusAction.buildData(unit, user, action);
             return yield this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, inBusActionData);
         });
     }
@@ -469,16 +488,17 @@ class Runner {
             return yield this.unitUserCall(sql, unit, user, sheet, id);
         });
     }
-    getInBusAction(actionName) {
-        let inBusAction = this.inBusActions[actionName];
-        if (inBusAction !== undefined)
-            return inBusAction;
-        inBusAction = new inBusAction_1.InBusAction(actionName, this);
-        return this.inBusActions[actionName] = inBusAction;
+    getActionParametersBus(actionName) {
+        let inBusAction = this.parametersBusCache[actionName];
+        if (inBusAction === undefined) {
+            inBusAction = this.parametersBusCache[actionName] = new inBusAction_1.ActionParametersBus(this, actionName);
+            inBusAction.init();
+        }
+        return inBusAction;
     }
     action(actionName, unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            let inBusAction = this.getInBusAction(actionName);
+            let inBusAction = this.getActionParametersBus(actionName);
             let actionData = yield inBusAction.buildData(unit, user, data);
             let result = yield this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
             return result;
@@ -486,7 +506,7 @@ class Runner {
     }
     actionFromObj(actionName, unit, user, obj) {
         return __awaiter(this, void 0, void 0, function* () {
-            let inBusAction = this.getInBusAction(actionName);
+            let inBusAction = this.getActionParametersBus(actionName);
             let actionData = yield inBusAction.buildDataFromObj(unit, user, obj);
             let result = yield this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
             return result;
@@ -500,19 +520,27 @@ class Runner {
     }
     // msgId: bus message id
     // body: bus message body
+    getAcceptParametersBus(bus, face) {
+        let name = bus + '_' + face;
+        let inBusAction = this.parametersBusCache[name];
+        if (inBusAction == undefined) {
+            inBusAction = this.parametersBusCache[name] = new inBusAction_1.AcceptParametersBus(this, bus, face);
+            inBusAction.init();
+        }
+        return inBusAction;
+    }
     bus(bus, face, unit, msgId, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            let actionName = bus + '_' + face;
-            let inBusAction = this.getInBusAction(actionName);
+            let inBusAction = this.getAcceptParametersBus(bus, face);
             let data = yield inBusAction.buildData(unit, 0, body);
-            return yield this.unitUserCall('tv_' + actionName, unit, 0, msgId, data);
+            return yield this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
         });
     }
-    busSyncMax(unit, maxId) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.call('$sync_busmax', [unit, maxId]);
-        });
+    /*
+    async busSyncMax(unit:number, maxId:number): Promise<void> {
+        return await this.call('$sync_busmax', [unit, maxId]);
     }
+    */
     importData(unit, user, source, entity, filePath) {
         return __awaiter(this, void 0, void 0, function* () {
             yield importData_1.ImportData.exec(this, unit, this.db, source, entity, filePath);
@@ -719,13 +747,13 @@ class Runner {
                     let url = busOwner.toLowerCase() + '/' + busName.toLowerCase() + '/' + faceName;
                     if (coll[url])
                         continue;
-                    if (accept === true) {
+                    if (accept !== undefined) {
                         faces.push(url);
                         coll[url] = {
                             bus: bus,
                             faceName: faceName,
                             version: version,
-                            accept: true,
+                            accept: accept,
                         };
                         hasAccept = true;
                     }

@@ -58,6 +58,8 @@ class Net {
     getRunner(name) {
         return __awaiter(this, void 0, void 0, function* () {
             let runner = yield this.innerRunner(name);
+            if (runner === undefined)
+                return;
             if (this.initRunner === true)
                 yield runner.init();
             return runner;
@@ -119,16 +121,8 @@ class Net {
     buildOpenApiFrom(uqFullName, unit, uqUrl) {
         return __awaiter(this, void 0, void 0, function* () {
             let openApis = this.uqOpenApis[uqFullName];
-            //if (uqUrl === undefined) return openApis[unit] = null;
             let url = yield this.getUqUrl(uqUrl);
             url = url.toLowerCase();
-            /*
-            let openApi = this.openApiColl[url];
-            if (openApi === undefined) {
-                openApi = new OpenApi(url);
-                this.openApiColl[url] = openApi;
-            }
-            */
             let openApi = new openApi_1.OpenApi(url);
             openApis[unit] = openApi;
             return openApi;
@@ -140,6 +134,8 @@ class Net {
             if (openApi !== undefined)
                 return openApi;
             let uqUrl = yield centerApi_1.centerApi.urlFromUq(unit, uqFullName);
+            if (!uqUrl)
+                return;
             return yield this.buildOpenApiFrom(uqFullName, unit, uqUrl);
         });
     }
@@ -236,6 +232,7 @@ class Net {
 }
 exports.Net = Net;
 class ProdNet extends Net {
+    get isTest() { return false; }
     getDbName(name) { return name; }
     getUnitxDb() { return db_1.getUnitxDb(false); }
     getUrl(db, url) {
@@ -245,6 +242,7 @@ class ProdNet extends Net {
     ;
 }
 class TestNet extends Net {
+    get isTest() { return true; }
     getDbName(name) { return name + '$test'; }
     getUnitxDb() { return db_1.getUnitxDb(true); }
     getUrl(db, url) {

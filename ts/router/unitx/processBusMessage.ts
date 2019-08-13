@@ -2,7 +2,7 @@ import { Runner, consts, BusMessage, busQueuehour, busQueueSeedFromHour } from '
 
 let faces:{[face:string]:number};
 let froms:{[from:string]:number};
-let lastHour: number;
+let lastHour: number = 0;
 
 async function getFaceId(runner:Runner, unit:number, face:string):Promise<number> {
     if (faces === undefined) {
@@ -53,10 +53,7 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
     let fromId = await getFromId(runner, unit, from);
     
     let hour = busQueuehour();
-    if (lastHour === undefined) {
-        lastHour = hour;
-    }
-    else if (hour > lastHour) {
+    if (hour > lastHour) {
         let seed = busQueueSeedFromHour(hour);
         let seedRet = await runner.call('$get_table_seed', ['busqueue']);
         let s = seedRet[0].seed;

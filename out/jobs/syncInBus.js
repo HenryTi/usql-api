@@ -8,18 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-//import { OpenApi } from "../core/openApi";
-//import { getOpenApi } from "./openApi";
-/*
-interface SyncFace {
-    unit: number;
-    faces: string;
-    faceUnitMessages: string;
-}
-*/
+const uqsDebugger = ['common', 'order'];
 function syncInBus(runner, net) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            /*
+            if (runner.net.isTest === true) {
+                if (uqsDebugger.indexOf(runner.uq)>=0) debugger;
+            }
+            */
             let { buses } = runner;
             let { faces, coll, hasError } = buses;
             while (hasError === false) {
@@ -82,7 +79,7 @@ function syncInBus(runner, net) {
                         break;
                     if (messages.length < maxRows && maxId < maxMsgId) {
                         // 如果unit的所有mssage都处理完成了，则设为unit的最大msg，下次查找可以快些
-                        yield runner.busSyncMax(unit, maxMsgId);
+                        //await runner.busSyncMax(unit, maxMsgId);
                     }
                 }
                 // 如果没有处理任何消息，则退出，等待下一个循环

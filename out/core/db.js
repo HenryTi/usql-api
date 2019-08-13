@@ -45,11 +45,14 @@ class Db {
             return this.isExists = yield this.dbServer.existsDatabase(this.dbName);
         });
     }
-    uqs() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.dbServer.uqDbs();
-        });
+    /*
+    async setDebugJobs():Promise<void> {
+        await this.dbServer.setDebugJobs();
     }
+    async uqs(): Promise<any[]> {
+        return await this.dbServer.uqDbs();
+    }
+    */
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
             if (exports.isDevelopment === true)
@@ -98,6 +101,11 @@ class Db {
     buildDatabase() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.dbServer.buildDatabase(this.dbName);
+        });
+    }
+    setDebugJobs() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.dbServer.setDebugJobs();
         });
     }
     uqDbs() {

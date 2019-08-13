@@ -7,6 +7,7 @@ export abstract class DbServer {
     abstract buildDatabase(db:string): Promise<boolean>;
     abstract existsDatabase(db:string): Promise<boolean>;
     abstract createDatabase(db:string): Promise<void>;
+    abstract setDebugJobs():Promise<void>;
     abstract uqDbs():Promise<any[]>;
     abstract initResDb(resDbName:string):Promise<void>;
     abstract init$UqDb():Promise<void>;

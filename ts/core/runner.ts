@@ -2,7 +2,7 @@ import * as _ from 'lodash';
 import { Db, isDevelopment } from './db';
 import { packReturns, packParam } from '.';
 import { ImportData } from './importData';
-import { InBusAction } from './inBusAction';
+import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from './inBusAction';
 import { Net } from './net';
 
 interface EntityAccess {
@@ -12,7 +12,10 @@ interface EntityAccess {
 
 interface SheetRun {
     onsave: boolean;
-    verify: any[];      // returns;
+    verify: {
+        returns: any[];      // returns;
+        inBuses: any[];
+    }
 }
 
 interface Buses {
@@ -26,7 +29,9 @@ interface Face {
     bus: string;
     faceName: string;
     version: number;
-    accept?: boolean;
+    accept?: {
+        inBuses: any[];
+    };
     query?: boolean;
 }
 
@@ -315,25 +320,35 @@ export class Runner {
         let ret = await this.unitUserTableFromProc(proc, unit, user, source, tuid, arr, no);
         return ret[0].vid;
     }
+    private getSheetVerifyParametersBus(sheetName:string):ParametersBus {
+        let name = sheetName + '$verify';
+        let inBusAction = this.parametersBusCache[name];
+        if (inBusAction === undefined) {
+            inBusAction = this.parametersBusCache[name] = new SheetVerifyParametersBus(this, sheetName);
+            inBusAction.init();
+        }
+        return inBusAction;
+    }
     async sheetVerify(sheet:string, unit:number, user:number, data:string):Promise<string> {
         let sheetRun = this.sheetRuns[sheet];
         if (sheetRun === undefined) return;
         let {verify} = sheetRun;
         if (verify === undefined) return;
-        let actionName = sheet + '$verify';
-        let inBusAction = this.getInBusAction(actionName);
-        let inBusActionData = inBusAction.buildData(unit, user, data);
-        let ret = await this.unitUserCall('tv_' + actionName, unit, user, inBusActionData);
-        let {length} = verify;
+        //let actionName = sheet + '$verify';
+        let inBusAction = this.getSheetVerifyParametersBus(sheet);
+        let inBusActionData = await inBusAction.buildData(unit, user, data);
+        let ret = await this.unitUserCall('tv_' + sheet + '$verify', unit, user, inBusActionData);
+        let {returns} = verify;
+        let {length} = returns;
         if (length === 0) {
-            if (ret === undefined) return 'fail';
+            if (ret === undefined || ret.length === 0) return 'fail';
             return;
         }
         if (length === 1) ret = [ret];
         for (let i=0; i<length; i++) {
             let t = ret[i];
             if (t.length > 0) {
-                return packReturns(verify, ret);
+                return packReturns(returns, ret);
             }
         }
         return;
@@ -347,10 +362,19 @@ export class Runner {
     async sheetProcessing(sheetId:number):Promise<void> {
         await this.db.call('tv_$sheet_processing', [sheetId]);
     }
+    private getSheetActionParametersBus(sheetName:string, actionName:string):ParametersBus {
+        let name = sheetName + '_' + actionName;
+        let inBusAction = this.parametersBusCache[name];
+        if (inBusAction === undefined) {
+            inBusAction = this.parametersBusCache[name] = new SheetActionParametersBus(this, sheetName, actionName);
+            inBusAction.init();
+        }
+        return inBusAction;
+    }
     async sheetAct(sheet:string, state:string, action:string, unit:number, user:number, id:number, flow:number): Promise<any[]> {
         let inBusActionName = sheet + '_' + (state === '$'?  action : state + '_' + action);
-        let inBusAction = this.getInBusAction(inBusActionName);        
-        let inBusActionData = inBusAction.buildData(unit, user, action);
+        let inBusAction = this.getSheetActionParametersBus(sheet, action);
+        let inBusActionData = await inBusAction.buildData(unit, user, action);
         return await this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, inBusActionData);
     }
     async sheetStates(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
@@ -385,22 +409,24 @@ export class Runner {
         return await this.unitUserCall(sql, unit, user, sheet, id);
     }
 
-    private inBusActions:{[actionName:string]:InBusAction} = {}
-    private getInBusAction(actionName:string):InBusAction {
-        let inBusAction = this.inBusActions[actionName];
-        if (inBusAction !== undefined) return inBusAction;
-        inBusAction = new InBusAction(actionName, this);
-        return this.inBusActions[actionName] = inBusAction;
+    private parametersBusCache:{[name:string]:ParametersBus} = {}
+    private getActionParametersBus(actionName:string):ParametersBus {
+        let inBusAction = this.parametersBusCache[actionName];
+        if (inBusAction === undefined) {
+            inBusAction = this.parametersBusCache[actionName] = new ActionParametersBus(this, actionName);
+            inBusAction.init();
+        }
+        return inBusAction;
     }
     async action(actionName:string, unit:number, user:number, data:string): Promise<any[][]> {
-        let inBusAction = this.getInBusAction(actionName);
+        let inBusAction = this.getActionParametersBus(actionName);
         let actionData = await inBusAction.buildData(unit, user, data);
         let result = await this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
         return result;
     }
 
     async actionFromObj(actionName:string, unit:number, user:number, obj:any): Promise<any[][]> {
-        let inBusAction = this.getInBusAction(actionName);
+        let inBusAction = this.getActionParametersBus(actionName);
         let actionData = await inBusAction.buildDataFromObj(unit, user, obj);
         let result = await this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
         return result;
@@ -413,16 +439,26 @@ export class Runner {
 
     // msgId: bus message id
     // body: bus message body
+    private getAcceptParametersBus(bus:string, face:string):ParametersBus {
+        let name = bus + '_' + face;
+        let inBusAction = this.parametersBusCache[name];
+        if (inBusAction == undefined) {
+            inBusAction = this.parametersBusCache[name] = new AcceptParametersBus(this, bus, face);
+            inBusAction.init();
+        }
+        return inBusAction;
+    }
     async bus(bus:string, face:string, unit:number, msgId:number, body:string): Promise<void> {
-        let actionName = bus + '_' + face;
-        let inBusAction = this.getInBusAction(actionName);
+        let inBusAction = this.getAcceptParametersBus(bus, face);
         let data = await inBusAction.buildData(unit, 0, body);
-        return await this.unitUserCall('tv_' + actionName, unit, 0, msgId, data);
+        return await this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
     }
 
+    /*
     async busSyncMax(unit:number, maxId:number): Promise<void> {
         return await this.call('$sync_busmax', [unit, maxId]);
     }
+    */
 
     async importData(unit:number, user:number, source:string, entity:string, filePath: string): Promise<void> {
         await ImportData.exec(this, unit, this.db, source, entity, filePath);
@@ -617,13 +653,13 @@ export class Runner {
                 let faceName = i.toLowerCase();
                 let url = busOwner.toLowerCase() + '/' + busName.toLowerCase() + '/' + faceName;
                 if (coll[url]) continue;
-                if (accept === true) {
+                if (accept !== undefined) {
                     faces.push(url);
                     coll[url] = {
                         bus: bus,
                         faceName: faceName,
                         version: version,
-                        accept: true,
+                        accept: accept,
                     };
                     hasAccept = true;
                 }

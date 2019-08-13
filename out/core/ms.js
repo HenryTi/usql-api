@@ -23,6 +23,7 @@ class MsDbServer extends dbServer_1.DbServer {
     buildDatabase(db) { return; }
     createDatabase(db) { return; }
     existsDatabase(db) { return; }
+    setDebugJobs() { return; }
     uqDbs() { return; }
     initResDb(resDbName) { return; }
     init$UqDb() { return; }

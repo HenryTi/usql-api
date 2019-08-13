@@ -9,19 +9,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const packParam_1 = require("./packParam");
-class InBusAction {
-    constructor(action, runner) {
-        this.action = action;
+class ParametersBus {
+    constructor(runner, entityName) {
         this.runner = runner;
-        let schema = this.runner.getSchema(action);
-        this.schema = schema.call;
+        this.entityName = entityName;
+    }
+    init() {
+        this.initSchema();
         this.initInBuses();
+    }
+    getQueryProc(bus, face) {
+        return `${this.entityName}$bus$${bus}_${face}`;
     }
     initInBuses() {
         let { inBuses } = this.schema;
         if (inBuses === undefined)
             return;
-        this.inBuses = inBuses.map(v => {
+        this.paramBuses = inBuses.map(v => {
             let parts = v.split('/');
             let schema = this.runner.getSchema(parts[0]);
             if (schema === undefined)
@@ -42,10 +46,10 @@ class InBusAction {
     }
     buildData(unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this.inBuses === undefined)
+            if (this.paramBuses === undefined)
                 return data;
             let retBusQuery = [];
-            for (let inBus of this.inBuses) {
+            for (let inBus of this.paramBuses) {
                 let ret = yield this.busQuery(inBus, unit, user, data);
                 retBusQuery.push(ret);
             }
@@ -66,7 +70,7 @@ class InBusAction {
             if (openApi === undefined) {
                 throw 'error on openApiUnitFace';
             }
-            let retParam = yield this.runner.call(this.action + '$bus$' + face, [unit, user, data]);
+            let retParam = yield this.runner.call(this.getQueryProc(bus.name, face), [unit, user, data]);
             let retMain = retParam[0][0];
             let params = [];
             if (param !== undefined) {
@@ -108,5 +112,49 @@ class InBusAction {
         return ret.join('\n');
     }
 }
-exports.InBusAction = InBusAction;
+exports.ParametersBus = ParametersBus;
+class ActionParametersBus extends ParametersBus {
+    initSchema() {
+        let schema = this.runner.getSchema(this.entityName);
+        this.schema = schema.call;
+    }
+}
+exports.ActionParametersBus = ActionParametersBus;
+class AcceptParametersBus extends ParametersBus {
+    constructor(runner, busName, faceName) {
+        super(runner, busName);
+        this.faceName = faceName;
+    }
+    getQueryProc(busName, face) {
+        let ret = `${this.entityName}_${this.faceName}$bus$${busName}_${face}`;
+        return ret;
+    }
+    initSchema() {
+        let schema = this.runner.getSchema(this.entityName);
+        this.schema = schema.call.schema[this.faceName];
+        let { accept } = this.schema;
+        this.schema.inBuses = accept.inBuses;
+    }
+}
+exports.AcceptParametersBus = AcceptParametersBus;
+class SheetVerifyParametersBus extends ParametersBus {
+    initSchema() {
+        let schema = this.runner.getSchema(this.entityName);
+        this.schema = schema.call.verify;
+    }
+    getQueryProc(bus, face) { return `${this.entityName}$verify$bus$${bus}_${face}`; }
+}
+exports.SheetVerifyParametersBus = SheetVerifyParametersBus;
+class SheetActionParametersBus extends ParametersBus {
+    constructor(runner, sheetName, actionName) {
+        super(runner, sheetName);
+        this.actionName = actionName;
+    }
+    initSchema() {
+        let schema = this.runner.getSchema(this.entityName);
+        this.schema = schema.call;
+    }
+    getQueryProc(bus, face) { return `${this.entityName}_${this.actionName}$bus$${bus}_${face}`; }
+}
+exports.SheetActionParametersBus = SheetActionParametersBus;
 //# sourceMappingURL=inBusAction.js.map

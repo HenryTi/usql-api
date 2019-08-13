@@ -40,9 +40,14 @@ export class Db {
         if (this.isExists === true) return true;
         return this.isExists = await this.dbServer.existsDatabase(this.dbName);
     }
+    /*
+    async setDebugJobs():Promise<void> {
+        await this.dbServer.setDebugJobs();
+    }
     async uqs(): Promise<any[]> {
         return await this.dbServer.uqDbs();
     }
+    */
     async sql(sql:string, params:any[]): Promise<any> {
         if (isDevelopment===true) console.log(this.dbName, ' sql: ', params.join(','))
         return await this.dbServer.sql(this.dbName, sql, params);
@@ -71,6 +76,9 @@ export class Db {
     }
     async buildDatabase(): Promise<boolean> {
         return await this.dbServer.buildDatabase(this.dbName);
+    }
+    async setDebugJobs():Promise<void> {
+        await this.dbServer.setDebugJobs();
     }
     async uqDbs():Promise<any[]> {
         return await this.dbServer.uqDbs();

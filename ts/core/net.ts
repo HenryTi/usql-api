@@ -9,11 +9,13 @@ import { UnitxApi } from "./unitxApi";
 
 export abstract class Net {
     private runners: {[name:string]: Runner} = {};
-    private initRunner: boolean;    
+    private initRunner: boolean;
 
     constructor(initRunner: boolean) {
         this.initRunner = initRunner;
     }
+
+    abstract get isTest():boolean;
 
     protected async innerRunner(name:string):Promise<Runner> {
         name = name.toLowerCase();
@@ -39,6 +41,7 @@ export abstract class Net {
 
     async getRunner(name:string):Promise<Runner> {
         let runner = await this.innerRunner(name);
+        if (runner === undefined) return;
         if (this.initRunner === true) await runner.init();
         return runner;
     }
@@ -102,16 +105,8 @@ export abstract class Net {
     }
     private async buildOpenApiFrom(uqFullName:string, unit:number, uqUrl:{db:string, url:string, urlTest:string}):Promise<OpenApi> {
         let openApis = this.uqOpenApis[uqFullName];
-        //if (uqUrl === undefined) return openApis[unit] = null;
         let url = await this.getUqUrl(uqUrl);
         url = url.toLowerCase();
-        /*
-        let openApi = this.openApiColl[url];
-        if (openApi === undefined) {
-            openApi = new OpenApi(url);
-            this.openApiColl[url] = openApi;
-        }
-        */
         let openApi = new OpenApi(url);
         openApis[unit] = openApi;
         return openApi;
@@ -120,6 +115,7 @@ export abstract class Net {
         let openApi = this.getOpenApiFromCache(uqFullName, unit);
         if (openApi !== undefined) return openApi;
         let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
+        if (!uqUrl) return;
         return await this.buildOpenApiFrom(uqFullName, unit, uqUrl);
     }
 
@@ -205,6 +201,7 @@ export abstract class Net {
 }
 
 class ProdNet extends Net {
+    get isTest():boolean {return false}
     getDbName(name:string):string {return name}
     protected getUnitxDb(): Db {return getUnitxDb(false)}
     protected getUrl(db:string, url:string):string {
@@ -214,6 +211,7 @@ class ProdNet extends Net {
 }
 
 class TestNet extends Net {
+    get isTest():boolean {return true}
     getDbName(name:string):string {return name + '$test'}
     protected getUnitxDb(): Db {return getUnitxDb(true)}
     protected getUrl(db:string, url:string):string {

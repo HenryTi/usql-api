@@ -46,8 +46,10 @@ function queueIn(runner, net) {
                             err.message : err;
                         yield runner.log(unit, errSubject, error);
                     }
-                    if (finish !== undefined)
+                    if (finish !== finish_1.Finish.done) {
+                        // 操作错误，retry++ or bad
                         yield runner.call('$queue_in_set', [id, finish]);
+                    }
                 }
             }
             catch (err) {

@@ -172,6 +172,8 @@ class MyDbServer extends dbServer_1.DbServer {
             yield this.exec(createUqTable, undefined);
             let createLog = 'CREATE TABLE IF NOT EXISTS $uq.log (`time` timestamp(6) not null, uq int, unit int, subject varchar(100), content text, primary key(`time`))';
             yield this.exec(createLog, undefined);
+            let createSetting = 'CREATE TABLE IF NOT EXISTS $uq.setting (`name` varchar(100) not null, `value` varchar(100), update_time timestamp default current_timestamp on update current_timestamp, primary key(`name`))';
+            yield this.exec(createSetting, undefined);
             let writeLog = `
 create procedure $uq.log(_unit int, _uq varchar(50), _subject varchar(100), _content text) begin
 declare _time timestamp(6);
@@ -195,17 +197,6 @@ end;
     }
     build$Uq(db) {
         return __awaiter(this, void 0, void 0, function* () {
-            /*
-            let exists = 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'$uq\'';
-            let rows:any[] = await this.exec(exists, undefined);
-            if (rows.length == 0) {
-                let sql = 'CREATE DATABASE IF NOT EXISTS $uq default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
-                await this.exec(sql, undefined);
-            }
-            //await this.exec('USE $uq;', undefined);
-            let createUqDb = 'CREATE TABLE IF NOT EXISTS $uq.uq (id int not null auto_increment, `name` varchar(50), create_time timestamp not null default current_timestamp, primary key(`name`), unique key unique_id (id))';
-            await this.exec(createUqDb, undefined);
-            */
             let insertUqDb = `insert into $uq.uq (\`name\`) values ('${db}') on duplicate key update create_time=current_timestamp();`;
             yield this.exec(insertUqDb, undefined);
         });
@@ -223,9 +214,20 @@ end;
             return rows.length > 0;
         });
     }
+    setDebugJobs() {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = `insert into $uq.setting (\`name\`, \`value\`) VALUES ('debugging_jobs', 'yes') 
+        ON DUPLICATE KEY UPDATE update_time=current_timestamp;`;
+            yield this.exec(sql, undefined);
+        });
+    }
     uqDbs() {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = `select name as db from $uq.uq;`;
+            let sql = db_1.isDevelopment === true ?
+                'select name as db from $uq.uq;' :
+                `select name as db 
+	            from $uq.uq 
+        	    where not exists(SELECT \`name\` FROM $uq.setting WHERE \`name\`='debugging_jobs' AND \`value\`='yes' AND UNIX_TIMESTAMP()-unix_timestamp(update_time)<120);`;
             let rows = yield this.exec(sql, undefined);
             return rows;
         });

@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../../core");
 let faces;
 let froms;
-let lastHour;
+let lastHour = 0;
 function getFaceId(runner, unit, face) {
     return __awaiter(this, void 0, void 0, function* () {
         if (faces === undefined) {
@@ -69,10 +69,7 @@ function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
         let faceId = yield getFaceId(runner, unit, face);
         let fromId = yield getFromId(runner, unit, from);
         let hour = core_1.busQueuehour();
-        if (lastHour === undefined) {
-            lastHour = hour;
-        }
-        else if (hour > lastHour) {
+        if (hour > lastHour) {
             let seed = core_1.busQueueSeedFromHour(hour);
             let seedRet = yield runner.call('$get_table_seed', ['busqueue']);
             let s = seedRet[0].seed;

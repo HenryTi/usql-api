@@ -7,7 +7,7 @@ interface SchemaField {
     fields:any[];
 }
 
-interface InBus {
+interface ParamBus {
     bus: any;       // schema
     busOwner: string;
     busName: string;
@@ -16,24 +16,31 @@ interface InBus {
     returns: {fields:SchemaField[]; arrs:{name:string; fields:SchemaField[]}[]},
 }
 
-export class InBusAction {
-    private action: string;
-    private runner: Runner;
-    private schema: any;
-    private inBuses:InBus[];
+export abstract class ParametersBus {
+    protected runner: Runner;
+    protected entityName: string;
+    protected schema: any;
+    private paramBuses:ParamBus[];
 
-    constructor(action:string, runner:Runner) {
-        this.action = action;
+    constructor(runner:Runner, entityName:string) {
         this.runner = runner;
-        let schema = this.runner.getSchema(action);
-        this.schema = schema.call;
+        this.entityName = entityName;
+    }
+
+    init() {
+        this.initSchema();
         this.initInBuses();
+    }
+
+    protected abstract initSchema():void;
+    protected getQueryProc(bus:string, face:string):string {
+        return `${this.entityName}$bus$${bus}_${face}`;
     }
 
     private initInBuses() {
         let {inBuses} = this.schema;
         if (inBuses === undefined) return;
-        this.inBuses = (inBuses as string[]).map(v => {
+        this.paramBuses = (inBuses as string[]).map(v => {
             let parts = v.split('/');
             let schema = this.runner.getSchema(parts[0]);
             if (schema === undefined) return;
@@ -53,10 +60,10 @@ export class InBusAction {
     }
 
     async buildData(unit:number, user:number, data:string):Promise<string> {
-        if (this.inBuses === undefined) return data;
+        if (this.paramBuses === undefined) return data;
 
         let retBusQuery:any[] = [];
-        for (let inBus of this.inBuses) {
+        for (let inBus of this.paramBuses) {
             let ret = await this.busQuery(inBus, unit, user, data);
             retBusQuery.push(ret);
         }
@@ -68,14 +75,14 @@ export class InBusAction {
         return await this.buildData(unit, user, data);
     }
 
-    private async busQuery(inBus:InBus, unit:number, user:number, data:string):Promise<any> {
+    private async busQuery(inBus:ParamBus, unit:number, user:number, data:string):Promise<any> {
         let {bus, face, busOwner, busName, param, returns} = inBus;
         //let {busOwner, busName} = bus;
         let openApi = await this.runner.net.openApiUnitFace(unit, busOwner, busName, face);
         if (openApi === undefined) {
             throw 'error on openApiUnitFace';
         }
-        let retParam = await this.runner.call(this.action + '$bus$' + face, [unit, user, data]);
+        let retParam = await this.runner.call(this.getQueryProc(bus.name, face), [unit, user, data]);
         let retMain = retParam[0][0];
         let params:any[] = [];
         if (param !== undefined) {
@@ -116,4 +123,51 @@ export class InBusAction {
         }
         return ret.join('\n');
     }
+}
+
+export class ActionParametersBus extends ParametersBus {
+    protected initSchema():void {
+        let schema = this.runner.getSchema(this.entityName);
+        this.schema = schema.call;
+    }
+}
+
+export class AcceptParametersBus extends ParametersBus {
+    private faceName:string;
+    constructor(runner:Runner, busName:string, faceName:string) {
+        super(runner, busName);
+        this.faceName = faceName;
+    }
+    protected getQueryProc(busName:string, face:string):string {
+        let ret = `${this.entityName}_${this.faceName}$bus$${busName}_${face}`
+        return ret;
+    }
+    protected initSchema():void {
+        let schema = this.runner.getSchema(this.entityName);
+        this.schema = schema.call.schema[this.faceName];
+        let {accept} = this.schema;
+        this.schema.inBuses = accept.inBuses;
+    }
+}
+
+export class SheetVerifyParametersBus extends ParametersBus {
+    protected initSchema():void {
+        let schema = this.runner.getSchema(this.entityName);
+        this.schema = schema.call.verify;
+    }
+    protected getQueryProc(bus:string, face:string):string {return `${this.entityName}$verify$bus$${bus}_${face}`}
+}
+
+export class SheetActionParametersBus extends ParametersBus {
+    private actionName:string;
+    constructor(runner:Runner, sheetName:string, actionName:string) {
+        super(runner, sheetName);
+        this.actionName = actionName;
+    }
+
+    protected initSchema():void {
+        let schema = this.runner.getSchema(this.entityName);
+        this.schema = schema.call;
+    }
+    protected getQueryProc(bus:string, face:string):string {return `${this.entityName}_${this.actionName}$bus$${bus}_${face}`}
 }

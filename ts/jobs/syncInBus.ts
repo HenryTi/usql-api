@@ -1,17 +1,14 @@
-import { Runner, consts, Net } from "../core";
-//import { OpenApi } from "../core/openApi";
-//import { getOpenApi } from "./openApi";
+import { Runner, Net } from "../core";
 
-/*
-interface SyncFace {
-    unit: number;
-    faces: string;
-    faceUnitMessages: string;
-}
-*/
+const uqsDebugger = ['common', 'order'];
 
 export async function syncInBus(runner: Runner,  net: Net) {
     try {
+        /*
+        if (runner.net.isTest === true) {
+            if (uqsDebugger.indexOf(runner.uq)>=0) debugger;
+        }
+        */
         let {buses} = runner;
         let {faces, coll, hasError} = buses;
         while (hasError === false) {
@@ -71,7 +68,7 @@ export async function syncInBus(runner: Runner,  net: Net) {
                 if (hasError === true) break;
                 if (messages.length < maxRows && maxId < maxMsgId) {
                     // 如果unit的所有mssage都处理完成了，则设为unit的最大msg，下次查找可以快些
-                    await runner.busSyncMax(unit, maxMsgId);
+                    //await runner.busSyncMax(unit, maxMsgId);
                 }
             }
             // 如果没有处理任何消息，则退出，等待下一个循环
