@@ -48,9 +48,12 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
     rb.post(router, '/finish',
     async (runner:Runner, body:any, params:any):Promise<any> => {
         let {uqId} = runner;
-        let {uqId:paramUqId} = body;
+        let {uqId:paramUqId, uqVersion} = body;
         if (!uqId) {
-            await runner.setSetting(0, 'uqId', String(paramUqId));
+            await Promise.all([
+                runner.setSetting(0, 'uqId', String(paramUqId)),
+                runner.setSetting(0, 'uqVersion', String(uqVersion))
+            ]);
             uqId = paramUqId;
         }
         await runner.initSetting();

@@ -22,6 +22,11 @@ class Runner {
         this.setting = {};
     }
     getDb() { return this.db.getDbName(); }
+    checkUqVersion(uqVersion) {
+        //if (this.uqVersion === undefined) return;
+        //if (uqVersion !== this.uqVersion) 
+        throw 'unmatched uq version';
+    }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -168,15 +173,6 @@ class Runner {
             return ret;
         });
     }
-    /*
-    async $$openFresh(unit:number, stampsText:string) {
-        return await this.unitCall('tv_$$open_fresh', unit, stampsText);
-    }
-
-    async setTimezone(unit:number, user:number): Promise<void> {
-        return await this.unitUserCall('tv_$set_timezone', unit, user);
-    }
-    */
     start(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.unitUserCall('tv_$start', unit, user);
@@ -536,11 +532,6 @@ class Runner {
             return yield this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
         });
     }
-    /*
-    async busSyncMax(unit:number, maxId:number): Promise<void> {
-        return await this.call('$sync_busmax', [unit, maxId]);
-    }
-    */
     importData(unit, user, source, entity, filePath) {
         return __awaiter(this, void 0, void 0, function* () {
             yield importData_1.ImportData.exec(this, unit, this.db, source, entity, filePath);
@@ -574,22 +565,26 @@ class Runner {
             let settingTable = rows[1];
             let setting = {};
             for (let row of settingTable) {
-                let v = row.value;
-                if (v === null) {
-                    setting[row.name] = null;
+                let { name, value } = row;
+                name = name.toLowerCase();
+                if (value === null) {
+                    setting[name] = null;
                 }
                 else {
-                    let n = Number(v);
-                    setting[row.name] = isNaN(n) === true ? v : n;
+                    let n = Number(value);
+                    setting[name] = isNaN(n) === true ? value : n;
                 }
             }
-            this.uqOwner = setting['uqOwner'];
+            this.uqOwner = setting['uqowner'];
             this.uq = setting['uq'];
             this.author = setting['author'];
-            this.version = setting['version'];
-            this.uqId = setting['uqId'];
-            this.hasUnit = !(setting['hasUnit'] === 0);
-            let uu = setting['uniqueUnit'];
+            this.uqId = setting['uqid'];
+            this.version = setting['version']; // source verion in uq code
+            this.uqVersion = setting['uqversion']; // compile changed
+            if (this.uqVersion === undefined)
+                this.uqVersion = 1;
+            this.hasUnit = !(setting['hasunit'] === 0);
+            let uu = setting['uniqueunit'];
             this.uniqueUnit = uu ? uu : 0;
             if (db_1.isDevelopment)
                 console.log('init schemas: ', this.uq, this.author, this.version);
@@ -772,15 +767,12 @@ class Runner {
             let faceText;
             if (faces.length > 0)
                 faceText = faces.join('\n');
-            //if (faceText !== undefined && outCount > 0) {
             this.buses = {
                 faces: faceText,
                 outCount: outCount,
                 coll: coll,
                 hasError: false,
             };
-            //}
-            //console.log('schema: %s', JSON.stringify(this.schemas));
             this.buildAccesses();
         });
     }
@@ -832,11 +824,6 @@ class Runner {
             uq: this.uqId
         };
         for (let access of this.accessSchemaArr) {
-            //let la = a.toLowerCase();
-            //let schema = this.schemas[la];
-            //if (schema === undefined) continue;
-            //let access = schema.call;
-            //if (access.type !== 'access') continue;
             let acc = this.access[access.name] = {};
             for (let item of access.list) {
                 let it = item;
@@ -913,7 +900,7 @@ class Runner {
                 entityAccess[name] = access;
             }
             return {
-                //access: access,
+                version: this.uqVersion,
                 access: entityAccess,
                 tuids: this.tuids
             };
@@ -929,6 +916,7 @@ class Runner {
                 entityAccess[name] = access;
             }
             return {
+                version: this.uqVersion,
                 access: entityAccess,
                 tuids: this.tuids
             };

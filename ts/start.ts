@@ -139,9 +139,8 @@ function buildUqRouter(rb: RouterBuilder, rbCompile: CompileRouterBuilder): Rout
     let entityRouter = Router({ mergeParams: true });
     buildEntityRouter(entityRouter, rb);
     uqRouter.use('/tv', [authCheck, entityRouter]);
-    uqRouter.use('/joint', [authJoint, entityRouter]);
-    // debug tonva uq, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
     uqRouter.use('/debug', [authCheck, entityRouter]);
+    uqRouter.use('/joint', [authJoint, entityRouter]);
 
     uqRouter.use('/', dbHello);
     uqRouter.use('/hello', dbHello);

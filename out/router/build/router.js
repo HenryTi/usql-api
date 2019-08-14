@@ -53,9 +53,12 @@ function buildBuildRouter(router, rb) {
     }));
     rb.post(router, '/finish', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         let { uqId } = runner;
-        let { uqId: paramUqId } = body;
+        let { uqId: paramUqId, uqVersion } = body;
         if (!uqId) {
-            yield runner.setSetting(0, 'uqId', String(paramUqId));
+            yield Promise.all([
+                runner.setSetting(0, 'uqId', String(paramUqId)),
+                runner.setSetting(0, 'uqVersion', String(uqVersion))
+            ]);
             uqId = paramUqId;
         }
         yield runner.initSetting();

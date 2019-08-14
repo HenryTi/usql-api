@@ -46,8 +46,14 @@ export class RouterBuilder {
     getDbName(name:string):string {return this.net.getDbName(name);}
     protected async routerRunner(req:Request):Promise<Runner> {
         let db:string = req.params.db;
-        //if (db.endsWith('$test') === true) debugger;
         let runner = await this.checkRunner(db);
+        let uqVersion = req.header('tonva-uq-version');
+        if (uqVersion !== undefined) {
+            let n = Number(uqVersion);
+            if (n !== NaN) {
+                runner.checkUqVersion(n);
+            }
+        }
         return runner;
     }
 

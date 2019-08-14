@@ -55,6 +55,7 @@ export class Runner {
     froms: {[from:string]:{[tuid:string]:{tuid?:string, maps?:string[], tuidObj?:any, mapObjs?:{[map:string]:any}}}};
     hasUnit: boolean;
     uqId: number;
+    uqVersion: number;  // uq compile changes
     uniqueUnit: number;
     buses:Buses; //{[url:string]:any}; // 直接查找bus
     hasSyncTuids: boolean = false;
@@ -67,6 +68,12 @@ export class Runner {
     }
 
     getDb():string {return this.db.getDbName()}
+
+    checkUqVersion(uqVersion:number) {
+        //if (this.uqVersion === undefined) return;
+        //if (uqVersion !== this.uqVersion) 
+        throw 'unmatched uq version';
+    }
 
     async sql(sql:string, params:any[]): Promise<any> {
         try {
@@ -173,16 +180,6 @@ export class Runner {
         let ret = await this.db.tablesFromProc(proc, p);
         return ret;
     }
-
-    /*
-    async $$openFresh(unit:number, stampsText:string) {
-        return await this.unitCall('tv_$$open_fresh', unit, stampsText);
-    }
-
-    async setTimezone(unit:number, user:number): Promise<void> {
-        return await this.unitUserCall('tv_$set_timezone', unit, user);
-    }
-    */
 
     async start(unit:number, user:number): Promise<void> {
         return await this.unitUserCall('tv_$start', unit, user);
@@ -454,12 +451,6 @@ export class Runner {
         return await this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
     }
 
-    /*
-    async busSyncMax(unit:number, maxId:number): Promise<void> {
-        return await this.call('$sync_busmax', [unit, maxId]);
-    }
-    */
-
     async importData(unit:number, user:number, source:string, entity:string, filePath: string): Promise<void> {
         await ImportData.exec(this, unit, this.db, source, entity, filePath);
     }
@@ -487,23 +478,26 @@ export class Runner {
         let settingTable:{name:string, value:string}[] = rows[1];
         let setting:{[name:string]:string|number} = {};
         for (let row of settingTable) {
-            let v = row.value;
-            if (v === null) {
-                setting[row.name] = null;
+            let {name, value} = row;
+            name = name.toLowerCase();
+            if (value === null) {
+                setting[name] = null;
             }
             else {
-                let n = Number(v);
-                setting[row.name] = isNaN(n)===true? v : n;
+                let n = Number(value);
+                setting[name] = isNaN(n)===true? value : n;
             }
         }
-        this.uqOwner = setting['uqOwner'] as string; 
-        this.uq = setting['uq'] as string; 
+        this.uqOwner = setting['uqowner'] as string; 
+        this.uq = setting['uq'] as string;
         this.author = setting['author'] as string;
-        this.version = setting['version'] as string;
-        this.uqId = setting['uqId'] as number;
-        this.hasUnit = !(setting['hasUnit'] as number === 0);
+        this.uqId = setting['uqid'] as number;
+        this.version = setting['version'] as string;        // source verion in uq code
+        this.uqVersion = setting['uqversion'] as number;    // compile changed
+        if (this.uqVersion === undefined) this.uqVersion = 1;
+        this.hasUnit = !(setting['hasunit'] as number === 0);
 
-        let uu = setting['uniqueUnit'];
+        let uu = setting['uniqueunit'];
         this.uniqueUnit = uu? uu as number: 0;
         
         if (isDevelopment) console.log('init schemas: ', this.uq, this.author, this.version);
@@ -676,16 +670,12 @@ export class Runner {
         }
         let faceText:string;
         if (faces.length > 0) faceText = faces.join('\n');
-        //if (faceText !== undefined && outCount > 0) {
         this.buses = {
             faces: faceText, 
             outCount: outCount,
             coll: coll,
             hasError: false,
         };
-        //}
-
-        //console.log('schema: %s', JSON.stringify(this.schemas));
         this.buildAccesses();
     }
 
@@ -730,11 +720,6 @@ export class Runner {
             uq: this.uqId
         };
         for (let access of this.accessSchemaArr) {
-            //let la = a.toLowerCase();
-            //let schema = this.schemas[la];
-            //if (schema === undefined) continue;
-            //let access = schema.call;
-            //if (access.type !== 'access') continue;
             let acc = this.access[access.name] = {};
             for (let item of access.list) {
                 let it = item as string;
@@ -804,7 +789,7 @@ export class Runner {
             entityAccess[name] = access;
         }
         return {
-            //access: access,
+            version: this.uqVersion,
             access: entityAccess,
             tuids: this.tuids
         };
@@ -819,6 +804,7 @@ export class Runner {
             entityAccess[name] = access;
         }
         return {
+            version: this.uqVersion,
             access: entityAccess,
             tuids: this.tuids
         };

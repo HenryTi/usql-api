@@ -84,8 +84,14 @@ class RouterBuilder {
     routerRunner(req) {
         return __awaiter(this, void 0, void 0, function* () {
             let db = req.params.db;
-            //if (db.endsWith('$test') === true) debugger;
             let runner = yield this.checkRunner(db);
+            let uqVersion = req.header('tonva-uq-version');
+            if (uqVersion !== undefined) {
+                let n = Number(uqVersion);
+                if (n !== NaN) {
+                    runner.checkUqVersion(n);
+                }
+            }
             return runner;
         });
     }
