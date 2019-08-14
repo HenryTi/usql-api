@@ -49,6 +49,7 @@ async function getFromId(runner:Runner, unit:number, from:string):Promise<number
 }
 
 export async function writeDataToBus(runner:Runner, face:string, unit:number, from:string, fromQueueId:number, version:number, body:string) {
+    /*
     let faceId = await getFaceId(runner, unit, face);
     let fromId = await getFromId(runner, unit, from);
     
@@ -66,6 +67,8 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
     
     await runner.tuidSave(consts.BusQueue, unit, undefined, 
         [undefined, faceId, fromId, fromQueueId, version, body]);
+    */
+    await runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, body);
 }
 
 export async function processBusMessage(unitxRunner:Runner, msg:BusMessage):Promise<void> {

@@ -66,20 +66,26 @@ function getFromId(runner, unit, from) {
 }
 function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
     return __awaiter(this, void 0, void 0, function* () {
-        let faceId = yield getFaceId(runner, unit, face);
-        let fromId = yield getFromId(runner, unit, from);
-        let hour = core_1.busQueuehour();
+        /*
+        let faceId = await getFaceId(runner, unit, face);
+        let fromId = await getFromId(runner, unit, from);
+        
+        let hour = busQueuehour();
         if (hour > lastHour) {
-            let seed = core_1.busQueueSeedFromHour(hour);
-            let seedRet = yield runner.call('$get_table_seed', ['busqueue']);
+            let seed = busQueueSeedFromHour(hour);
+            let seedRet = await runner.call('$get_table_seed', ['busqueue']);
             let s = seedRet[0].seed;
             if (seed > s) {
                 seed = s;
-                yield runner.call('$set_bus_queue_seed', ['busqueue', seed]);
+                await runner.call('$set_bus_queue_seed', ['busqueue', seed]);
             }
             lastHour = hour;
         }
-        yield runner.tuidSave(core_1.consts.BusQueue, unit, undefined, [undefined, faceId, fromId, fromQueueId, version, body]);
+        
+        await runner.tuidSave(consts.BusQueue, unit, undefined,
+            [undefined, faceId, fromId, fromQueueId, version, body]);
+        */
+        yield runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, body);
     });
 }
 exports.writeDataToBus = writeDataToBus;

@@ -429,6 +429,11 @@ export class Runner {
         return result;
     }
 
+    async actionDirect(actionName:string, unit:number, user:number, ...params:any[]): Promise<any[][]> {
+        let result = await this.unitUserCallEx('tv_' + actionName, unit, user, ...params);
+        return result;
+    }
+
     async query(query:string, unit:number, user:number, params:any[]): Promise<any> {
         let ret = await this.unitUserCall('tv_' + query, unit, user, ...params);
         return ret;

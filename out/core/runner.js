@@ -508,6 +508,12 @@ class Runner {
             return result;
         });
     }
+    actionDirect(actionName, unit, user, ...params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = yield this.unitUserCallEx('tv_' + actionName, unit, user, ...params);
+            return result;
+        });
+    }
     query(query, unit, user, params) {
         return __awaiter(this, void 0, void 0, function* () {
             let ret = yield this.unitUserCall('tv_' + query, unit, user, ...params);
