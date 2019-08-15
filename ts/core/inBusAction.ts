@@ -83,31 +83,35 @@ export abstract class ParametersBus {
             throw 'error on openApiUnitFace';
         }
         let retParam = await this.runner.call(this.getQueryProc(bus.name, face), [unit, user, data]);
-        let retMain = retParam[0][0];
+        let ret0 = retParam[0];
+        let retParamMain = Array.isArray(ret0)===true? ret0[0] : ret0;
         let params:any[] = [];
         if (param !== undefined) {
             let retIndex = 1;
             for (let qp of param) {
                 let {name, type, fields} = qp;
-                let param:any;
+                let value:any;
                 if (type === 'array') {
-                    param = this.buildTextFromRet(fields, retParam[retIndex++]);
+                    value = this.buildTextFromRet(fields, retParam[retIndex++]);
                 }
                 else {
-                    param = retMain[name];
+                    value = retParamMain[name];
                 }
-                params.push(param);
+                params.push(value);
             }
         }
         let ret = await openApi.busQuery(unit, busOwner, busName, face, params);
         let results:any[] = [];
         let {fields, arrs} = returns;
-        let text = this.buildTextFromRet(fields, ret[0]);
+        let retMain:any[] = arrs === undefined? ret : ret[0];
+        let text = this.buildTextFromRet(fields, retMain);
         results.push(text);
-        let len = arrs.length;
-        for (let i=0; i<len; i++) {
-            let text = this.buildTextFromRet(arrs[i].fields, ret[i+1]);
-            results.push(text);
+        if (arrs !== undefined) {
+            let len = arrs.length;
+            for (let i=0; i<len; i++) {
+                let text = this.buildTextFromRet(arrs[i].fields, ret[i+1]);
+                results.push(text);
+            }
         }
         return results.join('\n\n');
     }
