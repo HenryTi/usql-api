@@ -227,7 +227,7 @@ end;
                 'select name as db from $uq.uq;' :
                 `select name as db 
 	            from $uq.uq 
-        	    where not exists(SELECT \`name\` FROM $uq.setting WHERE \`name\`='debugging_jobs' AND \`value\`='yes' AND UNIX_TIMESTAMP()-unix_timestamp(update_time)<120);`;
+        	    where not exists(SELECT \`name\` FROM $uq.setting WHERE \`name\`='debugging_jobs' AND \`value\`='yes' AND UNIX_TIMESTAMP()-unix_timestamp(update_time)<600);`;
             let rows = yield this.exec(sql, undefined);
             return rows;
         });

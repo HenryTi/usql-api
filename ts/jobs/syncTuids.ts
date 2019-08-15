@@ -1,15 +1,6 @@
 import { Runner, packParam, Net } from '../core';
 import { OpenApi } from '../core/openApi';
 
-interface SyncRow {
-    unit: number;
-    from: string;
-    tuid: string;
-    id: number;
-    hasNew: number;
-    stamp: number;
-}
-
 export async function syncTuids(runner:Runner, net:Net):Promise<void> {
     let {froms, hasSyncTuids} = runner;
     if (hasSyncTuids === false) return;
@@ -20,98 +11,6 @@ export async function syncTuids(runner:Runner, net:Net):Promise<void> {
         if (uqs.indexOf(db) < 0) return;
         await syncNew(runner, net);
         await syncModify(runner, net);
-        /*
-        let syncTuids = await runner.call('$sync_tuids', []);
-        if (syncTuids.length === 0) return;
-        let fromRows: {[from:string]: {[unit:number]: SyncRow[]}} = {};
-        for (let row of syncTuids) {
-            let {from, unit, tuid} = row as SyncRow;
-            let f = froms[from];
-            if (f === undefined) continue;
-            let st = f[tuid];
-            if (st === undefined) continue;
-            let unitRows = fromRows[from];
-            if (unitRows === undefined) fromRows[from] = unitRows = {};
-            let rows = unitRows[unit];
-            if (rows === undefined) unitRows[unit] = rows = [];
-            rows.push(row);
-        }
-
-        for (let from in fromRows) {
-            let unitRows = fromRows[from];
-            let fromSchemas = froms[from];
-            for (let i in unitRows) {
-                let rows = unitRows[i];
-                let unit = Number(i);
-                let openApi = await net.getOpenApi(from, unit);
-                if (!openApi) continue;
-                let stamps:any[][] = [];
-                // 如果本tuid有新id了，去from端同步
-                for (let row of rows) {
-                    let {tuid, id, hasNew, stamp} = row;
-                    if (stamp === null) stamp = 0;
-                    if (id === null) id = 0;
-                    let tuidSchema = runner.getTuid(tuid);
-                    // 只有import from all的tuid才同步
-                    if (tuidSchema.from.all === true) {
-                        stamps.push([tuid, stamp, id]);
-                    }
-                    if (hasNew === 1) {
-                        if (fromSchemas === undefined) continue;
-                        let syncTuid = fromSchemas[tuid];
-                        let {maps} = syncTuid; // tuid, 随后 tab 分隔的 map
-                        try {
-                            for (;;) {
-                                let ids = await runner.unitCall(tuid + '$sync0', unit);
-                                if (ids.length === 0) break;
-                                for (let idRet of ids) {
-                                    await syncId(runner, openApi, unit, idRet.id, tuid, maps);
-                                }
-                            }
-                            await runner.unitUserCall(tuid + '$sync_set', unit, undefined, undefined, 0);
-                        }
-                        catch (err) {
-                            debugger;
-                        }
-                        let s = null;
-                    }
-                }
-                if (stamps.length === 0) continue;
-                // 如果from端更新了tuid，同步过来。
-                let fresh = await openApi.fresh(unit, stamps);
-                let len = stamps.length;
-                for (let i=0; i<len; i++) {
-                    let stampRow = stamps[i];
-                    let tuid = stampRow[0];
-                    let syncTuid = fromSchemas[tuid];
-                    let {maps} = syncTuid; // tuid, 随后 tab 分隔的 map
-                    let tuidIdTable:any[];
-
-                    if (len === 1) {
-                        tuidIdTable = fresh;
-                    }
-                    else {
-                        tuidIdTable = fresh[i];
-                    }
-                    let stampMax = 0;
-                    try {
-                        if (tuidIdTable !== undefined) {
-                            for (let row of tuidIdTable) {
-                                let {id, stamp} = row;
-                                await syncId(runner, openApi, unit, id, tuid, maps);
-                                if (stamp > stampMax) stampMax = stamp;
-                                await runner.unitCall(tuid + '$sync_set', unit, stampMax, id, undefined);
-                            }
-                        }
-                    }
-                    catch (err) {
-                        debugger;
-                    }
-                    let s = null;
-                }
-            }
-        }
-        */
     }
     catch (err) {
         debugger;
@@ -133,15 +32,6 @@ async function syncNew(runner:Runner, net:Net) {
             let {from} = schema;
             let openApi = await net.openApiUnitUq(unit, from);
             if (!openApi) continue;
-            /*
-            let ret = await openApi.fromEntity(unit, entity, key);
-            if (type === 'tuid') {
-                await setTuid(runner, entity, unit, id, ret);
-            }
-            else if (type === 'map') {
-                await setMap(runner, entity, unit, id, ret);
-            }
-            */
             await syncEntity(runner, openApi, unit, entity, key);
             await runner.call('$from_new_finished', [unit, id]);
         }
@@ -237,26 +127,14 @@ async function syncModify(runner:Runner, net:Net) {
 async function syncEntity(runner:Runner, openApi:OpenApi, unit:number|string, entity:string, key:string) {
     let ret = await openApi.fromEntity(unit, entity, key);
     let schema = runner.getSchema(entity);
-    let {type} = schema;
-    if (type === 'tuid') {
-        await setTuid(runner, entity, unit, /*id, */ret);
+    switch (schema.type) {
+        case 'tuid':
+            await setTuid(runner, entity, unit, ret);
+            break;
+        case 'map':
+            await setMap(runner, entity, unit, ret);
+            break;
     }
-    else if (type === 'map') {
-        await setMap(runner, entity, unit, /*id, */ret);
-    }
-}
-
-async function syncId(runner:Runner, openApi:OpenApi, unit:number, id:number, tuid:string, maps:string[]) {
-    let ret = undefined; //await openApi.tuid(unit, id, tuid, maps);
-    if (ret === undefined) return;
-    if (maps !== undefined) {
-        for (let map of maps) {
-            let mapValues = ret[map];
-            if (mapValues === undefined) continue;
-            await setMap(runner, map, unit, /*id, */mapValues);
-        }
-    }
-    await setTuid(runner, tuid, unit, /*id, */ret[tuid]);
 }
 
 async function setMap(runner:Runner, mapName:string, unit:number|string, /*id:number, */values:any[]) {

@@ -224,21 +224,20 @@ function toBusMessage(busSchema, face, content) {
     let { fields, arrs } = faceSchema;
     let ret = '';
     for (let item of data) {
-        ret += item['$'];
-        ret += '\n';
+        ret += item['$'] + '\n';
         if (arrs === undefined)
             continue;
         for (let arr of arrs) {
             let arrRows = item[arr.name];
             if (arrRows !== undefined) {
                 for (let ar of arrRows) {
-                    ret += ar;
-                    ret += '\n';
+                    ret += ar + '\n';
                 }
             }
             ret += '\n';
         }
-        ret += '\n';
+        // ret += '\n'; 
+        // 多个bus array，不需要三个回车结束。自动取完，超过长度，自动结束。这样便于之后附加busQuery
     }
     return { body: ret, version: busVersion };
 }

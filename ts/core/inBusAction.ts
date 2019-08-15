@@ -67,7 +67,8 @@ export abstract class ParametersBus {
             let ret = await this.busQuery(inBus, unit, user, data);
             retBusQuery.push(ret);
         }
-        return data + retBusQuery.join('\n\n') + '\n\n';
+        let ret = data + retBusQuery.join('\n\n') + '\n\n';
+        return ret;
     }
 
     async buildDataFromObj(unit:number, user:number, obj:any):Promise<string> {
@@ -82,9 +83,10 @@ export abstract class ParametersBus {
         if (openApi === undefined) {
             throw 'error on openApiUnitFace';
         }
-        let retParam = await this.runner.call(this.getQueryProc(bus.name, face), [unit, user, data]);
-        let ret0 = retParam[0];
-        let retParamMain = Array.isArray(ret0)===true? ret0[0] : ret0;
+        let proc = this.getQueryProc(bus.name, face);
+        let retParam = await this.runner.tablesFromProc(proc, [unit, user, data]);
+        let retParamMain = retParam[0][0];
+        //let retParamMain = Array.isArray(ret0)===true? ret0[0] : ret0;
         let params:any[] = [];
         if (param !== undefined) {
             let retIndex = 1;
@@ -103,7 +105,8 @@ export abstract class ParametersBus {
         let ret = await openApi.busQuery(unit, busOwner, busName, face, params);
         let results:any[] = [];
         let {fields, arrs} = returns;
-        let retMain:any[] = arrs === undefined? ret : ret[0];
+        let retMain:any[] = ret[0];
+        //let retMain:any[] = arrs === undefined? ret : ret[0];
         let text = this.buildTextFromRet(fields, retMain);
         results.push(text);
         if (arrs !== undefined) {
@@ -121,7 +124,9 @@ export abstract class ParametersBus {
         for (let row of values) {
             let items:any[] = [];
             for (let f of fields) {
-                items.push(row[f.name]);
+                let fn = f.name;
+                let v = row[fn];
+                items.push(v);
             }
             ret.push(items.join('\t'));
         }
