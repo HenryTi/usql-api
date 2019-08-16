@@ -451,14 +451,8 @@ export class Runner {
         return inBusAction;
     }
     async bus(bus:string, face:string, unit:number, msgId:number, body:string): Promise<void> {
-        let data:any;
-        try {
-            let inBusAction = this.getAcceptParametersBus(bus, face);
-            data = await inBusAction.buildData(unit, 0, body);
-        }
-        catch (err) {
-            throw 'error in inBusAction.buildData: ' + err;
-        }
+        let inBusAction = this.getAcceptParametersBus(bus, face);
+        let data = await inBusAction.buildData(unit, 0, body);
         return await this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
     }
 
