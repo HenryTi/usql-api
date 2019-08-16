@@ -16,6 +16,7 @@ export abstract class Net {
     }
 
     abstract get isTest():boolean;
+    abstract getUqFullName(uq:string):string;
 
     protected async innerRunner(name:string):Promise<Runner> {
         name = name.toLowerCase();
@@ -203,6 +204,7 @@ export abstract class Net {
 class ProdNet extends Net {
     get isTest():boolean {return false}
     getDbName(name:string):string {return name}
+    getUqFullName(uq:string):string {return uq}
     protected getUnitxDb(): Db {return getUnitxDb(false)}
     protected getUrl(db:string, url:string):string {
         return url + 'uq/prod/' + db + '/';
@@ -213,6 +215,7 @@ class ProdNet extends Net {
 class TestNet extends Net {
     get isTest():boolean {return true}
     getDbName(name:string):string {return name + '$test'}
+    getUqFullName(uq:string):string {return uq + '$test'}
     protected getUnitxDb(): Db {return getUnitxDb(true)}
     protected getUrl(db:string, url:string):string {
         return url + 'uq/test/' + db + '/';

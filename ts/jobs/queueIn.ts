@@ -29,9 +29,9 @@ export async function queueIn(runner: Runner,  net: Net) {
                     else {
                         finish = Finish.bad;  // fail
                     }
-                    let errSubject = `error on ${bus}/${faceName}:${id}`;
+                    let errSubject = `error queue_in on ${bus}/${faceName}:${id}`;
                     let error = typeof(err)==='object'?
-                        err.message : err;
+                        JSON.stringify(err) : err;
                     await runner.log(unit, errSubject, error);
                 }
                 if (finish !== Finish.done) {

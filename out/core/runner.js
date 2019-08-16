@@ -40,7 +40,7 @@ class Runner {
     }
     log(unit, subject, content) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.log(unit, this.uq, subject, content);
+            yield this.db.log(unit, this.net.getUqFullName(this.uq), subject, content);
         });
     }
     procCall(proc, params) {

@@ -41,9 +41,9 @@ function queueIn(runner, net) {
                         else {
                             finish = finish_1.Finish.bad; // fail
                         }
-                        let errSubject = `error on ${bus}/${faceName}:${id}`;
+                        let errSubject = `error queue_in on ${bus}/${faceName}:${id}`;
                         let error = typeof (err) === 'object' ?
-                            err.message : err;
+                            JSON.stringify(err) : err;
                         yield runner.log(unit, errSubject, error);
                     }
                     if (finish !== finish_1.Finish.done) {

@@ -234,6 +234,7 @@ exports.Net = Net;
 class ProdNet extends Net {
     get isTest() { return false; }
     getDbName(name) { return name; }
+    getUqFullName(uq) { return uq; }
     getUnitxDb() { return db_1.getUnitxDb(false); }
     getUrl(db, url) {
         return url + 'uq/prod/' + db + '/';
@@ -244,6 +245,7 @@ class ProdNet extends Net {
 class TestNet extends Net {
     get isTest() { return true; }
     getDbName(name) { return name + '$test'; }
+    getUqFullName(uq) { return uq + '$test'; }
     getUnitxDb() { return db_1.getUnitxDb(true); }
     getUrl(db, url) {
         return url + 'uq/test/' + db + '/';
