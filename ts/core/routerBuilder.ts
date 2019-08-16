@@ -123,14 +123,6 @@ export class RouterBuilder {
         let runner = await this.net.getRunner(db);
         if (runner !== undefined) return runner;
         throw `Database ${this.net.getDbName(db)} 不存在`;
-        /*
-        res.json({
-            error: {
-                no: apiErrors.databaseNotExists,
-                message: 
-            }
-        });
-        */
     }
 
     async getRunner(name:string):Promise<Runner> {

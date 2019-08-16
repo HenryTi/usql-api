@@ -533,8 +533,14 @@ class Runner {
     }
     bus(bus, face, unit, msgId, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            let inBusAction = this.getAcceptParametersBus(bus, face);
-            let data = yield inBusAction.buildData(unit, 0, body);
+            let data;
+            try {
+                let inBusAction = this.getAcceptParametersBus(bus, face);
+                data = yield inBusAction.buildData(unit, 0, body);
+            }
+            catch (err) {
+                throw 'error in inBusAction.buildData: ' + err;
+            }
             return yield this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
         });
     }
