@@ -121,7 +121,7 @@ class Net {
     buildOpenApiFrom(uqFullName, unit, uqUrl) {
         return __awaiter(this, void 0, void 0, function* () {
             let openApis = this.uqOpenApis[uqFullName];
-            let url = yield this.getUqUrl(uqUrl);
+            let url = yield this.getUqUrlOrDebug(uqUrl);
             url = url.toLowerCase();
             let openApi = new openApi_1.OpenApi(url);
             openApis[unit] = openApi;
@@ -189,16 +189,20 @@ class Net {
     uqUrl(unit, uq) {
         return __awaiter(this, void 0, void 0, function* () {
             let uqUrl = yield centerApi_1.centerApi.uqUrl(unit, uq);
-            return yield this.getUqUrl(uqUrl);
+            return yield this.getUqUrlOrDebug(uqUrl);
         });
     }
-    getUqUrl(urls) {
+    getUqUrlOrDebug(urls) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { db, url } = urls;
+            let url;
+            let { db } = urls;
             if (db_1.isDevelopment === true) {
                 let urlDebug = yield this.getUrlDebug();
                 if (urlDebug !== undefined)
                     url = urlDebug;
+            }
+            else {
+                url = this.chooseUrl(urls);
             }
             return this.getUrl(db, url);
         });
@@ -239,6 +243,7 @@ class ProdNet extends Net {
     getUrl(db, url) {
         return url + 'uq/prod/' + db + '/';
     }
+    chooseUrl(urls) { return urls.url; }
     unitxUrl(url) { return url + 'uq/unitx-prod/'; }
     ;
 }
@@ -250,6 +255,7 @@ class TestNet extends Net {
     getUrl(db, url) {
         return url + 'uq/test/' + db + '/';
     }
+    chooseUrl(urls) { return urls.urlTest; }
     unitxUrl(url) { return url + 'uq/unitx-test/'; }
     ;
 }

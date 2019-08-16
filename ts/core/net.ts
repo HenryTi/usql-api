@@ -106,7 +106,7 @@ export abstract class Net {
     }
     private async buildOpenApiFrom(uqFullName:string, unit:number, uqUrl:{db:string, url:string, urlTest:string}):Promise<OpenApi> {
         let openApis = this.uqOpenApis[uqFullName];
-        let url = await this.getUqUrl(uqUrl);
+        let url = await this.getUqUrlOrDebug(uqUrl);
         url = url.toLowerCase();
         let openApi = new OpenApi(url);
         openApis[unit] = openApi;
@@ -163,19 +163,24 @@ export abstract class Net {
 
     async uqUrl(unit:number, uq:number):Promise<string> {
         let uqUrl = await centerApi.uqUrl(unit, uq);
-        return await this.getUqUrl(uqUrl);
+        return await this.getUqUrlOrDebug(uqUrl);
     }
 
-    private async getUqUrl(urls: {db:string; url:string; urlTest:string}):Promise<string> {
-        let {db, url} = urls;
+    private async getUqUrlOrDebug(urls: {db:string; url:string; urlTest:string}):Promise<string> {
+        let url:string;
+        let {db} = urls;
         if (isDevelopment === true) {
             let urlDebug = await this.getUrlDebug();
             if (urlDebug !== undefined) url = urlDebug;
+        }
+        else {
+            url = this.chooseUrl(urls);
         }
         return this.getUrl(db, url);
     }
 
     protected abstract getUrl(db:string, url:string):string;
+    protected abstract chooseUrl(urls: {url:string; urlTest:string}):string;
 
     private async getUrlDebug():Promise<string> {
         try {
@@ -209,6 +214,7 @@ class ProdNet extends Net {
     protected getUrl(db:string, url:string):string {
         return url + 'uq/prod/' + db + '/';
     }
+    protected chooseUrl(urls: {url:string; urlTest:string}):string {return urls.url}
     protected unitxUrl(url:string):string {return url + 'uq/unitx-prod/'};
 }
 
@@ -220,6 +226,7 @@ class TestNet extends Net {
     protected getUrl(db:string, url:string):string {
         return url + 'uq/test/' + db + '/';
     }
+    protected chooseUrl(urls: {url:string; urlTest:string}):string {return urls.urlTest}
     protected unitxUrl(url:string):string {return url + 'uq/unitx-test/'};
 }
 /*
