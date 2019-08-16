@@ -73,48 +73,36 @@ class ParametersBus {
             }
             let params = [];
             let proc = this.getQueryProc(bus.name, face);
-            try {
-                let retParam = yield this.runner.tablesFromProc(proc, [unit, user, data]);
-                let retParamMain = retParam[0][0];
-                //let retParamMain = Array.isArray(ret0)===true? ret0[0] : ret0;
-                if (param !== undefined) {
-                    let retIndex = 1;
-                    for (let qp of param) {
-                        let { name, type, fields } = qp;
-                        let value;
-                        if (type === 'array') {
-                            value = this.buildTextFromRet(fields, retParam[retIndex++]);
-                        }
-                        else {
-                            value = retParamMain[name];
-                        }
-                        params.push(value);
+            let retParam = yield this.runner.tablesFromProc(proc, [unit, user, data]);
+            let retParamMain = retParam[0][0];
+            if (param !== undefined) {
+                let retIndex = 1;
+                for (let qp of param) {
+                    let { name, type, fields } = qp;
+                    let value;
+                    if (type === 'array') {
+                        value = this.buildTextFromRet(fields, retParam[retIndex++]);
                     }
+                    else {
+                        value = retParamMain[name];
+                    }
+                    params.push(value);
                 }
             }
-            catch (err) {
-                throw 'error in ' + proc + ':' + err;
-            }
-            try {
-                let ret = yield openApi.busQuery(unit, busOwner, busName, face, params);
-                let results = [];
-                let { fields, arrs } = returns;
-                let retMain = ret[0];
-                //let retMain:any[] = arrs === undefined? ret : ret[0];
-                let text = this.buildTextFromRet(fields, retMain);
-                results.push(text);
-                if (arrs !== undefined) {
-                    let len = arrs.length;
-                    for (let i = 0; i < len; i++) {
-                        let text = this.buildTextFromRet(arrs[i].fields, ret[i + 1]);
-                        results.push(text);
-                    }
+            let ret = yield openApi.busQuery(unit, busOwner, busName, face, params);
+            let results = [];
+            let { fields, arrs } = returns;
+            let retMain = ret[0];
+            let text = this.buildTextFromRet(fields, retMain);
+            results.push(text);
+            if (arrs !== undefined) {
+                let len = arrs.length;
+                for (let i = 0; i < len; i++) {
+                    let text = this.buildTextFromRet(arrs[i].fields, ret[i + 1]);
+                    results.push(text);
                 }
-                return results.join('\n\n');
             }
-            catch (err) {
-                throw 'error in let ret = await openApi.busQuery(unit, busOwner, busName, face, params); ' + err;
-            }
+            return results.join('\n\n');
         });
     }
     buildTextFromRet(fields, values) {
