@@ -1,13 +1,14 @@
 import * as _ from 'lodash';
 import { Net, Db, isDevelopment, prodNet, testNet } from '../core';
-import { syncTuids } from './syncTuids';
-import { syncInBus } from './syncInBus';
+import { pullEntities } from './pullEntities';
+import { pullBus } from './pullBus';
 import { queueIn } from './queueIn';
 import { queueOut } from './queueOut';
 
-let firstRun: number = isDevelopment === true? 3000 : 30*1000;
-let runGap: number = isDevelopment === true? 15*1000 : 30*1000;
-let waitForOtherStopJobs = 1*1000; // 等1分钟，等其它服务器uq-api停止jobs
+const firstRun: number = isDevelopment === true? 3000 : 30*1000;
+const runGap: number = isDevelopment === true? 15*1000 : 30*1000;
+const waitForOtherStopJobs = 1*1000; // 等1分钟，等其它服务器uq-api停止jobs
+const $test = '$test';
 
 export class Jobs {
     static start(): void {
@@ -17,7 +18,7 @@ export class Jobs {
         }
         if (isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
-            // return;
+            //return;
             (async function() {
                 console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
                 let db = new Db(undefined);
@@ -42,8 +43,8 @@ export class Jobs {
                 }
                 let net:Net;
                 let dbName:string;;
-                if (uqDb.endsWith('$test') === true) {
-                    dbName = uqDb.substr(0, uqDb.length - 5);
+                if (uqDb.endsWith($test) === true) {
+                    dbName = uqDb.substr(0, uqDb.length - $test.length);
                     net = testNet;
                 }
                 else {
@@ -56,14 +57,14 @@ export class Jobs {
                 if (buses !== undefined) {
                     let {outCount, faces} = buses;
                     if (outCount > 0) {
-                        await queueOut(runner, net);
+                        await queueOut(runner);
                     }
                     if (faces !== undefined) {
-                        await syncInBus(runner, net);
-                        await queueIn(runner, net);
+                        await pullBus(runner);
+                        await queueIn(runner);
                     }
                 }
-                await syncTuids(runner, net);
+                await pullEntities(runner);
             }
         }
         catch (err) {

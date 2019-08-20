@@ -15,7 +15,7 @@ const importData_1 = require("./importData");
 const inBusAction_1 = require("./inBusAction");
 class Runner {
     constructor(db, net = undefined) {
-        this.hasSyncTuids = false;
+        this.hasPullEntities = false;
         this.parametersBusCache = {};
         this.db = db;
         this.net = net;
@@ -538,6 +538,21 @@ class Runner {
             return yield this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
         });
     }
+    checkPull(unit, entity, entityType, modifies) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let proc;
+            switch (entityType) {
+                default: throw 'error entityType';
+                case 'tuid':
+                    proc = `tv_${entity}$pull_check`;
+                    break;
+                case 'map':
+                    proc = 'tv_$map_pull_check';
+                    break;
+            }
+            return yield this.unitTableFromProc(proc, unit, entity, modifies);
+        });
+    }
     importData(unit, user, source, entity, filePath) {
         return __awaiter(this, void 0, void 0, function* () {
             yield importData_1.ImportData.exec(this, unit, this.db, source, entity, filePath);
@@ -630,7 +645,7 @@ class Runner {
                         this.tuids[name] = schemaObj;
                         if (from) {
                             if (!(sync === false))
-                                this.hasSyncTuids = true;
+                                this.hasPullEntities = true;
                             tuidFroms = this.froms[from];
                             if (tuidFroms === undefined)
                                 tuidFroms = this.froms[from] = {};
@@ -643,6 +658,7 @@ class Runner {
                         break;
                     case 'map':
                         if (from) {
+                            this.hasPullEntities = true;
                             tuidFroms = this.froms[from];
                             if (tuidFroms === undefined)
                                 tuidFroms = this.froms[from] = {};

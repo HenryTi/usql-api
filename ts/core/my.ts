@@ -1,4 +1,4 @@
-import {createPool, Pool, MysqlError, TypeCast} from 'mysql';
+import {createPool, Pool, MysqlError, TypeCast, FieldInfo} from 'mysql';
 import * as _ from 'lodash';
 import {DbServer} from './dbServer';
 import { isDevelopment } from './db';
@@ -24,6 +24,7 @@ function getPool(dbConfig: any): Pool {
         if (_.isEqual(dbConfig, config) === true) return pool;
     }
     let conf = _.clone(dbConfig);
+    conf.timezone = 'UTC';
     conf.typeCast = castField;
     let newPool = createPool(conf);
     pools.push({config: dbConfig, pool: newPool});
@@ -258,9 +259,13 @@ function castDate(field:any) {
 }
 function castDateTime(field:any) {
     // 这个地方也许有某种方法加速吧
+    let text = field.string();;
+    return text;
+    /*
     let text = field.string();
     if (text === null) return null;
     if (text === undefined) return undefined;
     let d = new Date(new Date(text).getTime() - timezoneOffset);
     return d;
+    */
 }

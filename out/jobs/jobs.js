@@ -9,13 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
-const syncTuids_1 = require("./syncTuids");
-const syncInBus_1 = require("./syncInBus");
+const pullEntities_1 = require("./pullEntities");
+const pullBus_1 = require("./pullBus");
 const queueIn_1 = require("./queueIn");
 const queueOut_1 = require("./queueOut");
-let firstRun = core_1.isDevelopment === true ? 3000 : 30 * 1000;
-let runGap = core_1.isDevelopment === true ? 15 * 1000 : 30 * 1000;
-let waitForOtherStopJobs = 1 * 1000; // 等1分钟，等其它服务器uq-api停止jobs
+const firstRun = core_1.isDevelopment === true ? 3000 : 30 * 1000;
+const runGap = core_1.isDevelopment === true ? 15 * 1000 : 30 * 1000;
+const waitForOtherStopJobs = 1 * 1000; // 等1分钟，等其它服务器uq-api停止jobs
+const $test = '$test';
 class Jobs {
     constructor() {
         this.run = () => __awaiter(this, void 0, void 0, function* () {
@@ -31,8 +32,8 @@ class Jobs {
                     let net;
                     let dbName;
                     ;
-                    if (uqDb.endsWith('$test') === true) {
-                        dbName = uqDb.substr(0, uqDb.length - 5);
+                    if (uqDb.endsWith($test) === true) {
+                        dbName = uqDb.substr(0, uqDb.length - $test.length);
                         net = core_1.testNet;
                     }
                     else {
@@ -46,14 +47,14 @@ class Jobs {
                     if (buses !== undefined) {
                         let { outCount, faces } = buses;
                         if (outCount > 0) {
-                            yield queueOut_1.queueOut(runner, net);
+                            yield queueOut_1.queueOut(runner);
                         }
                         if (faces !== undefined) {
-                            yield syncInBus_1.syncInBus(runner, net);
-                            yield queueIn_1.queueIn(runner, net);
+                            yield pullBus_1.pullBus(runner);
+                            yield queueIn_1.queueIn(runner);
                         }
                     }
-                    yield syncTuids_1.syncTuids(runner, net);
+                    yield pullEntities_1.pullEntities(runner);
                 }
             }
             catch (err) {
@@ -71,7 +72,7 @@ class Jobs {
         });
         if (core_1.isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
-            // return;
+            //return;
             (function () {
                 return __awaiter(this, void 0, void 0, function* () {
                     console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);

@@ -1,7 +1,7 @@
 import { Runner, Net, isDevelopment, centerApi, SheetQueueData, BusMessage } from "../core";
 import { Finish } from "./finish";
 
-export async function queueOut(runner: Runner, net: Net): Promise<void> {
+export async function queueOut(runner: Runner): Promise<void> {
     try {
         let start = 0;
         for (;;) {
@@ -33,7 +33,7 @@ export async function queueOut(runner: Runner, net: Net): Promise<void> {
                                 finish = Finish.done;
                                 break;
                             case 'bus':
-                                await bus(runner, net, $unit, id, subject, content);
+                                await bus(runner, $unit, id, subject, content);
                                 finish = Finish.done;
                                 break;
                             case 'sheet':
@@ -108,7 +108,7 @@ async function email(runner:Runner, unit:number, id:number, content:string): Pro
     });
 }
 
-async function bus(runner:Runner, net:Net, unit:number, id:number, subject:string, content:string): Promise<void> {
+async function bus(runner:Runner, unit:number, id:number, subject:string, content:string): Promise<void> {
     if (!unit) return;
     
     let parts = subject.split('/');
@@ -136,7 +136,7 @@ async function bus(runner:Runner, net:Net, unit:number, id:number, subject:strin
         version: version,
         body: body,
     };
-    await net.sendToUnitx(unit, message);
+    await runner.net.sendToUnitx(unit, message);
 }
 
 async function sheet(runner: Runner, content:string):Promise<void> {

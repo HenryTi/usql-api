@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const finish_1 = require("./finish");
-function queueOut(runner, net) {
+function queueOut(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let start = 0;
@@ -46,7 +46,7 @@ function queueOut(runner, net) {
                                     finish = finish_1.Finish.done;
                                     break;
                                 case 'bus':
-                                    yield bus(runner, net, $unit, id, subject, content);
+                                    yield bus(runner, $unit, id, subject, content);
                                     finish = finish_1.Finish.done;
                                     break;
                                 case 'sheet':
@@ -125,7 +125,7 @@ function email(runner, unit, id, content) {
         });
     });
 }
-function bus(runner, net, unit, id, subject, content) {
+function bus(runner, unit, id, subject, content) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!unit)
             return;
@@ -151,7 +151,7 @@ function bus(runner, net, unit, id, subject, content) {
             version: version,
             body: body,
         };
-        yield net.sendToUnitx(unit, message);
+        yield runner.net.sendToUnitx(unit, message);
     });
 }
 function sheet(runner, content) {

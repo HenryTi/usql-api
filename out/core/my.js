@@ -26,6 +26,7 @@ function getPool(dbConfig) {
             return pool;
     }
     let conf = _.clone(dbConfig);
+    conf.timezone = 'UTC';
     conf.typeCast = castField;
     let newPool = mysql_1.createPool(conf);
     pools.push({ config: dbConfig, pool: newPool });
@@ -295,11 +296,14 @@ function castDate(field) {
 function castDateTime(field) {
     // 这个地方也许有某种方法加速吧
     let text = field.string();
-    if (text === null)
-        return null;
-    if (text === undefined)
-        return undefined;
+    ;
+    return text;
+    /*
+    let text = field.string();
+    if (text === null) return null;
+    if (text === undefined) return undefined;
     let d = new Date(new Date(text).getTime() - timezoneOffset);
     return d;
+    */
 }
 //# sourceMappingURL=my.js.map

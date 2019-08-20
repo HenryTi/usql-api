@@ -58,7 +58,7 @@ export class Runner {
     uqVersion: number;  // uq compile changes
     uniqueUnit: number;
     buses:Buses; //{[url:string]:any}; // 直接查找bus
-    hasSyncTuids: boolean = false;
+    hasPullEntities: boolean = false;
     net: Net;
 
     constructor(db:Db, net:Net = undefined) {
@@ -455,7 +455,15 @@ export class Runner {
         let data = await inBusAction.buildData(unit, 0, body);
         return await this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
     }
-
+    async checkPull(unit:number, entity:string, entityType:string, modifies:string): Promise<any[]> {
+        let proc:string;
+        switch (entityType) {
+            default: throw 'error entityType';
+            case 'tuid': proc = `tv_${entity}$pull_check`; break;
+            case 'map': proc = 'tv_$map_pull_check'; break;
+        }
+        return await this.unitTableFromProc(proc, unit as number, entity, modifies);
+    }
     async importData(unit:number, user:number, source:string, entity:string, filePath: string): Promise<void> {
         await ImportData.exec(this, unit, this.db, source, entity, filePath);
     }
@@ -541,7 +549,7 @@ export class Runner {
                 case 'tuid':
                     this.tuids[name] = schemaObj; 
                     if (from) {
-                        if (!(sync === false)) this.hasSyncTuids = true;
+                        if (!(sync === false)) this.hasPullEntities = true;
                         tuidFroms = this.froms[from];
                         if (tuidFroms === undefined) tuidFroms = this.froms[from] = {};
                         let tuidFrom = tuidFroms[name];
@@ -552,6 +560,7 @@ export class Runner {
                     break;
                 case 'map':
                     if (from) {
+                        this.hasPullEntities = true;
                         tuidFroms = this.froms[from];
                         if (tuidFroms === undefined) tuidFroms = this.froms[from] = {};
                         let {keys} = schemaObj;

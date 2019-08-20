@@ -69,7 +69,7 @@ class ParametersBus {
             //let {busOwner, busName} = bus;
             let openApi = yield this.runner.net.openApiUnitFace(unit, busOwner, busName, face);
             if (openApi === undefined) {
-                throw 'error on openApiUnitFace';
+                throw 'error await this.runner.net.openApiUnitFace nothing returned';
             }
             let params = [];
             let proc = this.getQueryProc(bus.name, face);

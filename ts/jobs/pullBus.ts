@@ -1,15 +1,13 @@
 import { Runner, Net } from "../core";
 
-const uqsDebugger = ['common', 'order'];
-
-export async function syncInBus(runner: Runner,  net: Net) {
+export async function pullBus(runner: Runner) {
     try {
         /*
         if (runner.net.isTest === true) {
-            if (uqsDebugger.indexOf(runner.uq)>=0) debugger;
+            if (debugUqs!==undefined && debugUqs.indexOf(runner.uq)>=0) debugger;
         }
         */
-        let {buses} = runner;
+        let {buses, net} = runner;
         let {faces, coll, hasError} = buses;
         while (hasError === false) {
             let unitMaxIds:{unit:number; maxId:number}[] = await getSyncUnits(runner);
@@ -22,28 +20,6 @@ export async function syncInBus(runner: Runner,  net: Net) {
                 let ret = await openApi.fetchBus(unit, maxId, faces);
                 let {maxMsgId, maxRows} = ret[0][0];
                 let messages = ret[1];
-                /* 原来版本，bus消息读来，直接调用accept操作。
-                for (let row of messages) {
-                    let {face:faceUrl, id:msgId, body, version} = row;
-                    let face = coll[faceUrl];
-                    let {bus, faceName, version:runnerBusVersion} = face;
-                    try {
-                        if (runnerBusVersion !== version) {
-                            // 也就是说，bus消息的version，跟runner本身的bus version有可能不同
-                            // 不同需要做数据转换
-                            // 但是，现在先不处理
-                            // 2019-07-23
-                        }
-                        await runner.bus(bus, faceName, unit, msgId, body);
-                    }
-                    catch (busErr) {
-                        hasError = buses.hasError = true;
-                        console.error(busErr);
-                        break;
-                    }
-                    ++msgCount;
-                }
-                */
                 // 新版：bus读来，直接写入queue_in。然后在队列里面处理
                 for (let row of messages) {
                     let {face:faceUrl, id:msgId, body, version} = row;

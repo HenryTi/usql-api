@@ -1,7 +1,7 @@
 import { Net, Runner } from "../core";
 import { Finish } from "./finish";
 
-export async function queueIn(runner: Runner,  net: Net) {
+export async function queueIn(runner: Runner) {
     let start = 0;
     let {buses} = runner;
     let {hasError} = buses;

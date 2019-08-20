@@ -56,26 +56,8 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
         return await runner.getEntities(params.unit);
     });
 
-    /*
-    rb.post(router, '/fresh',
-    async (runner:Runner, body:any):Promise<any> => {
-        let {unit, stamps} = body;
-        // tuidStamps: 'tuid-name'  stamp  id, tab分隔，\n分行
-        let stampsText = stamps.map((v:string[]) => v.join('\t')).join('\n');
-        try {
-            let ret = await runner.$$openFresh(unit, stampsText);
-            return ret;
-        }
-        catch (err) {
-            console.log(err.message);
-        }
-    });
-    */
-
     rb.post(router, '/from-entity',
     async (runner:Runner, body:any):Promise<any> => {
-        //body.$ = 'open/tuid';
-        console.log(body);
         let {unit, entity, key} = body;
         let schema = runner.getSchema(entity);
         let {type} = schema;
@@ -84,7 +66,17 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
             return tuidRet;
         }
         if (type === 'map') {
-            let mapRet = await runner.unitUserCall('tv_' + entity + '$query$', unit, undefined, key.split('\t'));
+            let keys = key.split('\t');
+            let len = keys.length;
+            for (let i=0; i<len; i++) {
+                if (!key[i]) keys[i] = undefined;
+            }
+            let {keys:keyFields} = schema.call;
+            let fieldsLen = keyFields.length;
+            for (let i=len; i<fieldsLen; i++) {
+                keys.push(undefined);
+            }
+            let mapRet = await runner.unitUserCall('tv_' + entity + '$query$', unit, undefined, keys);
             return mapRet;
         }
     });

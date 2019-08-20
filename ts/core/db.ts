@@ -40,35 +40,31 @@ export class Db {
         if (this.isExists === true) return true;
         return this.isExists = await this.dbServer.existsDatabase(this.dbName);
     }
-    /*
-    async setDebugJobs():Promise<void> {
-        await this.dbServer.setDebugJobs();
-    }
-    async uqs(): Promise<any[]> {
-        return await this.dbServer.uqDbs();
-    }
-    */
-    async sql(sql:string, params:any[]): Promise<any> {
-        if (isDevelopment===true) console.log(this.dbName, ' sql: ', params.join(','))
-        return await this.dbServer.sql(this.dbName, sql, params);
+
+    private devLog(proc:string, params:any[]) {
+        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params && params.join(','))
     }
     async log(unit:number, uq:string, subject:string, content:string):Promise<void> {
         return await this.dbServer.call('$uq', 'log', [unit, uq, subject, content]);
     }
+    async sql(sql:string, params:any[]): Promise<any> {
+        this.devLog('sql', params);
+        return await this.dbServer.sql(this.dbName, sql, params);
+    }
     async call(proc:string, params:any[]): Promise<any> {
-        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params.join(','))
+        this.devLog(proc, params);
         return await this.dbServer.call(this.dbName, proc, params);
     }
     async callEx(proc:string, params:any[]): Promise<any> {
-        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params.join(','))
+        this.devLog(proc, params);
         return await this.dbServer.callEx(this.dbName, proc, params);
     }
     async tableFromProc(proc:string, params:any[]): Promise<any[]> {
-        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params.join(','))
+        this.devLog(proc, params);
         return await this.dbServer.tableFromProc(this.dbName, proc, params);
     }
     async tablesFromProc(proc:string, params:any[]): Promise<any[][]> {
-        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params.join(','))
+        this.devLog(proc, params);
         return await this.dbServer.tablesFromProc(this.dbName, proc, params);
     }
     async createDatabase(): Promise<void> {

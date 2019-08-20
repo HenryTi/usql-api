@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const finish_1 = require("./finish");
-function queueIn(runner, net) {
+function queueIn(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         let start = 0;
         let { buses } = runner;

@@ -1,16 +1,15 @@
 import { Runner, packParam, Net } from '../core';
 import { OpenApi } from '../core/openApi';
+import { debugUqs } from './debugUqs';
 
-export async function syncTuids(runner:Runner, net:Net):Promise<void> {
-    let {froms, hasSyncTuids} = runner;
-    if (hasSyncTuids === false) return;
+export async function pullEntities(runner:Runner):Promise<void> {
+    let {uq, froms, hasPullEntities} = runner;
+    if (hasPullEntities === false) return;
     if (froms === undefined) return;
     try {
-        let db = runner.getDb();
-        let uqs = ['order', 'salestask'];
-        if (uqs.indexOf(db) < 0) return;
-        await syncNew(runner, net);
-        await syncModify(runner, net);
+        if (debugUqs!==undefined && debugUqs.indexOf(uq)<0) return;
+        await pullNew(runner);
+        await pullModify(runner);
     }
     catch (err) {
         debugger;
@@ -18,22 +17,41 @@ export async function syncTuids(runner:Runner, net:Net):Promise<void> {
     }
 }
 
-async function syncNew(runner:Runner, net:Net) {
+enum FromNewSet {ok=1, bad=2, moreTry=3}
+
+async function pullNew(runner:Runner) {
+    let {net} = runner;
     for (;;) {
-        let items = await runner.tableFromProc('$from_new', []);
+        let items = await runner.tableFromProc('$from_new', undefined);
         if (items.length === 0) {
             break;
         }
         for (let item of items) {
-            let {id, unit, entity, key} = item;
-            if (unit === undefined) unit = runner.uniqueUnit;
-            let schema = runner.getSchema(entity);
-            if (schema === undefined) continue;
-            let {from} = schema;
-            let openApi = await net.openApiUnitUq(unit, from);
-            if (!openApi) continue;
-            await syncEntity(runner, openApi, unit, entity, key);
-            await runner.call('$from_new_finished', [unit, id]);
+            let {id, unit, entity, key, tries, update_time, now} = item;
+            let fns:FromNewSet;
+            try {
+                if (unit === undefined) unit = runner.uniqueUnit;
+                if (tries > 0) {
+                    // 上次尝试之后十分钟内不尝试
+                    if (now - update_time < tries * 10 * 60) continue;
+                }
+                let schema = runner.getSchema(entity);
+                if (schema === undefined) continue;
+                let {from} = schema;
+                let openApi = await net.openApiUnitUq(unit, from);
+                if (!openApi) continue;
+                await pullEntity(runner, openApi, schema, unit, entity, key);
+                fns = FromNewSet.ok;
+            }
+            catch (err) {
+                if (tries > 5)
+                    fns = FromNewSet.bad;
+                else
+                    fns = FromNewSet.moreTry;
+            }
+            finally {
+                await runner.call('$from_new_set', [unit, id, fns]);
+            }
         }
     }
 }
@@ -47,8 +65,9 @@ interface UnitOpenApiItems {
     [unit:number]:OpenApiItem[];
 }
 
-async function syncModify(runner:Runner, net:Net) {
-    let items = await runner.tableFromProc('$sync_from', []);
+async function pullModify(runner:Runner) {
+    let {net} = runner;
+    let items = await runner.tableFromProc('$sync_from', undefined);
     if (items.length === 0) return;
     let unitOpenApiItems:UnitOpenApiItems = {};
     // 把访问同一个openApi的整理到一起
@@ -102,19 +121,40 @@ async function syncModify(runner:Runner, net:Net) {
         let openApiItems = unitOpenApiItems[unit];
         for (let openApiItem of openApiItems) {
             try {
+                // 只有exists items 需要pull modify
+                // 对于tuid，id必须存在
+                // 对于map，key0必须存在
                 let {openApi, entities, modifyMax} = openApiItem;
                 let ret = await openApi.queueModify(unit, modifyMax, page, entities.join('\t'), );
                 let {queue, queueMax} = ret;
+                if (queue.length === 0) continue;
+
+                let entityModifies:{[entity:string]: {
+                    modifies: string;
+                    idMax: number;
+                }} = {};
                 for (let item of queue) {
-                    let {id, entity, key} = item;
-                    await syncEntity(runner, openApi, unit, entity, key);
-                    await runner.call('$sync_from_set', [unit, entity, id]);
-                }
-                if (queue.length < page && modifyMax<queueMax) {
-                    for (let item of queue) {
-                        let {entity} = item;
-                        await runner.call('$sync_from_set', [unit, entity, queueMax]);
+                    let {id:modifyId, entity, key} = item;
+                    let em = entityModifies[entity];
+                    if (em === undefined) {
+                        entityModifies[entity] = em = {
+                            modifies: '',
+                            idMax: 0
+                        };
                     }
+                    em.modifies += modifyId + '\t' + key + '\n';
+                    em.idMax = modifyId;
+                }
+                for (let entity in entityModifies) {
+                    let schema = runner.getSchema(entity);
+                    let {modifies, idMax} = entityModifies[entity];
+                    let ret = await runner.checkPull(unit as unknown as number, entity, schema.type, modifies);
+                    for (let item of ret) {
+                        let {modifyId, key} = item;
+                        await pullEntity(runner, openApi, schema, unit, entity, key);
+                    }
+                    if (queue.length < page && idMax < queueMax) idMax = queueMax;
+                    if (idMax > 0) await runner.call('$sync_from_set', [unit, entity, idMax]);
                 }
             }
             catch (err) {
@@ -124,21 +164,20 @@ async function syncModify(runner:Runner, net:Net) {
     }
 }
 
-async function syncEntity(runner:Runner, openApi:OpenApi, unit:number|string, entity:string, key:string) {
+async function pullEntity(runner:Runner, openApi:OpenApi, schema:any, unit:number|string, entity:string, key:string) {
     let ret = await openApi.fromEntity(unit, entity, key);
-    let schema = runner.getSchema(entity);
     switch (schema.type) {
         case 'tuid':
-            await setTuid(runner, entity, unit, ret);
+            await setTuid(runner, entity, schema, unit, ret);
             break;
         case 'map':
-            await setMap(runner, entity, unit, ret);
+            await setMap(runner, entity, schema, unit, ret);
             break;
     }
 }
 
-async function setMap(runner:Runner, mapName:string, unit:number|string, /*id:number, */values:any[]) {
-    let map = runner.getMap(mapName);
+async function setMap(runner:Runner, mapName:string, schema:any, unit:number|string, values:any[]) {
+    let map = schema; // runner.getMap(mapName);
     if (map === undefined) return;
     let {actions} = map.call;
     let {sync} = actions;
@@ -151,10 +190,10 @@ async function setMap(runner:Runner, mapName:string, unit:number|string, /*id:nu
     return;
 }
 
-async function setTuid(runner:Runner, tuidName:string, unit:number|string, /*id:number, */values:any) {
+async function setTuid(runner:Runner, tuidName:string, schema:any, unit:number|string, values:any) {
     try {
         let user = undefined;
-        let tuid = runner.getTuid(tuidName);
+        let tuid = schema.call; // runner.getTuid(tuidName);
         let {id:idFieldName, fields, arrs} = tuid;
         let main = values[0];
         if (Array.isArray(main)) main = main[0];
@@ -179,7 +218,7 @@ async function setTuid(runner:Runner, tuidName:string, unit:number|string, /*id:
         }
         let paramMain:any[] = [idVal];
         (fields as any[]).forEach(v => paramMain.push(main[v.name]));
-        paramMain.push(main.$stamp);
+        //paramMain.push(main.$stamp);
         await runner.tuidSave(tuidName, unit as any, user, paramMain);
     }
     catch (err) {

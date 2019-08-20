@@ -81,7 +81,7 @@ export abstract class ParametersBus {
         //let {busOwner, busName} = bus;
         let openApi = await this.runner.net.openApiUnitFace(unit, busOwner, busName, face);
         if (openApi === undefined) {
-            throw 'error on openApiUnitFace';
+            throw 'error await this.runner.net.openApiUnitFace nothing returned';
         }
         let params:any[] = [];
         let proc = this.getQueryProc(bus.name, face);
