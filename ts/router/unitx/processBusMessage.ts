@@ -52,22 +52,23 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
     /*
     let faceId = await getFaceId(runner, unit, face);
     let fromId = await getFromId(runner, unit, from);
-    
+        
+    await runner.tuidSave(consts.BusQueue, unit, undefined, 
+        [undefined, faceId, fromId, fromQueueId, version, body]);
+    */
+
     let hour = busQueuehour();
     if (hour > lastHour) {
         let seed = busQueueSeedFromHour(hour);
         let seedRet = await runner.call('$get_table_seed', ['busqueue']);
         let s = seedRet[0].seed;
+        if (!s) s = 1;
         if (seed > s) {
-            seed = s;
             await runner.call('$set_bus_queue_seed', ['busqueue', seed]);
         }
         lastHour = hour;
     }
-    
-    await runner.tuidSave(consts.BusQueue, unit, undefined, 
-        [undefined, faceId, fromId, fromQueueId, version, body]);
-    */
+
     await runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, body);
 }
 

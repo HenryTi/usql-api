@@ -69,22 +69,22 @@ function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
         /*
         let faceId = await getFaceId(runner, unit, face);
         let fromId = await getFromId(runner, unit, from);
-        
-        let hour = busQueuehour();
-        if (hour > lastHour) {
-            let seed = busQueueSeedFromHour(hour);
-            let seedRet = await runner.call('$get_table_seed', ['busqueue']);
-            let s = seedRet[0].seed;
-            if (seed > s) {
-                seed = s;
-                await runner.call('$set_bus_queue_seed', ['busqueue', seed]);
-            }
-            lastHour = hour;
-        }
-        
+            
         await runner.tuidSave(consts.BusQueue, unit, undefined,
             [undefined, faceId, fromId, fromQueueId, version, body]);
         */
+        let hour = core_1.busQueuehour();
+        if (hour > lastHour) {
+            let seed = core_1.busQueueSeedFromHour(hour);
+            let seedRet = yield runner.call('$get_table_seed', ['busqueue']);
+            let s = seedRet[0].seed;
+            if (!s)
+                s = 1;
+            if (seed > s) {
+                yield runner.call('$set_bus_queue_seed', ['busqueue', seed]);
+            }
+            lastHour = hour;
+        }
         yield runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, body);
     });
 }

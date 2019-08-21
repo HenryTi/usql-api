@@ -1,10 +1,16 @@
 import { Net, testNet, prodNet } from "../core";
 import { pullEntities } from "../jobs/pullEntities";
 import { init } from "../start";
+import { writeDataToBus } from "../router/unitx/processBusMessage";
 
 const $test = '$test';
 
 (async function() {
+    process.env.NODE_ENV = 'developement';
+    let runner = await testNet.getUnitxRunner();
+    await writeDataToBus(runner, 'test', 24, 'a', 101, 8, '{a:1}');
+
+    /*
     await init();
 
     let uqDb = 'salestask$test';
@@ -28,7 +34,7 @@ const $test = '$test';
     console.log('===========================================================');
     console.log('=  End of test');
     console.log('===========================================================');
-
+    */
     process.exit();
 })();
 

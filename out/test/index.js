@@ -9,31 +9,38 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
-const pullEntities_1 = require("../jobs/pullEntities");
-const start_1 = require("../start");
+const processBusMessage_1 = require("../router/unitx/processBusMessage");
 const $test = '$test';
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
-        yield start_1.init();
+        process.env.NODE_ENV = 'developement';
+        let runner = yield core_1.testNet.getUnitxRunner();
+        yield processBusMessage_1.writeDataToBus(runner, 'test', 24, 'a', 101, 8, '{a:1}');
+        /*
+        await init();
+    
         let uqDb = 'salestask$test';
-        let net;
-        let dbName;
-        ;
+        let net:Net;
+        let dbName:string;;
         if (uqDb.endsWith($test) === true) {
             dbName = uqDb.substr(0, uqDb.length - $test.length);
-            net = core_1.testNet;
+            net = testNet;
         }
         else {
             dbName = uqDb;
-            net = core_1.prodNet;
+            net = prodNet;
         }
-        let runner = yield net.getRunner(dbName);
-        let ret = yield runner.tableFromProc('customer', [24, undefined, 431]);
-        yield pullEntities_1.pullEntities(runner);
+    
+        let runner = await net.getRunner(dbName);
+    
+        let ret = await runner.tableFromProc('customer', [24, undefined, 431]);
+    
+        await pullEntities(runner);
         console.log(' ');
         console.log('===========================================================');
         console.log('=  End of test');
         console.log('===========================================================');
+        */
         process.exit();
     });
 })();
