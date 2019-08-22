@@ -33,6 +33,9 @@ function queueIn(runner) {
                     try {
                         yield runner.bus(bus, faceName, unit, id, data);
                         finish = finish_1.Finish.done;
+                        if (1 === 1) {
+                            throw 'error test -- @#@';
+                        }
                     }
                     catch (err) {
                         if (tries < 5) {

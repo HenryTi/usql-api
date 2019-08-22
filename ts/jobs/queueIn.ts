@@ -21,6 +21,9 @@ export async function queueIn(runner: Runner) {
                 try {
                     await runner.bus(bus, faceName, unit, id, data);
                     finish = Finish.done;
+                    if (1===1) {
+                        throw 'error test -- @#@';
+                    }
                 }
                 catch (err) {
                     if (tries < 5) {
