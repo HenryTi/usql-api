@@ -10,7 +10,7 @@ const $test = '$test';
     //process.env.NODE_ENV = 'developement';
     //let runner = await testNet.getUnitxRunner();
     //await writeDataToBus(runner, 'test', 24, 'a', 101, 8, '{a:1}');
-
+    
     await init();
 
     let res = await fetch('http://localhost:3015/uq/unitx-test/joint-read-bus', {
@@ -26,7 +26,13 @@ const $test = '$test';
         })
     });
     let ret = await res.json();
-    let s = null;
+    try {
+        let s = null;
+        let b = s.b;
+    }
+    catch (err) {
+        let t = null;
+    }
 
     /*
     let uqDb = 'salestask$test';

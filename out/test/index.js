@@ -30,7 +30,13 @@ const $test = '$test';
             })
         });
         let ret = yield res.json();
-        let s = null;
+        try {
+            let s = null;
+            let b = s.b;
+        }
+        catch (err) {
+            let t = null;
+        }
         /*
         let uqDb = 'salestask$test';
         let net:Net;

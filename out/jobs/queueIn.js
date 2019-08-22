@@ -33,9 +33,6 @@ function queueIn(runner) {
                     try {
                         yield runner.bus(bus, faceName, unit, id, data);
                         finish = finish_1.Finish.done;
-                        if (1 === 1) {
-                            throw 'error test -- @#@';
-                        }
                     }
                     catch (err) {
                         if (tries < 5) {
@@ -46,7 +43,7 @@ function queueIn(runner) {
                         }
                         let errSubject = `error queue_in on ${bus}/${faceName}:${id}`;
                         let error = typeof (err) === 'object' ?
-                            err.message + '\n' + err.stack : err;
+                            err.message + '\n---\n' + err.stack : err;
                         yield runner.log(unit, errSubject, error);
                     }
                     if (finish !== finish_1.Finish.done) {
