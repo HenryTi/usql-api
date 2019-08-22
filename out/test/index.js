@@ -8,17 +8,30 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = require("../core");
-const processBusMessage_1 = require("../router/unitx/processBusMessage");
+const start_1 = require("../start");
+const node_fetch_1 = require("node-fetch");
 const $test = '$test';
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
-        process.env.NODE_ENV = 'developement';
-        let runner = yield core_1.testNet.getUnitxRunner();
-        yield processBusMessage_1.writeDataToBus(runner, 'test', 24, 'a', 101, 8, '{a:1}');
+        //process.env.NODE_ENV = 'developement';
+        //let runner = await testNet.getUnitxRunner();
+        //await writeDataToBus(runner, 'test', 24, 'a', 101, 8, '{a:1}');
+        yield start_1.init();
+        let res = yield node_fetch_1.default('http://localhost:3015/uq/unitx-test/joint-read-bus', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                unit: 24,
+                face: '百灵威系统工程部/WebUser/WebUser',
+                queue: 434898000000023
+            })
+        });
+        let ret = yield res.json();
+        let s = null;
         /*
-        await init();
-    
         let uqDb = 'salestask$test';
         let net:Net;
         let dbName:string;;

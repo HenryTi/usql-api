@@ -43,7 +43,7 @@ function queueIn(runner) {
                         }
                         let errSubject = `error queue_in on ${bus}/${faceName}:${id}`;
                         let error = typeof (err) === 'object' ?
-                            JSON.stringify(err) : err;
+                            err.message + '\n' + err.stack : err;
                         yield runner.log(unit, errSubject, error);
                     }
                     if (finish !== finish_1.Finish.done) {

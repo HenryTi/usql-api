@@ -147,10 +147,10 @@ class Net {
             }
             switch (ret.length) {
                 case 0:
-                    throw `unit-face-url return no result unit=${unit} bus=${busOwner}/${busName}/${face}`;
+                    throw `no bus-query for unit=${unit} bus=${busOwner}/${busName}/${face}`;
                 case 1: break;
                 default:
-                    throw `unit-face-url return multiple results unit=${unit} bus=${busOwner}/${busName}/${face}`;
+                    throw `multiple bus-query for unit=${unit} bus=${busOwner}/${busName}/${face}`;
             }
             let uqUrl = ret[0];
             let { uq } = uqUrl;
