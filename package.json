@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "debug": "SET NODE_ENV=development&&node --nolazy --inspect-brk=5857 out/test/index.js"
+    "debug": "SET NODE_ENV=development&&node --nolazy --inspect-brk=5857 out/index.js"
   },
   "keywords": [],
   "author": "henry",
