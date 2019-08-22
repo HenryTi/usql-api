@@ -92,7 +92,6 @@ function init() {
                     yield res_1.initResDb();
                     yield _uq_1.init$UqDb();
                     console.log('UQ-API listening on port ' + port);
-                    console.log('pm2 auto load');
                     let connection = config.get("connection");
                     let { host, user } = connection;
                     console.log('process.env.NODE_ENV: %s\nDB host: %s, user: %s', process.env.NODE_ENV, host, user);

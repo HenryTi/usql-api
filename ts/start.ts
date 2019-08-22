@@ -89,7 +89,6 @@ export async function init():Promise<void> {
                 await initResDb();
                 await init$UqDb();
                 console.log('UQ-API listening on port ' + port);
-                console.log('pm2 auto load');
                 let connection = config.get<any>("connection");
                 let {host, user} = connection;
                 console.log('process.env.NODE_ENV: %s\nDB host: %s, user: %s',
