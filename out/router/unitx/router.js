@@ -43,13 +43,14 @@ function buildUnitxRouter(rb) {
             });
         }
     }));
-    rb.post(router, '/fetch-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+    let fetchBus = (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, msgStart, faces } = body;
         let ret = yield runner.unitUserTablesFromProc('tv_GetBusMessages', unit, undefined, msgStart, faces);
         console.log(`unitx/fetch-bus - GetBusMessages - ${ret}`);
         return ret;
-    }));
-    rb.post(router, '/joint-read-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+    });
+    rb.post(router, '/fetch-bus', fetchBus);
+    let jointReadBus = (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, face, queue } = body;
         if (queue === undefined)
             queue = core_1.busQueueSeed();
@@ -57,8 +58,9 @@ function buildUnitxRouter(rb) {
         if (ret.length === 0)
             return;
         return ret[0];
-    }));
-    rb.post(router, '/joint-write-bus', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+    });
+    rb.post(router, '/joint-read-bus', jointReadBus);
+    let jointWriteBus = (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, face, from, sourceId, body: message } = body;
         /*
         let data = '';
@@ -72,7 +74,8 @@ function buildUnitxRouter(rb) {
         */
         let ret = yield runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
         return ret;
-    }));
+    });
+    rb.post(router, '/joint-write-bus', jointWriteBus);
     return router;
 }
 exports.buildUnitxRouter = buildUnitxRouter;

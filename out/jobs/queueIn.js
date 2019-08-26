@@ -42,8 +42,7 @@ function queueIn(runner) {
                             finish = finish_1.Finish.bad; // fail
                         }
                         let errSubject = `error queue_in on ${bus}/${faceName}:${id}`;
-                        let error = typeof (err) === 'object' ?
-                            err.message + '\n---\n' + err.stack : err;
+                        let error = errorText(err);
                         yield runner.log(unit, errSubject, error);
                     }
                     if (finish !== finish_1.Finish.done) {
@@ -61,4 +60,20 @@ function queueIn(runner) {
     });
 }
 exports.queueIn = queueIn;
+function errorText(err) {
+    let errType = typeof err;
+    switch (errType) {
+        default: return errType + ': ' + err;
+        case 'undefined': return 'undefined';
+        case 'string': return err;
+        case 'object': break;
+    }
+    if (err === null)
+        return 'null';
+    let ret = '';
+    for (let i in err) {
+        ret += i + ':' + err[i];
+    }
+    return ret;
+}
 //# sourceMappingURL=queueIn.js.map

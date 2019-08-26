@@ -30,8 +30,7 @@ export async function queueIn(runner: Runner) {
                         finish = Finish.bad;  // fail
                     }
                     let errSubject = `error queue_in on ${bus}/${faceName}:${id}`;
-                    let error = typeof(err)==='object'?
-                        err.message + '\n---\n' + err.stack : err;
+                    let error = errorText(err);
                     await runner.log(unit, errSubject, error);
                 }
                 if (finish !== Finish.done) {
@@ -46,4 +45,20 @@ export async function queueIn(runner: Runner) {
             break;
         }
     }
+}
+
+function errorText(err:any):string {
+    let errType = typeof err;
+    switch (errType) {
+        default: return errType + ': ' + err;
+        case 'undefined': return 'undefined';
+        case 'string': return err;
+        case 'object': break;
+    }
+    if (err === null) return 'null';
+    let ret:string = '';
+    for (let i in err) {
+        ret += i + ':' + err[i];
+    }
+    return ret;
 }

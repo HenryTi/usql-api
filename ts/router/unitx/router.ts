@@ -34,26 +34,25 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
             });
         }
     });
-    
-    rb.post(router, '/fetch-bus',
-    async (runner:Runner, body:any):Promise<any[][]> => {
+
+    let fetchBus = async (runner:Runner, body:any):Promise<any[][]> => {
         let {unit, msgStart, faces} = body;
         let ret = await runner.unitUserTablesFromProc('tv_GetBusMessages', unit, undefined, msgStart, faces);
         console.log(`unitx/fetch-bus - GetBusMessages - ${ret}`);
         return ret;
-    });
+    }
+    rb.post(router, '/fetch-bus', fetchBus);
 
-    rb.post(router, '/joint-read-bus',
-    async (runner:Runner, body:any):Promise<any> => {
+    let jointReadBus = async (runner:Runner, body:any):Promise<any> => {
         let {unit, face, queue} = body;
         if (queue === undefined) queue = busQueueSeed();
         let ret = await runner.unitUserCall('tv_BusMessageFromQueue', unit, undefined, face, queue);
         if (ret.length === 0) return;
         return ret[0];
-    });
+    }
+    rb.post(router, '/joint-read-bus',jointReadBus);
 
-    rb.post(router, '/joint-write-bus',
-    async (runner:Runner, body:any):Promise<any> => {
+    let jointWriteBus = async (runner:Runner, body:any):Promise<any> => {
         let {unit, face, from, sourceId, body:message} = body;
         /*
         let data = '';
@@ -67,7 +66,8 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
         */
         let ret = await runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
         return ret;
-    });
+    }
+    rb.post(router, '/joint-write-bus', jointWriteBus);
     
     return router;
 }
