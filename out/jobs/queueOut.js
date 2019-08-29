@@ -184,7 +184,7 @@ function toBusMessage(busSchema, face, content) {
     let faceSchema = busSchema[face];
     if (faceSchema === undefined) {
         debugger;
-        throw 'something wrong';
+        throw 'toBusMessage something wrong';
     }
     let data = [];
     let p = 0;

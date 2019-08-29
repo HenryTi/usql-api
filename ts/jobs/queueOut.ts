@@ -167,7 +167,7 @@ function toBusMessage(busSchema:any, face:string, content:string):{body:string;v
     let faceSchema = busSchema[face];
     if (faceSchema === undefined) {
         debugger;
-        throw 'something wrong';
+        throw 'toBusMessage something wrong';
     }
     let data:{[key:string]: string[]}[] = [];
     let p = 0;
