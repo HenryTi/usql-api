@@ -14,63 +14,40 @@ export function buildSheetRouter(router:Router, rb:RouterBuilder) {
     rb.entityPost(router, constSheet, '/:name', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {app, discription, data} = body;
-        let verify = await runner.sheetVerify(name, unit, user, data);
-        if (verify!==undefined) {
-            return verify;
-        }
-        let result = await runner.sheetSave(name, unit, user, app, discription, data);
-        let sheetRet = result[0];
-        if (sheetRet !== undefined) {
-            let states:any[] = schema.states;
-            let startState = states.find(v => v.name === '$');
-            if (startState !== undefined) {
-                let actions:any[] = startState.actions;
-                if (actions !== undefined) {
-                    let $onsave = actions.find(v => v.name === '$onsave');
-                    if ($onsave !== undefined) {
-                        let {id, flow} = sheetRet;
-                        let retQueue = await queueSheet(runner, unit, name, id, {
-                            sheet: name,
-                            state: '$',
-                            action: '$onsave',
-                            unit: unit,
-                            user: user,
-                            id: id,
-                            flow: flow,
-                        });
+        try {
+            let verify = await runner.sheetVerify(name, unit, user, data);
+            if (verify!==undefined) {
+                return verify;
+            }
+            let result = await runner.sheetSave(name, unit, user, app, discription, data);
+            let sheetRet = result[0];
+            if (sheetRet !== undefined) {
+                let states:any[] = schema.states;
+                let startState = states.find(v => v.name === '$');
+                if (startState !== undefined) {
+                    let actions:any[] = startState.actions;
+                    if (actions !== undefined) {
+                        let $onsave = actions.find(v => v.name === '$onsave');
+                        if ($onsave !== undefined) {
+                            let {id, flow} = sheetRet;
+                            let retQueue = await queueSheet(runner, unit, name, id, {
+                                sheet: name,
+                                state: '$',
+                                action: '$onsave',
+                                unit: unit,
+                                user: user,
+                                id: id,
+                                flow: flow,
+                            });
+                        }
                     }
                 }
             }
-            /*
-            let sheetMsg:SheetMessage = {
-                unit: unit,
-                type: constSheet,
-                from: user,
-                queueId: id,
-                db: db,
-                body: sheetRet,
-                to: [user],
-                subject: discription
-            };*/
-            //await queueToUnitx(sheetMsg);
-            /*
-            await runner.sheetProcessing(id);
-            await queueSheet({
-                db: db,
-                from: user,
-                sheetHead: {
-                    sheet: name,
-                    state: '$',
-                    action: '$onsave',
-                    unit: unit,
-                    user: user,
-                    id: id,
-                    flow: flow,
-                }
-            });
-            */
+            return sheetRet;
         }
-        return sheetRet;
+        catch (err) {
+            await runner.log(unit, 'sheet save ' + name, data);
+        }
     });
         
     rb.entityPut(router, constSheet, '/:name', 
