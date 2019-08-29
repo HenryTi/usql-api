@@ -72,7 +72,7 @@ class Jobs {
         });
         if (core_1.isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
-            //return;
+            return;
             (function () {
                 return __awaiter(this, void 0, void 0, function* () {
                     console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);

@@ -74,7 +74,7 @@ function packBusMain(result:string[], schema:BusSchema, main:any) {
     }
 }
 
-export function escape(d:any):any {
+function escape(d:any, field: Field):any {
     //if (d === null) return '\b';
     if (d === null) return '';
     switch (typeof d) {
@@ -82,6 +82,9 @@ export function escape(d:any):any {
             if (d instanceof Date) return (d as Date).getTime(); //-timezoneOffset-timezoneOffset;
             return d;
         case 'string':
+            if (field.type === 'datetime') {
+                return new Date(d).getTime();
+            }
             let len = d.length;
             let r = '', p = 0;
             for (let i=0;i<len;i++) {
@@ -99,10 +102,11 @@ export function escape(d:any):any {
 function packRow(result:string[], fields:Field[], data:any) {
     let ret = '';
     let len = fields.length;
-    ret += escape(data[fields[0].name]);
+    let f = fields[0];
+    ret += escape(data[f.name], f);
     for (let i=1;i<len;i++) {
-        let f = fields[i];
-        ret += tab + escape(data[f.name]);
+        f = fields[i];
+        ret += tab + escape(data[f.name], f);
     }
     result.push(ret + ln);
 }

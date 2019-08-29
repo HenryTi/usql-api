@@ -10,44 +10,46 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 function buildQueryRouter(router, rb) {
-    rb.entityPost(router, 'query', '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let params = [];
-        let fields = schema.fields;
-        let len = fields.length;
-        for (let i = 0; i < len; i++) {
-            params.push(body[fields[i].name]);
-        }
-        let result = yield runner.query(name, unit, user, params);
-        let data = core_1.packReturn(schema, result);
-        return data;
-    }));
-    rb.entityPost(router, 'query', '-page/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let pageStart = body['$pageStart'];
-        if (pageStart !== undefined) {
-            let page = schema.returns.find(v => v.name === '$page');
-            if (page !== undefined) {
-                let startField = page.fields[0];
-                if (startField !== undefined) {
-                    switch (startField.type) {
-                        case 'date':
-                        case 'time':
-                        case 'datetime':
-                            pageStart = new Date(pageStart);
-                            break;
-                    }
+    rb.entityPost(router, 'query', '/:name', exports.queryProcess);
+    rb.entityPost(router, 'query', '-page/:name', exports.pageQueryProcess);
+}
+exports.buildQueryRouter = buildQueryRouter;
+exports.queryProcess = (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    let params = [];
+    let fields = schema.fields;
+    let len = fields.length;
+    for (let i = 0; i < len; i++) {
+        params.push(body[fields[i].name]);
+    }
+    let result = yield runner.query(name, unit, user, params);
+    let data = core_1.packReturn(schema, result);
+    return data;
+});
+exports.pageQueryProcess = (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    let pageStart = body['$pageStart'];
+    if (pageStart !== undefined) {
+        let page = schema.returns.find(v => v.name === '$page');
+        if (page !== undefined) {
+            let startField = page.fields[0];
+            if (startField !== undefined) {
+                switch (startField.type) {
+                    case 'date':
+                    case 'time':
+                    case 'datetime':
+                        pageStart = new Date(pageStart);
+                        break;
                 }
             }
         }
-        let params = [pageStart, body['$pageSize']];
-        let fields = schema.fields;
-        let len = fields.length;
-        for (let i = 0; i < len; i++) {
-            params.push(body[fields[i].name]);
-        }
-        let result = yield runner.query(name, unit, user, params);
-        let data = core_1.packReturn(schema, result);
-        return data;
-    }));
-}
-exports.buildQueryRouter = buildQueryRouter;
+    }
+    let params = [pageStart, body['$pageSize']];
+    let fields = schema.fields;
+    let len = fields.length;
+    for (let i = 0; i < len; i++) {
+        params.push(body[fields[i].name]);
+    }
+    let result = yield runner.query(name, unit, user, params);
+    let data = core_1.packReturn(schema, result);
+    return data;
+});
 //# sourceMappingURL=query.js.map

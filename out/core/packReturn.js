@@ -67,7 +67,7 @@ function packBusMain(result, schema, main) {
         result.push(ln, ln, ln);
     }
 }
-function escape(d) {
+function escape(d, field) {
     //if (d === null) return '\b';
     if (d === null)
         return '';
@@ -77,6 +77,9 @@ function escape(d) {
                 return d.getTime(); //-timezoneOffset-timezoneOffset;
             return d;
         case 'string':
+            if (field.type === 'datetime') {
+                return new Date(d).getTime();
+            }
             let len = d.length;
             let r = '', p = 0;
             for (let i = 0; i < len; i++) {
@@ -96,14 +99,14 @@ function escape(d) {
         case 'undefined': return '';
     }
 }
-exports.escape = escape;
 function packRow(result, fields, data) {
     let ret = '';
     let len = fields.length;
-    ret += escape(data[fields[0].name]);
+    let f = fields[0];
+    ret += escape(data[f.name], f);
     for (let i = 1; i < len; i++) {
-        let f = fields[i];
-        ret += tab + escape(data[f.name]);
+        f = fields[i];
+        ret += tab + escape(data[f.name], f);
     }
     result.push(ret + ln);
 }

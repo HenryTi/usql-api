@@ -107,11 +107,31 @@ export class RouterBuilder {
                 run = schema.run;
                 if (this.validEntity(res, call, entityType) === false) return;
             }
-            let body = isGet === true? (req as any).query : (req as any).body;
-            let result = await processer(unit, userId, name, db, params, runner, body, call, run, this.net);
+            let result: any;
+            let $uq: any;
+            let entityVersion = req.header('en');
+            let uqVersion = req.header('uq');
+            let eqEntity = entityVersion === undefined || call.version === Number(entityVersion);
+            let eqUq = uqVersion === undefined || runner.uqVersion === Number(uqVersion);
+            if (eqEntity === true && eqUq === true)
+            {
+                let body = isGet === true? (req as any).query : (req as any).body;
+                result = await processer(unit, userId, name, db, params, runner, body, call, run, this.net);
+            }
+            else {
+                $uq = {};
+                if (eqEntity === false) {
+                    $uq.entity = call;
+                }
+                if (eqUq === false) {
+                    let access = await runner.getAccesses(unit, userId, undefined);
+                    $uq.uq = access;
+                }
+            }
             res.json({
                 ok: true,
-                res: result
+                res: result,
+                $uq: $uq,
             });
         }
         catch (err) {

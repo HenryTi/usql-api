@@ -16,6 +16,7 @@ const schema_1 = require("./schema");
 const tuid_1 = require("./tuid");
 const sheet_1 = require("./sheet");
 const import_1 = require("./import");
+const map_1 = require("./map");
 //import settingRouter from './setting';
 function buildEntityRouter(router, rb) {
     access_1.buildAccessRouter(router, rb);
@@ -27,6 +28,7 @@ function buildEntityRouter(router, rb) {
     tuid_1.buildTuidRouter(router, rb);
     sheet_1.buildSheetRouter(router, rb);
     import_1.buildImportRouter(router, rb);
+    map_1.buildMapRouter(router, rb);
 }
 exports.buildEntityRouter = buildEntityRouter;
 //# sourceMappingURL=index.js.map

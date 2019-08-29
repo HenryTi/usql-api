@@ -13,6 +13,7 @@ import {buildSchemaRouter} from './schema';
 import {buildTuidRouter} from './tuid';
 import {buildSheetRouter} from './sheet';
 import {buildImportRouter} from './import';
+import {buildMapRouter} from './map';
 import { RouterBuilder } from '../core';
 
 //import settingRouter from './setting';
@@ -27,4 +28,5 @@ export function buildEntityRouter(router:Router, rb: RouterBuilder) {
     buildTuidRouter(router, rb);
     buildSheetRouter(router, rb);
     buildImportRouter(router, rb);
+    buildMapRouter(router, rb);
 }

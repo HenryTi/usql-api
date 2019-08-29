@@ -49,11 +49,30 @@ class RouterBuilder {
                     if (this.validEntity(res, call, entityType) === false)
                         return;
                 }
-                let body = isGet === true ? req.query : req.body;
-                let result = yield processer(unit, userId, name, db, params, runner, body, call, run, this.net);
+                let result;
+                let $uq;
+                let entityVersion = req.header('en');
+                let uqVersion = req.header('uq');
+                let eqEntity = entityVersion === undefined || call.version === Number(entityVersion);
+                let eqUq = uqVersion === undefined || runner.uqVersion === Number(uqVersion);
+                if (eqEntity === true && eqUq === true) {
+                    let body = isGet === true ? req.query : req.body;
+                    result = yield processer(unit, userId, name, db, params, runner, body, call, run, this.net);
+                }
+                else {
+                    $uq = {};
+                    if (eqEntity === false) {
+                        $uq.entity = call;
+                    }
+                    if (eqUq === false) {
+                        let access = yield runner.getAccesses(unit, userId, undefined);
+                        $uq.uq = access;
+                    }
+                }
                 res.json({
                     ok: true,
-                    res: result
+                    res: result,
+                    $uq: $uq,
                 });
             }
             catch (err) {
