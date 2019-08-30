@@ -78,7 +78,7 @@ function escape(d, field) {
             return d;
         case 'string':
             if (field.type === 'datetime') {
-                return new Date(d).getTime();
+                return new Date(d).getTime() / 1000;
             }
             let len = d.length;
             let r = '', p = 0;

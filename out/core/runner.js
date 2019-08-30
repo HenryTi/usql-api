@@ -20,12 +20,36 @@ class Runner {
         this.db = db;
         this.net = net;
         this.setting = {};
+        this.modifyMaxes = {};
     }
     getDb() { return this.db.getDbName(); }
     checkUqVersion(uqVersion) {
         //if (this.uqVersion === undefined) return;
         //if (uqVersion !== this.uqVersion) 
         throw 'unmatched uq version';
+    }
+    setModifyMax(unit, modifyMax) {
+        this.modifyMaxes[unit] = modifyMax;
+    }
+    getModifyMax(unit) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let ret = this.modifyMaxes[unit];
+            if (ret !== undefined) {
+                if (ret === null)
+                    return;
+                return ret;
+            }
+            try {
+                let maxes = yield this.tableFromProc('$modify_queue_max', [unit]);
+                ret = maxes[0].max;
+                this.modifyMaxes[unit] = ret;
+                return ret;
+            }
+            catch (err) {
+                console.error(err);
+                this.modifyMaxes[unit] = null;
+            }
+        });
     }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {

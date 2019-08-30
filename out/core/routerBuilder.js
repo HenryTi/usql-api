@@ -72,6 +72,7 @@ class RouterBuilder {
                 res.json({
                     ok: true,
                     res: result,
+                    $modify: yield runner.getModifyMax(unit),
                     $uq: $uq,
                 });
             }

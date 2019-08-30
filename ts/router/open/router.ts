@@ -86,9 +86,11 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
         let {unit, start, page, entities} = body;
         let ret = await runner.unitTablesFromProc('tv_$modify_queue', unit, start, page, entities);
         let ret1 = ret[1];
+        let modifyMax = ret1.length===0? 0: ret1[0].max;
+        runner.setModifyMax(unit, modifyMax);
         return {
             queue: ret[0],
-            queueMax: ret1.length===0? 0: ret1[0].max
+            queueMax: modifyMax
         };
     });
 

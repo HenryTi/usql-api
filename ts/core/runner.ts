@@ -45,6 +45,7 @@ export class Runner {
     private setting: {[name:string]: any};
     private entityColl: {[id:number]: EntityAccess};
     private sheetRuns: {[sheet:string]: SheetRun};
+    private readonly modifyMaxes: {[unit:number]: number};
 
     uqOwner: string;
     uq: string;
@@ -65,6 +66,7 @@ export class Runner {
         this.db = db;
         this.net = net;
         this.setting = {};
+        this.modifyMaxes = {};
     }
 
     getDb():string {return this.db.getDbName()}
@@ -73,6 +75,28 @@ export class Runner {
         //if (this.uqVersion === undefined) return;
         //if (uqVersion !== this.uqVersion) 
         throw 'unmatched uq version';
+    }
+
+    setModifyMax(unit:number, modifyMax:number) {
+        this.modifyMaxes[unit] = modifyMax;
+    }
+
+    async getModifyMax(unit:number):Promise<number> {
+        let ret = this.modifyMaxes[unit];
+        if (ret !== undefined) {
+            if (ret === null) return;
+            return ret;
+        }
+        try {
+            let maxes:any[] = await this.tableFromProc('$modify_queue_max', [unit]);
+            ret = maxes[0].max;
+            this.modifyMaxes[unit] = ret;
+            return ret;
+        }
+        catch (err) {
+            console.error(err);
+            this.modifyMaxes[unit] = null;
+        }
     }
 
     async sql(sql:string, params:any[]): Promise<any> {

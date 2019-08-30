@@ -12,6 +12,25 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const tuidType = 'tuid';
 function buildTuidRouter(router, rb) {
+    router.post('/tuid/queue--modify', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        let userToken = req.user;
+        let { db, unit } = userToken;
+        let { start, page, entities } = req.body;
+        let runner = yield this.checkRunner(db);
+        if (runner === undefined)
+            return;
+        let ret = yield runner.unitTablesFromProc('tv_$modify_queue', unit, start, page, entities);
+        let ret1 = ret[1];
+        let modifyMax = ret1.length === 0 ? 0 : ret1[0].max;
+        runner.setModifyMax(unit, modifyMax);
+        res.json({
+            ok: true,
+            res: {
+                queue: ret[0],
+                queueMax: modifyMax
+            }
+        });
+    }));
     rb.entityGet(router, tuidType, '/:name/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id } = urlParams;
         let result = yield runner.tuidGet(name, unit, user, id);

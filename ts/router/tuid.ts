@@ -1,11 +1,31 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import * as _ from 'lodash';
 //import { getTuidArr } from './router';
-import { Runner, RouterBuilder, packArr } from '../core';
+import { Runner, RouterBuilder, packArr, User } from '../core';
 
 const tuidType = 'tuid';
 
 export function buildTuidRouter(router: Router, rb: RouterBuilder) {
+    router.post('/tuid/queue--modify',
+    async (req:Request, res:Response) => {
+        let userToken:User = (req as any).user;
+        let {db, unit} = userToken;
+        let {start, page, entities} = req.body;
+        let runner = await this.checkRunner(db);
+        if (runner === undefined) return;
+        let ret = await runner.unitTablesFromProc('tv_$modify_queue', unit, start, page, entities);
+        let ret1 = ret[1];
+        let modifyMax = ret1.length===0? 0: ret1[0].max;
+        runner.setModifyMax(unit, modifyMax);
+        res.json({
+            ok: true,
+            res: {            
+                queue: ret[0],
+                queueMax: modifyMax
+            }
+        });
+    });
+
     rb.entityGet(router, tuidType, '/:name/:id', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id} = urlParams;
@@ -145,7 +165,7 @@ export function buildTuidRouter(router: Router, rb: RouterBuilder) {
         }
         else {
             let {arrs} = schema;
-            let arrSchema = arrs.find(v => v.name === arr);
+            let arrSchema = (arrs as any[]).find(v => v.name === arr);
             let {mainFields} = arrSchema;
             if (mainFields !== undefined) {
                 let ret:string[] = [];

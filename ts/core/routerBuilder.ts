@@ -131,6 +131,7 @@ export class RouterBuilder {
             res.json({
                 ok: true,
                 res: result,
+                $modify: await runner.getModifyMax(unit),
                 $uq: $uq,
             });
         }
