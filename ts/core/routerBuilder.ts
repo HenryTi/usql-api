@@ -3,7 +3,7 @@ import { Runner } from './runner';
 import { consts } from "./consts";
 import { prodNet, testNet, Net, prodCompileNet, testCompileNet } from './net';
 
-type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
+type Processer = (runner:Runner, body:any, urlParams:any, userToken?:User) => Promise<any>;
 type EntityProcesser = (unit:number, user:number, name:string, db:string, urlParams:any, 
     runner:Runner, body:any, schema:any, run:any, net?:Net) => Promise<any>;
 
@@ -61,7 +61,8 @@ export class RouterBuilder {
         try {
             let runner = await this.routerRunner(req);
             if (runner === undefined) return;
-            let result = await processer(runner, queryOrBody, params);
+            let userToken:User = (req as any).user;
+            let result = await processer(runner, queryOrBody, params, userToken);
             res.json({
                 ok: true,
                 res: result
@@ -128,10 +129,11 @@ export class RouterBuilder {
                     $uq.uq = access;
                 }
             }
+            let modifyMax = await runner.getModifyMax(unit);
             res.json({
                 ok: true,
                 res: result,
-                $modify: await runner.getModifyMax(unit),
+                $modify: modifyMax,
                 $uq: $uq,
             });
         }

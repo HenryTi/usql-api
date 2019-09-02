@@ -300,9 +300,11 @@ export class Runner {
     async tuidGetArrAll(tuid:string, arr:string, unit:number, user:number, owner:number): Promise<any> {
         return await this.unitUserCall('tv_' + tuid + '_' + arr + '$all', unit, user, owner);
     }
+    /*
     async tuidProxyGet(tuid:string, unit:number, user:number, id:number, type:string): Promise<any> {
         return await this.unitUserCall('tv_' + tuid + '$proxy', unit, user, id, type);
     }
+    */
     async tuidIds(tuid:string, arr:string, unit:number, user:number, ids:string): Promise<any> {
         let proc = 'tv_' + tuid;
         if (arr !== '$') proc += '_' + arr;

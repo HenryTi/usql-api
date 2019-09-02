@@ -36,6 +36,7 @@ export function buildMapRouter(router:Router, rb:RouterBuilder) {
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any, net:Net):Promise<any> => {
         let queryName = name + '$query$';
         let querySchema = runner.getSchema(queryName);
-        return await queryProcess(unit, user, queryName, db, urlParams, runner, body, querySchema.call);
+        let ret = await queryProcess(unit, user, queryName, db, urlParams, runner, body, querySchema.call);
+        return ret;
     });
 }

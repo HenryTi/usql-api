@@ -18,7 +18,8 @@ class RouterBuilder {
                 let runner = yield this.routerRunner(req);
                 if (runner === undefined)
                     return;
-                let result = yield processer(runner, queryOrBody, params);
+                let userToken = req.user;
+                let result = yield processer(runner, queryOrBody, params, userToken);
                 res.json({
                     ok: true,
                     res: result
@@ -69,10 +70,11 @@ class RouterBuilder {
                         $uq.uq = access;
                     }
                 }
+                let modifyMax = yield runner.getModifyMax(unit);
                 res.json({
                     ok: true,
                     res: result,
-                    $modify: yield runner.getModifyMax(unit),
+                    $modify: modifyMax,
                     $uq: $uq,
                 });
             }

@@ -37,7 +37,8 @@ function buildMapRouter(router, rb) {
     rb.entityPost(router, actionType, '/:name/query', (unit, user, name, db, urlParams, runner, body, schema, run, net) => __awaiter(this, void 0, void 0, function* () {
         let queryName = name + '$query$';
         let querySchema = runner.getSchema(queryName);
-        return yield query_1.queryProcess(unit, user, queryName, db, urlParams, runner, body, querySchema.call);
+        let ret = yield query_1.queryProcess(unit, user, queryName, db, urlParams, runner, body, querySchema.call);
+        return ret;
     }));
 }
 exports.buildMapRouter = buildMapRouter;

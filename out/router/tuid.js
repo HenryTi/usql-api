@@ -12,24 +12,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const tuidType = 'tuid';
 function buildTuidRouter(router, rb) {
-    router.post('/tuid/queue--modify', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let userToken = req.user;
+    rb.post(router, '/queue-modify', (runner, body, params, userToken) => __awaiter(this, void 0, void 0, function* () {
         let { db, unit } = userToken;
-        let { start, page, entities } = req.body;
-        let runner = yield this.checkRunner(db);
+        let { start, page, entities } = body;
         if (runner === undefined)
             return;
         let ret = yield runner.unitTablesFromProc('tv_$modify_queue', unit, start, page, entities);
         let ret1 = ret[1];
         let modifyMax = ret1.length === 0 ? 0 : ret1[0].max;
         runner.setModifyMax(unit, modifyMax);
-        res.json({
-            ok: true,
-            res: {
-                queue: ret[0],
-                queueMax: modifyMax
-            }
-        });
+        return {
+            queue: ret[0],
+            queueMax: modifyMax
+        };
     }));
     rb.entityGet(router, tuidType, '/:name/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id } = urlParams;
@@ -75,12 +70,15 @@ function buildTuidRouter(router, rb) {
         let result = yield runner.tuidGetArrAll(name, arr, unit, user, owner);
         return result;
     }));
-    rb.entityGet(router, tuidType, '-proxy/:name/:type/:id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { id, type } = urlParams;
-        let result = yield runner.tuidProxyGet(name, unit, user, id, type);
+    /*
+    rb.entityGet(router, tuidType, '-proxy/:name/:type/:id',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {id, type} = urlParams;
+        let result = await runner.tuidProxyGet(name, unit, user, id, type);
         let row = result[0];
         return row;
-    }));
+    });
+    */
     rb.entityPost(router, tuidType, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let id = body["$id"];
         let dbParams = [id];

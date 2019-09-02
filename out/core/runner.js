@@ -331,11 +331,11 @@ class Runner {
             return yield this.unitUserCall('tv_' + tuid + '_' + arr + '$all', unit, user, owner);
         });
     }
-    tuidProxyGet(tuid, unit, user, id, type) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.unitUserCall('tv_' + tuid + '$proxy', unit, user, id, type);
-        });
+    /*
+    async tuidProxyGet(tuid:string, unit:number, user:number, id:number, type:string): Promise<any> {
+        return await this.unitUserCall('tv_' + tuid + '$proxy', unit, user, id, type);
     }
+    */
     tuidIds(tuid, arr, unit, user, ids) {
         return __awaiter(this, void 0, void 0, function* () {
             let proc = 'tv_' + tuid;
