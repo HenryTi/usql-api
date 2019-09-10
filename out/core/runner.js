@@ -644,9 +644,10 @@ class Runner {
                 let { name, id, version, schema, run, from } = row;
                 if (!schema)
                     continue;
-                name = name.toLowerCase();
+                //name = name.toLowerCase();
                 let tuidFroms;
                 let schemaObj = JSON.parse(schema);
+                let sName = schemaObj.name;
                 let runObj = JSON.parse(run);
                 schemaObj.typeId = id;
                 schemaObj.version = version;
@@ -708,7 +709,7 @@ class Runner {
                         break;
                 }
                 this.entityColl[id] = {
-                    name: name,
+                    name: sName,
                     access: type !== 'sheet' ?
                         type + '|' + id :
                         {

@@ -551,9 +551,10 @@ export class Runner {
         for (let row of schemaTable) {
             let {name, id, version, schema, run, from} = row;
             if (!schema) continue;
-            name = name.toLowerCase();
+            //name = name.toLowerCase();
             let tuidFroms:{[tuid:string]:{tuid?:string, maps?:string[], tuidObj?:any, mapObjs?:{[map:string]:any}}};
             let schemaObj = JSON.parse(schema);
+            let sName = schemaObj.name;
             let runObj = JSON.parse(run);
             schemaObj.typeId = id;
             schemaObj.version = version;
@@ -608,7 +609,7 @@ export class Runner {
                     break;
             }
             this.entityColl[id] = {
-                name: name,
+                name: sName,
                 access: type !== 'sheet'?
                     type + '|' + id :
                     {
