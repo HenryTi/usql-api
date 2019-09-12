@@ -8,14 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const debugUqs_1 = require("./debugUqs");
 function pullBus(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            /*
             if (runner.net.isTest === true) {
-                if (debugUqs!==undefined && debugUqs.indexOf(runner.uq)>=0) debugger;
+                if (debugUqs_1.debugUqs !== undefined && debugUqs_1.debugUqs.indexOf(runner.uq) >= 0)
+                    debugger;
             }
-            */
             let { buses, net } = runner;
             let { faces, coll, hasError } = buses;
             while (hasError === false) {
@@ -34,7 +34,9 @@ function pullBus(runner) {
                     // 新版：bus读来，直接写入queue_in。然后在队列里面处理
                     for (let row of messages) {
                         let { face: faceUrl, id: msgId, body, version } = row;
-                        let face = coll[faceUrl];
+                        let face = coll[faceUrl.toLowerCase()];
+                        if (face === undefined)
+                            continue;
                         let { bus, faceName, version: runnerBusVersion } = face;
                         try {
                             if (runnerBusVersion !== version) {

@@ -1,12 +1,11 @@
 import { Runner, Net } from "../core";
+import { debugUqs } from "./debugUqs";
 
 export async function pullBus(runner: Runner) {
     try {
-        /*
         if (runner.net.isTest === true) {
             if (debugUqs!==undefined && debugUqs.indexOf(runner.uq)>=0) debugger;
         }
-        */
         let {buses, net} = runner;
         let {faces, coll, hasError} = buses;
         while (hasError === false) {
@@ -23,7 +22,8 @@ export async function pullBus(runner: Runner) {
                 // 新版：bus读来，直接写入queue_in。然后在队列里面处理
                 for (let row of messages) {
                     let {face:faceUrl, id:msgId, body, version} = row;
-                    let face = coll[faceUrl];
+                    let face = coll[(faceUrl as string).toLowerCase()];
+                    if (face === undefined) continue;
                     let {bus, faceName, version:runnerBusVersion} = face;
                     try {
                         if (runnerBusVersion !== version) {
