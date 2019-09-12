@@ -8,14 +8,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const debugUqs_1 = require("./debugUqs");
 function pullBus(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            /*
             if (runner.net.isTest === true) {
-                if (debugUqs_1.debugUqs !== undefined && debugUqs_1.debugUqs.indexOf(runner.uq) >= 0)
-                    debugger;
-            }
+                if (debugUqs!==undefined && debugUqs.indexOf(runner.uq)>=0) debugger;
+            }*/
             let { buses, net } = runner;
             let { faces, coll, hasError } = buses;
             while (hasError === false) {

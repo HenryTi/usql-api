@@ -3,9 +3,10 @@ import { debugUqs } from "./debugUqs";
 
 export async function pullBus(runner: Runner) {
     try {
+        /*
         if (runner.net.isTest === true) {
             if (debugUqs!==undefined && debugUqs.indexOf(runner.uq)>=0) debugger;
-        }
+        }*/
         let {buses, net} = runner;
         let {faces, coll, hasError} = buses;
         while (hasError === false) {
