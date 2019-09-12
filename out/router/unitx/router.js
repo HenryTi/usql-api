@@ -61,7 +61,7 @@ function buildUnitxRouter(rb) {
     });
     rb.post(router, '/joint-read-bus', jointReadBus);
     let jointWriteBus = (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        let { unit, face, from, sourceId, body: message } = body;
+        let { unit, face, from, fromQueueId, version, body: message } = body;
         /*
         let data = '';
         if (face !== null && face !== undefined) data += face;
@@ -72,7 +72,8 @@ function buildUnitxRouter(rb) {
         data += '\t';
         data += message + '\n';
         */
-        let ret = yield runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, sourceId, message);
+        //let ret = await runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, fromQueueId, sourceId, message);
+        let ret = yield runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, message);
         return ret;
     });
     rb.post(router, '/joint-write-bus', jointWriteBus);
