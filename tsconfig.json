@@ -7,7 +7,7 @@
         "sourceMap": true,
         "module": "commonjs",
         "watch": false,
-        "outDir": "out",
+        "outDir": "out"
         //"sourceRoot": "ts"
     },
     "exclude": [
