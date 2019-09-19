@@ -495,8 +495,9 @@ export class Runner {
     }
 
     async reset() {
-        if (this.buses) this.buses.hasError = false;
-        this.schemas = undefined;
+        this.net.resetRunnerAfterCompile(this);
+        //if (this.buses) this.buses.hasError = false;
+        //this.schemas = undefined;
     }
 
     async init() {

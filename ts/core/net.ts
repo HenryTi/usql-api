@@ -47,6 +47,15 @@ export abstract class Net {
         return runner;
     }
 
+    resetRunnerAfterCompile(runner: Runner) {
+        for (let i in this.runners) {
+            if (this.runners[i] === runner) {
+                this.runners[i] = undefined;
+                break;
+            }
+        }
+    }
+
     async getUnitxRunner():Promise<Runner> {
         let name = '$unitx';
         let runner = this.runners[name];
