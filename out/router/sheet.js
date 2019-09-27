@@ -98,6 +98,11 @@ function buildSheetRouter(router, rb) {
         let result = yield runner.sheetStateCount(name, unit, user);
         return result;
     }));
+    rb.entityPost(router, constSheet, '/:name/user-sheets', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { state, user: sheetUser, pageStart, pageSize } = body;
+        let result = yield runner.userSheets(name, state, unit, user, sheetUser, pageStart, pageSize);
+        return result;
+    }));
     rb.entityPost(router, constSheet, '/:name/my-sheets', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { state, pageStart, pageSize } = body;
         let result = yield runner.mySheets(name, state, unit, user, pageStart, pageSize);

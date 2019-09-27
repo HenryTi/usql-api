@@ -408,6 +408,10 @@ export class Runner {
         let sql = 'tv_$sheet_state_count';
         return await this.unitUserCall(sql, unit, user, sheet);
     }
+    async userSheets(sheet:string, state:string, unit:number, user:number, sheetUser:number, pageStart:number, pageSize:number) {
+        let sql = 'tv_$sheet_state_user';
+        return await this.unitUserCall(sql, unit, user, sheet, state, sheetUser, pageStart, pageSize);
+    }
     async mySheets(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
         let sql = 'tv_$sheet_state_my';
         return await this.unitUserCall(sql, unit, user, sheet, state, pageStart, pageSize);

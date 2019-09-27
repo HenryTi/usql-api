@@ -479,6 +479,12 @@ class Runner {
             return yield this.unitUserCall(sql, unit, user, sheet);
         });
     }
+    userSheets(sheet, state, unit, user, sheetUser, pageStart, pageSize) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = 'tv_$sheet_state_user';
+            return yield this.unitUserCall(sql, unit, user, sheet, state, sheetUser, pageStart, pageSize);
+        });
+    }
     mySheets(sheet, state, unit, user, pageStart, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = 'tv_$sheet_state_my';

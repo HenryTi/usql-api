@@ -96,6 +96,13 @@ export function buildSheetRouter(router:Router, rb:RouterBuilder) {
         return result;
     });
 
+    rb.entityPost(router, constSheet, '/:name/user-sheets', 
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {state, user:sheetUser, pageStart, pageSize} = body;
+        let result = await runner.userSheets(name, state, unit, user, sheetUser, pageStart, pageSize);
+        return result;
+    });
+
     rb.entityPost(router, constSheet, '/:name/my-sheets', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {state, pageStart, pageSize} = body;
