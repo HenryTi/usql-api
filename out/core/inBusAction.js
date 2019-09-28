@@ -48,20 +48,21 @@ class ParametersBus {
     buildData(unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.paramBuses === undefined)
-                return data;
+                return '';
             let retBusQuery = [];
             for (let inBus of this.paramBuses) {
                 let ret = yield this.busQuery(inBus, unit, user, data);
                 retBusQuery.push(ret);
             }
-            let ret = data + retBusQuery.join('\n\n') + '\n\n';
+            let ret = retBusQuery.join('\n\n') + '\n\n';
             return ret;
         });
     }
     buildDataFromObj(unit, user, obj) {
         return __awaiter(this, void 0, void 0, function* () {
             let data = packParam_1.packParam(this.schema, obj);
-            return yield this.buildData(unit, user, data);
+            let ret = yield this.buildData(unit, user, data);
+            return data + ret;
         });
     }
     busQuery(inBus, unit, user, data) {
@@ -85,7 +86,7 @@ class ParametersBus {
                         value = this.buildTextFromRet(fields, retParam[retIndex++]);
                     }
                     else {
-                        value = retParamMain[name];
+                        value = retParamMain[name] || retParamMain[name.toLowerCase()];
                     }
                     params.push(value);
                 }
@@ -154,15 +155,29 @@ class SheetVerifyParametersBus extends ParametersBus {
 }
 exports.SheetVerifyParametersBus = SheetVerifyParametersBus;
 class SheetActionParametersBus extends ParametersBus {
-    constructor(runner, sheetName, actionName) {
+    constructor(runner, sheetName, stateName, actionName) {
         super(runner, sheetName);
-        this.actionName = actionName;
+        this.stateName = stateName.toLowerCase();
+        this.actionName = actionName.toLowerCase();
     }
     initSchema() {
         let schema = this.runner.getSchema(this.entityName);
         this.schema = schema.call;
+        let state = this.schema.states.find(v => v.name === this.stateName);
+        if (state === undefined) {
+            debugger;
+            return;
+        }
+        let action = state.actions.find(v => v.name === this.actionName);
+        if (action === undefined) {
+            debugger;
+            return;
+        }
+        this.schema.inBuses = action.inBuses;
     }
-    getQueryProc(bus, face) { return `${this.entityName}_${this.actionName}$bus$${bus}_${face}`; }
+    getQueryProc(bus, face) {
+        return `${this.entityName}_${this.stateName}_${this.actionName}$bus$${bus}_${face}`;
+    }
 }
 exports.SheetActionParametersBus = SheetActionParametersBus;
 //# sourceMappingURL=inBusAction.js.map

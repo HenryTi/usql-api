@@ -59,21 +59,22 @@ export abstract class ParametersBus {
         });
     }
 
-    async buildData(unit:number, user:number, data:string):Promise<string> {
-        if (this.paramBuses === undefined) return data;
+    async buildData(unit:number, user:number, data:any):Promise<string> {
+        if (this.paramBuses === undefined) return '';
 
         let retBusQuery:any[] = [];
         for (let inBus of this.paramBuses) {
             let ret = await this.busQuery(inBus, unit, user, data);
             retBusQuery.push(ret);
         }
-        let ret = data + retBusQuery.join('\n\n') + '\n\n';
+        let ret = retBusQuery.join('\n\n') + '\n\n';
         return ret;
     }
 
     async buildDataFromObj(unit:number, user:number, obj:any):Promise<string> {
         let data = packParam(this.schema, obj);
-        return await this.buildData(unit, user, data);
+        let ret = await this.buildData(unit, user, data);
+        return data + ret;
     }
 
     private async busQuery(inBus:ParamBus, unit:number, user:number, data:string):Promise<any> {
@@ -96,7 +97,7 @@ export abstract class ParametersBus {
                     value = this.buildTextFromRet(fields, retParam[retIndex++]);
                 }
                 else {
-                    value = retParamMain[name];
+                    value = retParamMain[name] || retParamMain[name.toLowerCase()];
                 }
                 params.push(value);
             }
@@ -166,15 +167,30 @@ export class SheetVerifyParametersBus extends ParametersBus {
 }
 
 export class SheetActionParametersBus extends ParametersBus {
-    private actionName:string;
-    constructor(runner:Runner, sheetName:string, actionName:string) {
+    private stateName: string;
+    private actionName: string;
+    constructor(runner:Runner, sheetName:string, stateName:string, actionName:string) {
         super(runner, sheetName);
-        this.actionName = actionName;
+        this.stateName = stateName.toLowerCase();
+        this.actionName = actionName.toLowerCase();
     }
 
     protected initSchema():void {
         let schema = this.runner.getSchema(this.entityName);
         this.schema = schema.call;
+        let state = (this.schema.states as any[]).find(v => v.name === this.stateName);
+        if (state === undefined) {
+            debugger;
+            return;
+        }
+        let action = (state.actions as any[]).find(v => v.name === this.actionName);
+        if (action === undefined) {
+            debugger;
+            return;
+        }
+        this.schema.inBuses = action.inBuses;
     }
-    protected getQueryProc(bus:string, face:string):string {return `${this.entityName}_${this.actionName}$bus$${bus}_${face}`}
+    protected getQueryProc(bus:string, face:string):string {
+        return `${this.entityName}_${this.stateName}_${this.actionName}$bus$${bus}_${face}`
+    }
 }

@@ -415,7 +415,8 @@ class Runner {
                 return;
             //let actionName = sheet + '$verify';
             let inBusAction = this.getSheetVerifyParametersBus(sheet);
-            let inBusActionData = yield inBusAction.buildData(unit, user, data);
+            let inBusResult = yield inBusAction.buildData(unit, user, data);
+            let inBusActionData = data + inBusResult;
             let ret = yield this.unitUserCall('tv_' + sheet + '$verify', unit, user, inBusActionData);
             let { returns } = verify;
             let { length } = returns;
@@ -450,11 +451,11 @@ class Runner {
             yield this.db.call('tv_$sheet_processing', [sheetId]);
         });
     }
-    getSheetActionParametersBus(sheetName, actionName) {
-        let name = sheetName + '_' + actionName;
+    getSheetActionParametersBus(sheetName, stateName, actionName) {
+        let name = `${sheetName}_${stateName}_${actionName}`;
         let inBusAction = this.parametersBusCache[name];
         if (inBusAction === undefined) {
-            inBusAction = this.parametersBusCache[name] = new inBusAction_1.SheetActionParametersBus(this, sheetName, actionName);
+            inBusAction = this.parametersBusCache[name] = new inBusAction_1.SheetActionParametersBus(this, sheetName, stateName, actionName);
             inBusAction.init();
         }
         return inBusAction;
@@ -462,9 +463,12 @@ class Runner {
     sheetAct(sheet, state, action, unit, user, id, flow) {
         return __awaiter(this, void 0, void 0, function* () {
             let inBusActionName = sheet + '_' + (state === '$' ? action : state + '_' + action);
-            let inBusAction = this.getSheetActionParametersBus(sheet, action);
-            let inBusActionData = yield inBusAction.buildData(unit, user, action);
-            return yield this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, inBusActionData);
+            let inBusAction = this.getSheetActionParametersBus(sheet, state, action);
+            let inBusActionData = yield inBusAction.buildData(unit, user, id);
+            if (inBusActionData === '')
+                return yield this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, action);
+            else
+                return yield this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, action, inBusActionData);
         });
     }
     sheetStates(sheet, state, unit, user, pageStart, pageSize) {
@@ -526,7 +530,8 @@ class Runner {
     action(actionName, unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let inBusAction = this.getActionParametersBus(actionName);
-            let actionData = yield inBusAction.buildData(unit, user, data);
+            let inBusResult = yield inBusAction.buildData(unit, user, data);
+            let actionData = data + inBusResult;
             let result = yield this.unitUserCallEx('tv_' + actionName, unit, user, actionData);
             return result;
         });
@@ -565,7 +570,8 @@ class Runner {
     bus(bus, face, unit, msgId, body) {
         return __awaiter(this, void 0, void 0, function* () {
             let inBusAction = this.getAcceptParametersBus(bus, face);
-            let data = yield inBusAction.buildData(unit, 0, body);
+            let inBusResult = yield inBusAction.buildData(unit, 0, body);
+            let data = body + inBusResult;
             return yield this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
         });
     }
