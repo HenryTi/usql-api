@@ -10,10 +10,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
+const $uq = '$uq';
 function init$UqDb() {
     return __awaiter(this, void 0, void 0, function* () {
-        let db = new core_1.Db('$uq');
-        let runner = new core_1.Runner(db);
+        let db = new core_1.Db($uq);
+        let runner = new core_1.Runner($uq, db);
         yield runner.init$UqDb();
     });
 }

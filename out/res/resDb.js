@@ -14,7 +14,7 @@ const resDbName = '$res';
 function initResDb() {
     return __awaiter(this, void 0, void 0, function* () {
         let db = new core_1.Db(resDbName);
-        let runner = new core_1.Runner(db);
+        let runner = new core_1.Runner(resDbName, db);
         yield runner.initResDb(resDbName);
     });
 }
@@ -24,7 +24,7 @@ function getResDbRunner() {
     return __awaiter(this, void 0, void 0, function* () {
         if (resDbRunner === undefined) {
             let db = new core_1.Db(resDbName);
-            resDbRunner = new core_1.Runner(db);
+            resDbRunner = new core_1.Runner(resDbName, db);
         }
         return resDbRunner;
     });

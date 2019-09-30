@@ -47,6 +47,7 @@ export class Runner {
     private sheetRuns: {[sheet:string]: SheetRun};
     private readonly modifyMaxes: {[unit:number]: number};
 
+    name: string;
     uqOwner: string;
     uq: string;
     author: string;
@@ -62,7 +63,8 @@ export class Runner {
     hasPullEntities: boolean = false;
     net: Net;
 
-    constructor(db:Db, net:Net = undefined) {
+    constructor(name:string, db:Db, net:Net = undefined) {
+        this.name = name;
         this.db = db;
         this.net = net;
         this.setting = {};

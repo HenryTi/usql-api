@@ -17,19 +17,12 @@ const setHostUrl_1 = require("./setHostUrl");
 const centerApi_1 = require("./centerApi");
 const unitxApi_1 = require("./unitxApi");
 class Net {
-    constructor(initRunner) {
+    constructor(executingNet) {
         this.runners = {};
-        /*
-        public getDb(name:string):Db {
-            let dbName = this.getDbName(name);
-            let db = getDb(dbName);
-            return db;
-        }
-        */
-        //private openApiColl: {[url:string]: OpenApi} = {};
         this.uqOpenApis = {};
         this.unitxApis = {};
-        this.initRunner = initRunner;
+        //this.initRunner = initRunner;
+        this.executingNet = executingNet;
     }
     innerRunner(name) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -43,15 +36,6 @@ class Net {
                 runner = yield this.createRunnerFromDb(name, db);
                 if (runner === undefined)
                     return;
-                /*
-                let isExists = await db.exists();
-                if (isExists === false) {
-                    this.runners[name] = null;
-                    return;
-                }
-                runner = new Runner(db);
-                this.runners[name] = runner;
-                */
             }
             return runner;
         });
@@ -61,14 +45,24 @@ class Net {
             let runner = yield this.innerRunner(name);
             if (runner === undefined)
                 return;
-            if (this.initRunner === true)
+            // 执行版的net，this.execeutingNet undefined，所以需要init
+            if (this.executingNet === undefined) {
                 yield runner.init();
+            }
             return runner;
         });
     }
     resetRunnerAfterCompile(runner) {
+        if (this.executingNet === undefined) {
+            debugger;
+            return;
+        }
+        this.executingNet.resetRunner(runner);
+    }
+    resetRunner(runner) {
+        let runnerName = runner.name;
         for (let i in this.runners) {
-            if (this.runners[i] === runner) {
+            if (this.runners[i].name === runnerName) {
                 this.runners[i] = undefined;
                 break;
             }
@@ -85,17 +79,11 @@ class Net {
                 runner = yield this.createRunnerFromDb(name, db);
                 if (runner === undefined)
                     return;
-                /*
-                let isExists = await db.exists();
-                if (isExists === false) {
-                    this.runners[name] = null;
-                    return;
-                }
-                runner = new Runner(db);
-                this.runners[name] = runner;
-                */
             }
-            yield runner.init();
+            // 执行版的net，this.execeutingNet undefined，所以需要init
+            if (this.executingNet === undefined) {
+                yield runner.init();
+            }
             return runner;
         });
     }
@@ -106,7 +94,7 @@ class Net {
                 this.runners[name] = null;
                 return;
             }
-            let runner = new runner_1.Runner(db, this);
+            let runner = new runner_1.Runner(name, db, this);
             this.runners[name] = runner;
             return runner;
         });
@@ -284,9 +272,9 @@ class TestCompileNet extends TestNet {
 }
 */
 // 在entity正常状态下，每个runner都需要init，loadSchema
-exports.prodNet = new ProdNet(true);
-exports.testNet = new TestNet(true);
+exports.prodNet = new ProdNet(undefined);
+exports.testNet = new TestNet(undefined);
 // runner在编译状态下，database可能还没有创建，不需要init，也就是不需要loadSchema
-exports.prodCompileNet = new ProdNet(false);
-exports.testCompileNet = new TestNet(false);
+exports.prodCompileNet = new ProdNet(exports.prodNet);
+exports.testCompileNet = new TestNet(exports.testNet);
 //# sourceMappingURL=net.js.map

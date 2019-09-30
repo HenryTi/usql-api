@@ -15,9 +15,10 @@ const _1 = require(".");
 const importData_1 = require("./importData");
 const inBusAction_1 = require("./inBusAction");
 class Runner {
-    constructor(db, net = undefined) {
+    constructor(name, db, net = undefined) {
         this.hasPullEntities = false;
         this.parametersBusCache = {};
+        this.name = name;
         this.db = db;
         this.net = net;
         this.setting = {};

@@ -9,10 +9,12 @@ import { UnitxApi } from "./unitxApi";
 
 export abstract class Net {
     private runners: {[name:string]: Runner} = {};
-    private initRunner: boolean;
+    //private initRunner: boolean;
+    private executingNet: Net;  // 编译Net指向对应的执行Net，编译完成后，reset runner
 
-    constructor(initRunner: boolean) {
-        this.initRunner = initRunner;
+    constructor(executingNet: Net) {
+        //this.initRunner = initRunner;
+        this.executingNet = executingNet;
     }
 
     abstract get isTest():boolean;
@@ -27,15 +29,6 @@ export abstract class Net {
             let db = getDb(dbName);
             runner = await this.createRunnerFromDb(name, db);
             if (runner === undefined) return;
-            /*
-            let isExists = await db.exists();
-            if (isExists === false) {
-                this.runners[name] = null;
-                return;
-            }
-            runner = new Runner(db);
-            this.runners[name] = runner;
-            */
         }
         return runner;
     }
@@ -43,13 +36,25 @@ export abstract class Net {
     async getRunner(name:string):Promise<Runner> {
         let runner = await this.innerRunner(name);
         if (runner === undefined) return;
-        if (this.initRunner === true) await runner.init();
+        // 执行版的net，this.execeutingNet undefined，所以需要init
+        if (this.executingNet === undefined) {
+            await runner.init();
+        }
         return runner;
     }
 
     resetRunnerAfterCompile(runner: Runner) {
+        if (this.executingNet === undefined) {
+            debugger;
+            return;
+        }
+        this.executingNet.resetRunner(runner);
+    }
+
+    private resetRunner(runner: Runner) {
+        let runnerName = runner.name;
         for (let i in this.runners) {
-            if (this.runners[i] === runner) {
+            if (this.runners[i].name === runnerName) {
                 this.runners[i] = undefined;
                 break;
             }
@@ -64,17 +69,11 @@ export abstract class Net {
             let db = this.getUnitxDb();
             runner = await this.createRunnerFromDb(name, db);
             if (runner === undefined) return;
-            /*
-            let isExists = await db.exists();
-            if (isExists === false) {
-                this.runners[name] = null;
-                return;
-            }
-            runner = new Runner(db);
-            this.runners[name] = runner;
-            */
         }
-        await runner.init();
+        // 执行版的net，this.execeutingNet undefined，所以需要init
+        if (this.executingNet === undefined) {
+            await runner.init();
+        }
         return runner;
     }
 
@@ -84,21 +83,14 @@ export abstract class Net {
             this.runners[name] = null;
             return;
         }
-        let runner = new Runner(db, this);
+        let runner = new Runner(name, db, this);
         this.runners[name] = runner;
         return runner;
     }
 
     abstract getDbName(name:string):string;
     protected abstract getUnitxDb(): Db;
-    /*
-    public getDb(name:string):Db {
-        let dbName = this.getDbName(name);
-        let db = getDb(dbName);
-        return db;
-    }
-    */
-    //private openApiColl: {[url:string]: OpenApi} = {};
+
     private uqOpenApis: {[uqFullName:string]: {[unit:number]:OpenApi}} = {};
     private getOpenApiFromCache(uqFullName:string, unit:number):OpenApi {
         let openApis = this.uqOpenApis[uqFullName];
@@ -255,9 +247,9 @@ class TestCompileNet extends TestNet {
 */
 
 // 在entity正常状态下，每个runner都需要init，loadSchema
-export const prodNet = new ProdNet(true);
-export const testNet = new TestNet(true);
+export const prodNet = new ProdNet(undefined);
+export const testNet = new TestNet(undefined);
 
 // runner在编译状态下，database可能还没有创建，不需要init，也就是不需要loadSchema
-export const prodCompileNet = new ProdNet(false);
-export const testCompileNet = new TestNet(false);
+export const prodCompileNet = new ProdNet(prodNet);
+export const testCompileNet = new TestNet(testNet);

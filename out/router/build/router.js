@@ -39,7 +39,7 @@ function buildBuildRouter(router, rb) {
         try {
             let dbName = req.params.db;
             let db = new core_1.Db(rb.getDbName(dbName));
-            let runner = new core_1.Runner(db);
+            let runner = new core_1.Runner(dbName, db);
             let exists = yield runner.buildDatabase();
             res.json({
                 ok: true,

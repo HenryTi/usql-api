@@ -31,7 +31,7 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
         try {
             let dbName:string = req.params.db;
             let db = new Db(rb.getDbName(dbName));
-            let runner = new Runner(db);
+            let runner = new Runner(dbName, db);
             let exists = await runner.buildDatabase();
             res.json({
                 ok: true,
