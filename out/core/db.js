@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const config = require("config");
+const _ = require("lodash");
 const ms_1 = require("./ms");
 const my_1 = require("./my");
 const const_connectionUnitx = 'connection_$unitx';
@@ -27,7 +28,9 @@ class Db {
     }
     getDbName() { return this.dbName; }
     getDbConfig() {
-        return config.get(const_connection);
+        let ret = _.clone(config.get(const_connection));
+        ret.flags = '-FOUND_ROWS';
+        return ret;
     }
     createDbServer() {
         let sqlType = config.get('sqlType');

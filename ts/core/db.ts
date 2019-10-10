@@ -1,4 +1,5 @@
 import * as config from 'config';
+import * as _ from 'lodash';
 import {DbServer} from './dbServer';
 import {MsDbServer} from './ms';
 import {MyDbServer} from './my';
@@ -24,7 +25,9 @@ export class Db {
     }
     getDbName():string {return this.dbName}
     protected getDbConfig() {
-        return config.get<any>(const_connection);
+        let ret = _.clone(config.get<any>(const_connection));
+        ret.flags = '-FOUND_ROWS';
+        return ret;
     }
     private createDbServer() {
         let sqlType = config.get<string>('sqlType');
