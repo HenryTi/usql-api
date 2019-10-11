@@ -1,0 +1,19 @@
+{
+    "center": "http://centerhost/tv/",
+    "centerhost": "localhost:3000",
+    "unitxhost": "localhost:3015",
+    "port": 3015,
+    "secret": "xxx-yyy-zzz-00110",
+    "sqlType": "mysql",
+    "uploadPath": "../uploads/",
+    "connection": {
+        "host": "0.0.0.0",
+        "user": "usr",
+        "password": "pwd",
+        "multipleStatements": true
+    },
+    "redis": {
+        "port": "6379",
+        "host": "127.0.0.1"
+    }
+}

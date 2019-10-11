@@ -1,0 +1,14 @@
+通用方式给entity加tag
+
+每一个种tuid，甚至sheet，都可以加tag，用一张表来解决 tv$tag
+
+第一个字段是entity，也就是entity种类
+
+第二个字段是id，是单个的tuid id值
+
+第三个字段是tag，是const_str的值，字符串对int的映射
+
+给定任何一个id，都可以找到相应的tags，给定一个tag，都可以找到相应的id
+
+因为是通用表，所以可以自动来完成很多tag相关的工作。
+

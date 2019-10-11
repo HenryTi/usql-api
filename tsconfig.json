@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "lib": ["es2016"],
+        "target": "es2016",
+        "sourceMap": true,
+        "module": "commonjs",
+        "watch": false,
+        "outDir": "out"
+        //"sourceRoot": "ts"
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}
