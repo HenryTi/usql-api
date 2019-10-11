@@ -50,6 +50,9 @@ export class Db {
     async log(unit:number, uq:string, subject:string, content:string):Promise<void> {
         return await this.dbServer.call('$uq', 'log', [unit, uq, subject, content]);
     }
+    async logPerformance(log:string):Promise<void> {
+        await this.dbServer.call('$uq', 'performance', [log]);
+    }
     async sql(sql:string, params:any[]): Promise<any> {
         this.devLog('sql', params);
         return await this.dbServer.sql(this.dbName, sql, params);
@@ -144,3 +147,69 @@ function getDbName(name:string): string {
 function getCacheDb(name:string):Db {
     return dbs[name];
 }
+
+
+class Span {
+    private logger: DbLogger
+    readonly log: string;
+    readonly tick: number;
+    private _count: number;
+    constructor(logger:DbLogger, log:string) {
+        this.logger = logger;
+        this.log = log;
+        this.tick = Date.now();
+    }
+
+    close() {
+        this._count = Date.now() - this.tick;
+        this.logger.add(this);
+    }
+
+    get count() {return this._count}
+}
+
+class DbLogger {
+    private db: Db;
+    private minSpan:number; // 10ms
+    private tick:number = Date.now();
+    private spans:Span[] = [];
+
+    constructor(minSpan:number = 10) {
+        this.db = new Db(undefined);
+        this.minSpan = minSpan;
+    }
+
+    open(log:string): Span {
+        return new Span(this, log);
+    }
+
+    add(span: Span) {
+        let {count, log} = span;
+        if (count >= this.minSpan) {
+            if (log.startsWith('call ') === true) {
+                if (log.startsWith('call `$uq`.') === false) {
+                    this.spans.push(span);
+                }
+            }
+        }
+        let len = this.spans.length;
+        if (len === 0) return;
+        let tick = Date.now();
+        if (len > 10 || tick - this.tick > 60*1000) {
+            this.tick = tick;
+            let spans = this.spans;
+            this.spans = [];
+            this.save(spans);
+        }
+    }
+
+    private save(spans: Span[]):void {
+        let arr = spans.map(v => {
+            let {log, tick, count} = v;
+            return `${tick}\t${log}\t${count}`;
+        }).join('\n');
+        this.db.logPerformance(arr);
+    }
+}
+
+export const dbLogger = new DbLogger();

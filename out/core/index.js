@@ -29,5 +29,5 @@ __export(require("./runner"));
 __export(require("./routerBuilder"));
 __export(require("./db"));
 __export(require("./net"));
-__export(require("./benchLogger"));
+__export(require("./logger"));
 //# sourceMappingURL=index.js.map

@@ -1,7 +1,7 @@
 import {createPool, Pool, MysqlError, TypeCast, FieldInfo} from 'mysql';
 import * as _ from 'lodash';
 import {DbServer} from './dbServer';
-import { isDevelopment } from './db';
+import { isDevelopment, dbLogger } from './db';
 
 const retries = 5;
 const minMillis = 1;
@@ -39,10 +39,12 @@ export class MyDbServer extends DbServer {
     }
 
     private async exec(sql:string, values:any[]): Promise<any> {
+        let logger = dbLogger.open(sql);
         return await new Promise<any>((resolve, reject) => {
             let retryCount = 0;
             let handleResponse = (err:MysqlError, result:any) => {
                 if (err === null) {
+                    logger.close();
                     resolve(result);
                     return;
                 }
@@ -149,6 +151,8 @@ export class MyDbServer extends DbServer {
         await this.exec(createLog, undefined);
         let createSetting = 'CREATE TABLE IF NOT EXISTS $uq.setting (`name` varchar(100) not null, `value` varchar(100), update_time timestamp default current_timestamp on update current_timestamp, primary key(`name`))';
         await this.exec(createSetting, undefined);
+        let createPerformance = 'CREATE TABLE IF NOT EXISTS $uq.performance (`time` timestamp(6) not null, ms int, log text, primary key(`time`))';
+        await this.exec(createPerformance, undefined);
 
         let writeLog = `
 create procedure $uq.log(_unit int, _uq varchar(50), _subject varchar(100), _content text) begin
@@ -164,10 +168,47 @@ declare _time timestamp(6);
 	end loop;
 end;
         `;
+        let performanceLog = `
+create procedure $uq.performance(_content text) begin
+declare _time timestamp(6);
+declare _len, _p, _t0, _t1, _n, _ln int;
+
+set _time=current_timestamp(6);
+set _len=length(_content);
+set _p = 1;
+_data_loop: loop
+      if _p>=_len then leave _data_loop; end if;
+    set _t0 = LOCATE('\\t', _content, _p);
+    set _t1 = LOCATE('\\t', _content, _t0+1);
+    SET _n = LOCATE('\\n', _content, _t1+1);
+    if _n=0 then SET _ln=_len+1; ELSE SET _ln=_n; END if;
+    set _time=from_unixtime(SUBSTRING(_content, _p, _t0-_p)/1000);
+    _exit: loop
+        if not exists(select \`time\` from performance where \`time\`=_time) then
+            insert into performance (\`time\`, log, ms) values (
+                _time, 
+                SUBSTRING(_content, _t0+1, _t1-_t0-1), 
+                SUBSTRING(_content, _t1+1, _ln-_t1-1));
+            if _n=0 then leave _data_loop; end if;
+            leave _exit;
+        else
+            set _time = ADDDATE(_time,interval 1 microsecond );
+        end if;
+    end loop;
+   set _p=_n+1;
+   set _time = ADDDATE(_time,interval 1 microsecond );
+end loop;
+end;
+        `;
         let procExists = `SELECT name FROM mysql.proc WHERE db='$uq' AND name='log';`
         let retProcExists = await this.exec(procExists, undefined);
         if (retProcExists.length === 0) {
             await this.exec(writeLog, undefined);
+        }
+        let performanceExists = `SELECT name FROM mysql.proc WHERE db='$uq' AND name='performance';`
+        let retPerformanceExists = await this.exec(performanceExists, undefined);
+        if (retPerformanceExists.length === 0) {
+            await this.exec(performanceLog, undefined);
         }
     }
     private async build$Uq(db:string): Promise<void> {

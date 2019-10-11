@@ -58,6 +58,11 @@ class Db {
             return yield this.dbServer.call('$uq', 'log', [unit, uq, subject, content]);
         });
     }
+    logPerformance(log) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.dbServer.call('$uq', 'performance', [log]);
+        });
+    }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
             this.devLog('sql', params);
@@ -171,4 +176,55 @@ function getDbName(name) {
 function getCacheDb(name) {
     return dbs[name];
 }
+class Span {
+    constructor(logger, log) {
+        this.logger = logger;
+        this.log = log;
+        this.tick = Date.now();
+    }
+    close() {
+        this._count = Date.now() - this.tick;
+        this.logger.add(this);
+    }
+    get count() { return this._count; }
+}
+class DbLogger {
+    constructor(minSpan = 10) {
+        this.tick = Date.now();
+        this.spans = [];
+        this.db = new Db(undefined);
+        this.minSpan = minSpan;
+    }
+    open(log) {
+        return new Span(this, log);
+    }
+    add(span) {
+        let { count, log } = span;
+        if (count >= this.minSpan) {
+            if (log.startsWith('call ') === true) {
+                if (log.startsWith('call `$uq`.') === false) {
+                    this.spans.push(span);
+                }
+            }
+        }
+        let len = this.spans.length;
+        if (len === 0)
+            return;
+        let tick = Date.now();
+        if (len > 10 || tick - this.tick > 60 * 1000) {
+            this.tick = tick;
+            let spans = this.spans;
+            this.spans = [];
+            this.save(spans);
+        }
+    }
+    save(spans) {
+        let arr = spans.map(v => {
+            let { log, tick, count } = v;
+            return `${tick}\t${log}\t${count}`;
+        }).join('\n');
+        this.db.logPerformance(arr);
+    }
+}
+exports.dbLogger = new DbLogger();
 //# sourceMappingURL=db.js.map

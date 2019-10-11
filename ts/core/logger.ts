@@ -1,5 +1,6 @@
 import * as winston from 'winston';
 import { createLogger, format, transports } from 'winston';
+import { Db } from './db';
 const { combine, timestamp, label, printf } = format;
 
 const myFormat = printf(({ level, message, label, timestamp }) => {
