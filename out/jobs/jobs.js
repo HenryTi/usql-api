@@ -14,7 +14,6 @@ const pullEntities_1 = require("./pullEntities");
 const pullBus_1 = require("./pullBus");
 const queueIn_1 = require("./queueIn");
 const queueOut_1 = require("./queueOut");
-const debugUqs_1 = require("./debugUqs");
 const firstRun = core_1.isDevelopment === true ? 3000 : 30 * 1000;
 const runGap = core_1.isDevelopment === true ? 15 * 1000 : 30 * 1000;
 const waitForOtherStopJobs = 1 * 1000; // 等1分钟，等其它服务器uq-api停止jobs
@@ -22,10 +21,13 @@ const $test = '$test';
 class Jobs {
     constructor() {
         this.run = () => __awaiter(this, void 0, void 0, function* () {
+            let logger = new core_1.Bench();
             try {
                 console.log('Jobs started!');
                 let db = new core_1.Db(undefined);
+                logger.start('db.uqDbs()');
                 let uqs = yield db.uqDbs();
+                logger.log();
                 for (let uqRow of uqs) {
                     let { db: uqDb } = uqRow;
                     if (core_1.isDevelopment === true) {
@@ -77,7 +79,7 @@ class Jobs {
             //return;
             (function () {
                 return __awaiter(this, void 0, void 0, function* () {
-                    debugUqs_1.logger.info('test', 't1', 't2');
+                    //logger.info('test', 't1', 't2');
                     console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
                     let db = new core_1.Db(undefined);
                     yield db.setDebugJobs();

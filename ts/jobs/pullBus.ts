@@ -1,5 +1,5 @@
 import { Runner, Net } from "../core";
-import { debugUqs } from "./debugUqs";
+import { bench } from "./debugUqs";
 
 export async function pullBus(runner: Runner) {
     try {
@@ -10,14 +10,20 @@ export async function pullBus(runner: Runner) {
         let {buses, net} = runner;
         let {faces, coll, hasError} = buses;
         while (hasError === false) {
+            bench.start('pullBus getSyncUnits(runner)');
             let unitMaxIds:{unit:number; maxId:number}[] = await getSyncUnits(runner);
+            bench.log();
             let msgCount = 0;
             for (let row of unitMaxIds) {
                 let {unit, maxId} = row;
                 if (maxId === null) maxId = 0;
+                bench.start('pullBus net.getUnitxApi(unit)')
                 let openApi = await net.getUnitxApi(unit);
+                bench.log();
                 if (!openApi) continue;
+                bench.start('pullBus openApi.fetchBus(unit, maxId, faces)')
                 let ret = await openApi.fetchBus(unit, maxId, faces);
+                bench.log();
                 let {maxMsgId, maxRows} = ret[0][0];
                 let messages = ret[1];
                 // 新版：bus读来，直接写入queue_in。然后在队列里面处理
@@ -33,7 +39,9 @@ export async function pullBus(runner: Runner) {
                             // 但是，现在先不处理
                             // 2019-07-23
                         }
+                        bench.start('pullBus runner.call("$queue_in_add", [unit, msgId, bus, faceName, body])')
                         await runner.call('$queue_in_add', [unit, msgId, bus, faceName, body]);
+                        bench.log();
                     }
                     catch (toQueueInErr) {
                         hasError = buses.hasError = true;

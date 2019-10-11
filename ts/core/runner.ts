@@ -4,6 +4,7 @@ import { packReturns, packParam } from '.';
 import { ImportData } from './importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from './inBusAction';
 import { Net } from './net';
+import { Bench } from './benchLogger';
 
 interface EntityAccess {
     name: string;

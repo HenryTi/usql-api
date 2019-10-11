@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const finish_1 = require("./finish");
+const debugUqs_1 = require("./debugUqs");
 function queueIn(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         let start = 0;
@@ -32,7 +33,9 @@ function queueIn(runner) {
                     }
                     let finish;
                     try {
+                        debugUqs_1.bench.start('queueIn: runner.bus(bus, faceName, unit, id, data)');
                         yield runner.bus(bus, faceName, unit, id, data);
+                        debugUqs_1.bench.log();
                         finish = finish_1.Finish.done;
                     }
                     catch (err) {

@@ -12,7 +12,6 @@ exports.authUpBuild = auth_1.authUpBuild;
 exports.setUqBuildSecret = auth_1.setUqBuildSecret;
 var centerApi_1 = require("./centerApi");
 exports.centerApi = centerApi_1.centerApi;
-//export {UnitxApi, urlSetUnitxHost} from '../tv/unitxApi';
 var packReturn_1 = require("./packReturn");
 exports.packReturn = packReturn_1.packReturnsFromSchema;
 exports.packBus = packReturn_1.packBus;
@@ -30,4 +29,5 @@ __export(require("./runner"));
 __export(require("./routerBuilder"));
 __export(require("./db"));
 __export(require("./net"));
+__export(require("./benchLogger"));
 //# sourceMappingURL=index.js.map

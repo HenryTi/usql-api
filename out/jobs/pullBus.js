@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const debugUqs_1 = require("./debugUqs");
 function pullBus(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -19,16 +20,22 @@ function pullBus(runner) {
             let { buses, net } = runner;
             let { faces, coll, hasError } = buses;
             while (hasError === false) {
+                debugUqs_1.bench.start('pullBus getSyncUnits(runner)');
                 let unitMaxIds = yield getSyncUnits(runner);
+                debugUqs_1.bench.log();
                 let msgCount = 0;
                 for (let row of unitMaxIds) {
                     let { unit, maxId } = row;
                     if (maxId === null)
                         maxId = 0;
+                    debugUqs_1.bench.start('pullBus net.getUnitxApi(unit)');
                     let openApi = yield net.getUnitxApi(unit);
+                    debugUqs_1.bench.log();
                     if (!openApi)
                         continue;
+                    debugUqs_1.bench.start('pullBus openApi.fetchBus(unit, maxId, faces)');
                     let ret = yield openApi.fetchBus(unit, maxId, faces);
+                    debugUqs_1.bench.log();
                     let { maxMsgId, maxRows } = ret[0][0];
                     let messages = ret[1];
                     // 新版：bus读来，直接写入queue_in。然后在队列里面处理
@@ -45,7 +52,9 @@ function pullBus(runner) {
                                 // 但是，现在先不处理
                                 // 2019-07-23
                             }
+                            debugUqs_1.bench.start('pullBus runner.call("$queue_in_add", [unit, msgId, bus, faceName, body])');
                             yield runner.call('$queue_in_add', [unit, msgId, bus, faceName, body]);
+                            debugUqs_1.bench.log();
                         }
                         catch (toQueueInErr) {
                             hasError = buses.hasError = true;

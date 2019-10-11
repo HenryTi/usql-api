@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const finish_1 = require("./finish");
+const debugUqs_1 = require("./debugUqs");
 function queueOut(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -38,6 +39,7 @@ function queueOut(runner) {
                     }
                     else {
                         try {
+                            debugUqs_1.bench.start('queueOut: ' + action);
                             switch (action) {
                                 default:
                                     yield processItem(runner, $unit, id, action, subject, content, update_time);
@@ -55,6 +57,7 @@ function queueOut(runner) {
                                     finish = finish_1.Finish.done;
                                     break;
                             }
+                            debugUqs_1.bench.log();
                         }
                         catch (err) {
                             if (tries < 5) {
