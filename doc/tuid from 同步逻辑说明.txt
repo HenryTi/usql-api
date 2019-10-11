@@ -1,6 +1,0 @@
-调试状态下，程序启动3秒钟之后，同步一次。产品状态下，每分钟同步一次。
-找出本机数据库里面的所有uq数据库。
-对于每一个库，同步tuids，同步buses。现在假定库的名字是A。
-
-A的所有需要导入的Tuid的最大stamp存放在tv_$sync_tuid库中。call tv_$sync_tuids()，找出所有的unit，tuid的最大stamp，和当下的id
-对每一个unit和每一个tuid，

@@ -1,1 +1,0 @@
-export {buildSettingRouter} from './router';

@@ -1,1 +1,0 @@
-export { buildBuildRouter } from './router';

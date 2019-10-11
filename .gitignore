@@ -1,6 +1,0 @@
-config/production.json
-config/development.json
-npm-debug.log
-npm-debug.log.*
-/node_modules
-/logs

@@ -1,1 +1,0 @@
-{"version":3,"file":"pushToClient.js","sourceRoot":"","sources":["../../../ts/router/unitx/pushToClient.ts"],"names":[],"mappings":";;;;;;;;;;;AAAA,qCAA8D;AAE9D,kDAAkD;AAClD,qBAAqB;AACrB,SAAsB,YAAY,CAAC,WAAkB,EAAE,GAAkB;;QACrE,IAAI;YACA,MAAM,gBAAS,CAAC,MAAM,CAAC,GAAG,CAAC,CAAC;SAC/B;QACD,OAAO,GAAG,EAAE;YACR,OAAO,CAAC,KAAK,CAAC,GAAG,CAAC,CAAC;SACtB;IACL,CAAC;CAAA;AAPD,oCAOC"}
