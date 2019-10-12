@@ -1,7 +1,7 @@
 import {createPool, Pool, MysqlError, TypeCast, FieldInfo} from 'mysql';
 import * as _ from 'lodash';
 import {DbServer} from './dbServer';
-import { isDevelopment, dbLogger } from './db';
+import { isDevelopment, dbLogger, SpanLog } from './db';
 
 const retries = 5;
 const minMillis = 1;
@@ -38,13 +38,15 @@ export class MyDbServer extends DbServer {
         this.pool = getPool(dbConfig);
     }
 
-    private async exec(sql:string, values:any[]): Promise<any> {
-        let logger = dbLogger.open(sql);
+    private async exec(sql:string, values:any[], log?: SpanLog): Promise<any> {
         return await new Promise<any>((resolve, reject) => {
             let retryCount = 0;
             let handleResponse = (err:MysqlError, result:any) => {
                 if (err === null) {
-                    logger.close();
+                    if (log !== undefined) {
+                        log.tries = retryCount;
+                        log.close();
+                    }
                     resolve(result);
                     return;
                 }
@@ -56,6 +58,11 @@ export class MyDbServer extends DbServer {
                     ++retryCount;
                     if (retryCount > retries) {    
                         if (isDevelopment===true) console.error(`Out of retries so just returning the error.`);
+                        if (log !== undefined) {
+                            log.tries = retryCount;
+                            log.error = err.sqlMessage;
+                            log.close();
+                        }
                         reject(err);
                         return;
                     }
@@ -70,6 +77,11 @@ export class MyDbServer extends DbServer {
                     if (isDevelopment===true) {
                         console.error(err);
                         console.error(sql);
+                    }
+                    if (log !== undefined) {
+                        log.tries = retryCount;
+                        log.error = err.sqlMessage;
+                        log.close();
                     }
                     reject(err);
                     return;
@@ -101,7 +113,15 @@ export class MyDbServer extends DbServer {
             }
         }
         sql += ')';
-        return await this.exec(sql, params);
+        let spanLog:SpanLog;
+        if (db !== '$uq') {
+            let log = db+'.'+proc;
+            if (params !== undefined) {
+                log += ': ' + params.join(', ');
+            }
+            spanLog = dbLogger.open(log);
+        }
+        return await this.exec(sql, params, spanLog);
     }
     async tableFromProc(db:string, proc:string, params:any[]): Promise<any[]> {
         let res = await this.execProc(db, proc, params);
@@ -172,15 +192,18 @@ end;
 create procedure $uq.performance(_content text) begin
 declare _time timestamp(6);
 declare _len, _p, _t0, _t1, _n, _ln int;
+declare _tSep, _nSep char(1);
 
+set _tSep=char(2);
+set _nSep=char(3);
 set _time=current_timestamp(6);
 set _len=length(_content);
 set _p = 1;
 _data_loop: loop
       if _p>=_len then leave _data_loop; end if;
-    set _t0 = LOCATE('\\t', _content, _p);
-    set _t1 = LOCATE('\\t', _content, _t0+1);
-    SET _n = LOCATE('\\n', _content, _t1+1);
+    set _t0 = LOCATE(_tSep, _content, _p);
+    set _t1 = LOCATE(_tSep, _content, _t0+1);
+    SET _n = LOCATE(_nSep, _content, _t1+1);
     if _n=0 then SET _ln=_len+1; ELSE SET _ln=_n; END if;
     set _time=from_unixtime(SUBSTRING(_content, _p, _t0-_p)/1000);
     _exit: loop

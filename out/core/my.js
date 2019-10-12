@@ -38,14 +38,16 @@ class MyDbServer extends dbServer_1.DbServer {
         super();
         this.pool = getPool(dbConfig);
     }
-    exec(sql, values) {
+    exec(sql, values, log) {
         return __awaiter(this, void 0, void 0, function* () {
-            let logger = db_1.dbLogger.open(sql);
             return yield new Promise((resolve, reject) => {
                 let retryCount = 0;
                 let handleResponse = (err, result) => {
                     if (err === null) {
-                        logger.close();
+                        if (log !== undefined) {
+                            log.tries = retryCount;
+                            log.close();
+                        }
                         resolve(result);
                         return;
                     }
@@ -59,6 +61,11 @@ class MyDbServer extends dbServer_1.DbServer {
                             if (retryCount > retries) {
                                 if (db_1.isDevelopment === true)
                                     console.error(`Out of retries so just returning the error.`);
+                                if (log !== undefined) {
+                                    log.tries = retryCount;
+                                    log.error = err.sqlMessage;
+                                    log.close();
+                                }
                                 reject(err);
                                 return;
                             }
@@ -73,6 +80,11 @@ class MyDbServer extends dbServer_1.DbServer {
                             if (db_1.isDevelopment === true) {
                                 console.error(err);
                                 console.error(sql);
+                            }
+                            if (log !== undefined) {
+                                log.tries = retryCount;
+                                log.error = err.sqlMessage;
+                                log.close();
                             }
                             reject(err);
                             return;
@@ -111,7 +123,15 @@ class MyDbServer extends dbServer_1.DbServer {
                 }
             }
             sql += ')';
-            return yield this.exec(sql, params);
+            let spanLog;
+            if (db !== '$uq') {
+                let log = db + '.' + proc;
+                if (params !== undefined) {
+                    log += ': ' + params.join(', ');
+                }
+                spanLog = db_1.dbLogger.open(log);
+            }
+            return yield this.exec(sql, params, spanLog);
         });
     }
     tableFromProc(db, proc, params) {
@@ -198,15 +218,18 @@ end;
 create procedure $uq.performance(_content text) begin
 declare _time timestamp(6);
 declare _len, _p, _t0, _t1, _n, _ln int;
+declare _tSep, _nSep char(1);
 
+set _tSep=char(2);
+set _nSep=char(3);
 set _time=current_timestamp(6);
 set _len=length(_content);
 set _p = 1;
 _data_loop: loop
       if _p>=_len then leave _data_loop; end if;
-    set _t0 = LOCATE('\\t', _content, _p);
-    set _t1 = LOCATE('\\t', _content, _t0+1);
-    SET _n = LOCATE('\\n', _content, _t1+1);
+    set _t0 = LOCATE(_tSep, _content, _p);
+    set _t1 = LOCATE(_tSep, _content, _t0+1);
+    SET _n = LOCATE(_nSep, _content, _t1+1);
     if _n=0 then SET _ln=_len+1; ELSE SET _ln=_n; END if;
     set _time=from_unixtime(SUBSTRING(_content, _p, _t0-_p)/1000);
     _exit: loop

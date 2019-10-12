@@ -149,53 +149,63 @@ function getCacheDb(name:string):Db {
 }
 
 
-class Span {
+export class SpanLog {
     private logger: DbLogger
-    readonly log: string;
+    private readonly _log: string;
     readonly tick: number;
-    private _count: number;
+    tries: number;
+    error: string;
+    private _ms: number;
     constructor(logger:DbLogger, log:string) {
         this.logger = logger;
-        this.log = log;
+        this._log = log;
         this.tick = Date.now();
+        this.tries = 0;
     }
 
     close() {
-        this._count = Date.now() - this.tick;
+        this._ms = Date.now() - this.tick;
         this.logger.add(this);
     }
 
-    get count() {return this._count}
+    get ms() {return this._ms}
+    get log(): string {
+        if (this.error !== undefined) {
+            return this.tries + ' ? ' + this.error + ' ? ' + this._log;
+        }
+        if (this.tries > 0) {
+            return this.tries + ' - ' + this._log;
+        }
+        return this._log;
+    }
 }
 
+const tSep = String.fromCharCode(2);
+const nSep = String.fromCharCode(3);
 class DbLogger {
     private db: Db;
     private minSpan:number; // 10ms
     private tick:number = Date.now();
-    private spans:Span[] = [];
+    private spans:SpanLog[] = [];
 
-    constructor(minSpan:number = 10) {
+    constructor(minSpan:number = 0) {
         this.db = new Db(undefined);
         this.minSpan = minSpan;
     }
 
-    open(log:string): Span {
-        return new Span(this, log);
+    open(log:string): SpanLog {
+        return new SpanLog(this, log);
     }
 
-    add(span: Span) {
-        let {count, log} = span;
+    add(span: SpanLog) {
+        let {ms: count, log} = span;
         if (count >= this.minSpan) {
-            if (log.startsWith('call ') === true) {
-                if (log.startsWith('call `$uq`.') === false) {
-                    this.spans.push(span);
-                }
-            }
+            this.spans.push(span);
         }
         let len = this.spans.length;
         if (len === 0) return;
         let tick = Date.now();
-        if (len > 10 || tick - this.tick > 60*1000) {
+        if (len > 10 || tick - this.tick > 10*1000) {
             this.tick = tick;
             let spans = this.spans;
             this.spans = [];
@@ -203,12 +213,12 @@ class DbLogger {
         }
     }
 
-    private save(spans: Span[]):void {
-        let arr = spans.map(v => {
-            let {log, tick, count} = v;
-            return `${tick}\t${log}\t${count}`;
-        }).join('\n');
-        this.db.logPerformance(arr);
+    private save(spans: SpanLog[]):void {
+        let log = spans.map(v => {
+            let {log, tick, ms} = v;
+            return `${tick}${tSep}${log}${tSep}${ms}`;
+        }).join(nSep);
+        this.db.logPerformance(log);
     }
 }
 

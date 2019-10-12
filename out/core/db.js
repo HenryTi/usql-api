@@ -176,42 +176,51 @@ function getDbName(name) {
 function getCacheDb(name) {
     return dbs[name];
 }
-class Span {
+class SpanLog {
     constructor(logger, log) {
         this.logger = logger;
-        this.log = log;
+        this._log = log;
         this.tick = Date.now();
+        this.tries = 0;
     }
     close() {
-        this._count = Date.now() - this.tick;
+        this._ms = Date.now() - this.tick;
         this.logger.add(this);
     }
-    get count() { return this._count; }
+    get ms() { return this._ms; }
+    get log() {
+        if (this.error !== undefined) {
+            return this.tries + ' ? ' + this.error + ' ? ' + this._log;
+        }
+        if (this.tries > 0) {
+            return this.tries + ' - ' + this._log;
+        }
+        return this._log;
+    }
 }
+exports.SpanLog = SpanLog;
+const tSep = String.fromCharCode(2);
+const nSep = String.fromCharCode(3);
 class DbLogger {
-    constructor(minSpan = 10) {
+    constructor(minSpan = 0) {
         this.tick = Date.now();
         this.spans = [];
         this.db = new Db(undefined);
         this.minSpan = minSpan;
     }
     open(log) {
-        return new Span(this, log);
+        return new SpanLog(this, log);
     }
     add(span) {
-        let { count, log } = span;
+        let { ms: count, log } = span;
         if (count >= this.minSpan) {
-            if (log.startsWith('call ') === true) {
-                if (log.startsWith('call `$uq`.') === false) {
-                    this.spans.push(span);
-                }
-            }
+            this.spans.push(span);
         }
         let len = this.spans.length;
         if (len === 0)
             return;
         let tick = Date.now();
-        if (len > 10 || tick - this.tick > 60 * 1000) {
+        if (len > 10 || tick - this.tick > 10 * 1000) {
             this.tick = tick;
             let spans = this.spans;
             this.spans = [];
@@ -219,11 +228,11 @@ class DbLogger {
         }
     }
     save(spans) {
-        let arr = spans.map(v => {
-            let { log, tick, count } = v;
-            return `${tick}\t${log}\t${count}`;
-        }).join('\n');
-        this.db.logPerformance(arr);
+        let log = spans.map(v => {
+            let { log, tick, ms } = v;
+            return `${tick}${tSep}${log}${tSep}${ms}`;
+        }).join(nSep);
+        this.db.logPerformance(log);
     }
 }
 exports.dbLogger = new DbLogger();
