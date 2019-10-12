@@ -190,10 +190,10 @@ class SpanLog {
     get ms() { return this._ms; }
     get log() {
         if (this.error !== undefined) {
-            return this.tries + ' ? ' + this.error + ' ? ' + this._log;
+            return `${this._log} RETRY:${this.tries} ERR:${this.error}`;
         }
         if (this.tries > 0) {
-            return this.tries + ' - ' + this._log;
+            return `${this._log} RETRY:${this.tries}`;
         }
         return this._log;
     }
