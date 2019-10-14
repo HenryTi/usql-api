@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Net, Db, isDevelopment, prodNet, testNet, Bench } from '../core';
+import { Net, Db, isDevelopment, prodNet, testNet } from '../core';
 import { pullEntities } from './pullEntities';
 import { pullBus } from './pullBus';
 import { queueIn } from './queueIn';
@@ -33,13 +33,10 @@ export class Jobs {
     }
 
     private run = async (): Promise<void> => {
-        let logger = new Bench();
         try {
             console.log('Jobs started!');
             let db = new Db(undefined);
-            logger.start('db.uqDbs()');
             let uqs = await db.uqDbs();
-            logger.log();
             for (let uqRow of uqs) {
                 let {db:uqDb} = uqRow;
                 if (isDevelopment === true) {

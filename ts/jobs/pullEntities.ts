@@ -1,6 +1,6 @@
 import { Runner, packParam, Net } from '../core';
 import { OpenApi } from '../core/openApi';
-import { debugUqs, bench } from './debugUqs';
+import { debugUqs } from './debugUqs';
 
 export async function pullEntities(runner:Runner):Promise<void> {
     let {uq, froms, hasPullEntities} = runner;
@@ -22,9 +22,7 @@ enum FromNewSet {ok=1, bad=2, moreTry=3}
 async function pullNew(runner:Runner) {
     let {net} = runner;
     for (;;) {
-        bench.start('pull New runner.tableFromProc("$from_new", undefined)');
         let items = await runner.tableFromProc('$from_new', undefined);
-        bench.log();
         if (items.length === 0) {
             break;
         }
@@ -37,14 +35,12 @@ async function pullNew(runner:Runner) {
                     // 上次尝试之后十分钟内不尝试
                     if (now - update_time < tries * 10 * 60) continue;
                 }
-                bench.start('pull New item');
                 let schema = runner.getSchema(entity);
                 if (schema === undefined) continue;
                 let {from} = schema;
                 let openApi = await net.openApiUnitUq(unit, from);
                 if (!openApi) continue;
                 await pullEntity(runner, openApi, schema, unit, entity, key);
-                bench.log();
                 fns = FromNewSet.ok;
             }
             catch (err) {

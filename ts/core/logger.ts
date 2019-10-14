@@ -1,11 +1,13 @@
-import * as winston from 'winston';
-import { createLogger, format, transports } from 'winston';
-import { Db } from './db';
-const { combine, timestamp, label, printf } = format;
-
+// import * as winston from 'winston';
+//import { createLogger, format, transports } from 'winston';
+//import { Db } from './db';
+//const { combine, timestamp, label, printf } = format;
+/*
 const myFormat = printf(({ level, message, label, timestamp }) => {
     return `${timestamp} ${level}: ${message}`;
     });
+*/
+/*
 winston.loggers.add('jobs-performance', {
   format: combine(
     timestamp(),
@@ -41,3 +43,4 @@ export class Bench {
 export function benchLogger(actionName: string) {
     return new Bench(actionName);
 };
+*/

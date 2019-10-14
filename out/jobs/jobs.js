@@ -21,13 +21,10 @@ const $test = '$test';
 class Jobs {
     constructor() {
         this.run = () => __awaiter(this, void 0, void 0, function* () {
-            let logger = new core_1.Bench();
             try {
                 console.log('Jobs started!');
                 let db = new core_1.Db(undefined);
-                logger.start('db.uqDbs()');
                 let uqs = yield db.uqDbs();
-                logger.log();
                 for (let uqRow of uqs) {
                     let { db: uqDb } = uqRow;
                     if (core_1.isDevelopment === true) {

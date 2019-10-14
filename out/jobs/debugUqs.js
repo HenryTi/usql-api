@@ -4,5 +4,5 @@ const core_1 = require("../core");
 exports.debugUqs = core_1.isDevelopment === true ?
     ['warehouse']
     : undefined;
-exports.bench = new core_1.Bench();
+//export const bench = new Bench();
 //# sourceMappingURL=debugUqs.js.map

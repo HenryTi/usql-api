@@ -1,6 +1,5 @@
 import { Runner, Net, isDevelopment, centerApi, SheetQueueData, BusMessage } from "../core";
 import { Finish } from "./finish";
-import { bench } from "./debugUqs";
 
 export async function queueOut(runner: Runner): Promise<void> {
     try {
@@ -25,7 +24,6 @@ export async function queueOut(runner: Runner): Promise<void> {
                 }
                 else {
                     try {
-                        bench.start('queueOut: ' + action);
                         switch (action) {
                             default:
                                 await processItem(runner, $unit, id, action, subject, content, update_time);
@@ -43,7 +41,6 @@ export async function queueOut(runner: Runner): Promise<void> {
                                 finish = Finish.done;
                                 break;
                         }
-                        bench.log();
                     }
                     catch (err) {
                         if (tries < 5) {

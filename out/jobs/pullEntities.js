@@ -42,9 +42,7 @@ function pullNew(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         let { net } = runner;
         for (;;) {
-            debugUqs_1.bench.start('pull New runner.tableFromProc("$from_new", undefined)');
             let items = yield runner.tableFromProc('$from_new', undefined);
-            debugUqs_1.bench.log();
             if (items.length === 0) {
                 break;
             }
@@ -59,7 +57,6 @@ function pullNew(runner) {
                         if (now - update_time < tries * 10 * 60)
                             continue;
                     }
-                    debugUqs_1.bench.start('pull New item');
                     let schema = runner.getSchema(entity);
                     if (schema === undefined)
                         continue;
@@ -68,7 +65,6 @@ function pullNew(runner) {
                     if (!openApi)
                         continue;
                     yield pullEntity(runner, openApi, schema, unit, entity, key);
-                    debugUqs_1.bench.log();
                     fns = FromNewSet.ok;
                 }
                 catch (err) {

@@ -1,6 +1,5 @@
 import { Net, Runner } from "../core";
 import { Finish } from "./finish";
-import { bench } from "./debugUqs";
 
 export async function queueIn(runner: Runner) {
     let start = 0;
@@ -20,9 +19,7 @@ export async function queueIn(runner: Runner) {
                 }
                 let finish:Finish;
                 try {
-                    bench.start('queueIn: runner.bus(bus, faceName, unit, id, data)');
                     await runner.bus(bus, faceName, unit, id, data);
-                    bench.log();
                     finish = Finish.done;
                 }
                 catch (err) {

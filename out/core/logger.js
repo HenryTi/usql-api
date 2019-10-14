@@ -1,37 +1,47 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const winston = require("winston");
-const winston_1 = require("winston");
-const { combine, timestamp, label, printf } = winston_1.format;
+// import * as winston from 'winston';
+//import { createLogger, format, transports } from 'winston';
+//import { Db } from './db';
+//const { combine, timestamp, label, printf } = format;
+/*
 const myFormat = printf(({ level, message, label, timestamp }) => {
     return `${timestamp} ${level}: ${message}`;
-});
+    });
+*/
+/*
 winston.loggers.add('jobs-performance', {
-    format: combine(timestamp(), myFormat),
-    transports: [
+  format: combine(
+    timestamp(),
+    myFormat
+  ),
+  transports: [
         new winston.transports.File({
-            dirname: 'logs',
+            dirname:'logs',
             filename: 'jobs-performance.log'
         }),
     ]
 });
+
 const logger = winston.loggers.get('jobs-performance');
-class Bench {
-    constructor(actionName) {
+
+export class Bench {
+    private actionName:string;
+    private tick: number;
+    constructor(actionName?:string) {
         this.start(actionName);
     }
-    start(actionName) {
+
+    start(actionName: string) {
         this.actionName = actionName;
         this.tick = Date.now();
     }
+
     log() {
         logger.info(`${this.actionName} ${Date.now() - this.tick}ms`);
     }
 }
-exports.Bench = Bench;
-function benchLogger(actionName) {
+
+export function benchLogger(actionName: string) {
     return new Bench(actionName);
-}
-exports.benchLogger = benchLogger;
-;
+};
+*/
 //# sourceMappingURL=logger.js.map
