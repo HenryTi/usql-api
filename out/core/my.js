@@ -218,15 +218,15 @@ end;
 create procedure $uq.performance(_content text) begin
 declare _time timestamp(6);
 declare _len, _p, _t0, _t1, _n, _ln int;
-declare _tSep, _nSep char(1);
+declare _tSep, _nSep varchar(10);
 
-set _tSep=char(2);
-set _nSep=char(3);
+set _tSep='\\r';
+set _nSep='\\r\\r';
 set _time=current_timestamp(6);
 set _len=length(_content);
 set _p = 1;
 _data_loop: loop
-      if _p>=_len then leave _data_loop; end if;
+    if _p>=_len then leave _data_loop; end if;
     set _t0 = LOCATE(_tSep, _content, _p);
     set _t1 = LOCATE(_tSep, _content, _t0+1);
     SET _n = LOCATE(_nSep, _content, _t1+1);
@@ -244,8 +244,8 @@ _data_loop: loop
             set _time = ADDDATE(_time,interval 1 microsecond );
         end if;
     end loop;
-   set _p=_n+1;
-   set _time = ADDDATE(_time,interval 1 microsecond );
+    set _p=_ln+2;
+    set _time = ADDDATE(_time,interval 1 microsecond );
 end loop;
 end;
         `;

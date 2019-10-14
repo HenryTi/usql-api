@@ -60,7 +60,19 @@ class Db {
     }
     logPerformance(log) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.dbServer.call('$uq', 'performance', [log]);
+            try {
+                yield this.dbServer.call('$uq', 'performance', [log]);
+            }
+            catch (err) {
+                console.error(err);
+                let { message, sqlMessage } = err;
+                let msg = '';
+                if (message)
+                    msg += message;
+                if (sqlMessage)
+                    msg += ' ' + sqlMessage;
+                yield this.dbServer.call('$uq', 'performance', [msg]);
+            }
         });
     }
     sql(sql, params) {
@@ -199,8 +211,8 @@ class SpanLog {
     }
 }
 exports.SpanLog = SpanLog;
-const tSep = String.fromCharCode(2);
-const nSep = String.fromCharCode(3);
+const tSep = '\r';
+const nSep = '\r\r';
 class DbLogger {
     constructor(minSpan = 0) {
         this.tick = Date.now();

@@ -51,7 +51,17 @@ export class Db {
         return await this.dbServer.call('$uq', 'log', [unit, uq, subject, content]);
     }
     async logPerformance(log:string):Promise<void> {
-        await this.dbServer.call('$uq', 'performance', [log]);
+        try {
+            await this.dbServer.call('$uq', 'performance', [log]);
+        }
+        catch (err) {
+            console.error(err);
+            let {message, sqlMessage} = err;
+            let msg = '';
+            if (message) msg += message;
+            if (sqlMessage) msg += ' ' + sqlMessage;
+            await this.dbServer.call('$uq', 'performance', [msg]);
+        }
     }
     async sql(sql:string, params:any[]): Promise<any> {
         this.devLog('sql', params);
@@ -180,8 +190,8 @@ export class SpanLog {
     }
 }
 
-const tSep = String.fromCharCode(2);
-const nSep = String.fromCharCode(3);
+const tSep = '\r';
+const nSep = '\r\r';
 class DbLogger {
     private db: Db;
     private minSpan:number; // 10ms
