@@ -127,7 +127,12 @@ async function pullModify(runner:Runner) {
                 let {openApi, entities, modifyMax} = openApiItem;
                 let ret = await openApi.queueModify(unit, modifyMax, page, entities.join('\t'), );
                 let {queue, queueMax} = ret;
-                if (queue.length === 0) continue;
+                if (queue.length === 0) {
+                    for (let entity of entities) {
+                        await runner.call('$sync_from_set', [unit, entity, queueMax]);
+                    }
+                    continue;
+                }
 
                 let entityModifies:{[entity:string]: {
                     modifies: string;
@@ -154,7 +159,9 @@ async function pullModify(runner:Runner) {
                         await pullEntity(runner, openApi, schema, unit, entity, key);
                     }
                     if (queue.length < page && idMax < queueMax) idMax = queueMax;
-                    if (idMax > 0) await runner.call('$sync_from_set', [unit, entity, idMax]);
+                    if (idMax > 0) {
+                        await runner.call('$sync_from_set', [unit, entity, idMax]);
+                    }
                 }
             }
             catch (err) {

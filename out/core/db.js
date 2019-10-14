@@ -49,10 +49,11 @@ class Db {
             return this.isExists = yield this.dbServer.existsDatabase(this.dbName);
         });
     }
-    devLog(proc, params) {
-        if (exports.isDevelopment === true)
-            console.log(this.dbName, '.', proc, ': ', params && params.join(','));
+    /*
+    private devLog(proc:string, params:any[]) {
+        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params && params.join(','))
     }
+    */
     log(unit, uq, subject, content) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.dbServer.call('$uq', 'log', [unit, uq, subject, content]);
@@ -77,31 +78,31 @@ class Db {
     }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.devLog('sql', params);
+            //this.devLog('sql', params);
             return yield this.dbServer.sql(this.dbName, sql, params);
         });
     }
     call(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.devLog(proc, params);
+            //this.devLog(proc, params);
             return yield this.dbServer.call(this.dbName, proc, params);
         });
     }
     callEx(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.devLog(proc, params);
+            //this.devLog(proc, params);
             return yield this.dbServer.callEx(this.dbName, proc, params);
         });
     }
     tableFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.devLog(proc, params);
+            //this.devLog(proc, params);
             return yield this.dbServer.tableFromProc(this.dbName, proc, params);
         });
     }
     tablesFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.devLog(proc, params);
+            //this.devLog(proc, params);
             return yield this.dbServer.tablesFromProc(this.dbName, proc, params);
         });
     }

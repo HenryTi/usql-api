@@ -146,8 +146,12 @@ function pullModify(runner) {
                     let { openApi, entities, modifyMax } = openApiItem;
                     let ret = yield openApi.queueModify(unit, modifyMax, page, entities.join('\t'));
                     let { queue, queueMax } = ret;
-                    if (queue.length === 0)
+                    if (queue.length === 0) {
+                        for (let entity of entities) {
+                            yield runner.call('$sync_from_set', [unit, entity, queueMax]);
+                        }
                         continue;
+                    }
                     let entityModifies = {};
                     for (let item of queue) {
                         let { id: modifyId, entity, key } = item;
@@ -171,8 +175,9 @@ function pullModify(runner) {
                         }
                         if (queue.length < page && idMax < queueMax)
                             idMax = queueMax;
-                        if (idMax > 0)
+                        if (idMax > 0) {
                             yield runner.call('$sync_from_set', [unit, entity, idMax]);
+                        }
                     }
                 }
                 catch (err) {
