@@ -104,7 +104,8 @@ export class MyDbServer extends DbServer {
         return arr;
     }
     private async execProc(db:string, proc:string, params:any[]): Promise<any> {
-        let sql = 'call `'+db+'`.`'+proc+'`(';
+        let c = 'call `'+db+'`.`'+proc+'`(';
+        let sql = c;
         if (params !== undefined) {
             let len = params.length;
             if (len > 0) {
@@ -115,10 +116,20 @@ export class MyDbServer extends DbServer {
         sql += ')';
         let spanLog:SpanLog;
         if (db !== '$uq') {
-            let log = db+'.'+proc;
+            let log = c;
             if (params !== undefined) {
-                log += ': ' + params.join(', ');
+                let len = params.length;
+                for (let i=0; i<len; i++) {
+                    if (i>0) log += ',';
+                    let v = params[i];
+                    if (v === undefined) log += 'null';
+                    else if (v === null) log += 'null';
+                    else {
+                        log += '\'' + v + '\'';
+                    }
+                }
             }
+            log += ')';
             spanLog = dbLogger.open(log);
         }
         return await this.exec(sql, params, spanLog);

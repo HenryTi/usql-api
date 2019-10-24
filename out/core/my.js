@@ -113,7 +113,8 @@ class MyDbServer extends dbServer_1.DbServer {
     }
     execProc(db, proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = 'call `' + db + '`.`' + proc + '`(';
+            let c = 'call `' + db + '`.`' + proc + '`(';
+            let sql = c;
             if (params !== undefined) {
                 let len = params.length;
                 if (len > 0) {
@@ -125,10 +126,23 @@ class MyDbServer extends dbServer_1.DbServer {
             sql += ')';
             let spanLog;
             if (db !== '$uq') {
-                let log = db + '.' + proc;
+                let log = c;
                 if (params !== undefined) {
-                    log += ': ' + params.join(', ');
+                    let len = params.length;
+                    for (let i = 0; i < len; i++) {
+                        if (i > 0)
+                            log += ',';
+                        let v = params[i];
+                        if (v === undefined)
+                            log += 'null';
+                        else if (v === null)
+                            log += 'null';
+                        else {
+                            log += '\'' + v + '\'';
+                        }
+                    }
                 }
+                log += ')';
                 spanLog = db_1.dbLogger.open(log);
             }
             return yield this.exec(sql, params, spanLog);
