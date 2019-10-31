@@ -18,7 +18,7 @@ export class Jobs {
         }
         if (isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
-            //return;
+            return;
             (async function() {
                 //logger.info('test', 't1', 't2');
                 console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);

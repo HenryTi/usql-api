@@ -54,6 +54,11 @@ class Db {
         if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params && params.join(','))
     }
     */
+    buildTuidAutoId() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.dbServer.buildTuidAutoId(this.dbName);
+        });
+    }
     log(unit, uq, subject, content) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.dbServer.call('$uq', 'log', [unit, uq, subject, content]);
@@ -192,6 +197,16 @@ function getCacheDb(name) {
 class SpanLog {
     constructor(logger, log) {
         this.logger = logger;
+        if (log) {
+            if (log.length > 2048)
+                log = log.substr(0, 2048);
+            if (log.indexOf('\r') >= 0) {
+                let reg = new RegExp('\r', "g");
+                log = log.replace(reg, '');
+                if (log.indexOf('\r') >= 0)
+                    debugger;
+            }
+        }
         this._log = log;
         this.tick = Date.now();
         this.tries = 0;
@@ -241,8 +256,18 @@ class DbLogger {
         }
     }
     save(spans) {
+        let now = Date.now();
         let log = spans.map(v => {
             let { log, tick, ms } = v;
+            if (ms === undefined || ms < 0 || ms > 1000000) {
+                debugger;
+            }
+            if (tick > now || tick < now - 1000000) {
+                debugger;
+            }
+            if (log.indexOf('\r') >= 0) {
+                debugger;
+            }
             return `${tick}${tSep}${log}${tSep}${ms}`;
         }).join(nSep);
         this.db.logPerformance(log);

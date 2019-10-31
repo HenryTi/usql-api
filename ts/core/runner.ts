@@ -129,6 +129,9 @@ export class Runner {
     async existsDatabase(): Promise<boolean> {
         return await this.db.exists();
     }
+    async buildTuidAutoId(): Promise<void> {
+        await this.db.buildTuidAutoId();
+    }
     async tableFromProc(proc:string, params:any[]): Promise<any[]> {
         return await this.db.tableFromProc('tv_' + proc, params);
     }
@@ -508,7 +511,7 @@ export class Runner {
     }
 
     async reset() {
-        this.net.resetRunnerAfterCompile(this);
+        await this.net.resetRunnerAfterCompile(this);
         //if (this.buses) this.buses.hasError = false;
         //this.schemas = undefined;
     }

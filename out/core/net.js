@@ -53,11 +53,15 @@ class Net {
         });
     }
     resetRunnerAfterCompile(runner) {
-        if (this.executingNet === undefined) {
-            debugger;
-            return;
-        }
-        this.executingNet.resetRunner(runner);
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.executingNet === undefined) {
+                debugger;
+                return;
+            }
+            yield runner.buildTuidAutoId();
+            this.resetRunner(runner);
+            this.executingNet.resetRunner(runner);
+        });
     }
     resetRunner(runner) {
         let runnerName = runner.name;

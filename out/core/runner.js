@@ -94,6 +94,11 @@ class Runner {
             return yield this.db.exists();
         });
     }
+    buildTuidAutoId() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.buildTuidAutoId();
+        });
+    }
     tableFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.tableFromProc('tv_' + proc, params);
@@ -598,7 +603,7 @@ class Runner {
     }
     reset() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.net.resetRunnerAfterCompile(this);
+            yield this.net.resetRunnerAfterCompile(this);
             //if (this.buses) this.buses.hasError = false;
             //this.schemas = undefined;
         });

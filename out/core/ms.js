@@ -19,6 +19,7 @@ class MsDbServer extends dbServer_1.DbServer {
         return __awaiter(this, void 0, void 0, function* () { return; });
     }
     callEx(db, proc, params) { return; }
+    buildTuidAutoId(db) { return; }
     tableFromProc(db, proc, params) { return; }
     tablesFromProc(db, proc, params) { return; }
     buildDatabase(db) { return; }

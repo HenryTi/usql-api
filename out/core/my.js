@@ -148,6 +148,16 @@ class MyDbServer extends dbServer_1.DbServer {
             return yield this.exec(sql, params, spanLog);
         });
     }
+    buildTuidAutoId(db) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = `UPDATE \`${db}\`.tv_$entity a 
+                inner JOIN information_schema.tables b ON a.name=substring(b.table_name, 4) AND b.TABLE_SCHEMA='${db}'
+                SET a.tuidVid=b.AUTO_INCREMENT
+                WHERE b.AUTO_INCREMENT IS NOT null;
+        `;
+            yield this.exec(sql, []);
+        });
+    }
     tableFromProc(db, proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             let res = yield this.execProc(db, proc, params);

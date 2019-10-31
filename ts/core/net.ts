@@ -43,11 +43,13 @@ export abstract class Net {
         return runner;
     }
 
-    resetRunnerAfterCompile(runner: Runner) {
+    async resetRunnerAfterCompile(runner: Runner) {
         if (this.executingNet === undefined) {
             debugger;
             return;
         }
+        await runner.buildTuidAutoId();
+        this.resetRunner(runner);
         this.executingNet.resetRunner(runner);
     }
 

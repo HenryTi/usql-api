@@ -48,6 +48,9 @@ export class Db {
         if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params && params.join(','))
     }
     */
+    async buildTuidAutoId(): Promise<void> {
+        await this.dbServer.buildTuidAutoId(this.dbName);
+    }
     async log(unit:number, uq:string, subject:string, content:string):Promise<void> {
         return await this.dbServer.call('$uq', 'log', [unit, uq, subject, content]);
     }
@@ -169,6 +172,14 @@ export class SpanLog {
     private _ms: number;
     constructor(logger:DbLogger, log:string) {
         this.logger = logger;
+        if (log) {
+            if (log.length > 2048) log = log.substr(0, 2048);
+            if (log.indexOf('\r')>=0) {
+                let reg = new RegExp('\r' , "g" );
+                log = log.replace(reg, '');
+                if (log.indexOf('\r')>=0) debugger;
+            }
+        }
         this._log = log;
         this.tick = Date.now();
         this.tries = 0;
@@ -225,8 +236,18 @@ class DbLogger {
     }
 
     private save(spans: SpanLog[]):void {
+        let now = Date.now();
         let log = spans.map(v => {
             let {log, tick, ms} = v;
+            if (ms === undefined || ms < 0 || ms > 1000000) {
+                debugger;
+            }
+            if (tick > now || tick < now - 1000000) {
+                debugger;
+            }
+            if (log.indexOf('\r') >= 0) {
+                debugger;
+            }
             return `${tick}${tSep}${log}${tSep}${ms}`;
         }).join(nSep);
         this.db.logPerformance(log);

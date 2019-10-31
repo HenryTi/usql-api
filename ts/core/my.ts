@@ -134,6 +134,14 @@ export class MyDbServer extends DbServer {
         }
         return await this.exec(sql, params, spanLog);
     }
+    async buildTuidAutoId(db:string): Promise<void> {
+        let sql = `UPDATE \`${db}\`.tv_$entity a 
+                inner JOIN information_schema.tables b ON a.name=substring(b.table_name, 4) AND b.TABLE_SCHEMA='${db}'
+                SET a.tuidVid=b.AUTO_INCREMENT
+                WHERE b.AUTO_INCREMENT IS NOT null;
+        `;
+        await this.exec(sql, []);
+    }
     async tableFromProc(db:string, proc:string, params:any[]): Promise<any[]> {
         let res = await this.execProc(db, proc, params);
         if (Array.isArray(res) === false) return [];
