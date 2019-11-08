@@ -18,7 +18,7 @@ export class Jobs {
         }
         if (isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
-            return;
+            //return;
             (async function() {
                 //logger.info('test', 't1', 't2');
                 console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
@@ -57,7 +57,7 @@ export class Jobs {
                 let {buses} = runner;
                 if (buses !== undefined) {
                     let {outCount, faces} = buses;
-                    if (outCount > 0) {
+                    if (outCount > 0 || runner.hasSheet === true) {
                         await queueOut(runner);
                     }
                     if (faces !== undefined) {

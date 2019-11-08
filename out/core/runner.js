@@ -17,6 +17,7 @@ const inBusAction_1 = require("./inBusAction");
 class Runner {
     constructor(name, db, net = undefined) {
         this.hasPullEntities = false;
+        this.hasSheet = false;
         this.parametersBusCache = {};
         this.name = name;
         this.db = db;
@@ -721,6 +722,7 @@ class Runner {
                         }
                         break;
                     case 'sheet':
+                        this.hasSheet = true;
                         this.sheetRuns[name] = {
                             onsave: runObj['$'] !== undefined,
                             verify: schemaObj.verify,

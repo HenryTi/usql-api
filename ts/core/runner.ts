@@ -63,6 +63,7 @@ export class Runner {
     buses:Buses; //{[url:string]:any}; // 直接查找bus
     hasPullEntities: boolean = false;
     net: Net;
+    hasSheet: boolean = false;
 
     constructor(name:string, db:Db, net:Net = undefined) {
         this.name = name;
@@ -619,6 +620,7 @@ export class Runner {
                     }
                     break;
                 case 'sheet':
+                    this.hasSheet = true;
                     this.sheetRuns[name] = {
                         onsave: runObj['$']!==undefined,
                         verify: schemaObj.verify,
