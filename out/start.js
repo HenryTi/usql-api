@@ -54,7 +54,8 @@ function init() {
                     let p = '';
                     if (req.method !== 'GET')
                         p = JSON.stringify(req.body);
-                    console.log('%s:%s - %s %s %s', s.remoteAddress, s.remotePort, req.method, req.originalUrl, p);
+                    let t = new Date();
+                    console.log('%s:%s %s:%s - %s %s %s', t.getMonth(), t.getDate(), t.getHours(), t.getMinutes(), req.method, req.originalUrl, p);
                     try {
                         yield next();
                     }
