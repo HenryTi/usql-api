@@ -64,10 +64,10 @@ class Db {
             return yield this.dbServer.call('$uq', 'log', [unit, uq, subject, content]);
         });
     }
-    logPerformance(log) {
+    logPerformance(tick, log, ms) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                yield this.dbServer.call('$uq', 'performance', [log]);
+                yield this.dbServer.call('$uq', 'performance', [tick, log, ms]);
             }
             catch (err) {
                 console.error(err);
@@ -77,7 +77,7 @@ class Db {
                     msg += message;
                 if (sqlMessage)
                     msg += ' ' + sqlMessage;
-                yield this.dbServer.call('$uq', 'performance', [msg]);
+                yield this.dbServer.call('$uq', 'performance', [Date.now(), msg, 0]);
             }
         });
     }
@@ -200,12 +200,13 @@ class SpanLog {
         if (log) {
             if (log.length > 2048)
                 log = log.substr(0, 2048);
-            if (log.indexOf('\r') >= 0) {
-                let reg = new RegExp('\r', "g");
+            /*
+            if (log.indexOf('\r')>=0) {
+                let reg = new RegExp('\r' , "g" );
                 log = log.replace(reg, '');
-                if (log.indexOf('\r') >= 0)
-                    debugger;
+                if (log.indexOf('\r')>=0) debugger;
             }
+            */
         }
         this._log = log;
         this.tick = Date.now();
@@ -256,9 +257,21 @@ class DbLogger {
         }
     }
     save(spans) {
+        for (let span of spans) {
+            let now = Date.now();
+            let { log, tick, ms } = span;
+            if (ms === undefined || ms < 0 || ms > 1000000) {
+                debugger;
+            }
+            if (tick > now || tick < now - 1000000) {
+                debugger;
+            }
+            this.db.logPerformance(tick, log, ms);
+        }
+        /*
         let now = Date.now();
         let log = spans.map(v => {
-            let { log, tick, ms } = v;
+            let {log, tick, ms} = v;
             if (ms === undefined || ms < 0 || ms > 1000000) {
                 debugger;
             }
@@ -270,7 +283,8 @@ class DbLogger {
             }
             return `${tick}${tSep}${log}${tSep}${ms}`;
         }).join(nSep);
-        this.db.logPerformance(log);
+        this.db.logPerformance(tick);
+        */
     }
 }
 exports.dbLogger = new DbLogger();

@@ -54,9 +54,9 @@ export class Db {
     async log(unit:number, uq:string, subject:string, content:string):Promise<void> {
         return await this.dbServer.call('$uq', 'log', [unit, uq, subject, content]);
     }
-    async logPerformance(log:string):Promise<void> {
+    async logPerformance(tick:number, log:string, ms:number):Promise<void> {
         try {
-            await this.dbServer.call('$uq', 'performance', [log]);
+            await this.dbServer.call('$uq', 'performance', [tick, log, ms]);
         }
         catch (err) {
             console.error(err);
@@ -64,7 +64,7 @@ export class Db {
             let msg = '';
             if (message) msg += message;
             if (sqlMessage) msg += ' ' + sqlMessage;
-            await this.dbServer.call('$uq', 'performance', [msg]);
+            await this.dbServer.call('$uq', 'performance', [Date.now(), msg, 0]);
         }
     }
     async sql(sql:string, params:any[]): Promise<any> {
@@ -174,11 +174,13 @@ export class SpanLog {
         this.logger = logger;
         if (log) {
             if (log.length > 2048) log = log.substr(0, 2048);
+            /*
             if (log.indexOf('\r')>=0) {
                 let reg = new RegExp('\r' , "g" );
                 log = log.replace(reg, '');
                 if (log.indexOf('\r')>=0) debugger;
             }
+            */
         }
         this._log = log;
         this.tick = Date.now();
@@ -236,6 +238,18 @@ class DbLogger {
     }
 
     private save(spans: SpanLog[]):void {
+        for (let span of spans) {
+            let now = Date.now();
+            let {log, tick, ms} = span;
+            if (ms === undefined || ms < 0 || ms > 1000000) {
+                debugger;
+            }
+            if (tick > now || tick < now - 1000000) {
+                debugger;
+            }
+            this.db.logPerformance(tick, log, ms);
+        }
+        /*
         let now = Date.now();
         let log = spans.map(v => {
             let {log, tick, ms} = v;
@@ -250,7 +264,8 @@ class DbLogger {
             }
             return `${tick}${tSep}${log}${tSep}${ms}`;
         }).join(nSep);
-        this.db.logPerformance(log);
+        this.db.logPerformance(tick);
+        */
     }
 }
 

@@ -208,7 +208,14 @@ declare _time timestamp(6);
 end;
         `;
         let performanceLog = `
-create procedure $uq.performance(_content text) begin
+create procedure $uq.performance(_tick int, _log text, _ms int) begin
+    insert into performance (\`time\`, log, ms) values (
+        from_unixtime(_tick/1000), 
+        _log, 
+        _ms);
+end;
+`;
+/*
 declare _time timestamp(6);
 declare _len, _p, _t0, _t1, _n, _ln int;
 declare _tSep, _nSep varchar(10);
@@ -242,6 +249,7 @@ _data_loop: loop
 end loop;
 end;
         `;
+*/
         let procExists = `SELECT name FROM mysql.proc WHERE db='$uq' AND name='log';`
         let retProcExists = await this.exec(procExists, undefined);
         if (retProcExists.length === 0) {
