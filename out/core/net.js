@@ -16,16 +16,15 @@ const openApi_1 = require("./openApi");
 const setHostUrl_1 = require("./setHostUrl");
 const centerApi_1 = require("./centerApi");
 const unitxApi_1 = require("./unitxApi");
-let netId = 1;
 class Net {
-    constructor(executingNet) {
+    constructor(executingNet, id) {
         this.runners = {};
         this.createRunnerFromDbPromises = {};
         this.uqOpenApis = {};
         this.unitxApis = {};
         //this.initRunner = initRunner;
         this.executingNet = executingNet;
-        this.id = netId++;
+        this.id = id;
     }
     innerRunner(name) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -73,15 +72,18 @@ class Net {
     resetRunner(runner) {
         let runnerName = runner.name;
         for (let i in this.runners) {
-            let runner = this.runners[i];
-            if (runner === null)
-                break;
-            if (runner === undefined)
+            if (i !== runnerName)
                 continue;
-            if (runner.name === runnerName) {
-                console.error('resetRunner ' + runnerName + '=undefined');
+            let runner = this.runners[i];
+            if (runner === null) {
+                console.error('resetRunner ' + runnerName + ' null, net is ' + this.id);
+            }
+            else if (runner === undefined) {
+                console.error('resetRunner ' + runnerName + ' undefined, net is ' + this.id);
+            }
+            else {
+                console.error('resetRunner ' + runnerName + ' net is ' + this.id);
                 this.runners[i] = undefined;
-                break;
             }
         }
     }
@@ -295,25 +297,10 @@ class TestNet extends Net {
     unitxUrl(url) { return url + 'uq/unitx-test/'; }
     ;
 }
-/*
-class ProdCompileNet extends ProdNet {
-    async getRunner(name:string):Promise<Runner> {
-        let runner = await this.innerRunner(name);
-        return runner;
-    }
-}
-
-class TestCompileNet extends TestNet {
-    async getRunner(name:string):Promise<Runner> {
-        let runner = await this.innerRunner(name);
-        return runner;
-    }
-}
-*/
 // 在entity正常状态下，每个runner都需要init，loadSchema
-exports.prodNet = new ProdNet(undefined);
-exports.testNet = new TestNet(undefined);
+exports.prodNet = new ProdNet(undefined, 'prodNet');
+exports.testNet = new TestNet(undefined, 'testNet');
 // runner在编译状态下，database可能还没有创建，不需要init，也就是不需要loadSchema
-exports.prodCompileNet = new ProdNet(exports.prodNet);
-exports.testCompileNet = new TestNet(exports.testNet);
+exports.prodCompileNet = new ProdNet(exports.prodNet, 'prodCompileNet');
+exports.testCompileNet = new TestNet(exports.testNet, 'testCompileNet');
 //# sourceMappingURL=net.js.map

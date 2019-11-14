@@ -6,19 +6,16 @@ import { urlSetUqHost } from "./setHostUrl";
 import { centerApi } from "./centerApi";
 import { Message } from "./model";
 import { UnitxApi } from "./unitxApi";
-import { resolve } from "bluebird";
-
-let netId = 1;
 
 export abstract class Net {
-    private readonly id:number;
+    private readonly id:string;
     private runners: {[name:string]: Runner} = {};
     private executingNet: Net;  // 编译Net指向对应的执行Net，编译完成后，reset runner
 
-    constructor(executingNet: Net) {
+    constructor(executingNet: Net, id:string) {
         //this.initRunner = initRunner;
         this.executingNet = executingNet;
-        this.id = netId ++;
+        this.id = id;
     }
 
     abstract get isTest():boolean;
@@ -64,13 +61,17 @@ export abstract class Net {
     private resetRunner(runner: Runner) {
         let runnerName = runner.name;
         for (let i in this.runners) {
+            if (i !== runnerName) continue;
             let runner = this.runners[i];
-            if (runner === null) break;
-            if (runner === undefined) continue;
-            if (runner.name === runnerName) {
-                console.error('resetRunner ' + runnerName + '=undefined');
+            if (runner === null) {
+                console.error('resetRunner '  + runnerName + ' null, net is ' + this.id);
+            }
+            else if (runner === undefined) {
+                console.error('resetRunner '  + runnerName + ' undefined, net is ' + this.id);
+            }
+            else {
+                console.error('resetRunner ' + runnerName + ' net is ' + this.id);
                 this.runners[i] = undefined;
-                break;
             }
         }
     }
@@ -267,26 +268,11 @@ class TestNet extends Net {
     protected chooseUrl(urls: {url:string; urlTest:string}):string {return urls.urlTest}
     protected unitxUrl(url:string):string {return url + 'uq/unitx-test/'};
 }
-/*
-class ProdCompileNet extends ProdNet {
-    async getRunner(name:string):Promise<Runner> {
-        let runner = await this.innerRunner(name);
-        return runner;
-    }
-}
-
-class TestCompileNet extends TestNet {
-    async getRunner(name:string):Promise<Runner> {
-        let runner = await this.innerRunner(name);
-        return runner;
-    }
-}
-*/
 
 // 在entity正常状态下，每个runner都需要init，loadSchema
-export const prodNet = new ProdNet(undefined);
-export const testNet = new TestNet(undefined);
+export const prodNet = new ProdNet(undefined, 'prodNet');
+export const testNet = new TestNet(undefined, 'testNet');
 
 // runner在编译状态下，database可能还没有创建，不需要init，也就是不需要loadSchema
-export const prodCompileNet = new ProdNet(prodNet);
-export const testCompileNet = new TestNet(testNet);
+export const prodCompileNet = new ProdNet(prodNet, 'prodCompileNet');
+export const testCompileNet = new TestNet(testNet, 'testCompileNet');
