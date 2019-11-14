@@ -16,8 +16,7 @@ const openApi_1 = require("./openApi");
 const setHostUrl_1 = require("./setHostUrl");
 const centerApi_1 = require("./centerApi");
 const unitxApi_1 = require("./unitxApi");
-// 这个仅仅用于占位
-const emptyRunner = new runner_1.Runner(undefined, undefined);
+let netId = 1;
 class Net {
     constructor(executingNet) {
         this.runners = {};
@@ -26,9 +25,11 @@ class Net {
         this.unitxApis = {};
         //this.initRunner = initRunner;
         this.executingNet = executingNet;
+        this.id = netId++;
     }
     innerRunner(name) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.error(name + ' in net ' + this.id + ' === innerRunner ');
             name = name.toLowerCase();
             let runner = this.runners[name];
             if (runner === null)

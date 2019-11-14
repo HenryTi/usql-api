@@ -8,22 +8,24 @@ import { Message } from "./model";
 import { UnitxApi } from "./unitxApi";
 import { resolve } from "bluebird";
 
-// 这个仅仅用于占位
-const emptyRunner = new Runner(undefined, undefined);
+let netId = 1;
 
 export abstract class Net {
+    private readonly id:number;
     private runners: {[name:string]: Runner} = {};
     private executingNet: Net;  // 编译Net指向对应的执行Net，编译完成后，reset runner
 
     constructor(executingNet: Net) {
         //this.initRunner = initRunner;
         this.executingNet = executingNet;
+        this.id = netId ++;
     }
 
     abstract get isTest():boolean;
     abstract getUqFullName(uq:string):string;
 
     protected async innerRunner(name:string):Promise<Runner> {
+        console.error(name + ' in net ' + this.id + ' === innerRunner ');
         name = name.toLowerCase();
         let runner = this.runners[name];
         if (runner === null) return;
