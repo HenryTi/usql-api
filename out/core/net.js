@@ -28,7 +28,6 @@ class Net {
     }
     innerRunner(name) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.error(name + ' in net ' + this.id + ' === innerRunner ');
             name = name.toLowerCase();
             let runner = this.runners[name];
             if (runner === null)
@@ -57,15 +56,12 @@ class Net {
     }
     resetRunnerAfterCompile(runner) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.error('resetRunnerAfterCompile');
             if (this.executingNet === undefined) {
                 debugger;
                 return;
             }
             yield runner.buildTuidAutoId();
-            console.error('this.resetRunner(runner)');
             this.resetRunner(runner);
-            console.error('this.executingNet.resetRunner(runner)');
             this.executingNet.resetRunner(runner);
         });
     }
@@ -75,14 +71,8 @@ class Net {
             if (i !== runnerName)
                 continue;
             let runner = this.runners[i];
-            if (runner === null) {
-                console.error('resetRunner ' + runnerName + ' null, net is ' + this.id);
-            }
-            else if (runner === undefined) {
-                console.error('resetRunner ' + runnerName + ' undefined, net is ' + this.id);
-            }
-            else {
-                console.error('resetRunner ' + runnerName + ' net is ' + this.id);
+            if (runner) {
+                console.error('--- === --- === ' + runnerName + ' resetRunner ' + ' net is ' + this.id);
                 this.runners[i] = undefined;
             }
         }
@@ -122,7 +112,7 @@ class Net {
                         runner = undefined;
                     }
                     else {
-                        console.error(name + ' --- +++ --- new Runner(name, db, this)');
+                        console.error('+++ === +++ === ' + name + ' new Runner(name, db, this)');
                         runner = new runner_1.Runner(name, db, this);
                         this.runners[name] = runner;
                     }
@@ -130,7 +120,6 @@ class Net {
                         promiseItem.resolve(runner);
                     }
                     this.createRunnerFromDbPromises[name] = undefined;
-                    //return runner;
                 }).catch(reason => {
                     for (let promiseItem of this.createRunnerFromDbPromises[name]) {
                         promiseItem.reject(reason);

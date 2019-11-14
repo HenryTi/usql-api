@@ -22,7 +22,6 @@ export abstract class Net {
     abstract getUqFullName(uq:string):string;
 
     protected async innerRunner(name:string):Promise<Runner> {
-        console.error(name + ' in net ' + this.id + ' === innerRunner ');
         name = name.toLowerCase();
         let runner = this.runners[name];
         if (runner === null) return;
@@ -46,15 +45,12 @@ export abstract class Net {
     }
 
     async resetRunnerAfterCompile(runner: Runner) {
-        console.error('resetRunnerAfterCompile');
         if (this.executingNet === undefined) {
             debugger;
             return;
         }
         await runner.buildTuidAutoId();
-        console.error('this.resetRunner(runner)');
         this.resetRunner(runner);
-        console.error('this.executingNet.resetRunner(runner)');
         this.executingNet.resetRunner(runner);
     }
 
@@ -63,14 +59,8 @@ export abstract class Net {
         for (let i in this.runners) {
             if (i !== runnerName) continue;
             let runner = this.runners[i];
-            if (runner === null) {
-                console.error('resetRunner '  + runnerName + ' null, net is ' + this.id);
-            }
-            else if (runner === undefined) {
-                console.error('resetRunner '  + runnerName + ' undefined, net is ' + this.id);
-            }
-            else {
-                console.error('resetRunner ' + runnerName + ' net is ' + this.id);
+            if (runner) {
+                console.error('--- === --- === ' + runnerName + ' resetRunner ' + ' net is ' + this.id);
                 this.runners[i] = undefined;
             }
         }
@@ -108,7 +98,7 @@ export abstract class Net {
                     runner = undefined;
                 }
                 else {
-                    console.error(name + ' --- +++ --- new Runner(name, db, this)')
+                    console.error('+++ === +++ === ' + name + ' new Runner(name, db, this)');
                     runner = new Runner(name, db, this);
                     this.runners[name] = runner;
                 }
@@ -116,7 +106,6 @@ export abstract class Net {
                     promiseItem.resolve(runner);
                 }
                 this.createRunnerFromDbPromises[name] = undefined;
-                //return runner;
             }).catch(reason => {
                 for (let promiseItem of this.createRunnerFromDbPromises[name]) {
                     promiseItem.reject(reason);
