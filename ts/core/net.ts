@@ -6,10 +6,13 @@ import { urlSetUqHost } from "./setHostUrl";
 import { centerApi } from "./centerApi";
 import { Message } from "./model";
 import { UnitxApi } from "./unitxApi";
+import { resolve } from "bluebird";
+
+// 这个仅仅用于占位
+const emptyRunner = new Runner(undefined, undefined);
 
 export abstract class Net {
     private runners: {[name:string]: Runner} = {};
-    //private initRunner: boolean;
     private executingNet: Net;  // 编译Net指向对应的执行Net，编译完成后，reset runner
 
     constructor(executingNet: Net) {
@@ -87,15 +90,36 @@ export abstract class Net {
         return runner;
     }
 
+    private createRunnerFromDbPromises: {[name:string]: {resolve: (value?: any) => void, reject: (reason?: any) => void}[]} = {};
     protected async createRunnerFromDb(name:string, db:Db):Promise<Runner> {
-        let isExists = await db.exists();
-        if (isExists === false) {
-            this.runners[name] = null;
-            return;
-        }
-        let runner = new Runner(name, db, this);
-        this.runners[name] = runner;
-        return runner;
+        return await new Promise<Runner>((resolve, reject) => {
+            let promiseArr = this.createRunnerFromDbPromises[name];
+            if (promiseArr !== undefined) {
+                promiseArr.push({resolve: resolve, reject: reject});
+                return;
+            }
+            this.createRunnerFromDbPromises[name] = promiseArr =[{resolve: resolve, reject: reject}];
+            db.exists().then(isExists => {
+                let runner: Runner;
+                if (isExists === false) {
+                    this.runners[name] = null;
+                    runner = undefined;
+                }
+                else {
+                    console.error(name + ' --- +++ --- new Runner(name, db, this)')
+                    runner = new Runner(name, db, this);
+                    this.runners[name] = runner;
+                }
+                for (let promiseItem of this.createRunnerFromDbPromises[name]) {
+                    promiseItem.resolve(runner);
+                }
+                //return runner;
+            }).catch(reason => {
+                for (let promiseItem of this.createRunnerFromDbPromises[name]) {
+                    promiseItem.reject(reason);
+                }
+            });
+        });
     }
 
     abstract getDbName(name:string):string;

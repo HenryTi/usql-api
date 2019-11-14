@@ -16,9 +16,12 @@ const openApi_1 = require("./openApi");
 const setHostUrl_1 = require("./setHostUrl");
 const centerApi_1 = require("./centerApi");
 const unitxApi_1 = require("./unitxApi");
+// 这个仅仅用于占位
+const emptyRunner = new runner_1.Runner(undefined, undefined);
 class Net {
     constructor(executingNet) {
         this.runners = {};
+        this.createRunnerFromDbPromises = {};
         this.uqOpenApis = {};
         this.unitxApis = {};
         //this.initRunner = initRunner;
@@ -103,14 +106,34 @@ class Net {
     }
     createRunnerFromDb(name, db) {
         return __awaiter(this, void 0, void 0, function* () {
-            let isExists = yield db.exists();
-            if (isExists === false) {
-                this.runners[name] = null;
-                return;
-            }
-            let runner = new runner_1.Runner(name, db, this);
-            this.runners[name] = runner;
-            return runner;
+            return yield new Promise((resolve, reject) => {
+                let promiseArr = this.createRunnerFromDbPromises[name];
+                if (promiseArr !== undefined) {
+                    promiseArr.push({ resolve: resolve, reject: reject });
+                    return;
+                }
+                this.createRunnerFromDbPromises[name] = promiseArr = [{ resolve: resolve, reject: reject }];
+                db.exists().then(isExists => {
+                    let runner;
+                    if (isExists === false) {
+                        this.runners[name] = null;
+                        runner = undefined;
+                    }
+                    else {
+                        console.error(name + ' --- +++ --- new Runner(name, db, this)');
+                        runner = new runner_1.Runner(name, db, this);
+                        this.runners[name] = runner;
+                    }
+                    for (let promiseItem of this.createRunnerFromDbPromises[name]) {
+                        promiseItem.resolve(runner);
+                    }
+                    //return runner;
+                }).catch(reason => {
+                    for (let promiseItem of this.createRunnerFromDbPromises[name]) {
+                        promiseItem.reject(reason);
+                    }
+                });
+            });
         });
     }
     getOpenApiFromCache(uqFullName, unit) {
