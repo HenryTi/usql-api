@@ -68,6 +68,7 @@ function buildBuildRouter(router, rb) {
             throw 'error uqId';
         }
         runner.reset();
+        console.error('router /finish end!');
     }));
     rb.post(router, '/sql', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         //return this.db.sql(sql, params);

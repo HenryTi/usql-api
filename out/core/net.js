@@ -60,19 +60,20 @@ class Net {
                 return;
             }
             yield runner.buildTuidAutoId();
+            console.error('this.resetRunner(runner)');
             this.resetRunner(runner);
+            console.error('this.executingNet.resetRunner(runner)');
             this.executingNet.resetRunner(runner);
         });
     }
     resetRunner(runner) {
-        console.error('resetRunner start');
         let runnerName = runner.name;
         for (let i in this.runners) {
             let runner = this.runners[i];
             if (runner === undefined)
                 continue;
             if (runner.name === runnerName) {
-                console.error('resetRunner ' + runnerName);
+                console.error('resetRunner ' + runnerName + '=undefined');
                 this.runners[i] = undefined;
                 break;
             }

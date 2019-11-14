@@ -63,6 +63,8 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
             throw 'error uqId';
         }
         runner.reset();
+
+        console.error('router /finish end!');
     });
 
     rb.post(router, '/sql',
