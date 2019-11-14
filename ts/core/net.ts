@@ -31,7 +31,6 @@ export abstract class Net {
             let dbName = this.getDbName(name);
             let db = getDb(dbName);
             runner = await this.createRunnerFromDb(name, db);
-            console.error('db:' + name + ' runner = await this.createRunnerFromDb(name, db)');
             if (runner === undefined) return;
         }
         return runner;
