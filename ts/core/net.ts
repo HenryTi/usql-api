@@ -28,6 +28,7 @@ export abstract class Net {
             let dbName = this.getDbName(name);
             let db = getDb(dbName);
             runner = await this.createRunnerFromDb(name, db);
+            console.error('db:' + name + ' runner = await this.createRunnerFromDb(name, db)');
             if (runner === undefined) return;
         }
         return runner;
@@ -60,6 +61,7 @@ export abstract class Net {
         let runnerName = runner.name;
         for (let i in this.runners) {
             let runner = this.runners[i];
+            if (runner === null) break;
             if (runner === undefined) continue;
             if (runner.name === runnerName) {
                 console.error('resetRunner ' + runnerName + '=undefined');
