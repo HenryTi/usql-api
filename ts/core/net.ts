@@ -44,6 +44,7 @@ export abstract class Net {
     }
 
     async resetRunnerAfterCompile(runner: Runner) {
+        console.error('resetRunnerAfterCompile');
         if (this.executingNet === undefined) {
             debugger;
             return;
@@ -54,9 +55,13 @@ export abstract class Net {
     }
 
     private resetRunner(runner: Runner) {
+        console.error('resetRunner start');
         let runnerName = runner.name;
         for (let i in this.runners) {
-            if (this.runners[i].name === runnerName) {
+            let runner = this.runners[i];
+            if (runner === undefined) continue;
+            if (runner.name === runnerName) {
+                console.error('resetRunner ' + runnerName);
                 this.runners[i] = undefined;
                 break;
             }

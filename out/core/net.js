@@ -54,6 +54,7 @@ class Net {
     }
     resetRunnerAfterCompile(runner) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.error('resetRunnerAfterCompile');
             if (this.executingNet === undefined) {
                 debugger;
                 return;
@@ -64,9 +65,14 @@ class Net {
         });
     }
     resetRunner(runner) {
+        console.error('resetRunner start');
         let runnerName = runner.name;
         for (let i in this.runners) {
-            if (this.runners[i].name === runnerName) {
+            let runner = this.runners[i];
+            if (runner === undefined)
+                continue;
+            if (runner.name === runnerName) {
+                console.error('resetRunner ' + runnerName);
                 this.runners[i] = undefined;
                 break;
             }

@@ -42,6 +42,10 @@ function queueOut(runner) {
                                 default:
                                     yield processItem(runner, $unit, id, action, subject, content, update_time);
                                     break;
+                                case 'app':
+                                    yield app(runner, $unit, id, content);
+                                    finish = finish_1.Finish.done;
+                                    break;
                                 case 'email':
                                     yield email(runner, $unit, id, content);
                                     finish = finish_1.Finish.done;
@@ -100,6 +104,15 @@ function jsonValues(content) {
         json[parts[0]] = parts[1];
     }
     return json;
+}
+function app(runner, unit, id, content) {
+    return __awaiter(this, void 0, void 0, function* () {
+        yield core_1.centerApi.send({
+            type: 'app',
+            unit: unit,
+            body: content,
+        });
+    });
 }
 function email(runner, unit, id, content) {
     return __awaiter(this, void 0, void 0, function* () {

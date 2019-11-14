@@ -69,13 +69,14 @@ class CenterApi extends Fetch {
 }
 
 interface SendParameter {
-    isUser:boolean;
+    isUser?:boolean;
     type: string;
-    subject:string;
+    unit?: number;
+    subject?:string;
     body:string;
-    to:string;
-    cc:string; 
-    bcc:string
+    to?:string;
+    cc?:string; 
+    bcc?:string
 };
 
 

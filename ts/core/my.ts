@@ -135,12 +135,26 @@ export class MyDbServer extends DbServer {
         return await this.exec(sql, params, spanLog);
     }
     async buildTuidAutoId(db:string): Promise<void> {
-        let sql = `UPDATE \`${db}\`.tv_$entity a 
-                inner JOIN information_schema.tables b ON a.name=substring(b.table_name, 4) AND b.TABLE_SCHEMA='${db}'
+        let sql1 = `UPDATE \`${db}\`.tv_$entity a 
+                inner JOIN information_schema.tables b ON 
+                    a.name=CONVERT(substring(b.table_name, 4) USING utf8) COLLATE utf8_unicode_ci
+                    AND b.TABLE_SCHEMA='${db}'
                 SET a.tuidVid=b.AUTO_INCREMENT
                 WHERE b.AUTO_INCREMENT IS NOT null;
         `;
-        await this.exec(sql, []);
+        let sql2 = `UPDATE \`${db}\`.tv_$entity a 
+                inner JOIN information_schema.tables b ON 
+                    a.name=substring(b.table_name, 4)
+                    AND b.TABLE_SCHEMA='${db}'
+                SET a.tuidVid=b.AUTO_INCREMENT
+                WHERE b.AUTO_INCREMENT IS NOT null;
+        `;
+        try {
+            await this.exec(sql1, []);
+        }
+        catch {
+            await this.exec(sql2, []);
+        }
     }
     async tableFromProc(db:string, proc:string, params:any[]): Promise<any[]> {
         let res = await this.execProc(db, proc, params);
@@ -208,11 +222,16 @@ declare _time timestamp(6);
 end;
         `;
         let performanceLog = `
-create procedure $uq.performance(_tick int, _log text, _ms int) begin
-    insert into performance (\`time\`, log, ms) values (
-        from_unixtime(_tick/1000), 
-        _log, 
-        _ms);
+create procedure $uq.performance(_tick bigint, _log text, _ms int) begin
+    declare _t timestamp(6);
+    set _t = from_unixtime(_tick/1000);
+    _loop: while 1=1 do
+        insert ignore into performance (\`time\`, log, ms) values (_t, _log, _ms);
+        if row_count()>0 then
+            leave _loop; 
+        end if;
+        set _t=date_add(_t, interval 1 microsecond);
+    end while;
 end;
 `;
 /*

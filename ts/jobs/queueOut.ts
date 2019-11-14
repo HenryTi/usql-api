@@ -28,6 +28,10 @@ export async function queueOut(runner: Runner): Promise<void> {
                             default:
                                 await processItem(runner, $unit, id, action, subject, content, update_time);
                                 break;
+                            case 'app':
+                                await app(runner, $unit, id, content);
+                                finish = Finish.done;
+                                break;
                             case 'email':
                                 await email(runner, $unit, id, content);
                                 finish = Finish.done;
@@ -82,6 +86,14 @@ function jsonValues(content:string):any {
         json[parts[0]] = parts[1];
     }
     return json;
+}
+
+async function app(runner:Runner, unit:number, id:number, content:string):Promise<void> {
+    await centerApi.send({
+        type: 'app',
+        unit: unit,
+        body: content,
+    });
 }
 
 async function email(runner:Runner, unit:number, id:number, content:string): Promise<void> {
