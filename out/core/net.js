@@ -108,6 +108,7 @@ class Net {
                 db.exists().then(isExists => {
                     let runner;
                     if (isExists === false) {
+                        console.error('??? === ??? === ' + name + ' not exists in new Runner');
                         this.runners[name] = null;
                         runner = undefined;
                     }
