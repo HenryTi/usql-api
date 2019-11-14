@@ -67,7 +67,7 @@ function buildBuildRouter(router, rb) {
             debugger;
             throw 'error uqId';
         }
-        runner.reset();
+        yield runner.reset();
         console.error('router /finish end!');
     }));
     rb.post(router, '/sql', (runner, body) => __awaiter(this, void 0, void 0, function* () {

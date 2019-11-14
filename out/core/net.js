@@ -126,11 +126,13 @@ class Net {
                     for (let promiseItem of this.createRunnerFromDbPromises[name]) {
                         promiseItem.resolve(runner);
                     }
+                    this.createRunnerFromDbPromises[name] = undefined;
                     //return runner;
                 }).catch(reason => {
                     for (let promiseItem of this.createRunnerFromDbPromises[name]) {
                         promiseItem.reject(reason);
                     }
+                    this.createRunnerFromDbPromises[name] = undefined;
                 });
             });
         });
