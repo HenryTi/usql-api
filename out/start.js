@@ -55,9 +55,9 @@ function init() {
                     if (req.method !== 'GET')
                         p = JSON.stringify(req.body);
                     let t = new Date();
-                    console.log('%s:%s %s:%s - %s %s %s', t.getMonth(), t.getDate(), t.getHours(), t.getMinutes(), req.method, req.originalUrl, p);
+                    console.log('%s-%s %s:%s - %s %s %s', t.getMonth() + 1, t.getDate(), t.getHours(), t.getMinutes(), req.method, req.originalUrl, p);
                     try {
-                        yield next();
+                        next();
                     }
                     catch (e) {
                         console.error(e);
@@ -114,7 +114,8 @@ exports.init = init;
 function start() {
     return __awaiter(this, void 0, void 0, function* () {
         yield init();
-        jobs_1.Jobs.start();
+        //Jobs.start();
+        yield jobs_1.startJobsLoop();
     });
 }
 exports.start = start;

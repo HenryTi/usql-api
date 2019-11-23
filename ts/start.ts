@@ -7,7 +7,7 @@ import {initResDb, router as resRouter, initResPath} from './res';
 import {Auth, authCheck, authDebug, authUnitx, RouterBuilder, uqProdRouterBuilder, uqTestRouterBuilder, unitxTestRouterBuilder, unitxProdRouterBuilder, compileProdRouterBuilder, compileTestRouterBuilder, CompileRouterBuilder} from './core';
 //import { /*buildUnitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
 import { authJoint, authUpBuild } from './core/auth';
-import { Jobs } from './jobs';
+import { Jobs, startJobsLoop } from './jobs';
 import { init$UqDb } from './$uq';
 //import { importData } from './import';
 
@@ -45,10 +45,10 @@ export async function init():Promise<void> {
                 let p = '';
                 if (req.method !== 'GET') p = JSON.stringify(req.body);
                 let t = new Date();
-                console.log('%s:%s %s:%s - %s %s %s', 
-                    t.getMonth(), t.getDate(), t.getHours(), t.getMinutes(), req.method, req.originalUrl, p);
+                console.log('%s-%s %s:%s - %s %s %s', 
+                    t.getMonth()+1, t.getDate(), t.getHours(), t.getMinutes(), req.method, req.originalUrl, p);
                 try {
-                    await next();
+                    next();
                 }
                 catch (e) {
                     console.error(e);
@@ -113,7 +113,8 @@ export async function init():Promise<void> {
 
 export async function start() {
     await init();
-    Jobs.start();
+    //Jobs.start();
+    await startJobsLoop();
 }
 
 function dbHello(req:Request, res:Response) {

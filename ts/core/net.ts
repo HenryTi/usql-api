@@ -94,12 +94,12 @@ export abstract class Net {
             db.exists().then(isExists => {
                 let runner: Runner;
                 if (isExists === false) {
-                    console.error('??? === ??? === ' + name + ' not exists in new Runner');
+                    //console.error('??? === ??? === ' + name + ' not exists in new Runner');
                     this.runners[name] = null;
                     runner = undefined;
                 }
                 else {
-                    console.error('+++ === +++ === ' + name + ' new Runner(name, db, this)');
+                    //console.error('+++ === +++ === ' + name + ' new Runner(name, db, this)');
                     runner = new Runner(name, db, this);
                     this.runners[name] = runner;
                 }
