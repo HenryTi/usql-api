@@ -148,8 +148,10 @@ function bus(runner, unit, id, subject, content) {
         let face = parts[1];
         let schema = runner.getSchema(busEntityName);
         if (schema === undefined) {
+            let err = `schema ${busEntityName} not exists`;
+            console.error(err);
             debugger;
-            throw 'something wrong';
+            throw err;
         }
         let { schema: busSchema, busOwner, busName } = schema.call;
         let { uqOwner, uq } = runner;

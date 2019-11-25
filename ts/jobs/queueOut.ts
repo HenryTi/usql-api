@@ -129,8 +129,10 @@ async function bus(runner:Runner, unit:number, id:number, subject:string, conten
 
     let schema = runner.getSchema(busEntityName);
     if (schema === undefined) {
+        let err = `schema ${busEntityName} not exists`;
+        console.error(err);
         debugger;
-        throw 'something wrong';
+        throw err;
     }
     let {schema:busSchema, busOwner, busName} = schema.call;
 
