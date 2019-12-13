@@ -180,11 +180,11 @@ export abstract class Net {
         return this.unitxApis[unit] = new UnitxApi(url);
     }
 
-    async sendToUnitx(unit:number, msg:Message):Promise<number[]> {
+    async sendToUnitx(unit:number, msg:Message):Promise<number[]|string> {
         let unitxApi = await this.getUnitxApi(unit);
         if (unitxApi === null) {
-            console.log('unit %s not have unitx', unit);
-            return;
+            let ret = `unit ${unit} not have unitx`;
+            return ret;
         }
         let toArr:number[] = await unitxApi.send(msg);
         return toArr;

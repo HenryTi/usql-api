@@ -168,7 +168,10 @@ function bus(runner, unit, id, subject, content) {
             body: body,
         };
         yield runner.log(unit, 'before sendToUnitx', body);
-        yield runner.net.sendToUnitx(unit, message);
+        let ret = yield runner.net.sendToUnitx(unit, message);
+        if (typeof ret === 'string') {
+            yield runner.log(unit, 'sendToUnitx', ret);
+        }
         yield runner.log(unit, 'after sendToUnitx', body);
     });
 }

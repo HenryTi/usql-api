@@ -207,8 +207,8 @@ class Net {
         return __awaiter(this, void 0, void 0, function* () {
             let unitxApi = yield this.getUnitxApi(unit);
             if (unitxApi === null) {
-                console.log('unit %s not have unitx', unit);
-                return;
+                let ret = `unit ${unit} not have unitx`;
+                return ret;
             }
             let toArr = yield unitxApi.send(msg);
             return toArr;
