@@ -42,6 +42,13 @@ function init() {
                         error: err
                     });
                 });
+                /*
+                app.use(async (req:Request, res:Response, next:NextFunction) => {
+                    let r = req;
+                    debugger;
+                    next();
+                });
+                */
                 app.use(bodyParser.json());
                 app.use(cors());
                 app.set('json replacer', (key, value) => {

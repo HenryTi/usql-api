@@ -472,10 +472,12 @@ class Runner {
             let inBusActionName = sheet + '_' + (state === '$' ? action : state + '_' + action);
             let inBusAction = this.getSheetActionParametersBus(sheet, state, action);
             let inBusActionData = yield inBusAction.buildData(unit, user, id);
-            if (inBusActionData === '')
-                return yield this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, action);
-            else
-                return yield this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, action, inBusActionData);
+            yield this.log(unit, 'sheetAct', 'before ' + inBusActionName);
+            let ret = inBusActionData === '' ?
+                yield this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, action)
+                : yield this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, action, inBusActionData);
+            yield this.log(unit, 'sheetAct', 'after ' + inBusActionName);
+            return ret;
         });
     }
     sheetStates(sheet, state, unit, user, pageStart, pageSize) {

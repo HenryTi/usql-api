@@ -406,10 +406,12 @@ export class Runner {
         let inBusActionName = sheet + '_' + (state === '$'?  action : state + '_' + action);
         let inBusAction = this.getSheetActionParametersBus(sheet, state, action);
         let inBusActionData = await inBusAction.buildData(unit, user, id);
-        if (inBusActionData === '')
-            return await this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, action);
-        else
-            return await this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, action, inBusActionData);
+        await this.log(unit, 'sheetAct', 'before ' + inBusActionName);
+        let ret = inBusActionData === ''?
+            await this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, action)
+            : await this.unitUserCallEx('tv_' + inBusActionName, unit, user, id, flow, action, inBusActionData);
+        await this.log(unit, 'sheetAct', 'after ' + inBusActionName);
+        return ret;
     }
     async sheetStates(sheet:string, state:string, unit:number, user:number, pageStart:number, pageSize:number) {
         let sql = 'tv_$sheet_state';
