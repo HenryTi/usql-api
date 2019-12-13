@@ -14,6 +14,8 @@ class Fetch {
     constructor(baseUrl) {
         this.baseUrl = baseUrl;
     }
+    get url() { return this.baseUrl; }
+    ;
     get(url, params = undefined) {
         return __awaiter(this, void 0, void 0, function* () {
             if (params) {

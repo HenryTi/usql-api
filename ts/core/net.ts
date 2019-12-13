@@ -187,7 +187,8 @@ export abstract class Net {
             return ret;
         }
         let toArr:number[] = await unitxApi.send(msg);
-        return toArr;
+        //return toArr;
+        return unitxApi.url;
     }
 
     async uqUrl(unit:number, uq:number):Promise<string> {

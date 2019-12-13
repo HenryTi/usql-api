@@ -5,6 +5,7 @@ export abstract class Fetch {
     constructor(baseUrl:string) {
         this.baseUrl = baseUrl;
     }
+    get url():string {return this.baseUrl};
     protected async get(url: string, params: any = undefined): Promise<any> {
         if (params) {
             let keys = Object.keys(params);
