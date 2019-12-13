@@ -150,7 +150,9 @@ async function bus(runner:Runner, unit:number, id:number, subject:string, conten
         version: version,
         body: body,
     };
+    await runner.log(unit, 'before sendToUnitx', body);
     await runner.net.sendToUnitx(unit, message);
+    await runner.log(unit, 'after sendToUnitx', body);
 }
 
 async function sheet(runner: Runner, content:string):Promise<void> {

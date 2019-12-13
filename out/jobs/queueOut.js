@@ -167,7 +167,9 @@ function bus(runner, unit, id, subject, content) {
             version: version,
             body: body,
         };
+        yield runner.log(unit, 'before sendToUnitx', body);
         yield runner.net.sendToUnitx(unit, message);
+        yield runner.log(unit, 'after sendToUnitx', body);
     });
 }
 function sheet(runner, content) {
