@@ -61,6 +61,7 @@ class Auth {
                 res.status(401);
                 res.json({
                     error: {
+                        type: 'unauthorized',
                         unauthorized: true,
                         message: 'Unauthorized'
                     }

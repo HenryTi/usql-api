@@ -70,7 +70,10 @@ function buildSheetRouter(router, rb) {
         });
         // 这个地方以后需要更多的判断和返回。提供给界面操作
         if (retQueue === false)
-            throw '不可以同时操作单据';
+            throw {
+                type: 'sheet-processing',
+                message: '不可以同时操作单据'
+            };
         /*
         await runner.sheetProcessing(id);
         await queueSheet({

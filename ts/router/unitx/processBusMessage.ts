@@ -78,7 +78,7 @@ export async function processBusMessage(unitxRunner:Runner, msg:BusMessage):Prom
     //let unitxRunner = await getRunner(consts.$unitx);
     let {unit, body, from, queueId, busOwner, bus, face, version} = msg;
     let faceUrl = busOwner + '/' + bus + '/' + face;
-    await unitxRunner.log(unit, faceUrl, 'processBusMessage: before writeDateToBus');
+    //await unitxRunner.log(unit, faceUrl, 'processBusMessage: before writeDateToBus');
     await writeDataToBus(unitxRunner, faceUrl, unit, from, queueId, version, body);
-    await unitxRunner.log(unit, faceUrl, 'processBusMessage: after writeDateToBus');
+    //await unitxRunner.log(unit, faceUrl, 'processBusMessage: after writeDateToBus');
 }

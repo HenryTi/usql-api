@@ -63,7 +63,10 @@ export function buildSheetRouter(router:Router, rb:RouterBuilder) {
             flow: flow,
         });
         // 这个地方以后需要更多的判断和返回。提供给界面操作
-        if (retQueue === false) throw '不可以同时操作单据';
+        if (retQueue === false) throw {
+            type: 'sheet-processing',
+            message: '不可以同时操作单据'
+        };
         /*
         await runner.sheetProcessing(id);
         await queueSheet({

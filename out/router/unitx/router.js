@@ -20,7 +20,7 @@ function buildUnitxRouter(rb) {
             let tos = undefined;
             let { type } = msg;
             let unitxRunner = yield rb.getUnitxRunner();
-            yield unitxRunner.log(0, 'unitx-message ' + type, 'before');
+            //await unitxRunner.log(0, 'unitx-message ' + type, 'before');
             if (type === 'sheet') {
                 let sheetMessage = msg;
                 let { from } = sheetMessage;
@@ -31,7 +31,7 @@ function buildUnitxRouter(rb) {
             }
             let mp = messageProcesser_1.messageProcesser(msg);
             yield mp(unitxRunner, msg);
-            yield unitxRunner.log(0, 'unitx-message ' + type, 'after');
+            //await unitxRunner.log(0, 'unitx-message ' + type, 'after');
             res.json({
                 ok: true,
                 res: tos,

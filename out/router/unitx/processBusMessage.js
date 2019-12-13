@@ -97,9 +97,9 @@ function processBusMessage(unitxRunner, msg) {
         //let unitxRunner = await getRunner(consts.$unitx);
         let { unit, body, from, queueId, busOwner, bus, face, version } = msg;
         let faceUrl = busOwner + '/' + bus + '/' + face;
-        yield unitxRunner.log(unit, faceUrl, 'processBusMessage: before writeDateToBus');
+        //await unitxRunner.log(unit, faceUrl, 'processBusMessage: before writeDateToBus');
         yield writeDataToBus(unitxRunner, faceUrl, unit, from, queueId, version, body);
-        yield unitxRunner.log(unit, faceUrl, 'processBusMessage: after writeDateToBus');
+        //await unitxRunner.log(unit, faceUrl, 'processBusMessage: after writeDateToBus');
     });
 }
 exports.processBusMessage = processBusMessage;

@@ -70,6 +70,7 @@ export default class Auth {
                 res.json(
                     {
                         error: {
+                            type: 'unauthorized',
                             unauthorized: true,
                             message: 'Unauthorized'
                         }
