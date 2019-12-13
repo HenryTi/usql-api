@@ -20,6 +20,7 @@ function buildUnitxRouter(rb) {
             let tos = undefined;
             let { type } = msg;
             let unitxRunner = yield rb.getUnitxRunner();
+            yield unitxRunner.log(0, 'unitx-message ' + type, 'before');
             if (type === 'sheet') {
                 let sheetMessage = msg;
                 let { from } = sheetMessage;
@@ -28,19 +29,20 @@ function buildUnitxRouter(rb) {
                     tos = [from];
                 sheetMessage.to = tos;
             }
-            //await queueUnitxIn(msg);
             let mp = messageProcesser_1.messageProcesser(msg);
             yield mp(unitxRunner, msg);
-            console.log('await queueUnitxIn(msg)', msg);
+            yield unitxRunner.log(0, 'unitx-message ' + type, 'after');
             res.json({
                 ok: true,
                 res: tos,
             });
         }
         catch (e) {
+            let err = JSON.stringify(e);
+            console.error('unitx-error: ', err);
             res.json({
                 ok: false,
-                error: JSON.stringify(e),
+                error: err,
             });
         }
     }));

@@ -11,6 +11,7 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
             let tos:number[] = undefined;
             let {type} = msg;
             let unitxRunner = await rb.getUnitxRunner();
+            await unitxRunner.log(0, 'unitx-message ' + type, 'before');
             if (type === 'sheet') {
                 let sheetMessage = msg as SheetMessage;
                 let {from} = sheetMessage;
@@ -18,19 +19,20 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
                 if (tos === undefined || tos.length === 0) tos = [from];
                 sheetMessage.to = tos;
             }
-            //await queueUnitxIn(msg);
             let mp = messageProcesser(msg);
             await mp(unitxRunner, msg);
-            console.log('await queueUnitxIn(msg)', msg);
+            await unitxRunner.log(0, 'unitx-message ' + type, 'after');
             res.json({
                 ok: true,
                 res: tos,
             });
         }
         catch (e) {
+            let err = JSON.stringify(e);
+            console.error('unitx-error: ', err);
             res.json({
                 ok: false,
-                error: JSON.stringify(e),
+                error: err,
             });
         }
     });
