@@ -211,8 +211,8 @@ class Net {
                 return ret;
             }
             let toArr = yield unitxApi.send(msg);
-            //return toArr;
-            return unitxApi.url;
+            return toArr;
+            //return unitxApi.url;
         });
     }
     uqUrl(unit, uq) {

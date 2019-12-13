@@ -150,12 +150,12 @@ async function bus(runner:Runner, unit:number, id:number, subject:string, conten
         version: version,
         body: body,
     };
-    await runner.log(unit, 'before sendToUnitx', body);
+    //await runner.log(unit, 'before sendToUnitx', body);
     let ret = await runner.net.sendToUnitx(unit, message);
-    if (typeof ret === 'string') {
-        await runner.log(unit, 'sendToUnitx', ret);
-    }
-    await runner.log(unit, 'after sendToUnitx', body);
+    //if (typeof ret === 'string') {
+    //    await runner.log(unit, 'sendToUnitx', ret);
+    //}
+    //await runner.log(unit, 'after sendToUnitx', body);
 }
 
 async function sheet(runner: Runner, content:string):Promise<void> {

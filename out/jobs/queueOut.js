@@ -167,12 +167,12 @@ function bus(runner, unit, id, subject, content) {
             version: version,
             body: body,
         };
-        yield runner.log(unit, 'before sendToUnitx', body);
+        //await runner.log(unit, 'before sendToUnitx', body);
         let ret = yield runner.net.sendToUnitx(unit, message);
-        if (typeof ret === 'string') {
-            yield runner.log(unit, 'sendToUnitx', ret);
-        }
-        yield runner.log(unit, 'after sendToUnitx', body);
+        //if (typeof ret === 'string') {
+        //    await runner.log(unit, 'sendToUnitx', ret);
+        //}
+        //await runner.log(unit, 'after sendToUnitx', body);
     });
 }
 function sheet(runner, content) {
