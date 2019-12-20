@@ -32,7 +32,7 @@ function initResPath() {
         fs.mkdirSync(resFilesPath);
     }
     uploadPath = resFilesPath + '/upload/';
-    upload = multer({ dest: uploadPath });
+    upload = multer({ dest: uploadPath, limits: { fieldSize: 2 * 1024 * 1024 } });
 }
 exports.initResPath = initResPath;
 exports.router.get('/hello', (req, res) => {

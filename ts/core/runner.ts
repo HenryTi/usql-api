@@ -41,6 +41,7 @@ export class Runner {
     private access:any;
     private schemas: {[entity:string]: {type:string; from:string; call:any; run:any;}};
     private accessSchemaArr: any[];
+    private role: any;
     private tuids: {[name:string]: any};
     private busArr: any[];
     private setting: {[name:string]: any};
@@ -587,6 +588,9 @@ export class Runner {
                 run: runObj,
             }
             switch (type) {
+                case '$role':
+                    this.role = schemaObj;
+                    break;
                 case 'access':
                     this.accessSchemaArr.push(schemaObj); 
                     break;
@@ -853,7 +857,8 @@ export class Runner {
         return {
             version: this.uqVersion,
             access: entityAccess,
-            tuids: this.tuids
+            tuids: this.tuids,
+            role: this.role,
         };
     }
 
@@ -868,7 +873,8 @@ export class Runner {
         return {
             version: this.uqVersion,
             access: entityAccess,
-            tuids: this.tuids
+            tuids: this.tuids,
+            role: this.role,
         };
     }
 

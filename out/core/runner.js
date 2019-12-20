@@ -682,6 +682,9 @@ class Runner {
                     run: runObj,
                 };
                 switch (type) {
+                    case '$role':
+                        this.role = schemaObj;
+                        break;
                     case 'access':
                         this.accessSchemaArr.push(schemaObj);
                         break;
@@ -972,7 +975,8 @@ class Runner {
             return {
                 version: this.uqVersion,
                 access: entityAccess,
-                tuids: this.tuids
+                tuids: this.tuids,
+                role: this.role,
             };
         });
     }
@@ -988,7 +992,8 @@ class Runner {
             return {
                 version: this.uqVersion,
                 access: entityAccess,
-                tuids: this.tuids
+                tuids: this.tuids,
+                role: this.role,
             };
         });
     }
