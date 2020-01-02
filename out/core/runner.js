@@ -19,6 +19,7 @@ class Runner {
         this.hasPullEntities = false;
         this.hasSheet = false;
         this.parametersBusCache = {};
+        this.actionConvertSchemas = {};
         this.name = name;
         this.db = db;
         this.net = net;
@@ -999,6 +1000,12 @@ class Runner {
     }
     getSchema(name) {
         return this.schemas[name.toLowerCase()];
+    }
+    getActionConvertSchema(name) {
+        return this.actionConvertSchemas[name];
+    }
+    setActionConvertSchema(name, value) {
+        this.actionConvertSchemas[name] = value;
     }
 }
 exports.Runner = Runner;

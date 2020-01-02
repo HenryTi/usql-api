@@ -881,4 +881,12 @@ export class Runner {
     getSchema(name:string):any {
         return this.schemas[name.toLowerCase()];
     }
+
+    private actionConvertSchemas:{[name:string]:any} = {};
+    getActionConvertSchema(name:string): any {
+        return this.actionConvertSchemas[name];
+    }
+    setActionConvertSchema(name:string, value:any): any {
+        this.actionConvertSchemas[name] = value;
+    }
 }

@@ -1,24 +1,9 @@
-//import { afterAction } from '../queue';
+import * as _ from 'lodash';
 import { Runner, packParam } from '../core';
+import { buildExpVar, buildExpCalc } from '../convert';
 
 export async function actionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
     let result = await actionReturns(unit, user, name, db, urlParams, runner, body, schema, run);
-    /*
-    let {data} = body;
-    if (data === undefined) {
-        console.log('action process data: ', body);
-        data = packParam(schema, body);
-    }
-    console.log('action process param: ', data);
-    let result = await runner.action(name, unit, user, data);
-    */
-    //let returns = schema.returns;
-    //let {hasSend,  busFaces, templets} = run;
-    //let actionReturn = await afterAction(db, runner, unit, returns, hasSend, busFaces, templets, result);
-    //let {busFaces} = run;
-    //let actionReturn = await afterAction(db, runner, unit, returns, busFaces, result);
-    //return actionReturn;
-
     let arr0 = result[0];
     if (arr0 === undefined || arr0.length === 0) return;
     return arr0[0];
@@ -26,11 +11,49 @@ export async function actionProcess(unit:number, user:number, name:string, db:st
 
 export async function actionReturns(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any[][]> {
     let {data} = body;
-    if (data === undefined) {
+    if (data !== undefined) {
         console.log('action process data: ', body);
-        data = packParam(schema, body);
+        data = packParam(schema, data);
     }
     console.log('action process param: ', data);
     let result = await runner.action(name, unit, user, data);
     return result;
+}
+
+export async function actionConvert(unit:number, user:number, entityName:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
+    let data = _.clone(body.data);
+    let {paramConvert} = schema;
+    let actionConvertSchema:any;
+    if (paramConvert !== undefined) {
+        let {name, to, type} = paramConvert;
+        let v = data[name];
+        switch (type) {
+            case 'expression': expressionConvert(data, v, to); break;
+        }
+
+        actionConvertSchema = runner.getActionConvertSchema(entityName);
+        if (actionConvertSchema === undefined) {
+            actionConvertSchema = _.cloneDeep(schema);
+            let fields:any[] = actionConvertSchema.fields;
+            let index = fields.findIndex(v => v.name === name);
+            if (index >= 0) {
+                fields.splice(index, 1);
+                for (let t of to) {
+                    fields.push({name: t, type: 'text'});
+                }
+            }
+            runner.setActionConvertSchema(entityName, actionConvertSchema);
+        }
+    }
+    //let param = packParam(actionConvertSchema || schema, data);
+    let result = await actionReturns(unit, user, entityName, db, urlParams, runner, 
+        {data}, actionConvertSchema || schema, run);
+    let arr0 = result[0];
+    if (arr0 === undefined || arr0.length === 0) return;
+    return arr0[0];
+};
+
+function expressionConvert(data:any, exp:string, to:string[]) {
+    data[to[0]] = buildExpVar(exp);
+    data[to[1]] = buildExpCalc(exp);
 }
