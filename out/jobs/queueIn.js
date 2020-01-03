@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const finish_1 = require("./finish");
+const tool_1 = require("../tool");
 function queueIn(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         let start = 0;
@@ -55,6 +56,7 @@ function queueIn(runner) {
             catch (err) {
                 hasError = buses.hasError = true;
                 console.error(err);
+                yield runner.log(0, 'jobs queueIn loop at ' + start, tool_1.getErrorString(err));
                 break;
             }
         }

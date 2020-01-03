@@ -1,5 +1,6 @@
 import { Net, Runner } from "../core";
 import { Finish } from "./finish";
+import { getErrorString } from "../tool";
 
 export async function queueIn(runner: Runner) {
     let start = 0;
@@ -42,6 +43,7 @@ export async function queueIn(runner: Runner) {
         catch (err) {
             hasError = buses.hasError = true;
             console.error(err);
+            await runner.log(0, 'jobs queueIn loop at ' + start, getErrorString(err));
             break;
         }
     }

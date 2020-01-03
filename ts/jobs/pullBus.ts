@@ -1,11 +1,8 @@
 import { Runner, Net } from "../core";
+import { getErrorString } from "../tool";
 
 export async function pullBus(runner: Runner) {
     try {
-        /*
-        if (runner.net.isTest === true) {
-            if (debugUqs!==undefined && debugUqs.indexOf(runner.uq)>=0) debugger;
-        }*/
         let {buses, net} = runner;
         let {faces, coll, hasError} = buses;
         while (hasError === false) {
@@ -37,6 +34,7 @@ export async function pullBus(runner: Runner) {
                     catch (toQueueInErr) {
                         hasError = buses.hasError = true;
                         console.error(toQueueInErr);
+                        await runner.log(unit, 'jobs pullBus loop to QueueInErr msgId='+msgId, getErrorString(toQueueInErr));
                         break;
                     }
                     ++msgCount;
@@ -53,7 +51,8 @@ export async function pullBus(runner: Runner) {
     }
     catch (err) {
         //debugger;
-        if (err && err.message) console.error(err.message);
+        console.error(err);
+        await runner.log(0, 'jobs pullBus loop', getErrorString(err));
     }
 }
 

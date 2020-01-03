@@ -1,5 +1,6 @@
 import { Runner, Net, isDevelopment, centerApi, SheetQueueData, BusMessage } from "../core";
 import { Finish } from "./finish";
+import { getErrorString } from "../tool";
 
 export async function queueOut(runner: Runner): Promise<void> {
     try {
@@ -64,6 +65,7 @@ export async function queueOut(runner: Runner): Promise<void> {
         }
     }
     catch (err) {
+        await runner.log(0, 'jobs queueOut loop', getErrorString(err));
         if (isDevelopment===true) console.log(err);
     }
 }

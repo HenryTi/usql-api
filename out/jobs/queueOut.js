@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const finish_1 = require("./finish");
+const tool_1 = require("../tool");
 function queueOut(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -79,6 +80,7 @@ function queueOut(runner) {
             }
         }
         catch (err) {
+            yield runner.log(0, 'jobs queueOut loop', tool_1.getErrorString(err));
             if (core_1.isDevelopment === true)
                 console.log(err);
         }

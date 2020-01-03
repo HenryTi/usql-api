@@ -9,13 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const tool_1 = require("../tool");
 function pullBus(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            /*
-            if (runner.net.isTest === true) {
-                if (debugUqs!==undefined && debugUqs.indexOf(runner.uq)>=0) debugger;
-            }*/
             let { buses, net } = runner;
             let { faces, coll, hasError } = buses;
             while (hasError === false) {
@@ -50,6 +47,7 @@ function pullBus(runner) {
                         catch (toQueueInErr) {
                             hasError = buses.hasError = true;
                             console.error(toQueueInErr);
+                            yield runner.log(unit, 'jobs pullBus loop to QueueInErr msgId=' + msgId, tool_1.getErrorString(toQueueInErr));
                             break;
                         }
                         ++msgCount;
@@ -68,8 +66,8 @@ function pullBus(runner) {
         }
         catch (err) {
             //debugger;
-            if (err && err.message)
-                console.error(err.message);
+            console.error(err);
+            yield runner.log(0, 'jobs pullBus loop', tool_1.getErrorString(err));
         }
     });
 }
