@@ -102,8 +102,11 @@ function escape(d, field) {
 function packRow(result, fields, data) {
     let ret = '';
     let len = fields.length;
-    let f = fields[0];
-    ret += escape(data[f.name], f);
+    let f;
+    if (len > 0) {
+        f = fields[0];
+        ret += escape(data[f.name], f);
+    }
     for (let i = 1; i < len; i++) {
         f = fields[i];
         ret += tab + escape(data[f.name], f);
