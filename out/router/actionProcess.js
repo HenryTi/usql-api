@@ -26,7 +26,7 @@ exports.actionProcess = actionProcess;
 function actionReturns(unit, user, name, db, urlParams, runner, body, schema, run) {
     return __awaiter(this, void 0, void 0, function* () {
         let { data } = body;
-        if (data !== undefined) {
+        if (typeof data === 'object') {
             console.log('action process data: ', body);
             data = core_1.packParam(schema, data);
         }

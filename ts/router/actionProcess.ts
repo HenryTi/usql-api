@@ -11,7 +11,7 @@ export async function actionProcess(unit:number, user:number, name:string, db:st
 
 export async function actionReturns(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any[][]> {
     let {data} = body;
-    if (data !== undefined) {
+    if (typeof data === 'object') {
         console.log('action process data: ', body);
         data = packParam(schema, data);
     }
