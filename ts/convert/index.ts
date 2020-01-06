@@ -1,3 +1,5 @@
+export * from './buildLicense';
+
 import { operators } from "./operator";
 
 export function buildExpVar(exp:string):string {

@@ -71,6 +71,9 @@ function escape(d, field) {
     //if (d === null) return '\b';
     if (d === null)
         return '';
+    if (field.type === 'bin') {
+        return d;
+    }
     switch (typeof d) {
         default:
             if (d instanceof Date)

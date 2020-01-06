@@ -77,6 +77,9 @@ function packBusMain(result:string[], schema:BusSchema, main:any) {
 function escape(d:any, field: Field):any {
     //if (d === null) return '\b';
     if (d === null) return '';
+    if (field.type === 'bin') {
+        return d;
+    }
     switch (typeof d) {
         default:
             if (d instanceof Date) return (d as Date).getTime(); //-timezoneOffset-timezoneOffset;

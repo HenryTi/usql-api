@@ -39,7 +39,7 @@ exports.actionReturns = actionReturns;
 function actionConvert(unit, user, entityName, db, urlParams, runner, body, schema, run) {
     return __awaiter(this, void 0, void 0, function* () {
         let data = _.clone(body.data);
-        let { paramConvert } = schema;
+        let { paramConvert, returns } = schema;
         let actionConvertSchema;
         if (paramConvert !== undefined) {
             let { name, to, type } = paramConvert;
@@ -64,11 +64,23 @@ function actionConvert(unit, user, entityName, db, urlParams, runner, body, sche
             }
         }
         //let param = packParam(actionConvertSchema || schema, data);
-        let result = yield actionReturns(unit, user, entityName, db, urlParams, runner, { data }, actionConvertSchema || schema, run);
-        let arr0 = result[0];
-        if (arr0 === undefined || arr0.length === 0)
+        let results = yield actionReturns(unit, user, entityName, db, urlParams, runner, { data }, actionConvertSchema || schema, run);
+        if (returns == undefined)
             return;
-        return arr0[0];
+        let len = returns.length;
+        let ret = [];
+        for (let i = 0; i < len; i++) {
+            let result = results[i];
+            let returnSchema = returns[i];
+            let { convert } = returnSchema;
+            if (convert === 'license') {
+                ret.push(convert_1.buildLicense(result));
+            }
+            else {
+                ret.push(result);
+            }
+        }
+        return ret;
     });
 }
 exports.actionConvert = actionConvert;

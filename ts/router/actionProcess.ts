@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Runner, packParam } from '../core';
-import { buildExpVar, buildExpCalc } from '../convert';
+import { buildExpVar, buildExpCalc, buildLicense } from '../convert';
 
 export async function actionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
     let result = await actionReturns(unit, user, name, db, urlParams, runner, body, schema, run);
@@ -22,7 +22,7 @@ export async function actionReturns(unit:number, user:number, name:string, db:st
 
 export async function actionConvert(unit:number, user:number, entityName:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
     let data = _.clone(body.data);
-    let {paramConvert} = schema;
+    let {paramConvert, returns} = schema;
     let actionConvertSchema:any;
     if (paramConvert !== undefined) {
         let {name, to, type} = paramConvert;
@@ -46,11 +46,23 @@ export async function actionConvert(unit:number, user:number, entityName:string,
         }
     }
     //let param = packParam(actionConvertSchema || schema, data);
-    let result = await actionReturns(unit, user, entityName, db, urlParams, runner, 
+    let results = await actionReturns(unit, user, entityName, db, urlParams, runner, 
         {data}, actionConvertSchema || schema, run);
-    let arr0 = result[0];
-    if (arr0 === undefined || arr0.length === 0) return;
-    return arr0[0];
+    if (returns == undefined) return;
+    let len = returns.length;
+    let ret:any[][] = [];
+    for (let i=0; i<len; i++) {
+        let result = results[i];
+        let returnSchema = returns[i];
+        let {convert} = returnSchema;
+        if (convert === 'license') {
+            ret.push(buildLicense(result));
+        }
+        else {
+            ret.push(result);
+        }
+    }
+    return ret;
 };
 
 function expressionConvert(data:any, exp:string, to:string[]) {
