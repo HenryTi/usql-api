@@ -5,7 +5,8 @@ export async function pullBus(runner: Runner) {
     try {
         let {buses, net} = runner;
         let {faces, coll, hasError} = buses;
-        while (hasError === false) {
+        let pullBusItemCount = 0;
+        while (hasError === false && pullBusItemCount < 200) {
             let unitMaxIds:{unit:number; maxId:number}[] = await getSyncUnits(runner);
             let msgCount = 0;
             for (let row of unitMaxIds) {
@@ -18,6 +19,7 @@ export async function pullBus(runner: Runner) {
                 let messages = ret[1];
                 // 新版：bus读来，直接写入queue_in。然后在队列里面处理
                 for (let row of messages) {
+                    ++pullBusItemCount;
                     let {face:faceUrl, id:msgId, body, version} = row;
                     let face = coll[(faceUrl as string).toLowerCase()];
                     if (face === undefined) continue;

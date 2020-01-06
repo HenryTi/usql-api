@@ -25,7 +25,7 @@ export async function startJobsLoop(): Promise<void> {
     let db = new Db(undefined);
     if (isDevelopment as any === true) {
         // 只有在开发状态下，才可以屏蔽jobs
-        return;
+        //return;
         console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
         await db.setDebugJobs();
         await sleep(waitForOtherStopJobs);
@@ -45,6 +45,7 @@ export async function startJobsLoop(): Promise<void> {
                 if (isDevelopment === true) {
                     await db.setDebugJobs();
                 }
+                console.info('====== job loop for ' + uqDb + '======');
                 let net:Net;
                 let dbName:string;;
                 if (uqDb.endsWith($test) === true) {
@@ -98,7 +99,7 @@ export async function startJobsLoop(): Promise<void> {
         }
     }
 }
-
+/*
 export class Jobs {
     static start(): void {
         let startRun = async () => {
@@ -107,7 +108,7 @@ export class Jobs {
         }
         if (isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
-            return;
+            //return;
             (async function() {
                 //logger.info('test', 't1', 't2');
                 console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
@@ -141,7 +142,8 @@ export class Jobs {
                     dbName = uqDb;
                     net = prodNet;
                 }
-                let runner = await net.getRunner(dbName);
+                if (dbName.toLowerCase() === 'salestask') debugger;
+                let runner = await net.getRunner(dbName);                
                 if (runner === undefined) continue;
                 let {buses} = runner;
                 if (buses !== undefined) {
@@ -165,3 +167,4 @@ export class Jobs {
         }
     }
 }
+*/

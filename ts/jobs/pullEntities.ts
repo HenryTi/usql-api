@@ -21,12 +21,14 @@ enum FromNewSet {ok=1, bad=2, moreTry=3}
 
 async function pullNew(runner:Runner) {
     let {net} = runner;
-    for (;;) {
+    let count = 0;
+    for (;count<200;) {
         let items = await runner.tableFromProc('$from_new', undefined);
         if (items.length === 0) {
             break;
         }
         for (let item of items) {
+            count++;
             let {id, unit, entity, key, tries, update_time, now} = item;
             let fns:FromNewSet;
             try {
@@ -73,6 +75,7 @@ async function pullModify(runner:Runner) {
     // 把访问同一个openApi的整理到一起
     let promises:Promise<OpenApi>[] = [];
     let params:{from:any, unit:any, modifyMax:number, entity:string}[] = [];
+    let count = 0;
     for (let item of items) {
         let {unit, entity, modifyMax} = item;
         if (!unit) unit = runner.uniqueUnit;
@@ -118,6 +121,7 @@ async function pullModify(runner:Runner) {
     // 从from uq获取数据
     let page = 100;
     for (let unit in unitOpenApiItems) {
+        if (count > 200) break;
         let openApiItems = unitOpenApiItems[unit];
         for (let openApiItem of openApiItems) {
             try {
@@ -151,6 +155,7 @@ async function pullModify(runner:Runner) {
                     em.idMax = modifyId;
                 }
                 for (let entity in entityModifies) {
+                    ++count;
                     let schema = runner.getSchema(entity);
                     let {modifies, idMax} = entityModifies[entity];
                     let ret = await runner.checkPull(unit as unknown as number, entity, schema.type, modifies);

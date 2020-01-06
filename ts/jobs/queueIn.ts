@@ -6,11 +6,13 @@ export async function queueIn(runner: Runner) {
     let start = 0;
     let {buses} = runner;
     let {hasError} = buses;
-    while (hasError === false) {
+    let count = 0;
+    while (hasError === false && count < 200) {
         try {
             let queueInArr:any[] = await runner.call('$queue_in_get',[start]);
             if (queueInArr.length === 0) break;
             for (let queueIn of queueInArr) {
+                ++count;
                 let {bus, faceName, id, unit, data, tries, update_time, now} = queueIn;
                 start = id;
                 if (!unit) unit = runner.uniqueUnit;

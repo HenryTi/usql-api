@@ -71,7 +71,7 @@ class MyDbServer extends dbServer_1.DbServer {
                             }
                             let sleepMillis = Math.floor((Math.random() * maxMillis) + minMillis);
                             if (db_1.isDevelopment === true) {
-                                console.error('Retrying request with', retries - retryCount, 'retries left. Timeout', sleepMillis);
+                                console.error(sql + ': ---- Retrying request with', retries - retryCount, 'retries left. Timeout', sleepMillis);
                             }
                             return setTimeout(() => {
                                 this.pool.query(sql, values, handleResponse);

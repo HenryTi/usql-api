@@ -41,12 +41,14 @@ var FromNewSet;
 function pullNew(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         let { net } = runner;
-        for (;;) {
+        let count = 0;
+        for (; count < 200;) {
             let items = yield runner.tableFromProc('$from_new', undefined);
             if (items.length === 0) {
                 break;
             }
             for (let item of items) {
+                count++;
                 let { id, unit, entity, key, tries, update_time, now } = item;
                 let fns;
                 try {
@@ -90,6 +92,7 @@ function pullModify(runner) {
         // 把访问同一个openApi的整理到一起
         let promises = [];
         let params = [];
+        let count = 0;
         for (let item of items) {
             let { unit, entity, modifyMax } = item;
             if (!unit)
@@ -137,6 +140,8 @@ function pullModify(runner) {
         // 从from uq获取数据
         let page = 100;
         for (let unit in unitOpenApiItems) {
+            if (count > 200)
+                break;
             let openApiItems = unitOpenApiItems[unit];
             for (let openApiItem of openApiItems) {
                 try {
@@ -166,6 +171,7 @@ function pullModify(runner) {
                         em.idMax = modifyId;
                     }
                     for (let entity in entityModifies) {
+                        ++count;
                         let schema = runner.getSchema(entity);
                         let { modifies, idMax } = entityModifies[entity];
                         let ret = yield runner.checkPull(unit, entity, schema.type, modifies);

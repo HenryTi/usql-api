@@ -15,7 +15,8 @@ function pullBus(runner) {
         try {
             let { buses, net } = runner;
             let { faces, coll, hasError } = buses;
-            while (hasError === false) {
+            let pullBusItemCount = 0;
+            while (hasError === false && pullBusItemCount < 200) {
                 let unitMaxIds = yield getSyncUnits(runner);
                 let msgCount = 0;
                 for (let row of unitMaxIds) {
@@ -30,6 +31,7 @@ function pullBus(runner) {
                     let messages = ret[1];
                     // 新版：bus读来，直接写入queue_in。然后在队列里面处理
                     for (let row of messages) {
+                        ++pullBusItemCount;
                         let { face: faceUrl, id: msgId, body, version } = row;
                         let face = coll[faceUrl.toLowerCase()];
                         if (face === undefined)

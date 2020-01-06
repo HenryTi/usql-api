@@ -5,11 +5,13 @@ import { getErrorString } from "../tool";
 export async function queueOut(runner: Runner): Promise<void> {
     try {
         let start = 0;
-        for (;;) {
+        let count = 0;
+        for (;count<200;) {
             let ret = await runner.call('$message_queue_get',  [start]);
             if (ret.length === 0) break;
             let procMessageQueueSet = 'tv_$message_queue_set';
             for (let row of ret) {
+                ++count;
                 // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
                 let {$unit, id, action, subject, content, tries, update_time, now} = row;
                 start = id;
