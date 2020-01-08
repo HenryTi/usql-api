@@ -31,7 +31,6 @@ function pullBus(runner) {
                     let messages = ret[1];
                     // 新版：bus读来，直接写入queue_in。然后在队列里面处理
                     for (let row of messages) {
-                        ++pullBusItemCount;
                         let { face: faceUrl, id: msgId, body, version } = row;
                         let face = coll[faceUrl.toLowerCase()];
                         if (face === undefined)
@@ -45,6 +44,7 @@ function pullBus(runner) {
                                 // 2019-07-23
                             }
                             yield runner.call('$queue_in_add', [unit, msgId, bus, faceName, body]);
+                            ++pullBusItemCount;
                         }
                         catch (toQueueInErr) {
                             hasError = buses.hasError = true;

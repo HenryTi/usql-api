@@ -23,7 +23,6 @@ function queueOut(runner) {
                     break;
                 let procMessageQueueSet = 'tv_$message_queue_set';
                 for (let row of ret) {
-                    ++count;
                     // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
                     let { $unit, id, action, subject, content, tries, update_time, now } = row;
                     start = id;
@@ -62,6 +61,7 @@ function queueOut(runner) {
                                     finish = finish_1.Finish.done;
                                     break;
                             }
+                            ++count;
                         }
                         catch (err) {
                             if (tries < 5) {

@@ -23,7 +23,6 @@ function queueIn(runner) {
                 if (queueInArr.length === 0)
                     break;
                 for (let queueIn of queueInArr) {
-                    ++count;
                     let { bus, faceName, id, unit, data, tries, update_time, now } = queueIn;
                     start = id;
                     if (!unit)
@@ -37,6 +36,7 @@ function queueIn(runner) {
                     try {
                         yield runner.bus(bus, faceName, unit, id, data);
                         finish = finish_1.Finish.done;
+                        ++count;
                     }
                     catch (err) {
                         if (tries < 5) {

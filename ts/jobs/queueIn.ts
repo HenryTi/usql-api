@@ -12,7 +12,6 @@ export async function queueIn(runner: Runner) {
             let queueInArr:any[] = await runner.call('$queue_in_get',[start]);
             if (queueInArr.length === 0) break;
             for (let queueIn of queueInArr) {
-                ++count;
                 let {bus, faceName, id, unit, data, tries, update_time, now} = queueIn;
                 start = id;
                 if (!unit) unit = runner.uniqueUnit;
@@ -24,6 +23,7 @@ export async function queueIn(runner: Runner) {
                 try {
                     await runner.bus(bus, faceName, unit, id, data);
                     finish = Finish.done;
+                    ++count;
                 }
                 catch (err) {
                     if (tries < 5) {
