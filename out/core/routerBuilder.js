@@ -80,6 +80,7 @@ class RouterBuilder {
                 });
             }
             catch (err) {
+                console.error(err);
                 res.json({ error: err });
             }
         });

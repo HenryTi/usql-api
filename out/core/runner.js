@@ -308,6 +308,11 @@ class Runner {
         if (m.type === 'map')
             return m;
     }
+    entityNo(entity, unit, year, month, date) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.call('$entity_no', [unit, entity, `${year}-${month}-${date}`]);
+        });
+    }
     tuidGet(tuid, unit, user, id) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.unitUserCallEx('tv_' + tuid, unit, user, id);

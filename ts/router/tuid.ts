@@ -40,6 +40,13 @@ export function buildTuidRouter(router: Router, rb: RouterBuilder) {
         return value;
     });
 
+    rb.entityPost(router, tuidType, '-no/:name', 
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+        let {year, month, date} = body;
+        let result = await runner.entityNo(name, unit, year, month, date);
+        return result[0];
+    });
+
     rb.entityGet(router, tuidType, '-arr/:name/:owner/:arr/:id/', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
         let {id, owner, arr} = urlParams;

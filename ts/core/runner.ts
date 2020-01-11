@@ -288,6 +288,9 @@ export class Runner {
         if (m.type === 'map') return m;
     }
 
+    async entityNo(entity:string, unit:number, year:number, month:number, date:number): Promise<any[]> {
+        return await this.call('$entity_no', [unit, entity, `${year}-${month}-${date}`]);
+    }
     async tuidGet(tuid:string, unit:number, user:number, id:number): Promise<any> {
         return await this.unitUserCallEx('tv_' + tuid, unit, user, id);
     }

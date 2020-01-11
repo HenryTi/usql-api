@@ -44,6 +44,11 @@ function buildTuidRouter(router, rb) {
         }
         return value;
     }));
+    rb.entityPost(router, tuidType, '-no/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { year, month, date } = body;
+        let result = yield runner.entityNo(name, unit, year, month, date);
+        return result[0];
+    }));
     rb.entityGet(router, tuidType, '-arr/:name/:owner/:arr/:id/', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { id, owner, arr } = urlParams;
         let schemaArr = getTuidArr(schema, arr);
