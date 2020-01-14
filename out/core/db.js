@@ -264,7 +264,7 @@ class DbLogger {
                 debugger;
             }
             if (tick > now || tick < now - 1000000) {
-                debugger;
+                //debugger;
             }
             this.db.logPerformance(tick, log, ms);
         }

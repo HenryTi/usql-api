@@ -1,4 +1,4 @@
-import { Runner, consts, BusMessage, busQueuehour, busQueueSeedFromHour } from '../../core';
+import { Runner, consts, BusMessage, busQueuehour, busQueueSeedFromHour, busQueueHourFromSeed } from '../../core';
 
 let faces:{[face:string]:number};
 let froms:{[from:string]:number};
@@ -58,6 +58,7 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
     */
 
     let hour = busQueuehour();
+    console.error('== writeDataToBus busQueuehour hour=' + hour + ' lastHour='  + lastHour);
     if (hour > lastHour) {
         let seed = busQueueSeedFromHour(hour);
         let seedRet = await runner.call('$get_table_seed', ['busqueue']);
@@ -66,6 +67,12 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
         if (seed > s) {
             await runner.call('$set_bus_queue_seed', ['busqueue', seed]);
         }
+        /*
+        let ret = await runner.call('$set_bus_queue_seed', ['busqueue', seed]);
+        let {seedRet} = ret[0];
+        let seedRetHour = busQueueHourFromSeed(seedRet);
+        if (seedRetHour > hour) hour = seedRetHour;
+        */
         lastHour = hour;
     }
 
