@@ -34,7 +34,9 @@ function queueIn(runner) {
                     }
                     let finish;
                     try {
-                        yield runner.bus(bus, faceName, unit, id, data);
+                        if (bus) {
+                            yield runner.bus(bus, faceName, unit, id, data);
+                        }
                         finish = finish_1.Finish.done;
                         ++count;
                     }

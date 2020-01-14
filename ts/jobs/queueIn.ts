@@ -21,7 +21,9 @@ export async function queueIn(runner: Runner) {
                 }
                 let finish:Finish;
                 try {
-                    await runner.bus(bus, faceName, unit, id, data);
+                    if (bus) {
+                        await runner.bus(bus, faceName, unit, id, data);
+                    }
                     finish = Finish.done;
                     ++count;
                 }

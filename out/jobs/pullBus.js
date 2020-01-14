@@ -58,6 +58,7 @@ function pullBus(runner) {
                         break;
                     if (messages.length < maxRows && maxId < maxMsgId) {
                         // 如果unit的所有mssage都处理完成了，则设为unit的最大msg，下次查找可以快些
+                        yield runner.call('$queue_in_add', [unit, maxMsgId, undefined, undefined, undefined]);
                         //await runner.busSyncMax(unit, maxMsgId);
                     }
                 }
