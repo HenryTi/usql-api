@@ -76,6 +76,7 @@ function buildUnitxRouter(rb) {
         data += message + '\n';
         */
         //let ret = await runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, fromQueueId, sourceId, message);
+        console.error('jointwriteBus', body);
         let ret = yield runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, message);
         return ret;
     });
