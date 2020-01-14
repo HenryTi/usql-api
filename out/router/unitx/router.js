@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const core_1 = require("../../core");
 const messageProcesser_1 = require("./messageProcesser");
+const processBusMessage_1 = require("./processBusMessage");
 function buildUnitxRouter(rb) {
     let router = express_1.Router();
     router.post('/', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
@@ -65,6 +66,7 @@ function buildUnitxRouter(rb) {
     rb.post(router, '/joint-read-bus', jointReadBus);
     let jointWriteBus = (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, face, from, fromQueueId, version, body: message } = body;
+        let ret = yield processBusMessage_1.writeDataToBus(runner, face, unit, from, fromQueueId, version, message);
         /*
         let data = '';
         if (face !== null && face !== undefined) data += face;
@@ -76,8 +78,8 @@ function buildUnitxRouter(rb) {
         data += message + '\n';
         */
         //let ret = await runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, fromQueueId, sourceId, message);
-        console.error('jointwriteBus', body);
-        let ret = yield runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, message);
+        //console.error('jointwriteBus', body);
+        //let ret = await runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, message);
         return ret;
     });
     rb.post(router, '/joint-write-bus', jointWriteBus);
