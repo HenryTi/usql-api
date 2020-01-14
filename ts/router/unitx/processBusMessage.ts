@@ -61,11 +61,13 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
     console.error('== writeDataToBus busQueuehour hour=' + hour + ' lastHour='  + lastHour);
     if (hour > lastHour) {
         let seed = busQueueSeedFromHour(hour);
+        console.error('== writeDataToBus seed=' + seed);
         let seedRet = await runner.call('$get_table_seed', ['busqueue']);
         let s = seedRet[0].seed;
         if (!s) s = 1;
         if (seed > s) {
             await runner.call('$set_bus_queue_seed', ['busqueue', seed]);
+            console.error('== after $set_bus_queue_seed seed=' + seed);
         }
         /*
         let ret = await runner.call('$set_bus_queue_seed', ['busqueue', seed]);

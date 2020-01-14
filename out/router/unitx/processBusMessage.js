@@ -75,15 +75,24 @@ function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
             [undefined, faceId, fromId, fromQueueId, version, body]);
         */
         let hour = core_1.busQueuehour();
+        console.error('== writeDataToBus busQueuehour hour=' + hour + ' lastHour=' + lastHour);
         if (hour > lastHour) {
             let seed = core_1.busQueueSeedFromHour(hour);
+            console.error('== writeDataToBus seed=' + seed);
             let seedRet = yield runner.call('$get_table_seed', ['busqueue']);
             let s = seedRet[0].seed;
             if (!s)
                 s = 1;
             if (seed > s) {
                 yield runner.call('$set_bus_queue_seed', ['busqueue', seed]);
+                console.error('== after $set_bus_queue_seed seed=' + seed);
             }
+            /*
+            let ret = await runner.call('$set_bus_queue_seed', ['busqueue', seed]);
+            let {seedRet} = ret[0];
+            let seedRetHour = busQueueHourFromSeed(seedRet);
+            if (seedRetHour > hour) hour = seedRetHour;
+            */
             lastHour = hour;
         }
         yield runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, body);

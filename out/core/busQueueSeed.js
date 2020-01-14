@@ -9,6 +9,10 @@ function busQueueSeedFromHour(hour) {
     return hour * bigNumber;
 }
 exports.busQueueSeedFromHour = busQueueSeedFromHour;
+function busQueueHourFromSeed(seed) {
+    return seed / bigNumber;
+}
+exports.busQueueHourFromSeed = busQueueHourFromSeed;
 function busQueueSeed() {
     return Math.floor(Date.now() / (3600 * 1000)) * bigNumber;
 }
