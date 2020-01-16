@@ -116,28 +116,26 @@ export class RouterBuilder {
             if (roles) {
                 $roles = await runner.getRoles(unit, app, userId, roles);
             }
-            if (!$roles) {
-                let entityVersion = req.header('en');
-                let uqVersion = req.header('uq');
-                let eqEntity = entityVersion === undefined || call.version === Number(entityVersion);
-                let eqUq = uqVersion === undefined || runner.uqVersion === Number(uqVersion);
-                if (eqEntity === true && eqUq === true)
-                {
-                    let body = isGet === true? (req as any).query : (req as any).body;
-                    result = await processer(unit, userId, name, db, params, runner, body, call, run, this.net);
-                }
-                else {
-                    $uq = {};
-                    if (eqEntity === false) {
-                        $uq.entity = call;
-                    }
-                    if (eqUq === false) {
-                        let access = await runner.getAccesses(unit, userId, undefined);
-                        $uq.uq = access;
-                    }
-                }
-                modifyMax = await runner.getModifyMax(unit);
+            let entityVersion = req.header('en');
+            let uqVersion = req.header('uq');
+            let eqEntity = entityVersion === undefined || call.version === Number(entityVersion);
+            let eqUq = uqVersion === undefined || runner.uqVersion === Number(uqVersion);
+            if (eqEntity === true && eqUq === true)
+            {
+                let body = isGet === true? (req as any).query : (req as any).body;
+                result = await processer(unit, userId, name, db, params, runner, body, call, run, this.net);
             }
+            else {
+                $uq = {};
+                if (eqEntity === false) {
+                    $uq.entity = call;
+                }
+                if (eqUq === false) {
+                    let access = await runner.getAccesses(unit, userId, undefined);
+                    $uq.uq = access;
+                }
+            }
+            modifyMax = await runner.getModifyMax(unit);
             res.json({
                 ok: true,
                 res: result,

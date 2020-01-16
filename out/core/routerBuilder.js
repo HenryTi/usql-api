@@ -59,27 +59,25 @@ class RouterBuilder {
                 if (roles) {
                     $roles = yield runner.getRoles(unit, app, userId, roles);
                 }
-                if (!$roles) {
-                    let entityVersion = req.header('en');
-                    let uqVersion = req.header('uq');
-                    let eqEntity = entityVersion === undefined || call.version === Number(entityVersion);
-                    let eqUq = uqVersion === undefined || runner.uqVersion === Number(uqVersion);
-                    if (eqEntity === true && eqUq === true) {
-                        let body = isGet === true ? req.query : req.body;
-                        result = yield processer(unit, userId, name, db, params, runner, body, call, run, this.net);
-                    }
-                    else {
-                        $uq = {};
-                        if (eqEntity === false) {
-                            $uq.entity = call;
-                        }
-                        if (eqUq === false) {
-                            let access = yield runner.getAccesses(unit, userId, undefined);
-                            $uq.uq = access;
-                        }
-                    }
-                    modifyMax = yield runner.getModifyMax(unit);
+                let entityVersion = req.header('en');
+                let uqVersion = req.header('uq');
+                let eqEntity = entityVersion === undefined || call.version === Number(entityVersion);
+                let eqUq = uqVersion === undefined || runner.uqVersion === Number(uqVersion);
+                if (eqEntity === true && eqUq === true) {
+                    let body = isGet === true ? req.query : req.body;
+                    result = yield processer(unit, userId, name, db, params, runner, body, call, run, this.net);
                 }
+                else {
+                    $uq = {};
+                    if (eqEntity === false) {
+                        $uq.entity = call;
+                    }
+                    if (eqUq === false) {
+                        let access = yield runner.getAccesses(unit, userId, undefined);
+                        $uq.uq = access;
+                    }
+                }
+                modifyMax = yield runner.getModifyMax(unit);
                 res.json({
                     ok: true,
                     res: result,

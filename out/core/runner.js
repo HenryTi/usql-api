@@ -37,14 +37,18 @@ class Runner {
                 this.roleVersions[unit] = unitRVs = {};
             }
             let rv = unitRVs[app];
-            if (Number(rolesVersion) === rv)
-                return;
+            if (rv !== undefined) {
+                let { version: rvVersion, tick } = rv;
+                let now = Date.now();
+                if (Number(rolesVersion) === rvVersion && now - tick < 60 * 1000)
+                    return;
+            }
             // 去中心服务器取user对应的roles，version
             let ret = yield centerApi_1.centerApi.appRoles(unit, app, user);
             if (ret === undefined)
                 return;
             let { roles, version } = ret;
-            unitRVs[app] = version;
+            unitRVs[app] = { version, tick: Date.now() };
             if (version === Number(rolesVersion) && roles === Number(rolesBin))
                 return;
             return ret;

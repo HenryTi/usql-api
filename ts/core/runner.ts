@@ -49,7 +49,7 @@ export class Runner {
     private entityColl: {[id:number]: EntityAccess};
     private sheetRuns: {[sheet:string]: SheetRun};
     private readonly modifyMaxes: {[unit:number]: number};
-    private readonly roleVersions: {[unit:number]: {[app:number]: number}} = {};
+    private readonly roleVersions: {[unit:number]: {[app:number]: {version:number, tick:number}}} = {};
 
     name: string;
     uqOwner: string;
@@ -85,12 +85,16 @@ export class Runner {
             this.roleVersions[unit] = unitRVs = {}
         }
         let rv = unitRVs[app];
-        if (Number(rolesVersion) === rv) return;
+        if (rv !== undefined) {
+            let {version:rvVersion, tick} = rv;
+            let now = Date.now();
+            if (Number(rolesVersion) === rvVersion && now-tick<60*1000) return;
+        }
         // 去中心服务器取user对应的roles，version
         let ret = await centerApi.appRoles(unit, app, user);
         if (ret === undefined) return;
         let {roles, version} = ret;
-        unitRVs[app] = version;
+        unitRVs[app] = {version, tick:Date.now()};
         if (version === Number(rolesVersion) && roles === Number(rolesBin)) return;
         return ret;
     }
