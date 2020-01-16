@@ -164,27 +164,6 @@ class RouterBuilder {
             return yield this.net.getUnitxRunner();
         });
     }
-    /*
-    private runners: {[name:string]: Runner} = {};
-
-    async getRunner(name:string):Promise<Runner> {
-        name = name.toLowerCase();
-        let runner = this.runners[name];
-        if (runner === null) return;
-        if (runner === undefined) {
-            let db = getDb(name);
-            let isExists = await db.exists();
-            if (isExists === false) {
-                this.runners[name] = null;
-                return;
-            }
-            runner = new Runner(db);
-            this.runners[name] = runner;
-        }
-        await runner.init();
-        return runner;
-    }
-    */
     unknownEntity(res, name) {
         res.json({ error: 'unknown entity: ' + name });
     }
