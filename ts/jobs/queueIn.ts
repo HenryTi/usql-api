@@ -21,7 +21,10 @@ export async function queueIn(runner: Runner) {
                 }
                 let finish:Finish;
                 try {
-                    if (bus) {
+                    if (!bus) {
+                        await runner.call('$queue_in_set', [id, Finish.done]); 
+                    }
+                    else {
                         await runner.bus(bus, faceName, unit, id, data);
                     }
                     finish = Finish.done;

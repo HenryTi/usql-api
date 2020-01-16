@@ -4,6 +4,7 @@ import { packReturns, packParam } from '.';
 import { ImportData } from './importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from './inBusAction';
 import { Net } from './net';
+import { centerApi } from './centerApi';
 //import { Bench } from './logger';
 
 interface EntityAccess {
@@ -48,6 +49,7 @@ export class Runner {
     private entityColl: {[id:number]: EntityAccess};
     private sheetRuns: {[sheet:string]: SheetRun};
     private readonly modifyMaxes: {[unit:number]: number};
+    private readonly roleVersions: {[unit:number]: {[app:number]: number}} = {};
 
     name: string;
     uqOwner: string;
@@ -75,6 +77,23 @@ export class Runner {
     }
 
     getDb():string {return this.db.getDbName()}
+
+    async getRoles(unit:number, app:any, user:number, inRoles:string): Promise<{roles:number, version:number}> {
+        let [rolesBin, rolesVersion] = inRoles.split('.');
+        let unitRVs = this.roleVersions[unit];
+        if (unitRVs === undefined) {
+            this.roleVersions[unit] = unitRVs = {}
+        }
+        let rv = unitRVs[app];
+        if (Number(rolesVersion) === rv) return;
+        // 去中心服务器取user对应的roles，version
+        let ret = await centerApi.appRoles(unit, app, user);
+        if (ret === undefined) return;
+        let {roles, version} = ret;
+        unitRVs[app] = version;
+        if (version === Number(rolesVersion) && roles === Number(rolesBin)) return;
+        return ret;
+    }
 
     checkUqVersion(uqVersion:number) {
         //if (this.uqVersion === undefined) return;
@@ -233,7 +252,6 @@ export class Runner {
             this.setting[name] = n === NaN? value : n;
         }
     }
-
     async getSetting(unit:number, name: string):Promise<any> {
         name = name.toLowerCase();
         let ret = await this.unitTableFromProc('tv_$get_setting', unit, name);
@@ -502,7 +520,7 @@ export class Runner {
         let inBusAction = this.getAcceptParametersBus(bus, face);
         let inBusResult = await inBusAction.buildData(unit, 0, body);
         let data = body + inBusResult;
-        return await this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
+        await this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
     }
     async checkPull(unit:number, entity:string, entityType:string, modifies:string): Promise<any[]> {
         let proc:string;

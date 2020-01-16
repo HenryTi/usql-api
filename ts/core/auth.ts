@@ -13,8 +13,8 @@ export interface AuthUser {
 }
 
 export default class Auth {
-    private roles: string[];
-    private anyRole: boolean;
+    //private roles: string[];
+    //private anyRole: boolean;
     private noUser: boolean;
     constructor(roles: string[]) {
         if (roles === undefined) {
@@ -22,11 +22,12 @@ export default class Auth {
             return;
         }
         if (roles[0] === '*') {
-            this.anyRole = true;
+            //this.anyRole = true;
             return;
         }
-        this.roles = roles;
+        //this.roles = roles;
     }
+    /*
     hasRole(roles:string): boolean {
         if (this.anyRole === true) return true;
         if (roles === undefined) return false;
@@ -37,6 +38,7 @@ export default class Auth {
         }
         return false;
     }
+    */
     check(req:Request, res:Response, next:NextFunction) {
         if (this.noUser === true) {
             if (next !== undefined) next();
@@ -60,10 +62,14 @@ export default class Auth {
             if (err === null) {
                 decoded.db = req.params.db;
                 (req as any).user = decoded;
+                next();
+                return;
+                /*
                 if (this.hasRole(decoded.roles) === true) {
                     if (next !== undefined) next();
                     return;
                 }
+                */
             }
             if (res !== undefined) {
                 res.status(401);

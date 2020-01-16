@@ -2,7 +2,8 @@ import * as express from 'express';
 import { Request, Response, NextFunction, Router } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
-import {buildSettingRouter, buildOpenRouter, buildEntityRouter, buildUnitxRouter, buildBuildRouter} from './router';
+import {buildOpenRouter, buildEntityRouter, buildUnitxRouter, buildBuildRouter} from './router';
+//import {buildSettingRouter} from './router'; 
 import {initResDb, router as resRouter, initResPath} from './res';
 import {Auth, authCheck, authDebug, authUnitx, RouterBuilder, uqProdRouterBuilder, uqTestRouterBuilder, unitxTestRouterBuilder, unitxProdRouterBuilder, compileProdRouterBuilder, compileTestRouterBuilder, CompileRouterBuilder} from './core';
 //import { /*buildUnitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
@@ -142,9 +143,9 @@ function buildUqRouter(rb: RouterBuilder, rbCompile: CompileRouterBuilder): Rout
     uqRouter.use('/build', [authUpBuild, buildRouter]);
 
     // 这个是不是也要放到只有unitx里面
-    let settingRouter = Router({ mergeParams: true });
-    buildSettingRouter(settingRouter, rb);
-    uqRouter.use('/setting', [settingRouter]); // unitx set access
+    //let settingRouter = Router({ mergeParams: true });
+    //buildSettingRouter(settingRouter, rb);
+    //uqRouter.use('/setting', [settingRouter]); // unitx set access
 
     /* 直接放到/unitx名下了
     let unitxQueueRouter = Router({ mergeParams: true });

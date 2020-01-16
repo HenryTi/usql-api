@@ -14,8 +14,10 @@ const db_1 = require("./db");
 const _1 = require(".");
 const importData_1 = require("./importData");
 const inBusAction_1 = require("./inBusAction");
+const centerApi_1 = require("./centerApi");
 class Runner {
     constructor(name, db, net = undefined) {
+        this.roleVersions = {};
         this.hasPullEntities = false;
         this.hasSheet = false;
         this.parametersBusCache = {};
@@ -27,6 +29,27 @@ class Runner {
         this.modifyMaxes = {};
     }
     getDb() { return this.db.getDbName(); }
+    getRoles(unit, app, user, inRoles) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let [rolesBin, rolesVersion] = inRoles.split('.');
+            let unitRVs = this.roleVersions[unit];
+            if (unitRVs === undefined) {
+                this.roleVersions[unit] = unitRVs = {};
+            }
+            let rv = unitRVs[app];
+            if (Number(rolesVersion) === rv)
+                return;
+            // 去中心服务器取user对应的roles，version
+            let ret = yield centerApi_1.centerApi.appRoles(unit, app, user);
+            if (ret === undefined)
+                return;
+            let { roles, version } = ret;
+            unitRVs[app] = version;
+            if (version === Number(rolesVersion) && roles === Number(rolesBin))
+                return;
+            return ret;
+        });
+    }
     checkUqVersion(uqVersion) {
         //if (this.uqVersion === undefined) return;
         //if (uqVersion !== this.uqVersion) 
@@ -587,7 +610,7 @@ class Runner {
             let inBusAction = this.getAcceptParametersBus(bus, face);
             let inBusResult = yield inBusAction.buildData(unit, 0, body);
             let data = body + inBusResult;
-            return yield this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
+            yield this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
         });
     }
     checkPull(unit, entity, entityType, modifies) {

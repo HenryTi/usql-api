@@ -90,11 +90,11 @@ export class RouterBuilder {
             await this.entityProcess(req, res, entityType, processer, false);
         });
     };
-    
+
     private entityProcess = async (req:Request, res:Response, entityType:string, processer:EntityProcesser, isGet:boolean):Promise<void> => {
         try {
             let userToken:User = (req as any).user;
-            let {db, id:userId, unit} = userToken;
+            let {db, id:userId, unit, roles} = userToken;
             if (db === undefined) db = consts.$unitx;
             let runner = await this.checkRunner(db);
             if (runner === undefined) return;
@@ -109,32 +109,41 @@ export class RouterBuilder {
                 if (this.validEntity(res, call, entityType) === false) return;
             }
             let result: any;
+            let modifyMax: any;
             let $uq: any;
-            let entityVersion = req.header('en');
-            let uqVersion = req.header('uq');
-            let eqEntity = entityVersion === undefined || call.version === Number(entityVersion);
-            let eqUq = uqVersion === undefined || runner.uqVersion === Number(uqVersion);
-            if (eqEntity === true && eqUq === true)
-            {
-                let body = isGet === true? (req as any).query : (req as any).body;
-                result = await processer(unit, userId, name, db, params, runner, body, call, run, this.net);
+            let app = req.header('app');
+            let $roles: any;
+            if (roles) {
+                $roles = await runner.getRoles(unit, app, userId, roles);
             }
-            else {
-                $uq = {};
-                if (eqEntity === false) {
-                    $uq.entity = call;
+            if (!$roles) {
+                let entityVersion = req.header('en');
+                let uqVersion = req.header('uq');
+                let eqEntity = entityVersion === undefined || call.version === Number(entityVersion);
+                let eqUq = uqVersion === undefined || runner.uqVersion === Number(uqVersion);
+                if (eqEntity === true && eqUq === true)
+                {
+                    let body = isGet === true? (req as any).query : (req as any).body;
+                    result = await processer(unit, userId, name, db, params, runner, body, call, run, this.net);
                 }
-                if (eqUq === false) {
-                    let access = await runner.getAccesses(unit, userId, undefined);
-                    $uq.uq = access;
+                else {
+                    $uq = {};
+                    if (eqEntity === false) {
+                        $uq.entity = call;
+                    }
+                    if (eqUq === false) {
+                        let access = await runner.getAccesses(unit, userId, undefined);
+                        $uq.uq = access;
+                    }
                 }
+                modifyMax = await runner.getModifyMax(unit);
             }
-            let modifyMax = await runner.getModifyMax(unit);
             res.json({
                 ok: true,
                 res: result,
                 $modify: modifyMax,
                 $uq: $uq,
+                $roles: $roles,
             });
         }
         catch (err) {

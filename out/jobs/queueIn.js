@@ -34,7 +34,10 @@ function queueIn(runner) {
                     }
                     let finish;
                     try {
-                        if (bus) {
+                        if (!bus) {
+                            yield runner.call('$queue_in_set', [id, finish_1.Finish.done]);
+                        }
+                        else {
                             yield runner.bus(bus, faceName, unit, id, data);
                         }
                         finish = finish_1.Finish.done;

@@ -53,18 +53,16 @@ class CenterApi extends Fetch {
         return await this.get('open/user-id-from-name', {user: user});
     }
 
-    /*
-    // \t 分隔的ids组
-    async users(ids:string):Promise<any> {
-        return await this.post('open/users', {ids: ids});
-    }*/
-
     async send(param: SendParameter):Promise<void> {
         return await this.post('send', param);
     }
 
     async queueOut(start:number, page:number):Promise<any> {
         return await this.get('open/queue-out', {start:start, page:page});
+    }
+
+    async appRoles(unit:number, app:any, user:number): Promise<{roles:number, version:number}> {
+        return await this.post('open/app-roles', {unit, app, user});
     }
 }
 

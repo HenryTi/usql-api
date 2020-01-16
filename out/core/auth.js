@@ -10,24 +10,23 @@ class Auth {
             return;
         }
         if (roles[0] === '*') {
-            this.anyRole = true;
+            //this.anyRole = true;
             return;
         }
-        this.roles = roles;
+        //this.roles = roles;
     }
-    hasRole(roles) {
-        if (this.anyRole === true)
-            return true;
-        if (roles === undefined)
-            return false;
-        let rs = roles.split(',');
+    /*
+    hasRole(roles:string): boolean {
+        if (this.anyRole === true) return true;
+        if (roles === undefined) return false;
+        let rs: string[] = roles.split(',');
         for (let r of rs) {
             for (let role of this.roles)
-                if (r === role)
-                    return true;
+                if (r === role) return true;
         }
         return false;
     }
+    */
     check(req, res, next) {
         if (this.noUser === true) {
             if (next !== undefined)
@@ -51,11 +50,14 @@ class Auth {
             if (err === null) {
                 decoded.db = req.params.db;
                 req.user = decoded;
+                next();
+                return;
+                /*
                 if (this.hasRole(decoded.roles) === true) {
-                    if (next !== undefined)
-                        next();
+                    if (next !== undefined) next();
                     return;
                 }
+                */
             }
             if (res !== undefined) {
                 res.status(401);

@@ -1,4 +1,4 @@
-export * from './setting';
+//export * from './setting';
 export * from './open';
 export * from './unitx';
 export * from './build';

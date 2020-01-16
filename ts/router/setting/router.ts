@@ -4,7 +4,7 @@ import { Runner, RouterBuilder } from '../../core';
 //import { post } from '../process';
 
 //export const router: Router = Router({ mergeParams: true });
-
+/*
 export function buildSettingRouter(router:Router, rb:RouterBuilder) {
     rb.post(router, '/access-user',
     async (runner:Runner, body:any):Promise<any> => {
@@ -30,6 +30,7 @@ export function buildSettingRouter(router:Router, rb:RouterBuilder) {
         await runner.unitUserCall('$set_access_fully', unit, user, flag);
     });
 };
+*/
 /*
 type Processer = (runner:Runner, body:any) => Promise<any>;
 
