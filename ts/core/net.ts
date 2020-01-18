@@ -181,14 +181,18 @@ export abstract class Net {
     }
 
     async sendToUnitx(unit:number, msg:Message):Promise<number[]|string> {
-        let unitxApi = await this.getUnitxApi(unit);
-        if (unitxApi === null) {
-            let ret = `unit ${unit} not have unitx`;
-            return ret;
+        try {
+            let unitxApi = await this.getUnitxApi(unit);
+            if (unitxApi === null) {
+                let ret = `unit ${unit} not have unitx`;
+                return ret;
+            }
+            let toArr:number[] = await unitxApi.send(msg);
+            return toArr;
         }
-        let toArr:number[] = await unitxApi.send(msg);
-        return toArr;
-        //return unitxApi.url;
+        catch (err) {
+            console.error('sendToUnitx', err, msg);
+        }
     }
 
     async uqUrl(unit:number, uq:number):Promise<string> {
