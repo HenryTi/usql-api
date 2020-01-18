@@ -66,7 +66,7 @@ export async function writeDataToBus(runner:Runner, face:string, unit:number, fr
 
 export async function processBusMessage(unitxRunner:Runner, msg:BusMessage):Promise<void> {
     // 处理 bus message，发送到相应的uq服务器
-    console.log('bus:', msg);
+    console.error('**  ** ** Accept BUS:', msg);
     //let unitxRunner = await getRunner(consts.$unitx);
     let {unit, body, from, queueId, busOwner, bus, face, version} = msg;
     let faceUrl = busOwner + '/' + bus + '/' + face;
