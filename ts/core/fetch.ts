@@ -1,7 +1,7 @@
 import fetch, {Headers} from 'node-fetch';
 
 export abstract class Fetch {
-    private readonly baseUrl:string;
+    protected readonly baseUrl:string;
     constructor(baseUrl:string) {
         this.baseUrl = baseUrl;
     }

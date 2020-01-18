@@ -18,11 +18,9 @@ function buildUnitxRouter(rb) {
     router.post('/', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
         try {
             let msg = req.body;
-            console.error('** BUS.Post: ', msg);
             let tos = undefined;
             let { type } = msg;
             let unitxRunner = yield rb.getUnitxRunner();
-            //await unitxRunner.log(0, 'unitx-message ' + type, 'before');
             if (type === 'sheet') {
                 let sheetMessage = msg;
                 let { from } = sheetMessage;
@@ -33,7 +31,6 @@ function buildUnitxRouter(rb) {
             }
             let mp = messageProcesser_1.messageProcesser(msg);
             yield mp(unitxRunner, msg);
-            //await unitxRunner.log(0, 'unitx-message ' + type, 'after');
             res.json({
                 ok: true,
                 res: tos,
@@ -67,19 +64,6 @@ function buildUnitxRouter(rb) {
     let jointWriteBus = (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { unit, face, from, fromQueueId, version, body: message } = body;
         let ret = yield processBusMessage_1.writeDataToBus(runner, face, unit, from, fromQueueId, version, message);
-        /*
-        let data = '';
-        if (face !== null && face !== undefined) data += face;
-        data += '\t';
-        if (from !== null && from !== undefined) data += from;
-        data += '\t';
-        if (sourceId !== null && sourceId !== undefined) data += sourceId;
-        data += '\t';
-        data += message + '\n';
-        */
-        //let ret = await runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, fromQueueId, sourceId, message);
-        //console.error('jointwriteBus', body);
-        //let ret = await runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, message);
         return ret;
     });
     rb.post(router, '/joint-write-bus', jointWriteBus);

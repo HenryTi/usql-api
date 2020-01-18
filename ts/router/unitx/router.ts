@@ -9,11 +9,9 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
     router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         try {
             let msg:Message = req.body;
-            console.error('** BUS.Post: ', msg);
             let tos:number[] = undefined;
             let {type} = msg;
             let unitxRunner = await rb.getUnitxRunner();
-            //await unitxRunner.log(0, 'unitx-message ' + type, 'before');
             if (type === 'sheet') {
                 let sheetMessage = msg as SheetMessage;
                 let {from} = sheetMessage;
@@ -23,7 +21,6 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
             }
             let mp = messageProcesser(msg);
             await mp(unitxRunner, msg);
-            //await unitxRunner.log(0, 'unitx-message ' + type, 'after');
             res.json({
                 ok: true,
                 res: tos,
@@ -59,19 +56,6 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
 
         let {unit, face, from, fromQueueId, version, body:message} = body;
         let ret = await writeDataToBus(runner, face, unit, from, fromQueueId, version, message);
-        /*
-        let data = '';
-        if (face !== null && face !== undefined) data += face;
-        data += '\t';
-        if (from !== null && from !== undefined) data += from;
-        data += '\t';
-        if (sourceId !== null && sourceId !== undefined) data += sourceId;
-        data += '\t';
-        data += message + '\n';
-        */
-        //let ret = await runner.unitUserCall('tv_SaveBusMessage', unit, undefined, face, from, fromQueueId, sourceId, message);
-        //console.error('jointwriteBus', body);
-        //let ret = await runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, message);
         return ret;
     }
     rb.post(router, '/joint-write-bus', jointWriteBus);

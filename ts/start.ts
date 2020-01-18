@@ -66,19 +66,6 @@ export async function init():Promise<void> {
             app.use('/res', resRouter);
             app.use('/hello', dbHello);
 
-            // 正常的tonva uq接口 uqRouter
-            //let uqRouter = express.Router({ mergeParams: true });
-            /*
-            uqRouter.use('/', dbHello);
-            uqRouter.use('/hello', dbHello);
-            uqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
-            uqRouter.use('/open', [authUnitx, openRouter]);
-            uqRouter.use('/tv', [authCheck, router]);
-            //uqRouter.use('/joint', [authJoint, router]);
-            uqRouter.use('/setting', [settingRouter]); // unitx set access
-            // debug tonva uq, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
-            uqRouter.use('/debug', [authCheck, router]);
-            */
             app.use('/uq/prod/:db/', buildUqRouter(uqProdRouterBuilder, compileProdRouterBuilder));
             app.use('/uq/test/:db/', buildUqRouter(uqTestRouterBuilder, compileTestRouterBuilder));
             app.use('/uq/unitx-prod/', buildUnitxRouter(unitxProdRouterBuilder));
@@ -86,14 +73,6 @@ export async function init():Promise<void> {
 
             let port = config.get<number>('port');
             console.log('port=', port);
-
-            //let redisConfig = config.get<any>('redis');
-            //let redis = {redis: redisConfig};
-            //console.log('redis:', redisConfig);
-
-            //startSheetQueue(redis);
-            //startToUnitxQueue(redis);
-            //startUnitxInQueue(redis);
 
             app.listen(port, async ()=>{
                 await initResDb();
@@ -106,11 +85,7 @@ export async function init():Promise<void> {
                     host,
                     user);
 
-                //await importData();
                 resolve();
-                //if (startJobs === true) Jobs.start();
-                // **
-                // **
             });
         }
         catch (err) {
@@ -141,17 +116,6 @@ function buildUqRouter(rb: RouterBuilder, rbCompile: CompileRouterBuilder): Rout
     let buildRouter = Router({ mergeParams: true });
     buildBuildRouter(buildRouter, rbCompile);
     uqRouter.use('/build', [authUpBuild, buildRouter]);
-
-    // 这个是不是也要放到只有unitx里面
-    //let settingRouter = Router({ mergeParams: true });
-    //buildSettingRouter(settingRouter, rb);
-    //uqRouter.use('/setting', [settingRouter]); // unitx set access
-
-    /* 直接放到/unitx名下了
-    let unitxQueueRouter = Router({ mergeParams: true });
-    buildUnitxQueueRouter(unitxQueueRouter, rb);
-    uqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
-    */
 
     let entityRouter = Router({ mergeParams: true });
     buildEntityRouter(entityRouter, rb);

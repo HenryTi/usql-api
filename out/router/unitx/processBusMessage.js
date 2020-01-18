@@ -10,61 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../../core");
-let faces;
-let froms;
 let lastHour = 0;
-function getFaceId(runner, unit, face) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (faces === undefined) {
-            faces = {};
-            let ret = yield runner.tuidGetAll(core_1.consts.Face, unit, undefined);
-            for (let row of ret) {
-                let { id, str } = row;
-                faces[str] = id;
-            }
-        }
-        let faceId = faces[face];
-        if (faceId === undefined) {
-            let ret = yield runner.tuidSave(core_1.consts.Face, unit, undefined, [undefined, face]);
-            if (ret === undefined)
-                return;
-            if (ret.length === 0)
-                return;
-            let { id } = ret[0];
-            if (id < 0)
-                id = -id;
-            faceId = id;
-            faces[face] = faceId;
-        }
-        return faceId;
-    });
-}
-function getFromId(runner, unit, from) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (froms === undefined) {
-            froms = {};
-            let ret = yield runner.tuidGetAll(core_1.consts.BusFrom, unit, undefined);
-            for (let row of ret) {
-                let { id, str } = row;
-                froms[str] = id;
-            }
-        }
-        let fromId = froms[from];
-        if (fromId === undefined) {
-            let ret = yield runner.tuidSave(core_1.consts.BusFrom, unit, undefined, [undefined, from, undefined]);
-            if (ret === undefined)
-                return;
-            if (ret.length === 0)
-                return;
-            let { id } = ret[0];
-            if (id < 0)
-                id = -id;
-            fromId = id;
-            froms[from] = fromId;
-        }
-        return fromId;
-    });
-}
 function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
     return __awaiter(this, void 0, void 0, function* () {
         let hour = core_1.busQueuehour();
@@ -86,13 +32,9 @@ exports.writeDataToBus = writeDataToBus;
 function processBusMessage(unitxRunner, msg) {
     return __awaiter(this, void 0, void 0, function* () {
         // 处理 bus message，发送到相应的uq服务器
-        console.error('**  ** ** Accept BUS:', msg);
-        //let unitxRunner = await getRunner(consts.$unitx);
         let { unit, body, from, queueId, busOwner, bus, face, version } = msg;
         let faceUrl = busOwner + '/' + bus + '/' + face;
-        //await unitxRunner.log(unit, faceUrl, 'processBusMessage: before writeDateToBus');
         yield writeDataToBus(unitxRunner, faceUrl, unit, from, queueId, version, body);
-        //await unitxRunner.log(unit, faceUrl, 'processBusMessage: after writeDateToBus');
     });
 }
 exports.processBusMessage = processBusMessage;

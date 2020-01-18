@@ -73,31 +73,12 @@ function init() {
                 }));
                 app.use('/res', res_1.router);
                 app.use('/hello', dbHello);
-                // 正常的tonva uq接口 uqRouter
-                //let uqRouter = express.Router({ mergeParams: true });
-                /*
-                uqRouter.use('/', dbHello);
-                uqRouter.use('/hello', dbHello);
-                uqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
-                uqRouter.use('/open', [authUnitx, openRouter]);
-                uqRouter.use('/tv', [authCheck, router]);
-                //uqRouter.use('/joint', [authJoint, router]);
-                uqRouter.use('/setting', [settingRouter]); // unitx set access
-                // debug tonva uq, 默认 unit=-99, user=-99, 以后甚至可以加访问次数，超过1000次，关闭这个接口
-                uqRouter.use('/debug', [authCheck, router]);
-                */
                 app.use('/uq/prod/:db/', buildUqRouter(core_1.uqProdRouterBuilder, core_1.compileProdRouterBuilder));
                 app.use('/uq/test/:db/', buildUqRouter(core_1.uqTestRouterBuilder, core_1.compileTestRouterBuilder));
                 app.use('/uq/unitx-prod/', router_1.buildUnitxRouter(core_1.unitxProdRouterBuilder));
                 app.use('/uq/unitx-test/', router_1.buildUnitxRouter(core_1.unitxTestRouterBuilder));
                 let port = config.get('port');
                 console.log('port=', port);
-                //let redisConfig = config.get<any>('redis');
-                //let redis = {redis: redisConfig};
-                //console.log('redis:', redisConfig);
-                //startSheetQueue(redis);
-                //startToUnitxQueue(redis);
-                //startUnitxInQueue(redis);
                 app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
                     yield res_1.initResDb();
                     yield _uq_1.init$UqDb();
@@ -105,11 +86,7 @@ function init() {
                     let connection = config.get("connection");
                     let { host, user } = connection;
                     console.log('process.env.NODE_ENV: %s\nDB host: %s, user: %s', process.env.NODE_ENV, host, user);
-                    //await importData();
                     resolve();
-                    //if (startJobs === true) Jobs.start();
-                    // **
-                    // **
                 }));
             }
             catch (err) {
@@ -140,15 +117,6 @@ function buildUqRouter(rb, rbCompile) {
     let buildRouter = express_1.Router({ mergeParams: true });
     router_1.buildBuildRouter(buildRouter, rbCompile);
     uqRouter.use('/build', [auth_1.authUpBuild, buildRouter]);
-    // 这个是不是也要放到只有unitx里面
-    //let settingRouter = Router({ mergeParams: true });
-    //buildSettingRouter(settingRouter, rb);
-    //uqRouter.use('/setting', [settingRouter]); // unitx set access
-    /* 直接放到/unitx名下了
-    let unitxQueueRouter = Router({ mergeParams: true });
-    buildUnitxQueueRouter(unitxQueueRouter, rb);
-    uqRouter.use('/unitx', [authUnitx, unitxQueueRouter]);
-    */
     let entityRouter = express_1.Router({ mergeParams: true });
     router_1.buildEntityRouter(entityRouter, rb);
     uqRouter.use('/tv', [core_1.authCheck, entityRouter]);
