@@ -13,6 +13,7 @@ export async function queueOut(runner: Runner): Promise<void> {
             for (let row of ret) {
                 // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
                 let {$unit, id, action, subject, content, tries, update_time, now} = row;
+                console.log('queueOut 1: ', action, subject, content, update_time);
                 start = id;
                 if (!$unit) $unit = runner.uniqueUnit;
                 if (tries > 0) {
@@ -154,12 +155,9 @@ async function bus(runner:Runner, unit:number, id:number, subject:string, conten
         version: version,
         body: body,
     };
-    //await runner.log(unit, 'before sendToUnitx', body);
+    console.log('bus to Unitx:', message);
     let ret = await runner.net.sendToUnitx(unit, message);
-    //if (typeof ret === 'string') {
-    //    await runner.log(unit, 'sendToUnitx', ret);
-    //}
-    //await runner.log(unit, 'after sendToUnitx', body);
+    console.log('bus to Unitx finished.');
 }
 
 async function sheet(runner: Runner, content:string):Promise<void> {

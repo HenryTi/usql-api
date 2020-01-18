@@ -25,6 +25,7 @@ function queueOut(runner) {
                 for (let row of ret) {
                     // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
                     let { $unit, id, action, subject, content, tries, update_time, now } = row;
+                    console.log('queueOut 1: ', action, subject, content, update_time);
                     start = id;
                     if (!$unit)
                         $unit = runner.uniqueUnit;
@@ -171,12 +172,9 @@ function bus(runner, unit, id, subject, content) {
             version: version,
             body: body,
         };
-        //await runner.log(unit, 'before sendToUnitx', body);
+        console.log('bus to Unitx:', message);
         let ret = yield runner.net.sendToUnitx(unit, message);
-        //if (typeof ret === 'string') {
-        //    await runner.log(unit, 'sendToUnitx', ret);
-        //}
-        //await runner.log(unit, 'after sendToUnitx', body);
+        console.log('bus to Unitx finished.');
     });
 }
 function sheet(runner, content) {
