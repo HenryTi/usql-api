@@ -18,6 +18,7 @@ function buildUnitxRouter(rb) {
     router.post('/', (req, res, next) => __awaiter(this, void 0, void 0, function* () {
         try {
             let msg = req.body;
+            console.error('** BUS.Post: ', msg);
             let tos = undefined;
             let { type } = msg;
             let unitxRunner = yield rb.getUnitxRunner();

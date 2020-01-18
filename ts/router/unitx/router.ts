@@ -9,6 +9,7 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
     router.post('/', async (req: Request, res: Response, next: NextFunction) => {
         try {
             let msg:Message = req.body;
+            console.error('** BUS.Post: ', msg);
             let tos:number[] = undefined;
             let {type} = msg;
             let unitxRunner = await rb.getUnitxRunner();
