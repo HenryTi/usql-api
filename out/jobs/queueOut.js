@@ -174,7 +174,7 @@ function bus(runner, unit, id, subject, content) {
         };
         console.log('bus to Unitx:', message);
         let ret = yield runner.net.sendToUnitx(unit, message);
-        console.log('bus to Unitx finished.');
+        console.log('bus to Unitx finished.', ret);
     });
 }
 function sheet(runner, content) {
