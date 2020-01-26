@@ -155,9 +155,7 @@ async function bus(runner:Runner, unit:number, id:number, subject:string, conten
         version: version,
         body: body,
     };
-    console.log('bus to Unitx:', message);
-    let ret = await runner.net.sendToUnitx(unit, message);
-    console.log('bus to Unitx finished.', ret);
+    await runner.net.sendToUnitx(unit, message);
 }
 
 async function sheet(runner: Runner, content:string):Promise<void> {

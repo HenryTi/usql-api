@@ -172,9 +172,7 @@ function bus(runner, unit, id, subject, content) {
             version: version,
             body: body,
         };
-        console.log('bus to Unitx:', message);
-        let ret = yield runner.net.sendToUnitx(unit, message);
-        console.log('bus to Unitx finished.', ret);
+        yield runner.net.sendToUnitx(unit, message);
     });
 }
 function sheet(runner, content) {

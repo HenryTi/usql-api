@@ -181,18 +181,15 @@ export abstract class Net {
     }
 
     async sendToUnitx(unit:number, msg:Message):Promise<number[]|string> {
-        try {
-            let unitxApi = await this.getUnitxApi(unit);
-            if (unitxApi === null) {
-                let ret = `unit ${unit} not have unitx`;
-                return ret;
-            }
-            let toArr:number[] = await unitxApi.send(msg);
-            return toArr;
+        let unitxApi = await this.getUnitxApi(unit);
+        if (!unitxApi) {
+            let err = `Center unit ${unit} not binding $unitx service!!!`;
+            //return ret;
+            console.error(err);
+            throw new Error(err);
         }
-        catch (err) {
-            console.error('sendToUnitx', err, msg);
-        }
+        let toArr:number[] = await unitxApi.send(msg);
+        return toArr;
     }
 
     async uqUrl(unit:number, uq:number):Promise<string> {

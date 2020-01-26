@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const crypto = require("crypto");
+const constants = require("constants");
 //const algorithm = 'aes-128-cbc';
 //const algorithm = 'aes-48-cbc';
 const algorithm = 'RSA-SHA384';
@@ -10,44 +11,51 @@ const cryptoPassword = 'pickering-on-ca';
 const ivText = 'longcheng';
 const keyLength = 16;
 const ivLength = 16;
-const rsaPrivate384 = `
------BEGIN RSA PRIVATE KEY-----
-MIHyAgEAAjEAyqkqDm4/3NJaJhNhPGSVbHMCWY2Tj+XpfhalGxJ+A62TZrK2C/it
-aMKyM+CpPu8ZAgMBAAECMCGVHq79ff+tq9qbY4WKdWhfNoh4eXdi9Z6rANHheJuU
-+e9tiJQMouzw4bwQTOnXwQIZAO4dtnWWnRJIw/cLbi27bYBO6diSJzQ7bQIZANnh
-v6sugF05rv2S6erAVphPOp1zcm7q3QIYHvd4QiSbOsSBz8AJzSLB49zfZo3jUVSl
-AhkAl+wqGnF9PgPXuaY0BuUAPImaJGl4VFDdAhgK9nL1vLy3ODZQlM/kpsP0zM6a
-HRNp3DQ=
------END RSA PRIVATE KEY-----
+const rsaPublic384 = `
+-----BEGIN PUBLIC KEY-----
+MEwwDQYJKoZIhvcNAQEBBQADOwAwOAIxAMqpKg5uP9zSWiYTYTxklWxzAlmNk4/l
+6X4WpRsSfgOtk2aytgv4rWjCsjPgqT7vGQIDAQAB
+-----END PUBLIC KEY-----
 `;
-const rsaPrivate512 = `
------BEGIN RSA PRIVATE KEY-----
-MIIBOwIBAAJBAM7nR7MvLBTE2MGG9jH8LjsPFrxVm7pV28T9VDN0y9U5ro6yAtnA
-HM71PT465sLAdrY/65gNogrklp8y+wCw03ECAwEAAQJAer766nKx1CBz91v58u2I
-/8CT3GdtW75UAynHKj/ALV5ZFaX5+do3+WU0sitjElAu1Gph3q+nWCdeqm8auQNS
-AQIhAPms65g0BhsWzXS8QVNrvqSr1accwob7GXnK86XEA3O1AiEA1CT+kgygLxnw
-RsYHw2T/SNhQNGii7X/J6KtH8Aw6rk0CIQDFU5lPza4VssvmuvKWT814sCZH0T8d
-F09nJrOyC1z/EQIgTVeTbAGoYKOvQs4txGHM5GzgiMrhI38kSGwxlOWQez0CIQDm
-Flx6rdCypijjmqF3wetdNWpUdjgp2YkPV0BcdCsNJQ==
------END RSA PRIVATE KEY-----
+const rsaPublic512 = `
+-----BEGIN PUBLIC KEY-----
+MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAM7nR7MvLBTE2MGG9jH8LjsPFrxVm7pV
+28T9VDN0y9U5ro6yAtnAHM71PT465sLAdrY/65gNogrklp8y+wCw03ECAwEAAQ==
+-----END PUBLIC KEY-----
 `;
-const rsaPrivate1024 = `
------BEGIN RSA PRIVATE KEY-----
-MIICXAIBAAKBgQCLVsJ1mM65r0m59T2PHhebZwA8QBziqj5i23pRWy66wlok6H3x
-IwBQTp05Ex1bhxgXBG4BVtyBX22dfrOTAoJdZHYGI+j8+MFXajySxaRDsDPMfm+v
-i9x6C2e6soQw6fwKZxJ4y+ACcr5USuyYTpZDa1ZxFrgBirhZArSHOPXcXwIDAQAB
-AoGANBmvwnrtqV6Sqba6Wt48o33jB6RNaK+RfjNkzDDVCz4KqMxJ8zVMM7sBbMrp
-6kRcTJb6bwPElZdSDFbI3IpOpgHNybLHVjkCZ/4L+Yxh7SY1UdL/q6BGNqkhgMQw
-DTES0F45k9X6qDC7sdpCWx6NviQQUcBmYZWL3+p03wC5XeECQQDDPJQXbC/5UGsk
-iKTQpHToqAG0uabYOLO55MSN7sK+Ntoy7yJtHFwJnU1MgXcxiSjE3vwDEvD/9ofZ
-RUpa5LJvAkEAtrSLwKdJwB2+wClAeRLjeSiRUQYfmg6dgmlbewXYTJgdsQKAlywN
-10Aca7i+10czxDmSd3aI1pYCMiZAVF+tEQJAN4qARrmMXEy4bkhBOunOKHHDKnq2
-METRPE0MbaRC2oIYSO0myguLU2DgoKckFX+DjZ4x6130GZ00wGap5HmzGQJALwFi
-Vy1y9v9wHQY/9SZb6cb7JApcRQlvkqbCh3MohAQ611iadso5wWBYL4q3ZrGF6v0Y
-5q1TZUnwxLA8qrh20QJBAKFW6zEUcVSB4q7OgtJu9Tw8tposW8KCKQ1M9L2sGHVr
-8A3jtkhM6orcANyYwh4U9MQe3rVS8rh8DxXa+B8KR6Q=
------END RSA PRIVATE KEY-----
+const rsaPublic1024 = `
+-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCLVsJ1mM65r0m59T2PHhebZwA8
+QBziqj5i23pRWy66wlok6H3xIwBQTp05Ex1bhxgXBG4BVtyBX22dfrOTAoJdZHYG
+I+j8+MFXajySxaRDsDPMfm+vi9x6C2e6soQw6fwKZxJ4y+ACcr5USuyYTpZDa1Zx
+FrgBirhZArSHOPXcXwIDAQAB
+-----END PUBLIC KEY-----
 `;
+function toHex(bytes) {
+    let str = [];
+    for (let i = 0; i < bytes.length; i++) {
+        str.push('0x' + bytes[i].toString(16));
+    }
+    let t = str.join(', ');
+    return t;
+}
+function encrypt(data, key) {
+    let ret = crypto.publicEncrypt({
+        key: key,
+        //padding: constants.RSA_PKCS1_OAEP_PADDING
+        padding: constants.RSA_PKCS1_PADDING,
+    }, data);
+    return ret;
+}
+function encrypt384(data) {
+    return encrypt(data, rsaPublic384);
+}
+function encrypt512(data) {
+    return encrypt(data, rsaPublic512);
+}
+function encrypt1024(data) {
+    return encrypt(data, rsaPublic1024);
+}
 function buildLicense(result) {
     try {
         if (result.length !== 1)
@@ -55,12 +63,9 @@ function buildLicense(result) {
         let { serialBin, code, userLimit, concurrentLimit, accountLimit, entityLimit, dateStart, monthLimit, dogType, ext } = result[0];
         if (monthLimit === null)
             monthLimit = -1;
-        /*
-        let t = Buffer.from('abcdefgh', 'utf8');
-        let ret0 = crypto.privateEncrypt(rsaPrivate384, t);
-        let rr = ret0.toString('hex');
-        */
         let len = 32; // 4096;
+        if (!serialBin)
+            serialBin = 'FFFFFFFFFFFFFFFF';
         let header = serialBin + code;
         let buf = Buffer.alloc(len, header, 'hex');
         let p = header.length / 2;
@@ -99,19 +104,14 @@ function buildLicense(result) {
         for (let i = 0; i < p; i++) {
             buf.writeUInt8(buf.readUInt8(i) ^ 0xA5, i);
         }
-        let data1 = crypto.privateEncrypt(rsaPrivate384, buf);
-        /*
-        RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
-        rsa.ImportCspBlob(blobRsa384);
-        byte[] data1 = rsa.Encrypt(data, false);
-        */
-        let data2 = crypto.privateEncrypt(rsaPrivate512, buf);
+        let data1 = encrypt384(buf);
+        let data2 = encrypt512(buf);
+        let data3 = encrypt1024(buf);
         /*
         rsa = new RSACryptoServiceProvider();
         rsa.ImportCspBlob(blobRsa512);
         byte[] data2 = rsa.Encrypt(data, false);
         */
-        let data3 = crypto.privateEncrypt(rsaPrivate1024, buf);
         /*
         rsa = new RSACryptoServiceProvider();
         rsa.ImportCspBlob(blobRsa1024);
@@ -160,10 +160,11 @@ function buildLicense(result) {
         arr.forEach(v => size += v.byteLength);
         let encoded = Buffer.concat([dataLenBuf, buf, data1LenBuf, data1, data2LenBuf, data2, data3LenBuf, data3], size);
         let ret = `License
-Dog Serial: ${serialBin}SUPR
+Dog Serial: ${serialBin}
 CPU Code: ${code}
 ${encoded.toString('base64')}
-==END==`;
+==END==
+`;
         return [ret];
     }
     catch (err) {
@@ -171,4 +172,38 @@ ${encoded.toString('base64')}
     }
 }
 exports.buildLicense = buildLicense;
+// rsa nodejs version 跟 C# version 的匹配试验过程
+/*
+let rr = Buffer.from(rsaPrivate384, 'base64');
+let hex = toHex(rr);
+
+let data1 = crypto.privateEncrypt(rsaPrivate384, buf);
+let str = toHex(data1);
+let p1 = crypto.publicDecrypt(rsaPublic384, data1);
+let p2 = crypto.publicDecrypt(rsaPrivate384, data1);
+
+let pubData1 = crypto.publicEncrypt({
+    key: rsaPublic384,
+    //padding: constants.RSA_PKCS1_OAEP_PADDING
+    padding: constants.RSA_PKCS1_PADDING,
+    //padding: constants.RSA_PKCS1_PSS_PADDING,
+    //padding: constants.RSA_NO_PADDING,
+    //padding: constants.RSA_SSLV23_PADDING,
+    //padding: constants.RSA_X931_PADDING
+},buf);
+let str1 = toHex(pubData1);
+let p4 = crypto.privateDecrypt({
+    key: rsaPrivate384,
+    padding: constants.RSA_PKCS1_PADDING,
+}, pubData1);
+let p3 = crypto.privateDecrypt(rsaPublic384, pubData1);
+
+//let b1 = crypto.privateDecrypt(rsaPrivate384, p1);
+
+//let data1 = crypto.privateEncrypt(rsaPrivate384, buf);
+/*
+RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+rsa.ImportCspBlob(blobRsa384);
+byte[] data1 = rsa.Encrypt(data, false);
+*/
 //# sourceMappingURL=buildLicense.js.map

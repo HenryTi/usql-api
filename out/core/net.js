@@ -205,18 +205,15 @@ class Net {
     }
     sendToUnitx(unit, msg) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                let unitxApi = yield this.getUnitxApi(unit);
-                if (unitxApi === null) {
-                    let ret = `unit ${unit} not have unitx`;
-                    return ret;
-                }
-                let toArr = yield unitxApi.send(msg);
-                return toArr;
+            let unitxApi = yield this.getUnitxApi(unit);
+            if (!unitxApi) {
+                let err = `Center unit ${unit} not binding $unitx service!!!`;
+                //return ret;
+                console.error(err);
+                throw new Error(err);
             }
-            catch (err) {
-                console.error('sendToUnitx', err, msg);
-            }
+            let toArr = yield unitxApi.send(msg);
+            return toArr;
         });
     }
     uqUrl(unit, uq) {
