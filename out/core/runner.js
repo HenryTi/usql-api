@@ -313,6 +313,11 @@ class Runner {
             yield this.db.call('tv_$save_face', [bus, busOwner, busName, faceName]);
         });
     }
+    tagType(names) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.call('tv_$tag_type', [names]);
+        });
+    }
     isTuidOpen(tuid) {
         tuid = tuid.toLowerCase();
         let t = this.tuids[tuid];

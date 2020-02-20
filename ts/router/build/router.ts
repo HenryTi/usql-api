@@ -133,7 +133,13 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
     async (runner:Runner, body: {entities:string, valid:number}):Promise<any[]> => {
         let {entities, valid} = body;
         return await runner.setEntityValid(entities, valid);
-    });
+	});
+	
+	rb.post(router, '/tag-type', 
+    async (runner:Runner, body: {names:string}):Promise<void> => {
+        let {names} = body;
+        await runner.tagType(names);
+	});
 
     /*
     rb.post(router, '/save-face',

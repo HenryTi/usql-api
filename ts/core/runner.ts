@@ -289,7 +289,11 @@ export class Runner {
     }
     async saveFace(bus:string, busOwner:string, busName:string, faceName:string) {
         await this.db.call('tv_$save_face', [bus, busOwner, busName, faceName]);
-    }
+	}
+	
+	async tagType(names:string) {
+		await this.db.call('tv_$tag_type', [names]);
+	}
 
     isTuidOpen(tuid:string) {
         tuid = tuid.toLowerCase();

@@ -118,6 +118,10 @@ function buildBuildRouter(router, rb) {
         let { entities, valid } = body;
         return yield runner.setEntityValid(entities, valid);
     }));
+    rb.post(router, '/tag-type', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        let { names } = body;
+        yield runner.tagType(names);
+    }));
     /*
     rb.post(router, '/save-face',
     async (runner:Runner, body:{bus:string, busOwner:string, busName:string, faceName:string}) => {
