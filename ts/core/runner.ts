@@ -294,6 +294,9 @@ export class Runner {
 	async tagType(names:string) {
 		await this.db.call('tv_$tag_type', [names]);
 	}
+	async tagSave(unit:number, sys:number, data:string) {
+		await this.db.call('tv_$tag_save', [unit, sys, data]);
+	}
 
     isTuidOpen(tuid:string) {
         tuid = tuid.toLowerCase();

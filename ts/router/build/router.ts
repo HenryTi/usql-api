@@ -141,6 +141,12 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
         await runner.tagType(names);
 	});
 
+	rb.post(router, '/tag-save', 
+    async (runner:Runner, body: {data:string}):Promise<void> => {
+        let {data} = body;
+        await runner.tagSave(0, 1, data);
+	});
+
     /*
     rb.post(router, '/save-face',
     async (runner:Runner, body:{bus:string, busOwner:string, busName:string, faceName:string}) => {
