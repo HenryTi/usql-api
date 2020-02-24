@@ -141,10 +141,10 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
         await runner.tagType(names);
 	});
 
-	rb.post(router, '/tag-save', 
+	rb.post(router, '/tag-save-sys', 
     async (runner:Runner, body: {data:string}):Promise<void> => {
         let {data} = body;
-        await runner.tagSave(0, 1, data);
+        await runner.tagSaveSys(data);
 	});
 
     /*

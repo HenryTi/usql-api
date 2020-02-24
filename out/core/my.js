@@ -265,41 +265,6 @@ create procedure $uq.performance(_tick bigint, _log text, _ms int) begin
     end while;
 end;
 `;
-            /*
-            declare _time timestamp(6);
-            declare _len, _p, _t0, _t1, _n, _ln int;
-            declare _tSep, _nSep varchar(10);
-            
-            set _tSep='\\r';
-            set _nSep='\\r\\r';
-            set _time=current_timestamp(6);
-            set _len=length(_content);
-            set _p = 1;
-            _data_loop: loop
-                if _p>=_len then leave _data_loop; end if;
-                set _t0 = LOCATE(_tSep, _content, _p);
-                set _t1 = LOCATE(_tSep, _content, _t0+1);
-                SET _n = LOCATE(_nSep, _content, _t1+1);
-                if _n=0 then SET _ln=_len+1; ELSE SET _ln=_n; END if;
-                set _time=from_unixtime(SUBSTRING(_content, _p, _t0-_p)/1000);
-                _exit: loop
-                    if not exists(select \`time\` from performance where \`time\`=_time) then
-                        insert into performance (\`time\`, log, ms) values (
-                            _time,
-                            SUBSTRING(_content, _t0+1, _t1-_t0-1),
-                            SUBSTRING(_content, _t1+1, _ln-_t1-1));
-                        if _n=0 then leave _data_loop; end if;
-                        leave _exit;
-                    else
-                        set _time = ADDDATE(_time,interval 1 microsecond );
-                    end if;
-                end loop;
-                set _p=_ln+2;
-                set _time = ADDDATE(_time,interval 1 microsecond );
-            end loop;
-            end;
-                    `;
-            */
             let procExists = `SELECT name FROM mysql.proc WHERE db='$uq' AND name='log';`;
             let retProcExists = yield this.exec(procExists, undefined);
             if (retProcExists.length === 0) {

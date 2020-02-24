@@ -122,9 +122,9 @@ function buildBuildRouter(router, rb) {
         let { names } = body;
         yield runner.tagType(names);
     }));
-    rb.post(router, '/tag-save', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+    rb.post(router, '/tag-save-sys', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let { data } = body;
-        yield runner.tagSave(0, 1, data);
+        yield runner.tagSaveSys(data);
     }));
     /*
     rb.post(router, '/save-face',

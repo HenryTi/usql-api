@@ -268,23 +268,6 @@ class DbLogger {
             }
             this.db.logPerformance(tick, log, ms);
         }
-        /*
-        let now = Date.now();
-        let log = spans.map(v => {
-            let {log, tick, ms} = v;
-            if (ms === undefined || ms < 0 || ms > 1000000) {
-                debugger;
-            }
-            if (tick > now || tick < now - 1000000) {
-                debugger;
-            }
-            if (log.indexOf('\r') >= 0) {
-                debugger;
-            }
-            return `${tick}${tSep}${log}${tSep}${ms}`;
-        }).join(nSep);
-        this.db.logPerformance(tick);
-        */
     }
 }
 exports.dbLogger = new DbLogger();

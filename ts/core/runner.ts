@@ -294,8 +294,8 @@ export class Runner {
 	async tagType(names:string) {
 		await this.db.call('tv_$tag_type', [names]);
 	}
-	async tagSave(unit:number, sys:number, data:string) {
-		await this.db.call('tv_$tag_save', [unit, sys, data]);
+	async tagSaveSys(data:string) {
+		await this.db.call('tv_$tag_save_sys', [data]);
 	}
 
     isTuidOpen(tuid:string) {
@@ -697,7 +697,7 @@ export class Runner {
             switch (type) {
                 case 'map':
                     this.mapBorn(schema)
-                    break;
+					break;
             }
         }
 
@@ -911,8 +911,24 @@ export class Runner {
     }
 
     getSchema(name:string):any {
-        return this.schemas[name.toLowerCase()];
-    }
+		return this.schemas[name.toLowerCase()];
+	}
+	async tagValues(unit:number, type:string) {
+		type = type.toLowerCase();
+		let schema = this.schemas[type];
+		if (schema === undefined) return;
+		let {call} = schema as any;
+		let isSys = call.hasValue===true? 1:0;
+		let result = await this.db.tableFromProc('tv_$tag_values', [unit, isSys, type]);
+		let ret = '';
+		for (let row of result) {
+			let {id, name, ext} = row;
+			if (ext === null) ext = '';
+			if (ret.length > 0) ret += '\n';
+			ret += `${id}\t${name}\t${ext}`;
+		}
+		return ret;
+	}
 
     private actionConvertSchemas:{[name:string]:any} = {};
     getActionConvertSchema(name:string): any {

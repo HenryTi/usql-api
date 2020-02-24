@@ -318,9 +318,9 @@ class Runner {
             yield this.db.call('tv_$tag_type', [names]);
         });
     }
-    tagSave(unit, sys, data) {
+    tagSaveSys(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.call('tv_$tag_save', [unit, sys, data]);
+            yield this.db.call('tv_$tag_save_sys', [data]);
         });
     }
     isTuidOpen(tuid) {
@@ -1042,6 +1042,27 @@ class Runner {
     }
     getSchema(name) {
         return this.schemas[name.toLowerCase()];
+    }
+    tagValues(unit, type) {
+        return __awaiter(this, void 0, void 0, function* () {
+            type = type.toLowerCase();
+            let schema = this.schemas[type];
+            if (schema === undefined)
+                return;
+            let { call } = schema;
+            let isSys = call.hasValue === true ? 1 : 0;
+            let result = yield this.db.tableFromProc('tv_$tag_values', [unit, isSys, type]);
+            let ret = '';
+            for (let row of result) {
+                let { id, name, ext } = row;
+                if (ext === null)
+                    ext = '';
+                if (ret.length > 0)
+                    ret += '\n';
+                ret += `${id}\t${name}\t${ext}`;
+            }
+            return ret;
+        });
     }
     getActionConvertSchema(name) {
         return this.actionConvertSchemas[name];
