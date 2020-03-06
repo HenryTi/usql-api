@@ -82,7 +82,7 @@ function escape(d:any, field: Field):any {
     }
     switch (typeof d) {
         default:
-            if (d instanceof Date) return (d as Date).getTime(); //-timezoneOffset-timezoneOffset;
+            if (d instanceof Date) return (d as Date).getTime()/1000; //-timezoneOffset-timezoneOffset;
             return d;
         case 'string':
             if (field.type === 'datetime') {

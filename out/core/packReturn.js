@@ -77,7 +77,7 @@ function escape(d, field) {
     switch (typeof d) {
         default:
             if (d instanceof Date)
-                return d.getTime(); //-timezoneOffset-timezoneOffset;
+                return d.getTime() / 1000; //-timezoneOffset-timezoneOffset;
             return d;
         case 'string':
             if (field.type === 'datetime') {
