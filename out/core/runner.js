@@ -93,6 +93,31 @@ class Runner {
             }
         });
     }
+    procSql(procName, procSql) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield this.db.sqlProc(procName, procSql);
+            }
+            catch (err) {
+                debugger;
+                throw err;
+            }
+        });
+    }
+    procCoreSql(procName, procSql) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                //let sqlDrop = 'DROP PROCEDURE IF EXISTS ' + procName;
+                //await this.db.sql(sqlDrop, undefined);
+                yield this.db.sqlDropProc(procName);
+                return yield this.db.sql(procSql, undefined);
+            }
+            catch (err) {
+                debugger;
+                throw err;
+            }
+        });
+    }
     log(unit, subject, content) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.db.log(unit, this.net.getUqFullName(this.uq), subject, content);

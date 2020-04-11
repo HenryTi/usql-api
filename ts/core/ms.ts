@@ -5,7 +5,9 @@ export class MsDbServer extends DbServer {
         super();
     }
     sql(db:string, sql:string, params:any[]): Promise<any> {return}
-    async call(db:string, proc:string, params:any[]): Promise<any> {return}
+	sqlProc(db:string, procName:string, procSql:string): Promise<any> {return}
+	sqlDropProc(db:string, procName:string): Promise<any> {return}
+    call(db:string, proc:string, params:any[]): Promise<any> {return}
     callEx(db:string, proc:string, params:any[]): Promise<any> {return}
     buildTuidAutoId(db:string): Promise<void> {return}
     tableFromProc(db:string, proc:string, params:any[]): Promise<any[]> {return}

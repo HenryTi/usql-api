@@ -36,6 +36,7 @@ function getPool(dbConfig) {
 class MyDbServer extends dbServer_1.DbServer {
     constructor(dbConfig) {
         super();
+        this.procColl = {};
         this.pool = getPool(dbConfig);
     }
     exec(sql, values, log) {
@@ -111,7 +112,71 @@ class MyDbServer extends dbServer_1.DbServer {
             return arr;
         });
     }
+    sqlDropProc(db, procName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = 'use `' + db + '`;' + 'DROP PROCEDURE IF EXISTS ' + procName;
+            yield this.exec(sql, []);
+        });
+    }
+    buidlCallProcSql(db, proc, params) {
+        let c = 'call `' + db + '`.`' + proc + '`(';
+        let sql = c;
+        if (params !== undefined) {
+            let len = params.length;
+            if (len > 0) {
+                sql += '?';
+                for (let i = 1; i < len; i++)
+                    sql += ',?';
+            }
+        }
+        sql += ')';
+        return sql;
+    }
+    callProcBase(db, proc, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = this.buidlCallProcSql(db, proc, params);
+            let ret = yield this.exec(sql, params);
+            return ret;
+        });
+    }
+    sqlProc(db, procName, procSql) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let ret = yield this.callProcBase(db, 'tv_$proc_save', [db, procName, procSql]);
+            let t0 = ret[0];
+            let changed = t0[0]['changed'];
+            let isOk = changed === 0;
+            this.procColl[procName.toLowerCase()] = isOk;
+        });
+    }
     execProc(db, proc, params) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (db[0] !== '$') {
+                let procLower = proc.toLowerCase();
+                let p = this.procColl[procLower];
+                if (p !== true) {
+                    let results = yield this.callProcBase(db, 'tv_$proc_get', [db, proc]);
+                    let ret = results[0];
+                    if (ret.length === 0) {
+                        debugger;
+                        throw new Error('proc not defined ' + proc);
+                    }
+                    let r0 = ret[0];
+                    let changed = r0['changed'];
+                    if (changed === 1) {
+                        // await this.sqlDropProc(db, proc);
+                        let sql = r0['proc'];
+                        let drop = 'DROP PROCEDURE IF EXISTS ' + proc + ';';
+                        yield this.sql(db, drop + sql, undefined);
+                        // clear changed flag
+                        yield this.callProcBase(db, 'tv_$proc_save', [db, proc, undefined]);
+                    }
+                    this.procColl[procLower] = true;
+                }
+            }
+            return yield this.execProcBase(db, proc, params);
+        });
+    }
+    execProcBase(db, proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             let c = 'call `' + db + '`.`' + proc + '`(';
             let sql = c;

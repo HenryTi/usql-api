@@ -136,6 +136,27 @@ export class Runner {
             throw err;
         }
     }
+    async procSql(procName:string, procSql:string): Promise<any> {
+        try {
+            return await this.db.sqlProc(procName, procSql);
+        }
+        catch (err) {
+            debugger;
+            throw err;
+        }
+    }
+    async procCoreSql(procName:string, procSql:string): Promise<any> {
+        try {
+        	//let sqlDrop = 'DROP PROCEDURE IF EXISTS ' + procName;
+			//await this.db.sql(sqlDrop, undefined);
+			await this.db.sqlDropProc(procName);
+            return await this.db.sql(procSql, undefined);
+        }
+        catch (err) {
+            debugger;
+            throw err;
+        }
+    }
     async log(unit:number, subject:string, content:string):Promise<void> {
         await this.db.log(unit, this.net.getUqFullName(this.uq), subject, content);
     }

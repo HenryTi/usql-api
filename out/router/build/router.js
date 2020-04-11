@@ -74,6 +74,16 @@ function buildBuildRouter(router, rb) {
         let { sql, params } = body;
         return yield runner.sql(sql, params);
     }));
+    rb.post(router, '/proc-sql', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        //return this.db.sql(sql, params);
+        let { name, proc } = body;
+        return yield runner.procSql(name, proc);
+    }));
+    rb.post(router, '/proc-core-sql', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        //return this.db.sql(sql, params);
+        let { name, proc } = body;
+        return yield runner.procCoreSql(name, proc);
+    }));
     rb.post(router, '/create-database', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         yield runner.createDatabase();
     }));

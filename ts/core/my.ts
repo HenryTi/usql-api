@@ -102,8 +102,66 @@ export class MyDbServer extends DbServer {
         arr.shift();
         if (arr.length === 1) return arr[0];
         return arr;
-    }
+	}
+	async sqlDropProc(db:string, procName:string): Promise<any> {
+		let sql = 'use `'+db+'`;' + 'DROP PROCEDURE IF EXISTS ' + procName;
+		await this.exec(sql, []);
+	}
+
+	private procColl:{[procName:string]:boolean} = {};
+	private buidlCallProcSql(db:string, proc:string, params:any[]):string {
+        let c = 'call `'+db+'`.`'+proc+'`(';
+        let sql = c;
+        if (params !== undefined) {
+            let len = params.length;
+            if (len > 0) {
+                sql += '?';
+                for (let i=1;i<len;i++) sql += ',?';
+            }
+        }
+        sql += ')';
+		return sql;
+	}
+	private async callProcBase(db:string, proc:string, params:any[]): Promise<any> {
+		let sql = this.buidlCallProcSql(db, proc, params);
+		let ret = await this.exec(sql, params);
+		return ret;
+	}
+	async sqlProc(db:string, procName:string, procSql:string): Promise<any> {
+		let ret = await this.callProcBase(db, 'tv_$proc_save', [db, procName, procSql]);
+		let t0 = ret[0];
+		let changed = t0[0]['changed'];
+		let isOk = changed === 0;
+		this.procColl[procName.toLowerCase()] = isOk;
+	}
+
     private async execProc(db:string, proc:string, params:any[]): Promise<any> {
+		if (db[0] !== '$') {
+			let procLower = proc.toLowerCase();
+			let p = this.procColl[procLower];
+			if (p !== true) {
+				let results = await this.callProcBase(db, 'tv_$proc_get', [db, proc]);
+				let ret = results[0];
+				if (ret.length === 0) {
+					debugger;
+					throw new Error('proc not defined ' + proc);
+				}
+				let r0 = ret[0];
+				let changed = r0['changed'];
+				if (changed === 1) {
+					// await this.sqlDropProc(db, proc);
+					let sql = r0['proc'];
+					let drop = 'DROP PROCEDURE IF EXISTS ' + proc + ';';
+					await this.sql(db, drop + sql, undefined);
+					// clear changed flag
+					await this.callProcBase(db, 'tv_$proc_save', [db, proc, undefined]);
+				}
+				this.procColl[procLower] = true;
+			}
+		}
+		return await this.execProcBase(db, proc, params);
+    }
+	private async execProcBase(db:string, proc:string, params:any[]): Promise<any> {
         let c = 'call `'+db+'`.`'+proc+'`(';
         let sql = c;
         if (params !== undefined) {
@@ -133,7 +191,7 @@ export class MyDbServer extends DbServer {
             spanLog = dbLogger.open(log);
         }
         return await this.exec(sql, params, spanLog);
-    }
+	}
     async buildTuidAutoId(db:string): Promise<void> {
         let sql1 = `UPDATE \`${db}\`.tv_$entity a 
                 inner JOIN information_schema.tables b ON 

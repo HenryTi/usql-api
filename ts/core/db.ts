@@ -71,6 +71,12 @@ export class Db {
         //this.devLog('sql', params);
         return await this.dbServer.sql(this.dbName, sql, params);
     }
+    async sqlDropProc(procName:string): Promise<any> {
+        return await this.dbServer.sqlDropProc(this.dbName, procName);
+    }
+    async sqlProc(procName:string, procSql:string): Promise<any> {
+        return await this.dbServer.sqlProc(this.dbName, procName, procSql);
+    }
     async call(proc:string, params:any[]): Promise<any> {
         //this.devLog(proc, params);
         return await this.dbServer.call(this.dbName, proc, params);

@@ -87,6 +87,16 @@ class Db {
             return yield this.dbServer.sql(this.dbName, sql, params);
         });
     }
+    sqlDropProc(procName) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.dbServer.sqlDropProc(this.dbName, procName);
+        });
+    }
+    sqlProc(procName, procSql) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.dbServer.sqlProc(this.dbName, procName, procSql);
+        });
+    }
     call(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             //this.devLog(proc, params);

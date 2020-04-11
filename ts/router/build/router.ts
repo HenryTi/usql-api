@@ -72,6 +72,20 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
         return await runner.sql(sql, params);
     });
 
+    rb.post(router, '/proc-sql',
+    async (runner:Runner, body:{name:string, proc:string}): Promise<any> => {
+        //return this.db.sql(sql, params);
+        let {name, proc} = body;
+        return await runner.procSql(name, proc);
+    });
+
+    rb.post(router, '/proc-core-sql',
+    async (runner:Runner, body:{name:string, proc:string}): Promise<any> => {
+        //return this.db.sql(sql, params);
+        let {name, proc} = body;
+        return await runner.procCoreSql(name, proc);
+    });
+
     rb.post(router, '/create-database',
     async (runner:Runner, body:any): Promise<void> => {
         await runner.createDatabase();
