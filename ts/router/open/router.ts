@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { Runner, busQueueSeed, RouterBuilder, testNet } from '../../core';
+import { EntityRunner, busQueueSeed, RouterBuilder, testNet } from '../../core';
 
 //type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
 
@@ -42,22 +42,22 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
     */
     
     rb.get(router, '/entities/:unit',
-    async (runner:Runner, body:any, params:any):Promise<any> => {
+    async (runner:EntityRunner, body:any, params:any):Promise<any> => {
         return await runner.getEntities(params.unit);
     });
 
     rb.get(router, '/entity/:entityName',
-    async (runner:Runner, body:any, params:any):Promise<any> => {
+    async (runner:EntityRunner, body:any, params:any):Promise<any> => {
         return runner.getSchema(params.entityName);
     });
 
     rb.post(router, '/entities/:unit',
-    async (runner:Runner, body:any, params:any):Promise<any> => {
+    async (runner:EntityRunner, body:any, params:any):Promise<any> => {
         return await runner.getEntities(params.unit);
     });
 
     rb.post(router, '/from-entity',
-    async (runner:Runner, body:any):Promise<any> => {
+    async (runner:EntityRunner, body:any):Promise<any> => {
         let {unit, entity, key} = body;
         let schema = runner.getSchema(entity);
         let {type} = schema;
@@ -82,7 +82,7 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
     });
 
     rb.post(router, '/queue-modify',
-    async (runner:Runner, body:any):Promise<any> => {
+    async (runner:EntityRunner, body:any):Promise<any> => {
         let {unit, start, page, entities} = body;
         let ret = await runner.unitTablesFromProc('tv_$modify_queue', unit, start, page, entities);
         let ret1 = ret[1];
@@ -95,7 +95,7 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
     });
 
     rb.post(router, '/bus-query',
-    async (runner:Runner, body:any):Promise<any> => {
+    async (runner:EntityRunner, body:any):Promise<any> => {
         let {unit, busOwner, busName, face:faceName, params} = body;
         let faceUrl = `${busOwner}/${busName}/${faceName}`;
         let face = runner.buses.coll[faceUrl];
@@ -105,7 +105,7 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
     });
 
     rb.post(router, '/tuid-main/:tuid',
-    async (runner:Runner, body:any, params:any):Promise<any> => {
+    async (runner:EntityRunner, body:any, params:any):Promise<any> => {
         body.$ = 'open/tuid-main/';
         console.log(body);
         let {tuid} = params;
@@ -118,7 +118,7 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
     });
 
     rb.post(router, '/tuid-div/:tuid/:div',
-    async (runner:Runner, body:any, params:any):Promise<any> => {
+    async (runner:EntityRunner, body:any, params:any):Promise<any> => {
         body.$ = 'open/tuid-div/';
         console.log(body);
         let {tuid, div} = params;

@@ -1,11 +1,11 @@
 import { Router, Request, Response } from 'express';
-import { Runner } from './runner';
+import { EntityRunner } from './runner';
 import { consts } from "./consts";
 import { prodNet, testNet, Net, prodCompileNet, testCompileNet } from './net';
 
-type Processer = (runner:Runner, body:any, urlParams:any, userToken?:User) => Promise<any>;
+type Processer = (runner:EntityRunner, body:any, urlParams:any, userToken?:User) => Promise<any>;
 type EntityProcesser = (unit:number, user:number, name:string, db:string, urlParams:any, 
-    runner:Runner, body:any, schema:any, run:any, net?:Net) => Promise<any>;
+    runner:EntityRunner, body:any, schema:any, run:any, net?:Net) => Promise<any>;
 
 /*
 const apiErrors = {
@@ -44,7 +44,7 @@ export class RouterBuilder {
         });
     };
     getDbName(name:string):string {return this.net.getDbName(name);}
-    protected async routerRunner(req:Request):Promise<Runner> {
+    protected async routerRunner(req:Request):Promise<EntityRunner> {
         let db:string = req.params.db;
         let runner = await this.checkRunner(db);
         let uqVersion = req.header('tonva-uq-version');
@@ -150,17 +150,17 @@ export class RouterBuilder {
         }
     }
 
-    private async checkRunner(db:string):Promise<Runner> {
+    private async checkRunner(db:string):Promise<EntityRunner> {
         let runner = await this.net.getRunner(db);
         if (runner !== undefined) return runner;
         throw `Database ${this.net.getDbName(db)} 不存在`;
     }
 
-    async getRunner(name:string):Promise<Runner> {
+    async getRunner(name:string):Promise<EntityRunner> {
         return await this.net.getRunner(name);
     }
 
-    async getUnitxRunner():Promise<Runner> {
+    async getUnitxRunner():Promise<EntityRunner> {
         return await this.net.getUnitxRunner();
     }
 
@@ -181,7 +181,7 @@ export class CompileRouterBuilder extends RouterBuilder {
 }
 
 class UnitxRouterBuilder extends RouterBuilder {
-    protected async routerRunner(req:Request):Promise<Runner> {
+    protected async routerRunner(req:Request):Promise<EntityRunner> {
         let runner = await this.net.getUnitxRunner();
         if (runner !== undefined) return runner;
         throw `Database ${this.net.getDbName('$unitx')} 不存在`;

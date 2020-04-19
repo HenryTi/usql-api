@@ -1,4 +1,5 @@
 export abstract class DbServer {
+	abstract initProcObjs(db:string): Promise<void>;
 	abstract sql(db:string, sql:string, params:any[]): Promise<any>;
 	abstract sqlProc(db:string, procName:string, procSql:string): Promise<any>;
 	abstract sqlDropProc(db:string, procName:string): Promise<any>;

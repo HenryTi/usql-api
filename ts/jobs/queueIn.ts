@@ -1,8 +1,8 @@
-import { Net, Runner } from "../core";
+import { Net, EntityRunner } from "../core";
 import { Finish } from "./finish";
 import { getErrorString } from "../tool";
 
-export async function queueIn(runner: Runner) {
+export async function queueIn(runner: EntityRunner) {
     let start = 0;
     let {buses} = runner;
     let {hasError} = buses;

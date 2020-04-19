@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { Runner, packReturn, RouterBuilder } from '../core';
+import { EntityRunner, packReturn, RouterBuilder } from '../core';
 //import { entityPost } from './entityProcess';
 
 export function buildBookRouter(router:Router, rb:RouterBuilder) {
     rb.entityPost(router, 'book', '/:name',
-    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let pageStart = body['$pageStart'];
         let params:any[] = [pageStart, body['$pageSize']];
         let fields = schema.fields;

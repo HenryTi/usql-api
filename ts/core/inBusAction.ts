@@ -1,4 +1,4 @@
-import { Runner } from "./runner";
+import { EntityRunner } from "./runner";
 import { packParam } from "./packParam";
 
 interface SchemaField {
@@ -17,12 +17,12 @@ interface ParamBus {
 }
 
 export abstract class ParametersBus {
-    protected runner: Runner;
+    protected runner: EntityRunner;
     protected entityName: string;
     protected schema: any;
     private paramBuses:ParamBus[];
 
-    constructor(runner:Runner, entityName:string) {
+    constructor(runner:EntityRunner, entityName:string) {
         this.runner = runner;
         this.entityName = entityName;
     }
@@ -142,7 +142,7 @@ export class ActionParametersBus extends ParametersBus {
 
 export class AcceptParametersBus extends ParametersBus {
     private faceName:string;
-    constructor(runner:Runner, busName:string, faceName:string) {
+    constructor(runner:EntityRunner, busName:string, faceName:string) {
         super(runner, busName);
         this.faceName = faceName;
     }
@@ -169,7 +169,7 @@ export class SheetVerifyParametersBus extends ParametersBus {
 export class SheetActionParametersBus extends ParametersBus {
     private stateName: string;
     private actionName: string;
-    constructor(runner:Runner, sheetName:string, stateName:string, actionName:string) {
+    constructor(runner:EntityRunner, sheetName:string, stateName:string, actionName:string) {
         super(runner, sheetName);
         this.stateName = stateName.toLowerCase();
         this.actionName = actionName.toLowerCase();

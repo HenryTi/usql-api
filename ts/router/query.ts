@@ -1,12 +1,12 @@
 import {Router} from 'express';
-import {Runner, packReturn, RouterBuilder} from '../core';
+import {EntityRunner, packReturn, RouterBuilder} from '../core';
 
 export function buildQueryRouter(router:Router, rb:RouterBuilder) {
     rb.entityPost(router, 'query', '/:name', queryProcess);
     rb.entityPost(router, 'query', '-page/:name', pageQueryProcess);
 }
 
-export const queryProcess = async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+export const queryProcess = async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
     let params:any[] = [];
     let fields = schema.fields;
     let len = fields.length;
@@ -18,7 +18,7 @@ export const queryProcess = async (unit:number, user:number, name:string, db:str
     return data;
 }
 
-export const pageQueryProcess = async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+export const pageQueryProcess = async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
     let pageStart = body['$pageStart'];
     if (pageStart !== undefined) {
         let page = (schema.returns as any[]).find(v => v.name === '$page');

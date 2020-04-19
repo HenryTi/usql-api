@@ -1,8 +1,8 @@
-import { Runner, packParam, Net } from '../core';
+import { EntityRunner, packParam, Net } from '../core';
 import { OpenApi } from '../core/openApi';
 import { debugUqs } from './debugUqs';
 
-export async function pullEntities(runner:Runner):Promise<void> {
+export async function pullEntities(runner:EntityRunner):Promise<void> {
     let {uq, froms, hasPullEntities} = runner;
     if (hasPullEntities === false) return;
     if (froms === undefined) return;
@@ -19,7 +19,7 @@ export async function pullEntities(runner:Runner):Promise<void> {
 
 enum FromNewSet {ok=1, bad=2, moreTry=3}
 
-async function pullNew(runner:Runner) {
+async function pullNew(runner:EntityRunner) {
     let {net} = runner;
     let count = 0;
     for (;count<200;) {
@@ -67,7 +67,7 @@ interface UnitOpenApiItems {
     [unit:number]:OpenApiItem[];
 }
 
-async function pullModify(runner:Runner) {
+async function pullModify(runner:EntityRunner) {
     let {net} = runner;
     let items = await runner.tableFromProc('$sync_from', undefined);
     if (items.length === 0) return;
@@ -176,7 +176,7 @@ async function pullModify(runner:Runner) {
     }
 }
 
-async function pullEntity(runner:Runner, openApi:OpenApi, schema:any, unit:number|string, entity:string, key:string) {
+async function pullEntity(runner:EntityRunner, openApi:OpenApi, schema:any, unit:number|string, entity:string, key:string) {
     let ret = await openApi.fromEntity(unit, entity, key);
     switch (schema.type) {
         case 'tuid':
@@ -188,7 +188,7 @@ async function pullEntity(runner:Runner, openApi:OpenApi, schema:any, unit:numbe
     }
 }
 
-async function setMap(runner:Runner, mapName:string, schema:any, unit:number|string, values:any[]) {
+async function setMap(runner:EntityRunner, mapName:string, schema:any, unit:number|string, values:any[]) {
     let map = schema; // runner.getMap(mapName);
     if (map === undefined) return;
     let {actions} = map.call;
@@ -202,7 +202,7 @@ async function setMap(runner:Runner, mapName:string, schema:any, unit:number|str
     return;
 }
 
-async function setTuid(runner:Runner, tuidName:string, schema:any, unit:number|string, values:any) {
+async function setTuid(runner:EntityRunner, tuidName:string, schema:any, unit:number|string, values:any) {
     try {
         let user = undefined;
         let tuid = schema.call; // runner.getTuid(tuidName);

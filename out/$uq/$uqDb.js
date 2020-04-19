@@ -14,7 +14,7 @@ const $uq = '$uq';
 function init$UqDb() {
     return __awaiter(this, void 0, void 0, function* () {
         let db = new core_1.Db($uq);
-        let runner = new core_1.Runner($uq, db);
+        let runner = new core_1.EntityRunner($uq, db);
         yield runner.init$UqDb();
     });
 }

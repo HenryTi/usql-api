@@ -1,0 +1,153 @@
+import * as _ from 'lodash';
+import { Db } from '../db';
+
+export class BuildRunner {
+	private readonly db:Db;
+
+    constructor(db:Db) {
+        this.db = db;
+    }
+
+    getDb():string {return this.db.getDbName()}
+
+    async sql(sql:string, params:any[]): Promise<any> {
+        try {
+            return await this.db.sql(sql, params || []);
+        }
+        catch (err) {
+            debugger;
+            throw err;
+        }
+    }
+    async procSql(procName:string, procSql:string): Promise<any> {
+        try {
+            return await this.db.sqlProc(procName, procSql);
+        }
+        catch (err) {
+            debugger;
+            throw err;
+        }
+    }
+    async procCoreSql(procName:string, procSql:string): Promise<any> {
+        try {
+        	//let sqlDrop = 'DROP PROCEDURE IF EXISTS ' + procName;
+			//await this.db.sql(sqlDrop, undefined);
+			await this.db.sqlProc(procName, procSql);
+			await this.db.sqlDropProc(procName);
+            return await this.db.sql(procSql, undefined);
+        }
+        catch (err) {
+            debugger;
+            throw err;
+        }
+	}
+	/*
+    async log(unit:number, subject:string, content:string):Promise<void> {
+        await this.db.log(unit, this.net.getUqFullName(this.uq), subject, content);
+	}
+	*/
+    async procCall(proc:string, params:any[]): Promise<any> {
+        return await this.db.call(proc, params);
+    }
+    async call(proc:string, params:any[]): Promise<any> {
+        return await this.db.call('tv_' + proc, params);
+	}
+	
+    async buildDatabase(): Promise<boolean> {
+		let ret = await this.db.buildDatabase();
+		await this.db.initProcObjs();
+		return ret;
+    }
+    async createDatabase(): Promise<void> {
+		let ret = await this.db.createDatabase();
+		await this.db.initProcObjs();
+		return ret;
+    }
+    async existsDatabase(): Promise<boolean> {
+        return await this.db.exists();
+    }
+    async buildTuidAutoId(): Promise<void> {
+        await this.db.buildTuidAutoId();
+    }
+    async tableFromProc(proc:string, params:any[]): Promise<any[]> {
+        return await this.db.tableFromProc('tv_' + proc, params);
+    }
+    async tablesFromProc(proc:string, params:any[]): Promise<any[][]> {
+        let ret = await this.db.tablesFromProc('tv_' + proc, params);
+        let len = ret.length;
+        if (len === 0) return ret;
+        let pl = ret[len-1];
+        if (Array.isArray(pl) === false) ret.pop();
+        return ret;
+    }
+    async unitCall(proc:string, unit:number, ...params:any[]): Promise<any> {
+        let p:any[] = [];
+        //if (this.hasUnit === true) 
+        p.push(unit);
+        if (params !== undefined) p.push(...params);
+        return await this.db.call(proc, p);
+    }
+    async unitUserCall(proc:string, unit:number, user:number, ...params:any[]): Promise<any> {
+        let p:any[] = [];
+        //if (this.hasUnit === true) 
+        p.push(unit);
+        p.push(user);
+        if (params !== undefined) p.push(...params);
+        return await this.db.call(proc, p);
+    }
+
+	private async unitUserCallEx(proc:string, unit:number, user:number, ...params:any[]): Promise<any> {
+        let p:any[] = [];
+        //if (this.hasUnit === true) 
+        p.push(unit);
+        p.push(user);
+        if (params !== undefined) p.push(...params);
+        return await this.db.callEx(proc, p);
+    }
+
+    async unitTableFromProc(proc:string, unit:number, ...params:any[]):Promise<any[]> {
+        let p:any[] = [];
+        //if (this.hasUnit === true) 
+        p.push(unit);
+        if (params !== undefined) p.push(...params);
+        let ret = await this.db.tableFromProc(proc, p);
+        return ret;
+    }
+    async unitUserTableFromProc(proc:string, unit:number, user:number, ...params:any[]):Promise<any[]> {
+        let p:any[] = [];
+        //if (this.hasUnit === true) 
+        p.push(unit);
+        p.push(user);
+        if (params !== undefined) p.push(...params);
+        let ret = await this.db.tableFromProc(proc, p);
+        return ret;
+    }
+
+    async unitTablesFromProc(proc:string, unit:number, ...params:any[]):Promise<any[][]> {
+        let p:any[] = [];
+        //if (this.hasUnit === true) 
+        p.push(unit);
+        if (params !== undefined) p.push(...params);
+        let ret = await this.db.tablesFromProc(proc, p);
+        return ret;
+    }
+    async unitUserTablesFromProc(proc:string, unit:number, user:number, ...params:any[]):Promise<any[][]> {
+        let p:any[] = [];
+        //if (this.hasUnit === true) 
+        p.push(unit);
+        p.push(user);
+        if (params !== undefined) p.push(...params);
+        let ret = await this.db.tablesFromProc(proc, p);
+        return ret;
+    }
+
+    async start(unit:number, user:number): Promise<void> {
+        return await this.unitUserCall('tv_$start', unit, user);
+    }
+    async initResDb(resDbName:string): Promise<void> {
+        await this.db.initResDb(resDbName);
+    }
+    async init$UqDb(): Promise<void> {
+        await this.db.init$UqDb();
+    }
+}

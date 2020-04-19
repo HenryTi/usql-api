@@ -1,7 +1,7 @@
-import { Runner, centerApi, unpack, packParam, Fetch, Net } from '../../core';
+import { EntityRunner, centerApi, unpack, packParam, Fetch, Net } from '../../core';
 import { actionProcess } from '../actionProcess';
 
-export async function unitxActionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any, net:Net):Promise<any> {
+export async function unitxActionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any, run:any, net:Net):Promise<any> {
     switch (name) {
         case 'saveentityoppost':
             return await saveEntityOpPost(unit, user, name, db, urlParams, runner, body, schema, run, net);
@@ -44,7 +44,7 @@ if (opName === '$') {
 return await actionProcess(unit, user, name, db, urlParams, runner, body, schema, run);
 */
 
-async function saveEntityOpPost(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any, net:Net) {
+async function saveEntityOpPost(unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any, run:any, net:Net) {
     let actionParam = unpack(schema, body.data);
     let {uq, entityName, opName} = actionParam;
 

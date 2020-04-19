@@ -1,4 +1,4 @@
-import {createPool, Pool, MysqlError, TypeCast, FieldInfo} from 'mysql';
+import {createPool, Pool, MysqlError, TypeCast, FieldInfo, QueryOptions, queryCallback, Connection} from 'mysql';
 import * as _ from 'lodash';
 import {DbServer} from './dbServer';
 import { isDevelopment, dbLogger, SpanLog } from './db';
@@ -18,27 +18,63 @@ interface DbConfigPool {
 
 const pools: DbConfigPool[] = [];
 
-function getPool(dbConfig: any): Pool {
-    for (let p of pools) {
-        let {config, pool} = p;
-        if (_.isEqual(dbConfig, config) === true) return pool;
-    }
-    let conf = _.clone(dbConfig);
-    conf.timezone = 'UTC';
-    conf.typeCast = castField;
-    let newPool = createPool(conf);
-    pools.push({config: dbConfig, pool: newPool});
-    return newPool;
-}
+const sqls = {
+	procExists: undefined as string,
+	performanceExists: undefined as string,
+};
+
+const sqls_8 = {
+	procExists: `SELECT routine_name FROM information_schema.routines WHERE routine_schema='$uq' AND routine_name='log';`,
+	performanceExists: `SELECT routine_name FROM information_schema.routines WHERE routine_schema='$uq' AND routine_name='performance';`,
+};
+
+const sqls_5 = {
+	procExists: `SELECT name FROM mysql.proc WHERE db='$uq' AND name='log';`,
+	performanceExists: `SELECT name FROM mysql.proc WHERE db='$uq' AND name='performance';`,
+};
 
 export class MyDbServer extends DbServer {
+	private dbConfig: any;
     private pool: Pool;
     constructor(dbConfig:any) {
-        super();
-        this.pool = getPool(dbConfig);
-    }
+		super();
+		this.dbConfig = dbConfig;
+	}
+
+	private async getPool(dbConfig: any): Promise<Pool> {
+		for (let p of pools) {
+			let {config, pool} = p;
+			if (_.isEqual(dbConfig, config) === true) return pool;
+		}
+		let conf = _.clone(dbConfig);
+		conf.timezone = 'UTC';
+		conf.typeCast = castField;
+		let newPool = await this.createPool(conf);
+		pools.push({config: dbConfig, pool: newPool});
+		return newPool;
+	}
+
+	private async createPool(dbConfig:any):Promise<Pool> {
+		return await new Promise<Pool>((resolve, reject) => {
+			let newPool = createPool(dbConfig);
+            let handleResponse = (err:MysqlError, result:any) => {
+				if (err === null) {
+					resolve(newPool);
+					return;
+				}
+				reject(err);
+			};
+			newPool.query(`
+				SET character_set_client = 'utf8';
+				SET collation_connection = 'utf8_unicode_ci';
+			`, handleResponse);
+		});
+	}
 
     private async exec(sql:string, values:any[], log?: SpanLog): Promise<any> {
+		if (this.pool === undefined) {
+			this.pool = await this.getPool(this.dbConfig);
+		}
         return await new Promise<any>((resolve, reject) => {
             let retryCount = 0;
             let handleResponse = (err:MysqlError, result:any) => {
@@ -87,11 +123,6 @@ export class MyDbServer extends DbServer {
                     return;
                 }
             }
-            /*
-            let orgHandleResponse = function(err:MysqlError, result:any) {
-                if (err !== null) reject(err);
-                else resolve(result);
-            } */
             this.pool.query(sql, values, handleResponse);
         });
     }
@@ -108,7 +139,22 @@ export class MyDbServer extends DbServer {
 		await this.exec(sql, []);
 	}
 
-	private procColl:{[procName:string]:boolean} = {};
+	private procColl:{[procName:string]:boolean} = {
+        tv_$entitys: true,
+        tv_$entity: true,
+        tv_$entity_version: true,
+        tv_$entity_validate: true,
+		tv_$entity_no: true,
+        tv_$init_setting: true,
+        tv_$set_setting: true,
+        tv_$get_setting: true,
+        tv_$const_strs: true,
+        tv_$const_str: true,
+		tv_$tag_values: true,
+		tv_$tag_type: true,
+        tv_$tag_save_sys: true,
+        tv_$tag_save: true,
+	};
 	private buidlCallProcSql(db:string, proc:string, params:any[]):string {
         let c = 'call `'+db+'`.`'+proc+'`(';
         let sql = c;
@@ -188,11 +234,12 @@ export class MyDbServer extends DbServer {
                 }
             }
             log += ')';
-            spanLog = dbLogger.open(log);
+            spanLog = await dbLogger.open(log);
         }
         return await this.exec(sql, params, spanLog);
 	}
     async buildTuidAutoId(db:string): Promise<void> {
+		/*
         let sql1 = `UPDATE \`${db}\`.tv_$entity a 
                 inner JOIN information_schema.tables b ON 
                     a.name=CONVERT(substring(b.table_name, 4) USING utf8) COLLATE utf8_unicode_ci
@@ -206,7 +253,22 @@ export class MyDbServer extends DbServer {
                     AND b.TABLE_SCHEMA='${db}'
                 SET a.tuidVid=b.AUTO_INCREMENT
                 WHERE b.AUTO_INCREMENT IS NOT null;
+		`;
+		*/
+        let sql1 = `UPDATE \`${db}\`.tv_$entity a 
+			SET a.tuidVid=(select b.AUTO_INCREMENT 
+				from information_schema.tables b
+				where b.table_name=concat('tv_', CONVERT(a.name USING utf8) COLLATE utf8_general_ci)
+				AND b.TABLE_SCHEMA='${db}'
+			);
         `;
+        let sql2 = `UPDATE \`${db}\`.tv_$entity a 
+			SET a.tuidVid=(select b.AUTO_INCREMENT 
+				from information_schema.tables b
+				where b.table_name=concat('tv_', CONVERT(a.name USING utf8) COLLATE utf8_unicode_ci)
+				AND b.TABLE_SCHEMA='${db}'
+			);
+		`;
         try {
             await this.exec(sql1, []);
         }
@@ -249,6 +311,58 @@ export class MyDbServer extends DbServer {
         await this.build$Uq(db);
         return false;
     }
+	async initProcObjs(db:string): Promise<void> {
+		await this.exec('use `' + db + '`', undefined);
+		let createProcTable = 'CREATE TABLE IF NOT EXISTS `tv_$proc` (`name` VARCHAR(200) NOT NULL,`proc` TEXT NULL, `changed` TINYINT(4) NULL DEFAULT NULL,PRIMARY KEY (`name`))';
+        await this.exec(createProcTable, undefined);
+		let getProc = `
+DROP PROCEDURE IF EXISTS tv_$proc_get;
+CREATE PROCEDURE tv_$proc_get(
+	IN _schema VARCHAR(200),
+	IN _name VARCHAR(200)
+) BEGIN	
+	SELECT proc, CASE WHEN (changed=1 OR NOT (exists(SELECT ROUTINE_BODY
+	FROM information_schema.routines
+	WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed
+	FROM tv_$proc
+	WHERE 1=1 AND name=_name FOR UPDATE;
+END
+`;
+        await this.exec(getProc, undefined);
+		let saveProc = `
+DROP PROCEDURE IF EXISTS tv_$proc_save;
+CREATE PROCEDURE tv_$proc_save(
+	_schema VARCHAR(200),
+	_name VARCHAR(200),
+	_proc TEXT
+) 
+__proc_exit: BEGIN
+	DECLARE _procOld TEXT;DECLARE _changed TINYINT;
+	IF _proc IS NULL THEN
+	UPDATE tv_$proc SET changed=0 WHERE name=_name;
+	LEAVE __proc_exit;
+	END IF;
+	SELECT proc INTO _procOld
+	FROM tv_$proc
+	WHERE 1=1 AND name=_name FOR UPDATE;
+	SET _changed=1;
+	IF _procOld IS NULL THEN
+	INSERT INTO tv_$proc (name, proc, changed) 
+		VALUES (_name, _proc, 1);
+	ELSEIF _proc=_procOld THEN
+		SET _changed=0;
+	ELSE
+	UPDATE tv_$proc SET proc=_proc, changed=1 
+		WHERE name=_name;
+	END IF;
+	SELECT CASE WHEN (_changed=1 OR NOT (exists(SELECT ROUTINE_BODY
+	FROM information_schema.routines 
+	WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed;
+END
+`;
+        await this.exec(saveProc, undefined);
+		return;
+	}
     async init$UqDb():Promise<void> {
         let exists = 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'$uq\'';
         let rows:any[] = await this.exec(exists, undefined);
@@ -292,13 +406,19 @@ create procedure $uq.performance(_tick bigint, _log text, _ms int) begin
     end while;
 end;
 `;
-        let procExists = `SELECT name FROM mysql.proc WHERE db='$uq' AND name='log';`
-        let retProcExists = await this.exec(procExists, undefined);
+		let versionRows = await this.sql('information_schema', 'select version() as v', []);
+		let version = versionRows[0]['v'];
+		if (version >= '8.0') {
+			_.merge(sqls, sqls_8);
+		}
+		else {
+			_.merge(sqls, sqls_5);
+		}
+        let retProcExists = await this.exec(sqls.procExists, undefined);
         if (retProcExists.length === 0) {
             await this.exec(writeLog, undefined);
         }
-        let performanceExists = `SELECT name FROM mysql.proc WHERE db='$uq' AND name='performance';`
-        let retPerformanceExists = await this.exec(performanceExists, undefined);
+        let retPerformanceExists = await this.exec(sqls.performanceExists, undefined);
         if (retPerformanceExists.length === 0) {
             await this.exec(performanceLog, undefined);
         }

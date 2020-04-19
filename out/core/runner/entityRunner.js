@@ -10,12 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const _ = require("lodash");
-const db_1 = require("./db");
-const _1 = require(".");
-const importData_1 = require("./importData");
-const inBusAction_1 = require("./inBusAction");
-const centerApi_1 = require("./centerApi");
-class Runner {
+const db_1 = require("../db");
+const __1 = require("..");
+const importData_1 = require("../importData");
+const inBusAction_1 = require("../inBusAction");
+const centerApi_1 = require("../centerApi");
+class EntityRunner {
     constructor(name, db, net = undefined) {
         this.roleVersions = {};
         this.hasPullEntities = false;
@@ -133,11 +133,11 @@ class Runner {
             return yield this.db.call('tv_' + proc, params);
         });
     }
-    buildDatabase() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.buildDatabase();
-        });
+    /*
+    private async buildDatabase(): Promise<boolean> {
+        return await this.db.buildDatabase();
     }
+    */
     createDatabase() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.createDatabase();
@@ -173,7 +173,6 @@ class Runner {
     unitCall(proc, unit, ...params) {
         return __awaiter(this, void 0, void 0, function* () {
             let p = [];
-            //if (this.hasUnit === true) 
             p.push(unit);
             if (params !== undefined)
                 p.push(...params);
@@ -189,16 +188,6 @@ class Runner {
             if (params !== undefined)
                 p.push(...params);
             return yield this.db.call(proc, p);
-        });
-    }
-    unitCallEx(proc, unit, ...params) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let p = [];
-            //if (this.hasUnit === true) 
-            p.push(unit);
-            if (params !== undefined)
-                p.push(...params);
-            return yield this.db.callEx(proc, p);
         });
     }
     unitUserCallEx(proc, unit, user, ...params) {
@@ -407,11 +396,6 @@ class Runner {
             return yield this.unitUserCall('tv_' + tuid + '_' + arr + '$all', unit, user, owner);
         });
     }
-    /*
-    async tuidProxyGet(tuid:string, unit:number, user:number, id:number, type:string): Promise<any> {
-        return await this.unitUserCall('tv_' + tuid + '$proxy', unit, user, id, type);
-    }
-    */
     tuidIds(tuid, arr, unit, user, ids) {
         return __awaiter(this, void 0, void 0, function* () {
             let proc = 'tv_' + tuid;
@@ -451,6 +435,12 @@ class Runner {
         return __awaiter(this, void 0, void 0, function* () {
             let proc = 'tv_' + tuid + '$search';
             return yield this.unitUserTablesFromProc(proc, unit, user, key || '', pageStart, pageSize);
+        });
+    }
+    saveProp(tuid, unit, user, id, prop, value) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let proc = 'tv_' + tuid + '$prop_' + prop;
+            yield this.unitUserCall(proc, unit, user, id, prop, value);
         });
     }
     tuidArrSeach(tuid, unit, user, arr, ownerId, key, pageStart, pageSize) {
@@ -505,7 +495,7 @@ class Runner {
             for (let i = 0; i < length; i++) {
                 let t = ret[i];
                 if (t.length > 0) {
-                    return _1.packReturns(returns, ret);
+                    return __1.packReturns(returns, ret);
                 }
             }
             return;
@@ -1096,5 +1086,5 @@ class Runner {
         this.actionConvertSchemas[name] = value;
     }
 }
-exports.Runner = Runner;
-//# sourceMappingURL=runner.js.map
+exports.EntityRunner = EntityRunner;
+//# sourceMappingURL=entityRunner.js.map

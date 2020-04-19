@@ -34,7 +34,7 @@ class Net {
                 return;
             if (runner === undefined) {
                 let dbName = this.getDbName(name);
-                let db = db_1.getDb(dbName);
+                let db = yield db_1.getDb(dbName);
                 runner = yield this.createRunnerFromDb(name, db);
                 if (runner === undefined)
                     return;
@@ -114,7 +114,7 @@ class Net {
                     }
                     else {
                         //console.error('+++ === +++ === ' + name + ' new Runner(name, db, this)');
-                        runner = new runner_1.Runner(name, db, this);
+                        runner = new runner_1.EntityRunner(name, db, this);
                         this.runners[name] = runner;
                     }
                     for (let promiseItem of this.createRunnerFromDbPromises[name]) {

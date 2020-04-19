@@ -1,7 +1,7 @@
-import { Runner, Net } from "../core";
+import { EntityRunner, Net } from "../core";
 import { getErrorString } from "../tool";
 
-export async function pullBus(runner: Runner) {
+export async function pullBus(runner: EntityRunner) {
     try {
         let {buses, net} = runner;
         let {faces, coll, hasError} = buses;
@@ -60,7 +60,7 @@ export async function pullBus(runner: Runner) {
     }
 }
 
-async function getSyncUnits(runner: Runner): Promise<any[]> {
+async function getSyncUnits(runner: EntityRunner): Promise<any[]> {
     let syncUnits = await runner.call('$sync_units', []);
     return syncUnits;
 }

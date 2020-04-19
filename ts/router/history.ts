@@ -1,10 +1,10 @@
 import { Router } from 'express';
-import { Runner, packReturn, RouterBuilder } from '../core';
+import { EntityRunner, packReturn, RouterBuilder } from '../core';
 
 export function buildHistoryRouter(router:Router, rb:RouterBuilder) {
     //router.post('/history/:name', async (req:Request, res:Response) => {
     rb.entityPost(router, 'history', '/:name',
-    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let pageStart = body['$pageStart'];
         if (pageStart !== undefined) {
             pageStart = new Date(pageStart);

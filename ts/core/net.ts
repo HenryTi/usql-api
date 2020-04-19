@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { Runner } from "./runner";
+import { EntityRunner } from "./runner";
 import { getDb, isDevelopment, Db, getUnitxDb } from "./db";
 import { OpenApi } from "./openApi";
 import { urlSetUqHost } from "./setHostUrl";
@@ -9,7 +9,7 @@ import { UnitxApi } from "./unitxApi";
 
 export abstract class Net {
     private readonly id:string;
-    private runners: {[name:string]: Runner} = {};
+    private runners: {[name:string]: EntityRunner} = {};
     private executingNet: Net;  // 编译Net指向对应的执行Net，编译完成后，reset runner
 
     constructor(executingNet: Net, id:string) {
@@ -21,20 +21,20 @@ export abstract class Net {
     abstract get isTest():boolean;
     abstract getUqFullName(uq:string):string;
 
-    protected async innerRunner(name:string):Promise<Runner> {
+    protected async innerRunner(name:string):Promise<EntityRunner> {
         name = name.toLowerCase();
         let runner = this.runners[name];
         if (runner === null) return;
         if (runner === undefined) {
             let dbName = this.getDbName(name);
-            let db = getDb(dbName);
+            let db = await getDb(dbName);
             runner = await this.createRunnerFromDb(name, db);
             if (runner === undefined) return;
         }
         return runner;
     }
 
-    async getRunner(name:string):Promise<Runner> {
+    async getRunner(name:string):Promise<EntityRunner> {
         let runner = await this.innerRunner(name);
         if (runner === undefined) return;
         // 执行版的net，this.execeutingNet undefined，所以需要init
@@ -44,7 +44,7 @@ export abstract class Net {
         return runner;
     }
 
-    async resetRunnerAfterCompile(runner: Runner) {
+    async resetRunnerAfterCompile(runner: EntityRunner) {
         if (this.executingNet === undefined) {
             debugger;
             return;
@@ -54,7 +54,7 @@ export abstract class Net {
         this.executingNet.resetRunner(runner);
     }
 
-    private resetRunner(runner: Runner) {
+    private resetRunner(runner: EntityRunner) {
         let runnerName = runner.name;
         for (let i in this.runners) {
             if (i !== runnerName) continue;
@@ -66,7 +66,7 @@ export abstract class Net {
         }
     }
 
-    async getUnitxRunner():Promise<Runner> {
+    async getUnitxRunner():Promise<EntityRunner> {
         let name = '$unitx';
         let runner = this.runners[name];
         if (runner === null) return;
@@ -83,8 +83,8 @@ export abstract class Net {
     }
 
     private createRunnerFromDbPromises: {[name:string]: {resolve: (value?: any) => void, reject: (reason?: any) => void}[]} = {};
-    protected async createRunnerFromDb(name:string, db:Db):Promise<Runner> {
-        return await new Promise<Runner>((resolve, reject) => {
+    protected async createRunnerFromDb(name:string, db:Db):Promise<EntityRunner> {
+        return await new Promise<EntityRunner>((resolve, reject) => {
             let promiseArr = this.createRunnerFromDbPromises[name];
             if (promiseArr !== undefined) {
                 promiseArr.push({resolve: resolve, reject: reject});
@@ -92,7 +92,7 @@ export abstract class Net {
             }
             this.createRunnerFromDbPromises[name] = promiseArr =[{resolve: resolve, reject: reject}];
             db.exists().then(isExists => {
-                let runner: Runner;
+                let runner: EntityRunner;
                 if (isExists === false) {
                     //console.error('??? === ??? === ' + name + ' not exists in new Runner');
                     this.runners[name] = null;
@@ -100,7 +100,7 @@ export abstract class Net {
                 }
                 else {
                     //console.error('+++ === +++ === ' + name + ' new Runner(name, db, this)');
-                    runner = new Runner(name, db, this);
+                    runner = new EntityRunner(name, db, this);
                     this.runners[name] = runner;
                 }
                 for (let promiseItem of this.createRunnerFromDbPromises[name]) {

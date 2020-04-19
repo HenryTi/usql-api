@@ -1,5 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
-import { RouterBuilder, Runner, busQueueSeed, SheetMessage, Message } from "../../core";
+import { RouterBuilder, EntityRunner, busQueueSeed, SheetMessage, Message } from "../../core";
 import { messageProcesser } from "./messageProcesser";
 import { writeDataToBus } from "./processBusMessage";
 
@@ -36,14 +36,14 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
         }
     });
 
-    let fetchBus = async (runner:Runner, body:any):Promise<any[][]> => {
+    let fetchBus = async (runner:EntityRunner, body:any):Promise<any[][]> => {
         let {unit, msgStart, faces} = body;
         let ret = await runner.unitUserTablesFromProc('tv_GetBusMessages', unit, undefined, msgStart, faces);
         return ret;
     }
     rb.post(router, '/fetch-bus', fetchBus);
 
-    let jointReadBus = async (runner:Runner, body:any):Promise<any> => {
+    let jointReadBus = async (runner:EntityRunner, body:any):Promise<any> => {
         let {unit, face, queue} = body;
         if (queue === undefined) queue = busQueueSeed();
         let ret = await runner.unitUserCall('tv_BusMessageFromQueue', unit, undefined, face, queue);
@@ -52,7 +52,7 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
     }
     rb.post(router, '/joint-read-bus',jointReadBus);
 
-    let jointWriteBus = async (runner:Runner, body:any):Promise<any> => {
+    let jointWriteBus = async (runner:EntityRunner, body:any):Promise<any> => {
 
         let {unit, face, from, fromQueueId, version, body:message} = body;
         let ret = await writeDataToBus(runner, face, unit, from, fromQueueId, version, message);
@@ -65,7 +65,7 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
 
 // 之前用 getSheetTo 查询，现在改名为 getEntityAccess
 const uqGetSheetTo = 'getEntityAccess';
-async function getSheetTos(unitxRunner:Runner, sheetMessage:SheetMessage):Promise<number[]> {
+async function getSheetTos(unitxRunner:EntityRunner, sheetMessage:SheetMessage):Promise<number[]> {
     let {unit, body} = sheetMessage;
     let {state, user, name, no, discription, uq } = body;
     // 新单只能发给做单人

@@ -1,15 +1,15 @@
 import * as _ from 'lodash';
-import { Runner, packParam } from '../core';
+import { EntityRunner, packParam } from '../core';
 import { buildExpVar, buildExpCalc, buildLicense } from '../convert';
 
-export async function actionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
+export async function actionProcess(unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any, run:any):Promise<any> {
     let result = await actionReturns(unit, user, name, db, urlParams, runner, body, schema, run);
     let arr0 = result[0];
     if (arr0 === undefined || arr0.length === 0) return;
     return arr0[0];
 };
 
-export async function actionReturns(unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any[][]> {
+export async function actionReturns(unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any, run:any):Promise<any[][]> {
     let {data} = body;
     if (typeof data === 'object') {
         console.log('action process data: ', body);
@@ -20,7 +20,7 @@ export async function actionReturns(unit:number, user:number, name:string, db:st
     return result;
 }
 
-export async function actionConvert(unit:number, user:number, entityName:string, db:string, urlParams:any, runner:Runner, body:any, schema:any, run:any):Promise<any> {
+export async function actionConvert(unit:number, user:number, entityName:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any, run:any):Promise<any> {
     let data = _.clone(body.data);
     let {paramConvert, returns} = schema;
     let actionConvertSchema:any;

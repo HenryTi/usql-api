@@ -5,6 +5,7 @@ class MsDbServer extends dbServer_1.DbServer {
     constructor(dbConfig) {
         super();
     }
+    initProcObjs(db) { return; }
     sql(db, sql, params) { return; }
     sqlProc(db, procName, procSql) { return; }
     sqlDropProc(db, procName) { return; }

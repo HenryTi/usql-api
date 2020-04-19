@@ -1,8 +1,8 @@
-import { SheetMessage, consts, Runner } from '../../core';
+import { SheetMessage, consts, EntityRunner } from '../../core';
 import { pushToClient } from "./pushToClient";
 import { actionProcess } from "../actionProcess";
 
-export async function processSheetMessage(unitxRunner:Runner, sheetMsg:SheetMessage) {
+export async function processSheetMessage(unitxRunner:EntityRunner, sheetMsg:SheetMessage) {
     let {$unitx, sheetMessage} = consts;
     let {unit, body, to} = sheetMsg;
     let {id, discription, no, state, app, uq, sheet} = body;

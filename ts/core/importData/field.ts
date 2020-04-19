@@ -1,4 +1,4 @@
-import { Runner } from "../runner";
+import { EntityRunner } from "../runner";
 import { centerApi } from "..";
 
 export interface Header {
@@ -6,7 +6,7 @@ export interface Header {
 }
 
 export abstract class Field {
-	static create(runner:Runner, schema:any, fieldName:string, header:Header, source:string):Field {
+	static create(runner:EntityRunner, schema:any, fieldName:string, header:Header, source:string):Field {
 		let field:Field;
 		let schemaField = (schema.fields as any[]).find(v => v.name === fieldName);
 		if (schemaField === undefined) {
@@ -90,7 +90,7 @@ export abstract class Field {
 		return f;
 	}
 
-	static createIdField(runner:Runner, source:string, tuid:string, div:string):BaseTuidField {
+	static createIdField(runner:EntityRunner, source:string, tuid:string, div:string):BaseTuidField {
 		let field = new IdField();
 		field.source = source;
 		field.tuid = tuid;
@@ -138,7 +138,7 @@ class UserField extends Field {
 }
 
 abstract class BaseTuidField extends Field {
-	runner: Runner;
+	runner: EntityRunner;
 	source: string;
 	tuid: string;
 }

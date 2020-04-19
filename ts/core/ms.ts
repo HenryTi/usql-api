@@ -1,9 +1,10 @@
 import {DbServer} from './dbServer';
 
 export class MsDbServer extends DbServer {
-    constructor(dbConfig:any) {
-        super();
-    }
+	constructor(dbConfig: any) {
+		super();
+	}
+	initProcObjs(db:string): Promise<void> {return}
     sql(db:string, sql:string, params:any[]): Promise<any> {return}
 	sqlProc(db:string, procName:string, procSql:string): Promise<any> {return}
 	sqlDropProc(db:string, procName:string): Promise<any> {return}

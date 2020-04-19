@@ -10,18 +10,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../../core");
+const core_2 = require("../../core");
 function buildBuildRouter(router, rb) {
-    /*
-    rb.post(router, '/start',
-    async (runner:Runner, body:{enc:string}):Promise<void> => {
-        let {enc} = body;
-        setUqBuildSecret(enc);
-    });
-    rb.post(router, '/build-database',
-    async (runner:Runner, body:any):Promise<void> => {
-        await runner.buildDatabase();
-    });
-    */
     router.post('/start', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
             let { enc } = req.body;
@@ -39,7 +29,7 @@ function buildBuildRouter(router, rb) {
         try {
             let dbName = req.params.db;
             let db = new core_1.Db(rb.getDbName(dbName));
-            let runner = new core_1.Runner(dbName, db);
+            let runner = new core_2.BuildRunner(db);
             let exists = yield runner.buildDatabase();
             res.json({
                 ok: true,
@@ -69,27 +59,119 @@ function buildBuildRouter(router, rb) {
         }
         yield runner.reset();
     }));
-    rb.post(router, '/sql', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        //return this.db.sql(sql, params);
-        let { sql, params } = body;
-        return yield runner.sql(sql, params);
+    router.post('/sql', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            let dbName = req.params.db;
+            let db = new core_1.Db(rb.getDbName(dbName));
+            let runner = new core_2.BuildRunner(db);
+            let { sql, params } = req.body;
+            let result = yield runner.sql(sql, params);
+            res.json({
+                ok: true,
+                res: result
+            });
+        }
+        catch (err) {
+            res.json({ error: err });
+        }
     }));
-    rb.post(router, '/proc-sql', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        //return this.db.sql(sql, params);
-        let { name, proc } = body;
-        return yield runner.procSql(name, proc);
+    /*
+        rb.post(router, '/sql',
+            async (runner:EntityRunner, body:{sql:string, params:any[]}): Promise<any> => {
+            //return this.db.sql(sql, params);
+            let {sql, params} = body;
+            return await runner.sql(sql, params);
+        });
+    */
+    router.post('/proc-sql', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            let dbName = req.params.db;
+            let db = new core_1.Db(rb.getDbName(dbName));
+            let runner = new core_2.BuildRunner(db);
+            let { name, proc } = req.body;
+            let result = yield runner.procSql(name, proc);
+            res.json({
+                ok: true,
+                res: result
+            });
+        }
+        catch (err) {
+            res.json({ error: err });
+        }
     }));
-    rb.post(router, '/proc-core-sql', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        //return this.db.sql(sql, params);
-        let { name, proc } = body;
-        return yield runner.procCoreSql(name, proc);
+    /*
+        rb.post(router, '/proc-sql',
+        async (runner:EntityRunner, body:{name:string, proc:string}): Promise<any> => {
+            //return this.db.sql(sql, params);
+            let {name, proc} = body;
+            return await runner.procSql(name, proc);
+        });
+    */
+    router.post('/proc-core-sql', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            let dbName = req.params.db;
+            let db = new core_1.Db(rb.getDbName(dbName));
+            let runner = new core_2.BuildRunner(db);
+            let { name, proc } = req.body;
+            let result = yield runner.procCoreSql(name, proc);
+            res.json({
+                ok: true,
+                res: result
+            });
+        }
+        catch (err) {
+            res.json({ error: err });
+        }
     }));
-    rb.post(router, '/create-database', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        yield runner.createDatabase();
+    /*
+    rb.post(router, '/proc-core-sql',
+    async (runner:EntityRunner, body:{name:string, proc:string}): Promise<any> => {
+        let {name, proc} = body;
+        return await runner.procCoreSql(name, proc);
+    });
+    */
+    router.post('/create-database', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            let dbName = req.params.db;
+            let db = new core_1.Db(rb.getDbName(dbName));
+            let runner = new core_2.BuildRunner(db);
+            let result = yield runner.createDatabase();
+            res.json({
+                ok: true,
+                res: result
+            });
+        }
+        catch (err) {
+            res.json({ error: err });
+        }
     }));
-    rb.post(router, '/exists-databse', (runner) => __awaiter(this, void 0, void 0, function* () {
-        return yield runner.existsDatabase();
+    /*
+    rb.post(router, '/create-database',
+    async (runner:EntityRunner, body:any): Promise<void> => {
+        await runner.createDatabase();
+    });
+    */
+    router.post('/exists-database', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            let dbName = req.params.db;
+            let db = new core_1.Db(rb.getDbName(dbName));
+            let runner = new core_2.BuildRunner(db);
+            let result = yield runner.existsDatabase();
+            res.json({
+                ok: true,
+                res: result
+            });
+        }
+        catch (err) {
+            res.json({ error: err });
+        }
     }));
+    /*
+    rb.post(router, '/exists-databse',
+    async (runner:EntityRunner): Promise<boolean> => {
+        return await runner.existsDatabase();
+    });
+    */
     rb.post(router, '/set-setting', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         let promises = [];
         for (let i in body) {
@@ -136,13 +218,6 @@ function buildBuildRouter(router, rb) {
         let { data } = body;
         yield runner.tagSaveSys(data);
     }));
-    /*
-    rb.post(router, '/save-face',
-    async (runner:Runner, body:{bus:string, busOwner:string, busName:string, faceName:string}) => {
-        let {bus, busOwner, busName, faceName} = body;
-        await runner.saveFace(bus, busOwner, busName, faceName);
-    });
-    */
 }
 exports.buildBuildRouter = buildBuildRouter;
 ;

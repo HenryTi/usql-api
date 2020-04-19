@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import { Db } from "../db";
-import { Runner } from '../runner';
+import { EntityRunner } from '../runner';
 import { Field, Header } from './field';
 
 // 导入文件表头
@@ -14,7 +14,7 @@ import { Field, Header } from './field';
 export abstract class ImportData {
     // entity: 'product';
     // entity: 'product-pack'
-    static async exec(runner:Runner, unit:number, db: Db, source:string, entity:string, filePath: string): Promise<void> {
+    static async exec(runner:EntityRunner, unit:number, db: Db, source:string, entity:string, filePath: string): Promise<void> {
         let importData:ImportData;
         let parts = entity.split('.');
         entity = parts[0];
@@ -65,7 +65,7 @@ export abstract class ImportData {
     protected source: string;
     protected entity: string;
     protected div: string;
-    protected runner: Runner;
+    protected runner: EntityRunner;
 
     private readLine():any[] {
         let ret:string[] = [];

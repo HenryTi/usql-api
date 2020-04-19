@@ -1,9 +1,9 @@
 import { processSheetMessage } from "./processSheetMessage";
 import { pushToClient } from "./pushToClient";
 import { processBusMessage } from "./processBusMessage";
-import { Runner, Message } from "../../core";
+import { EntityRunner, Message } from "../../core";
 
-type MessageProcesser = (unitxRunner:Runner, msg: Message) => Promise<void>;
+type MessageProcesser = (unitxRunner:EntityRunner, msg: Message) => Promise<void>;
 
 export function messageProcesser(msg:Message):MessageProcesser  {
     switch (msg.type) {

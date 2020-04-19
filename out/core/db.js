@@ -81,6 +81,11 @@ class Db {
             }
         });
     }
+    initProcObjs() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.dbServer.initProcObjs(this.dbName);
+        });
+    }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
             //this.devLog('sql', params);
@@ -180,11 +185,14 @@ const dbCollection = (function () {
     return config.get(dbColl);
 })();
 function getDb(name) {
-    let db = getCacheDb(name);
-    if (db !== undefined)
-        return db;
-    let dbName = getDbName(name);
-    return dbs[name] = new Db(dbName);
+    return __awaiter(this, void 0, void 0, function* () {
+        let db = getCacheDb(name);
+        if (db !== undefined)
+            return db;
+        let dbName = getDbName(name);
+        db = new Db(dbName);
+        return dbs[name] = db;
+    });
 }
 exports.getDb = getDb;
 function getUnitxDb(testing) {
@@ -244,11 +252,15 @@ class DbLogger {
     constructor(minSpan = 0) {
         this.tick = Date.now();
         this.spans = [];
-        this.db = new Db(undefined);
         this.minSpan = minSpan;
     }
     open(log) {
-        return new SpanLog(this, log);
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.db === undefined) {
+                this.db = new Db(undefined);
+            }
+            return new SpanLog(this, log);
+        });
     }
     add(span) {
         let { ms: count, log } = span;

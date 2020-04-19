@@ -182,6 +182,11 @@ function buildTuidRouter(router, rb) {
         yield runner.importData(unit, user, body.source, entity, filePath);
         return;
     }));
+    rb.entityPost(router, tuidType, '-prop/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { id, prop, value } = body;
+        yield runner.saveProp(name, unit, user, id, prop, value);
+        return;
+    }));
 }
 exports.buildTuidRouter = buildTuidRouter;
 ;

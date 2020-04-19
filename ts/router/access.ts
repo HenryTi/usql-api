@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { Runner, RouterBuilder } from '../core';
+import { EntityRunner, RouterBuilder } from '../core';
 
 const accessType = 'access';
 
 export function buildAccessRouter(router:Router, rb:RouterBuilder) {
     rb.entityGet(router, accessType, '', 
-    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         try {
             let {acc} = body;
             let accs:string[] = undefined;
@@ -24,7 +24,7 @@ export function buildAccessRouter(router:Router, rb:RouterBuilder) {
     });
 
     rb.entityGet(router, 'entities', '', 
-    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:Runner, body:any, schema:any) => {
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let entities = await runner.getEntities(unit);
         return entities;
     });

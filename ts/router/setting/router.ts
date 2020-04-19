@@ -1,6 +1,6 @@
 import { Router } from 'express';
 //import { checkRunner } from '../router';
-import { Runner, RouterBuilder } from '../../core';
+import { EntityRunner, RouterBuilder } from '../../core';
 //import { post } from '../process';
 
 //export const router: Router = Router({ mergeParams: true });

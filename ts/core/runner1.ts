@@ -1,3 +1,4 @@
+/*
 import * as _ from 'lodash';
 import { Db, isDevelopment } from './db';
 import { packReturns, packParam } from '.';
@@ -5,7 +6,6 @@ import { ImportData } from './importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from './inBusAction';
 import { Net } from './net';
 import { centerApi } from './centerApi';
-//import { Bench } from './logger';
 
 interface EntityAccess {
     name: string;
@@ -37,7 +37,7 @@ interface Face {
     query?: boolean;
 }
 
-export class Runner {
+export class EntityRunner {
     protected db:Db;
     private access:any;
     private schemas: {[entity:string]: {type:string; from:string; call:any; run:any;}};
@@ -204,14 +204,6 @@ export class Runner {
         if (params !== undefined) p.push(...params);
         return await this.db.call(proc, p);
     }
-
-    private async unitCallEx(proc:string, unit:number, ...params:any[]): Promise<any> {
-        let p:any[] = [];
-        //if (this.hasUnit === true) 
-        p.push(unit);
-        if (params !== undefined) p.push(...params);
-        return await this.db.callEx(proc, p);
-    }
     private async unitUserCallEx(proc:string, unit:number, user:number, ...params:any[]): Promise<any> {
         let p:any[] = [];
         //if (this.hasUnit === true) 
@@ -361,11 +353,6 @@ export class Runner {
     async tuidGetArrAll(tuid:string, arr:string, unit:number, user:number, owner:number): Promise<any> {
         return await this.unitUserCall('tv_' + tuid + '_' + arr + '$all', unit, user, owner);
     }
-    /*
-    async tuidProxyGet(tuid:string, unit:number, user:number, id:number, type:string): Promise<any> {
-        return await this.unitUserCall('tv_' + tuid + '$proxy', unit, user, id, type);
-    }
-    */
     async tuidIds(tuid:string, arr:string, unit:number, user:number, ids:string): Promise<any> {
         let proc = 'tv_' + tuid;
         if (arr !== '$') proc += '_' + arr;
@@ -391,7 +378,11 @@ export class Runner {
     async tuidSeach(tuid:string, unit:number, user:number, arr:string, key:string, pageStart:number, pageSize:number): Promise<any> {
         let proc = 'tv_' + tuid + '$search';
         return await this.unitUserTablesFromProc(proc, unit, user, key||'', pageStart, pageSize);
-    }
+	}
+	async saveProp(tuid:string, unit:number, user:number, id:number, prop:string, value:any) {
+		let proc = 'tv_' + tuid + '$prop_' + prop;
+		await this.unitUserCall(proc, unit, user, id, prop, value);
+	}	
     async tuidArrSeach(tuid:string, unit:number, user:number, arr:string, ownerId:number, key:string, pageStart:number, pageSize:number): Promise<any> {
         let proc = `tv_${tuid}_${arr}$search`;
         return await this.unitUserTablesFromProc(proc, unit, user, ownerId, key||'', pageStart, pageSize);
@@ -565,7 +556,7 @@ export class Runner {
     }
     async importData(unit:number, user:number, source:string, entity:string, filePath: string): Promise<void> {
         await ImportData.exec(this, unit, this.db, source, entity, filePath);
-    }
+	}
 
     async reset() {
         await this.net.resetRunnerAfterCompile(this);
@@ -959,3 +950,4 @@ export class Runner {
         this.actionConvertSchemas[name] = value;
     }
 }
+*/

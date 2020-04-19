@@ -1,8 +1,8 @@
-import { Runner, Net, isDevelopment, centerApi, SheetQueueData, BusMessage } from "../core";
+import { EntityRunner, Net, isDevelopment, centerApi, SheetQueueData, BusMessage } from "../core";
 import { Finish } from "./finish";
 import { getErrorString } from "../tool";
 
-export async function queueOut(runner: Runner): Promise<void> {
+export async function queueOut(runner: EntityRunner): Promise<void> {
     try {
         let start = 0;
         let count = 0;
@@ -73,7 +73,7 @@ export async function queueOut(runner: Runner): Promise<void> {
     }
 }
 
-async function processItem(runner:Runner, unit:number, id:number, action:string, subject:string, content:string, update_time:Date): Promise<void> {
+async function processItem(runner:EntityRunner, unit:number, id:number, action:string, subject:string, content:string, update_time:Date): Promise<void> {
     let json:any = {};
     let items = content.split('\n\t\n');
     for (let item of items) {
@@ -93,7 +93,7 @@ function jsonValues(content:string):any {
     return json;
 }
 
-async function app(runner:Runner, unit:number, id:number, content:string):Promise<void> {
+async function app(runner:EntityRunner, unit:number, id:number, content:string):Promise<void> {
     await centerApi.send({
         type: 'app',
         unit: unit,
@@ -101,7 +101,7 @@ async function app(runner:Runner, unit:number, id:number, content:string):Promis
     });
 }
 
-async function email(runner:Runner, unit:number, id:number, content:string): Promise<void> {
+async function email(runner:EntityRunner, unit:number, id:number, content:string): Promise<void> {
     let values = jsonValues(content);
     let {$isUser, $to, $cc, $bcc, $templet} = values;
     if (!$to) return;
@@ -125,7 +125,7 @@ async function email(runner:Runner, unit:number, id:number, content:string): Pro
     });
 }
 
-async function bus(runner:Runner, unit:number, id:number, subject:string, content:string): Promise<void> {
+async function bus(runner:EntityRunner, unit:number, id:number, subject:string, content:string): Promise<void> {
     if (!unit) return;
     
     let parts = subject.split('/');
@@ -158,7 +158,7 @@ async function bus(runner:Runner, unit:number, id:number, subject:string, conten
     await runner.net.sendToUnitx(unit, message);
 }
 
-async function sheet(runner: Runner, content:string):Promise<void> {
+async function sheet(runner: EntityRunner, content:string):Promise<void> {
     let sheetQueueData:SheetQueueData = JSON.parse(content);
     let {id, sheet, state, action, unit, user, flow} = sheetQueueData;
     let result = await runner.sheetAct(sheet, state, action, unit, user, id, flow);

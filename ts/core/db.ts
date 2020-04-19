@@ -22,7 +22,8 @@ export class Db {
         this.dbName = dbName;
         this.dbServer = this.createDbServer();
         this.isExists = false;
-    }
+	}
+
     getDbName():string {return this.dbName}
     protected getDbConfig() {
         let ret = _.clone(config.get<any>(const_connection));
@@ -66,7 +67,10 @@ export class Db {
             if (sqlMessage) msg += ' ' + sqlMessage;
             await this.dbServer.call('$uq', 'performance', [Date.now(), msg, 0]);
         }
-    }
+	}
+	async initProcObjs():Promise<void> {
+		await this.dbServer.initProcObjs(this.dbName);
+	}
     async sql(sql:string, params:any[]): Promise<any> {
         //this.devLog('sql', params);
         return await this.dbServer.sql(this.dbName, sql, params);
@@ -144,11 +148,12 @@ const dbCollection:{[name:string]:string} = (function () {
     return config.get<any>(dbColl);
 })();
 
-export function getDb(name:string):Db {
+export async function getDb(name:string):Promise<Db> {
     let db = getCacheDb(name);
     if (db !== undefined) return db;
-    let dbName = getDbName(name);
-    return dbs[name] = new Db(dbName);
+	let dbName = getDbName(name);
+	db = new Db(dbName);
+    return dbs[name] = db;
 }
 
 export function getUnitxDb(testing:boolean):Db {
@@ -219,11 +224,13 @@ class DbLogger {
     private spans:SpanLog[] = [];
 
     constructor(minSpan:number = 0) {
-        this.db = new Db(undefined);
         this.minSpan = minSpan;
     }
 
-    open(log:string): SpanLog {
+    async open(log:string): Promise<SpanLog> {
+		if (this.db === undefined) {
+			this.db = new Db(undefined);
+		}
         return new SpanLog(this, log);
     }
 
