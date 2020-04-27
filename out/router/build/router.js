@@ -20,6 +20,8 @@ function buildBuildRouter(router, rb) {
             yield core_1.testNet.runnerCompiling(db);
             let { enc } = req.body;
             core_1.setUqBuildSecret(enc);
+            let runner = new core_2.BuildRunner(db);
+            yield runner.initProcObjs();
             res.json({
                 ok: true,
                 res: undefined

@@ -12,8 +12,10 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
 			let db = Db.db(rb.getDbName(dbName));
 			await prodNet.runnerCompiling(db);
 			await testNet.runnerCompiling(db);
-				let {enc} = req.body;
-            setUqBuildSecret(enc);
+			let {enc} = req.body;
+			setUqBuildSecret(enc);
+			let runner = new BuildRunner(db);
+			await runner.initProcObjs();
             res.json({
                 ok: true,
                 res: undefined

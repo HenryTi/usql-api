@@ -87,7 +87,10 @@ export class BuildRunner {
 		let ret = await this.db.createDatabase();
 		await this.db.initProcObjs();
 		return ret;
-    }
+	}
+	async initProcObjs() {
+		await this.db.initProcObjs();
+	}
     async existsDatabase(): Promise<boolean> {
         return await this.db.exists();
     }

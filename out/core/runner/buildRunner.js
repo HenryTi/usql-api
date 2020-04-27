@@ -111,6 +111,11 @@ class BuildRunner {
             return ret;
         });
     }
+    initProcObjs() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.initProcObjs();
+        });
+    }
     existsDatabase() {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.exists();
