@@ -11,9 +11,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 class BuildRunner {
     constructor(db) {
+        this.setting = {};
         this.db = db;
     }
     getDb() { return this.db.getDbName(); }
+    initSetting() {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.call('tv_$init_setting', []);
+        });
+    }
+    setSetting(unit, name, value) {
+        return __awaiter(this, void 0, void 0, function* () {
+            name = name.toLowerCase();
+            yield this.unitCall('tv_$set_setting', unit, name, value);
+            if (unit === 0) {
+                let n = Number(value);
+                this.setting[name] = n === NaN ? value : n;
+            }
+        });
+    }
+    getSetting(unit, name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            name = name.toLowerCase();
+            let ret = yield this.unitTableFromProc('tv_$get_setting', unit, name);
+            if (ret.length === 0)
+                return undefined;
+            let v = ret[0].value;
+            if (unit === 0) {
+                let n = Number(v);
+                v = this.setting[name] = isNaN(n) === true ? v : n;
+            }
+            return v;
+        });
+    }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -39,11 +69,12 @@ class BuildRunner {
     procCoreSql(procName, procSql) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                //let sqlDrop = 'DROP PROCEDURE IF EXISTS ' + procName;
-                //await this.db.sql(sqlDrop, undefined);
                 yield this.db.sqlProc(procName, procSql);
-                yield this.db.sqlDropProc(procName);
-                return yield this.db.sql(procSql, undefined);
+                yield this.db.buildProc(procName, procSql);
+                /*
+                await this.db.sqlDropProc(procName);
+                return await this.db.sql(procSql, undefined);
+                */
             }
             catch (err) {
                 debugger;

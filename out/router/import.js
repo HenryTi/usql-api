@@ -68,7 +68,9 @@ function buildImportRouter(router, rb) {
 }
 exports.buildImportRouter = buildImportRouter;
 const uploadPath = config.get("uploadPath");
-var upload = multer({ dest: uploadPath });
+var upload = (function () {
+    return multer({ dest: uploadPath });
+})();
 /*
 async function uploadImport(req:Request, res:Response) {
     let userToken:User = (req as any).user;

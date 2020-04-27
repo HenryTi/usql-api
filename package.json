@@ -28,7 +28,7 @@
     "@types/mysql": "^2.15.5",
     "body-parser": "^1.18.3",
     "bull": "^3.4.8",
-    "config": "^1.31.0",
+    "config": "^3.3.1",
     "cors": "^2.8.3",
     "express": "^4.16.4",
     "express-jwt": "^5.3.1",

@@ -13,7 +13,7 @@ const core_1 = require("../core");
 const resDbName = '$res';
 function initResDb() {
     return __awaiter(this, void 0, void 0, function* () {
-        let db = new core_1.Db(resDbName);
+        let db = core_1.Db.db(resDbName);
         let runner = new core_1.EntityRunner(resDbName, db);
         yield runner.initResDb(resDbName);
     });
@@ -23,7 +23,7 @@ let resDbRunner;
 function getResDbRunner() {
     return __awaiter(this, void 0, void 0, function* () {
         if (resDbRunner === undefined) {
-            let db = new core_1.Db(resDbName);
+            let db = core_1.Db.db(resDbName);
             resDbRunner = new core_1.EntityRunner(resDbName, db);
         }
         return resDbRunner;

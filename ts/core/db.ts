@@ -3,25 +3,91 @@ import * as _ from 'lodash';
 import {DbServer} from './dbServer';
 import {MsDbServer} from './ms';
 import {MyDbServer} from './my';
+import { EntityRunner } from './runner';
 
 const const_connectionUnitx = 'connection_$unitx';
 const const_connection = 'connection';
 const const_development = 'development';
+const const_devdo = 'devdo';
 const const_unitx = '$unitx';
 
-export const isDevelopment = (function ():boolean {
-    return (process.env.NODE_ENV === const_development);
-})();
+function isNodeEnvEqu(env:string):boolean {
+	let nodeEnv = process.env.NODE_ENV as string;
+	if (!nodeEnv) return false;
+	return (nodeEnv.toLowerCase() === env);
+}
+
+export const isDevelopment:boolean = isNodeEnvEqu(const_development);
+export const isDevdo:boolean = isNodeEnvEqu(const_devdo);
 
 export class Db {
+	private static dbs:{[name:string]:Db} = {
+	}
+	// 数据库名称对照表
+	private static dbCollection:{[name:string]:string} = {}
+	/*(function () {
+		const dbColl = "db";
+		if (!config.has(dbColl)) return {};
+		return config.get<any>(dbColl);
+	})();*/
+	/*
+	private static getDb(name:string):Db {
+		let db = Db.dbs[name]; //.getCacheDb(name);
+		if (db !== undefined) return db;
+		let dbName = Db.getDbName(name);
+		db = new Db(dbName);
+		return Db.dbs[name] = db;
+	}*/
+	
+	/*
+	private static getUnitxDb(testing:boolean):Db {
+		let name = const_unitx;
+		if (testing === true) name += '$test';
+		let db = Db.dbs[name]; //.getCacheDb(name);
+		if (db !== undefined) return db;
+		let dbName = Db.getDbName(name);
+		return Db.dbs[name] = new UnitxDb(dbName);
+	}*/
+	
+	private static getDbName(name:string): string {
+		return Db.dbCollection[name] || name;
+	}
+	
+	/*
+	private static getCacheDb(name:string):Db {
+		return Db.dbs[name];
+	}*/
+	
+	static db(name:string):Db {
+		name = name || $uq;
+		let db = Db.dbs[name]; //.getCacheDb(name);
+		if (db !== undefined) return db;
+		let dbName = Db.getDbName(name);
+		db = new Db(dbName);
+		return Db.dbs[name] = db;
+	}
+
+	static unitxDb(testing:boolean):Db {
+		let name = const_unitx;
+		if (testing === true) name += '$test';
+		let db = Db.dbs[name]; // getCacheDb(name);
+		if (db !== undefined) return db;
+		let dbName = Db.getDbName(name);
+		return Db.dbs[name] = new UnitxDb(dbName);
+	}
+
     private dbName: string;
     private isExists: boolean;
     private dbServer:DbServer;
 
-    constructor(dbName: string) {
+    protected constructor(dbName: string) {
         this.dbName = dbName;
         this.dbServer = this.createDbServer();
         this.isExists = false;
+	}
+
+	reset() {
+		this.dbServer.reset();
 	}
 
     getDbName():string {return this.dbName}
@@ -35,8 +101,8 @@ export class Db {
         let dbConfig:any = this.getDbConfig();
         if (dbConfig === undefined) throw 'dbConfig not defined';
         switch (sqlType) {
-            case 'mysql': return new MyDbServer(dbConfig);
-            case 'mssql': return new MsDbServer(dbConfig);
+            case 'mysql': return new MyDbServer(this.dbName, dbConfig);
+            case 'mssql': return new MsDbServer(this.dbName, dbConfig);
         }
     }
 
@@ -44,11 +110,6 @@ export class Db {
         if (this.isExists === true) return true;
         return this.isExists = await this.dbServer.existsDatabase(this.dbName);
     }
-    /*
-    private devLog(proc:string, params:any[]) {
-        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params && params.join(','))
-    }
-    */
     async buildTuidAutoId(): Promise<void> {
         await this.dbServer.buildTuidAutoId(this.dbName);
     }
@@ -81,7 +142,10 @@ export class Db {
     async sqlProc(procName:string, procSql:string): Promise<any> {
         return await this.dbServer.sqlProc(this.dbName, procName, procSql);
     }
-    async call(proc:string, params:any[]): Promise<any> {
+    async buildProc(procName:string, procSql:string): Promise<void> {
+        await this.dbServer.buildProc(this.dbName, procName, procSql);
+	}
+	async call(proc:string, params:any[]): Promise<any> {
         //this.devLog(proc, params);
         return await this.dbServer.call(this.dbName, proc, params);
     }
@@ -129,51 +193,6 @@ class UnitxDb extends Db {
     }
 }
 
-const dbs:{[name:string]:Db} = {
-}
-
-/*
-const projects = config.get<any>("projects");
-
-export function dbNameFromProject(projectName:string) {
-    let proj = projects[projectName];
-    return proj && proj.db;
-}
-*/
-
-// 数据库名称对照表
-const dbCollection:{[name:string]:string} = (function () {
-    const dbColl = "db";
-    if (!config.has(dbColl)) return {};
-    return config.get<any>(dbColl);
-})();
-
-export async function getDb(name:string):Promise<Db> {
-    let db = getCacheDb(name);
-    if (db !== undefined) return db;
-	let dbName = getDbName(name);
-	db = new Db(dbName);
-    return dbs[name] = db;
-}
-
-export function getUnitxDb(testing:boolean):Db {
-    let name = const_unitx;
-    if (testing === true) name += '$test';
-    let db = getCacheDb(name);
-    if (db !== undefined) return db;
-    let dbName = getDbName(name);
-    return dbs[name] = new UnitxDb(dbName);
-}
-
-function getDbName(name:string): string {
-    return dbCollection[name] || name;
-}
-
-function getCacheDb(name:string):Db {
-    return dbs[name];
-}
-
-
 export class SpanLog {
     private logger: DbLogger
     private readonly _log: string;
@@ -185,13 +204,6 @@ export class SpanLog {
         this.logger = logger;
         if (log) {
             if (log.length > 2048) log = log.substr(0, 2048);
-            /*
-            if (log.indexOf('\r')>=0) {
-                let reg = new RegExp('\r' , "g" );
-                log = log.replace(reg, '');
-                if (log.indexOf('\r')>=0) debugger;
-            }
-            */
         }
         this._log = log;
         this.tick = Date.now();
@@ -215,6 +227,14 @@ export class SpanLog {
     }
 }
 
+const $uq = '$uq';
+
+export async function init$UqDb() {
+	let db = Db.db($uq);
+    let runner = new EntityRunner($uq, db);
+    await runner.init$UqDb();
+}
+
 const tSep = '\r';
 const nSep = '\r\r';
 class DbLogger {
@@ -229,7 +249,7 @@ class DbLogger {
 
     async open(log:string): Promise<SpanLog> {
 		if (this.db === undefined) {
-			this.db = new Db(undefined);
+			this.db = Db.db(undefined);
 		}
         return new SpanLog(this, log);
     }

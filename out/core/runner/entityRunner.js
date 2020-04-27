@@ -20,15 +20,20 @@ class EntityRunner {
         this.roleVersions = {};
         this.hasPullEntities = false;
         this.hasSheet = false;
+        this.isCompiling = false;
         this.parametersBusCache = {};
         this.actionConvertSchemas = {};
         this.name = name;
         this.db = db;
         this.net = net;
-        this.setting = {};
+        //this.setting = {};
         this.modifyMaxes = {};
     }
     getDb() { return this.db.getDbName(); }
+    reset() {
+        this.isCompiling = false;
+        this.db.reset();
+    }
     getRoles(unit, app, user, inRoles) {
         return __awaiter(this, void 0, void 0, function* () {
             let [rolesBin, rolesVersion] = inRoles.split('.');
@@ -82,42 +87,38 @@ class EntityRunner {
             }
         });
     }
-    sql(sql, params) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                return yield this.db.sql(sql, params || []);
-            }
-            catch (err) {
-                debugger;
-                throw err;
-            }
-        });
+    /*
+    private async sql(sql:string, params:any[]): Promise<any> {
+        try {
+            return await this.db.sql(sql, params || []);
+        }
+        catch (err) {
+            debugger;
+            throw err;
+        }
     }
-    procSql(procName, procSql) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                return yield this.db.sqlProc(procName, procSql);
-            }
-            catch (err) {
-                debugger;
-                throw err;
-            }
-        });
+    private async procSql(procName:string, procSql:string): Promise<any> {
+        try {
+            return await this.db.sqlProc(procName, procSql);
+        }
+        catch (err) {
+            debugger;
+            throw err;
+        }
     }
-    procCoreSql(procName, procSql) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                //let sqlDrop = 'DROP PROCEDURE IF EXISTS ' + procName;
-                //await this.db.sql(sqlDrop, undefined);
-                yield this.db.sqlDropProc(procName);
-                return yield this.db.sql(procSql, undefined);
-            }
-            catch (err) {
-                debugger;
-                throw err;
-            }
-        });
+    private async procCoreSql(procName:string, procSql:string): Promise<any> {
+        try {
+            //let sqlDrop = 'DROP PROCEDURE IF EXISTS ' + procName;
+            //await this.db.sql(sqlDrop, undefined);
+            await this.db.sqlDropProc(procName);
+            return await this.db.sql(procSql, undefined);
+        }
+        catch (err) {
+            debugger;
+            throw err;
+        }
     }
+    */
     log(unit, subject, content) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.db.log(unit, this.net.getUqFullName(this.uq), subject, content);
@@ -137,17 +138,14 @@ class EntityRunner {
     private async buildDatabase(): Promise<boolean> {
         return await this.db.buildDatabase();
     }
+    
+    async createDatabase(): Promise<void> {
+        return await this.db.createDatabase();
+    }
+    async existsDatabase(): Promise<boolean> {
+        return await this.db.exists();
+    }
     */
-    createDatabase() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.createDatabase();
-        });
-    }
-    existsDatabase() {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield this.db.exists();
-        });
-    }
     buildTuidAutoId() {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.db.buildTuidAutoId();
@@ -262,35 +260,30 @@ class EntityRunner {
             yield this.db.init$UqDb();
         });
     }
-    initSetting() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.call('tv_$init_setting', []);
-        });
-    }
-    setSetting(unit, name, value) {
-        return __awaiter(this, void 0, void 0, function* () {
+    /*
+        async initSetting():Promise<void> {
+            await this.db.call('tv_$init_setting', []);
+        }
+        async setSetting(unit:number, name: string, value: string): Promise<void> {
             name = name.toLowerCase();
-            yield this.unitCall('tv_$set_setting', unit, name, value);
+            await this.unitCall('tv_$set_setting', unit, name, value);
             if (unit === 0) {
                 let n = Number(value);
-                this.setting[name] = n === NaN ? value : n;
+                this.setting[name] = n === NaN? value : n;
             }
-        });
-    }
-    getSetting(unit, name) {
-        return __awaiter(this, void 0, void 0, function* () {
+        }
+        async getSetting(unit:number, name: string):Promise<any> {
             name = name.toLowerCase();
-            let ret = yield this.unitTableFromProc('tv_$get_setting', unit, name);
-            if (ret.length === 0)
-                return undefined;
+            let ret = await this.unitTableFromProc('tv_$get_setting', unit, name);
+            if (ret.length===0) return undefined;
             let v = ret[0].value;
             if (unit === 0) {
                 let n = Number(v);
-                v = this.setting[name] = isNaN(n) === true ? v : n;
+                v = this.setting[name] = isNaN(n)===true? v : n;
             }
             return v;
-        });
-    }
+        }
+    */
     loadSchemas(hasSource) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.tablesFromProc('tv_$entitys', [hasSource]);
@@ -662,13 +655,14 @@ class EntityRunner {
             yield importData_1.ImportData.exec(this, unit, this.db, source, entity, filePath);
         });
     }
-    reset() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.net.resetRunnerAfterCompile(this);
-            //if (this.buses) this.buses.hasError = false;
-            //this.schemas = undefined;
-        });
+    equDb(db) {
+        return this.db === db;
     }
+    /*
+        async reset() {
+            await this.net.resetRunnerAfterCompile(this);
+        }
+    */
     init() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.schemas !== undefined)

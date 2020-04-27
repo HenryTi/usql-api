@@ -30,9 +30,8 @@ function jobsLoopNoWait() {
 exports.jobsLoopNoWait = jobsLoopNoWait;
 function startJobsLoop() {
     return __awaiter(this, void 0, void 0, function* () {
-        return;
-        let db = new core_1.Db(undefined);
-        if (core_1.isDevelopment === true) {
+        let db = core_1.Db.db(undefined);
+        if (core_1.isDevelopment === true || core_1.isDevdo === true) {
             // 只有在开发状态下，才可以屏蔽jobs
             return;
             console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);

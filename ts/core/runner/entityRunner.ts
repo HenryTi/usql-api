@@ -37,14 +37,14 @@ interface Face {
 }
 
 export class EntityRunner {
-    protected db:Db;
+	protected db:Db;
     private access:any;
     private schemas: {[entity:string]: {type:string; from:string; call:any; run:any;}};
     private accessSchemaArr: any[];
     private role: any;
     private tuids: {[name:string]: any};
     private busArr: any[];
-    private setting: {[name:string]: any};
+    //private setting: {[name:string]: any};
     private entityColl: {[id:number]: EntityAccess};
     private sheetRuns: {[sheet:string]: SheetRun};
     private readonly modifyMaxes: {[unit:number]: number};
@@ -66,17 +66,23 @@ export class EntityRunner {
     hasPullEntities: boolean = false;
     net: Net;
     hasSheet: boolean = false;
+	isCompiling:boolean = false;
 
     constructor(name:string, db:Db, net:Net = undefined) {
         this.name = name;
         this.db = db;
         this.net = net;
-        this.setting = {};
+        //this.setting = {};
         this.modifyMaxes = {};
     }
 
-    getDb():string {return this.db.getDbName()}
+	getDb():string {return this.db.getDbName()}
 
+	reset() {
+		this.isCompiling = false;
+		this.db.reset();
+	}
+	
     async getRoles(unit:number, app:any, user:number, inRoles:string): Promise<{roles:number, version:number}> {
         let [rolesBin, rolesVersion] = inRoles.split('.');
         let unitRVs = this.roleVersions[unit];
@@ -125,7 +131,7 @@ export class EntityRunner {
             this.modifyMaxes[unit] = null;
         }
     }
-
+	/*
     private async sql(sql:string, params:any[]): Promise<any> {
         try {
             return await this.db.sql(sql, params || []);
@@ -155,7 +161,8 @@ export class EntityRunner {
             debugger;
             throw err;
         }
-    }
+	}
+	*/
     async log(unit:number, subject:string, content:string):Promise<void> {
         await this.db.log(unit, this.net.getUqFullName(this.uq), subject, content);
     }
@@ -169,16 +176,17 @@ export class EntityRunner {
     private async buildDatabase(): Promise<boolean> {
         return await this.db.buildDatabase();
 	}
-	*/
+	
     async createDatabase(): Promise<void> {
         return await this.db.createDatabase();
     }
     async existsDatabase(): Promise<boolean> {
         return await this.db.exists();
     }
+	*/
     async buildTuidAutoId(): Promise<void> {
         await this.db.buildTuidAutoId();
-    }
+	}
     async tableFromProc(proc:string, params:any[]): Promise<any[]> {
         return await this.db.tableFromProc('tv_' + proc, params);
     }
@@ -258,7 +266,8 @@ export class EntityRunner {
     }
     async init$UqDb(): Promise<void> {
         await this.db.init$UqDb();
-    }
+	}
+/*	
     async initSetting():Promise<void> {
         await this.db.call('tv_$init_setting', []);
     }
@@ -281,7 +290,7 @@ export class EntityRunner {
         }
         return v;
     }
-
+*/
     async loadSchemas(hasSource:number): Promise<any[][]> {
         return await this.db.tablesFromProc('tv_$entitys', [hasSource]);
     }
@@ -559,12 +568,14 @@ export class EntityRunner {
         await ImportData.exec(this, unit, this.db, source, entity, filePath);
 	}
 
+	equDb(db:Db) {
+		return this.db === db;
+	}
+/*
     async reset() {
         await this.net.resetRunnerAfterCompile(this);
-        //if (this.buses) this.buses.hasError = false;
-        //this.schemas = undefined;
     }
-
+*/
     async init() {
         if (this.schemas !== undefined) return;
         try {

@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Net, Db, isDevelopment, prodNet, testNet } from '../core';
+import { Net, Db, isDevelopment, prodNet, testNet, isDevdo } from '../core';
 import { pullEntities } from './pullEntities';
 import { pullBus } from './pullBus';
 import { queueIn } from './queueIn';
@@ -22,9 +22,8 @@ export function jobsLoopNoWait() {
 }
 
 export async function startJobsLoop(): Promise<void> {
-	return;
-	let db = new Db(undefined);
-    if (isDevelopment as any === true) {
+	let db = Db.db(undefined);
+    if ( isDevelopment === true || isDevdo === true) {
         // 只有在开发状态下，才可以屏蔽jobs
         return;
         console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
@@ -43,7 +42,7 @@ export async function startJobsLoop(): Promise<void> {
             let uqs = await db.uqDbs();
             for (let uqRow of uqs) {
                 let {db:uqDb} = uqRow;
-                if (isDevelopment === true) {
+                if (isDevelopment as any === true) {
                     await db.setDebugJobs();
                 }
                 console.info('====== job loop for ' + uqDb + '======');

@@ -33,13 +33,44 @@ const sqls_5 = {
 	performanceExists: `SELECT name FROM mysql.proc WHERE db='$uq' AND name='performance';`,
 };
 
+const collationConnection = `
+	SET character_set_client = 'utf8';
+	SET collation_connection = 'utf8_unicode_ci';
+`;
+
+const sysProcColl = {
+	tv_$entitys: true,
+	tv_$entity: true,
+	tv_$entity_version: true,
+	tv_$entity_validate: true,
+	tv_$entity_no: true,
+	tv_$init_setting: true,
+	tv_$set_setting: true,
+	tv_$get_setting: true,
+	tv_$const_strs: true,
+	tv_$const_str: true,
+	tv_$tag_values: true,
+	tv_$tag_type: true,
+	tv_$tag_save_sys: true,
+	tv_$tag_save: true,
+};
+
 export class MyDbServer extends DbServer {
+	private dbName: string;
 	private dbConfig: any;
     private pool: Pool;
-    constructor(dbConfig:any) {
+    constructor(dbName:string, dbConfig:any) {
 		super();
+		this.dbName = dbName;
 		this.dbConfig = dbConfig;
+		this.resetProcColl();
 	}
+
+	private resetProcColl() {
+		this.procColl = _.merge({}, sysProcColl);
+	}
+
+	reset():void { this.resetProcColl();};
 
 	private async getPool(dbConfig: any): Promise<Pool> {
 		for (let p of pools) {
@@ -49,11 +80,12 @@ export class MyDbServer extends DbServer {
 		let conf = _.clone(dbConfig);
 		conf.timezone = 'UTC';
 		conf.typeCast = castField;
-		let newPool = await this.createPool(conf);
+		//let newPool = await this.createPool(conf);
+		let newPool = createPool(conf);
 		pools.push({config: dbConfig, pool: newPool});
 		return newPool;
 	}
-
+/*
 	private async createPool(dbConfig:any):Promise<Pool> {
 		return await new Promise<Pool>((resolve, reject) => {
 			let newPool = createPool(dbConfig);
@@ -70,7 +102,7 @@ export class MyDbServer extends DbServer {
 			`, handleResponse);
 		});
 	}
-
+*/
     private async exec(sql:string, values:any[], log?: SpanLog): Promise<any> {
 		if (this.pool === undefined) {
 			this.pool = await this.getPool(this.dbConfig);
@@ -123,38 +155,45 @@ export class MyDbServer extends DbServer {
                     return;
                 }
             }
-            this.pool.query(sql, values, handleResponse);
+			//this.pool.query(sql, values, handleResponse);
+			this.pool.getConnection(function(err, connection) {
+				if (err) {
+					reject(err);
+				}
+				else {
+					//connection.query(collationConnection, function(errCollation) {
+					//if (errCollation) reject(collationConnection);
+					connection.query(sql, values, function(error, results) {
+						//(results as any[]).shift();
+						//(results as any[]).shift();
+						//console.log(sql, results, error);
+						connection.release();
+						handleResponse(error, results);
+					});
+					//});
+				}
+			})
         });
     }
     async sql(db:string, sql:string, params:any[]): Promise<any> {
-        let result = await this.exec('use `'+db+'`;'+sql, params);
+		//let result = await this.exec('use `'+db+'`;'+sql, params);
+		let result = await this.exec(sql, params);
+		return result;
+		/*
         if (Array.isArray(result) === false) return [];
         let arr = result as any[];
         arr.shift();
         if (arr.length === 1) return arr[0];
-        return arr;
+		return arr;
+		*/
 	}
 	async sqlDropProc(db:string, procName:string): Promise<any> {
-		let sql = 'use `'+db+'`;' + 'DROP PROCEDURE IF EXISTS ' + procName;
+		//let sql = 'use `'+db+'`;' + 'DROP PROCEDURE IF EXISTS ' + procName;
+		let sql = `DROP PROCEDURE IF EXISTS  \`${db}\`.\`${procName}\``;
 		await this.exec(sql, []);
 	}
 
-	private procColl:{[procName:string]:boolean} = {
-        tv_$entitys: true,
-        tv_$entity: true,
-        tv_$entity_version: true,
-        tv_$entity_validate: true,
-		tv_$entity_no: true,
-        tv_$init_setting: true,
-        tv_$set_setting: true,
-        tv_$get_setting: true,
-        tv_$const_strs: true,
-        tv_$const_str: true,
-		tv_$tag_values: true,
-		tv_$tag_type: true,
-        tv_$tag_save_sys: true,
-        tv_$tag_save: true,
-	};
+	private procColl:{[procName:string]:boolean};
 	private buidlCallProcSql(db:string, proc:string, params:any[]):string {
         let c = 'call `'+db+'`.`'+proc+'`(';
         let sql = c;
@@ -181,6 +220,13 @@ export class MyDbServer extends DbServer {
 		this.procColl[procName.toLowerCase()] = isOk;
 	}
 
+	async buildProc(db:string, procName:string, procSql:string):Promise<any> {
+		let drop = `USE \`${db}\`; DROP PROCEDURE IF EXISTS \`${db}\`.\`${procName}\`;`;
+		await this.sql(db, drop + collationConnection + procSql, undefined);
+		// clear changed flag
+		await this.callProcBase(db, 'tv_$proc_save', [db, procName, undefined]);
+	}
+
     private async execProc(db:string, proc:string, params:any[]): Promise<any> {
 		if (db[0] !== '$') {
 			let procLower = proc.toLowerCase();
@@ -197,10 +243,18 @@ export class MyDbServer extends DbServer {
 				if (changed === 1) {
 					// await this.sqlDropProc(db, proc);
 					let sql = r0['proc'];
+					await this.buildProc(db, proc, sql);
+					/*
+					let collationConnection = `
+						SET character_set_client = 'utf8';
+						SET collation_connection = 'utf8_unicode_ci';
+					`;
+			
 					let drop = 'DROP PROCEDURE IF EXISTS ' + proc + ';';
-					await this.sql(db, drop + sql, undefined);
+					await this.sql(db, drop + collationConnection + sql, undefined);
 					// clear changed flag
 					await this.callProcBase(db, 'tv_$proc_save', [db, proc, undefined]);
+					*/
 				}
 				this.procColl[procLower] = true;
 			}
@@ -312,12 +366,18 @@ export class MyDbServer extends DbServer {
         return false;
     }
 	async initProcObjs(db:string): Promise<void> {
-		await this.exec('use `' + db + '`', undefined);
-		let createProcTable = 'CREATE TABLE IF NOT EXISTS `tv_$proc` (`name` VARCHAR(200) NOT NULL,`proc` TEXT NULL, `changed` TINYINT(4) NULL DEFAULT NULL,PRIMARY KEY (`name`))';
+		//let useDb = 'use `' + db + '`;';
+		let createProcTable = `
+CREATE TABLE IF NOT EXISTS \`${db}\`.\`tv_$proc\` (
+	\`name\` VARCHAR(200) NOT NULL,
+	\`proc\` TEXT NULL, 
+	\`changed\` TINYINT(4) NULL DEFAULT NULL,
+	PRIMARY KEY (\`name\`))
+`;
         await this.exec(createProcTable, undefined);
 		let getProc = `
-DROP PROCEDURE IF EXISTS tv_$proc_get;
-CREATE PROCEDURE tv_$proc_get(
+DROP PROCEDURE IF EXISTS \`${db}\`.tv_$proc_get;
+CREATE PROCEDURE \`${db}\`.tv_$proc_get(
 	IN _schema VARCHAR(200),
 	IN _name VARCHAR(200)
 ) BEGIN	
@@ -330,8 +390,8 @@ END
 `;
         await this.exec(getProc, undefined);
 		let saveProc = `
-DROP PROCEDURE IF EXISTS tv_$proc_save;
-CREATE PROCEDURE tv_$proc_save(
+DROP PROCEDURE IF EXISTS \`${db}\`.tv_$proc_save;
+CREATE PROCEDURE \`${db}\`.tv_$proc_save(
 	_schema VARCHAR(200),
 	_name VARCHAR(200),
 	_proc TEXT
@@ -360,7 +420,59 @@ __proc_exit: BEGIN
 	WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed;
 END
 `;
-        await this.exec(saveProc, undefined);
+		await this.exec(saveProc, undefined);
+
+		let escapeFunction = `
+DROP FUNCTION IF EXISTS \`${db}\`.$unescape;
+CREATE FUNCTION \`${db}\`.\`$unescape\`(
+	\`t\` TEXT
+)
+RETURNS text CHARSET utf8 COLLATE utf8_unicode_ci
+LANGUAGE SQL
+DETERMINISTIC
+CONTAINS SQL
+SQL SECURITY DEFINER
+COMMENT ''
+BEGIN
+	declare ret text;
+	declare sep, sub, s char(10);
+	declare p, len, c int;
+	set sep = "\\\\";
+	set p = locate(sep, t, 1);
+	if p=0 then
+		return t;
+	end if;
+	
+	set c=1;
+	set ret = '';
+	set len=char_length(t);
+__while: while p<=len do
+		set s=substring(t, c, p-c);
+		set sub=substring(t, p+1, 1);
+		if sub="\\\\" then
+			set ret=concat(ret, s, "\\\\");
+			set p=p+2;
+		elseif sub="t" then
+			set ret=concat(ret, s, "\\t");
+			set p=p+2;
+		elseif sub="n" then
+			set ret=concat(ret, s, "\\n");
+			set p=p+2;
+		else
+			set ret=concat(ret, s, "\\\\");
+			set p=p+1;
+		end if;
+		set c=p;
+		set p=locate(sep, t, p);
+		if p=0 then
+			set ret=concat(ret, substr(t, c, len-c+1));
+			leave __while;
+		end if;
+	end while __while;
+	return ret;
+END
+`;
+		await this.exec(escapeFunction, undefined);
 		return;
 	}
     async init$UqDb():Promise<void> {
@@ -385,7 +497,11 @@ declare _time timestamp(6);
     set _time=current_timestamp(6);
     _exit: loop
         if not exists(select \`unit\` from \`log\` where \`time\`=_time) then
-            insert into \`log\` (\`time\`, unit, uq, subject, content) values (_time, _unit, (select id from uq where \`name\`=_uq), _subject, _content);
+			insert into \`log\` (\`time\`, unit, uq, subject, content) 
+				values (_time, _unit, 
+					(select id from uq where \`name\`=_uq) collate utf8_unicode_ci, 
+					_subject collate utf8_unicode_ci, 
+					_content collate utf8_unicode_ci);
             leave _exit;
 		else
 			set _time = ADDDATE(_time,interval 1 microsecond );
@@ -406,7 +522,8 @@ create procedure $uq.performance(_tick bigint, _log text, _ms int) begin
     end while;
 end;
 `;
-		let versionRows = await this.sql('information_schema', 'select version() as v', []);
+		let versionResults = await this.sql('information_schema', 'use information_schema; select version() as v', []);
+		let versionRows = versionResults[1];
 		let version = versionRows[0]['v'];
 		if (version >= '8.0') {
 			_.merge(sqls, sqls_8);
@@ -463,9 +580,8 @@ end;
         `;
         await this.exec(sql, undefined);
         let proc = `
-            use ${resDbName};
-            DROP PROCEDURE IF EXISTS createItem;
-            CREATE PROCEDURE createItem (\`_fileName\` varchar(120), _mimetype varchar(50))
+            DROP PROCEDURE IF EXISTS ${resDbName}.createItem;
+            CREATE PROCEDURE ${resDbName}.createItem (\`_fileName\` varchar(120), _mimetype varchar(50))
             BEGIN
                 insert into item (fileName, mimetype) values (\`_fileName\`, _mimetype);
                 select last_insert_id() as id;
@@ -474,9 +590,8 @@ end;
         await this.exec(proc, undefined);
 
         proc = `
-            use ${resDbName};
-            DROP PROCEDURE IF EXISTS useItem;
-            CREATE PROCEDURE useItem(_id int)
+            DROP PROCEDURE IF EXISTS ${resDbName}.useItem;
+            CREATE PROCEDURE ${resDbName}.useItem(_id int)
             BEGIN
                 update item set useDate=now() where id=_id;
             END;

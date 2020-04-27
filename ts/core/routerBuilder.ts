@@ -7,12 +7,6 @@ type Processer = (runner:EntityRunner, body:any, urlParams:any, userToken?:User)
 type EntityProcesser = (unit:number, user:number, name:string, db:string, urlParams:any, 
     runner:EntityRunner, body:any, schema:any, run:any, net?:Net) => Promise<any>;
 
-/*
-const apiErrors = {
-    databaseNotExists: -1,
-}
-*/
-
 export interface User {
     db: string;
     id: number;

@@ -32,27 +32,38 @@ const sqls_5 = {
     procExists: `SELECT name FROM mysql.proc WHERE db='$uq' AND name='log';`,
     performanceExists: `SELECT name FROM mysql.proc WHERE db='$uq' AND name='performance';`,
 };
+const collationConnection = `
+	SET character_set_client = 'utf8';
+	SET collation_connection = 'utf8_unicode_ci';
+`;
+const sysProcColl = {
+    tv_$entitys: true,
+    tv_$entity: true,
+    tv_$entity_version: true,
+    tv_$entity_validate: true,
+    tv_$entity_no: true,
+    tv_$init_setting: true,
+    tv_$set_setting: true,
+    tv_$get_setting: true,
+    tv_$const_strs: true,
+    tv_$const_str: true,
+    tv_$tag_values: true,
+    tv_$tag_type: true,
+    tv_$tag_save_sys: true,
+    tv_$tag_save: true,
+};
 class MyDbServer extends dbServer_1.DbServer {
-    constructor(dbConfig) {
+    constructor(dbName, dbConfig) {
         super();
-        this.procColl = {
-            tv_$entitys: true,
-            tv_$entity: true,
-            tv_$entity_version: true,
-            tv_$entity_validate: true,
-            tv_$entity_no: true,
-            tv_$init_setting: true,
-            tv_$set_setting: true,
-            tv_$get_setting: true,
-            tv_$const_strs: true,
-            tv_$const_str: true,
-            tv_$tag_values: true,
-            tv_$tag_type: true,
-            tv_$tag_save_sys: true,
-            tv_$tag_save: true,
-        };
+        this.dbName = dbName;
         this.dbConfig = dbConfig;
+        this.resetProcColl();
     }
+    resetProcColl() {
+        this.procColl = _.merge({}, sysProcColl);
+    }
+    reset() { this.resetProcColl(); }
+    ;
     getPool(dbConfig) {
         return __awaiter(this, void 0, void 0, function* () {
             for (let p of pools) {
@@ -63,16 +74,17 @@ class MyDbServer extends dbServer_1.DbServer {
             let conf = _.clone(dbConfig);
             conf.timezone = 'UTC';
             conf.typeCast = castField;
-            let newPool = yield this.createPool(conf);
+            //let newPool = await this.createPool(conf);
+            let newPool = mysql_1.createPool(conf);
             pools.push({ config: dbConfig, pool: newPool });
             return newPool;
         });
     }
-    createPool(dbConfig) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return yield new Promise((resolve, reject) => {
-                let newPool = mysql_1.createPool(dbConfig);
-                let handleResponse = (err, result) => {
+    /*
+        private async createPool(dbConfig:any):Promise<Pool> {
+            return await new Promise<Pool>((resolve, reject) => {
+                let newPool = createPool(dbConfig);
+                let handleResponse = (err:MysqlError, result:any) => {
                     if (err === null) {
                         resolve(newPool);
                         return;
@@ -80,12 +92,12 @@ class MyDbServer extends dbServer_1.DbServer {
                     reject(err);
                 };
                 newPool.query(`
-				SET character_set_client = 'utf8';
-				SET collation_connection = 'utf8_unicode_ci';
-			`, handleResponse);
+                    SET character_set_client = 'utf8';
+                    SET collation_connection = 'utf8_unicode_ci';
+                `, handleResponse);
             });
-        });
-    }
+        }
+    */
     exec(sql, values, log) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.pool === undefined) {
@@ -141,25 +153,45 @@ class MyDbServer extends dbServer_1.DbServer {
                             return;
                     }
                 };
-                this.pool.query(sql, values, handleResponse);
+                //this.pool.query(sql, values, handleResponse);
+                this.pool.getConnection(function (err, connection) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        //connection.query(collationConnection, function(errCollation) {
+                        //if (errCollation) reject(collationConnection);
+                        connection.query(sql, values, function (error, results) {
+                            //(results as any[]).shift();
+                            //(results as any[]).shift();
+                            //console.log(sql, results, error);
+                            connection.release();
+                            handleResponse(error, results);
+                        });
+                        //});
+                    }
+                });
             });
         });
     }
     sql(db, sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            let result = yield this.exec('use `' + db + '`;' + sql, params);
-            if (Array.isArray(result) === false)
-                return [];
-            let arr = result;
+            //let result = await this.exec('use `'+db+'`;'+sql, params);
+            let result = yield this.exec(sql, params);
+            return result;
+            /*
+            if (Array.isArray(result) === false) return [];
+            let arr = result as any[];
             arr.shift();
-            if (arr.length === 1)
-                return arr[0];
+            if (arr.length === 1) return arr[0];
             return arr;
+            */
         });
     }
     sqlDropProc(db, procName) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = 'use `' + db + '`;' + 'DROP PROCEDURE IF EXISTS ' + procName;
+            //let sql = 'use `'+db+'`;' + 'DROP PROCEDURE IF EXISTS ' + procName;
+            let sql = `DROP PROCEDURE IF EXISTS  \`${db}\`.\`${procName}\``;
             yield this.exec(sql, []);
         });
     }
@@ -193,6 +225,14 @@ class MyDbServer extends dbServer_1.DbServer {
             this.procColl[procName.toLowerCase()] = isOk;
         });
     }
+    buildProc(db, procName, procSql) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let drop = `USE \`${db}\`; DROP PROCEDURE IF EXISTS \`${db}\`.\`${procName}\`;`;
+            yield this.sql(db, drop + collationConnection + procSql, undefined);
+            // clear changed flag
+            yield this.callProcBase(db, 'tv_$proc_save', [db, procName, undefined]);
+        });
+    }
     execProc(db, proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             if (db[0] !== '$') {
@@ -210,10 +250,18 @@ class MyDbServer extends dbServer_1.DbServer {
                     if (changed === 1) {
                         // await this.sqlDropProc(db, proc);
                         let sql = r0['proc'];
+                        yield this.buildProc(db, proc, sql);
+                        /*
+                        let collationConnection = `
+                            SET character_set_client = 'utf8';
+                            SET collation_connection = 'utf8_unicode_ci';
+                        `;
+                
                         let drop = 'DROP PROCEDURE IF EXISTS ' + proc + ';';
-                        yield this.sql(db, drop + sql, undefined);
+                        await this.sql(db, drop + collationConnection + sql, undefined);
                         // clear changed flag
-                        yield this.callProcBase(db, 'tv_$proc_save', [db, proc, undefined]);
+                        await this.callProcBase(db, 'tv_$proc_save', [db, proc, undefined]);
+                        */
                     }
                     this.procColl[procLower] = true;
                 }
@@ -350,12 +398,18 @@ class MyDbServer extends dbServer_1.DbServer {
     }
     initProcObjs(db) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.exec('use `' + db + '`', undefined);
-            let createProcTable = 'CREATE TABLE IF NOT EXISTS `tv_$proc` (`name` VARCHAR(200) NOT NULL,`proc` TEXT NULL, `changed` TINYINT(4) NULL DEFAULT NULL,PRIMARY KEY (`name`))';
+            //let useDb = 'use `' + db + '`;';
+            let createProcTable = `
+CREATE TABLE IF NOT EXISTS \`${db}\`.\`tv_$proc\` (
+	\`name\` VARCHAR(200) NOT NULL,
+	\`proc\` TEXT NULL, 
+	\`changed\` TINYINT(4) NULL DEFAULT NULL,
+	PRIMARY KEY (\`name\`))
+`;
             yield this.exec(createProcTable, undefined);
             let getProc = `
-DROP PROCEDURE IF EXISTS tv_$proc_get;
-CREATE PROCEDURE tv_$proc_get(
+DROP PROCEDURE IF EXISTS \`${db}\`.tv_$proc_get;
+CREATE PROCEDURE \`${db}\`.tv_$proc_get(
 	IN _schema VARCHAR(200),
 	IN _name VARCHAR(200)
 ) BEGIN	
@@ -368,8 +422,8 @@ END
 `;
             yield this.exec(getProc, undefined);
             let saveProc = `
-DROP PROCEDURE IF EXISTS tv_$proc_save;
-CREATE PROCEDURE tv_$proc_save(
+DROP PROCEDURE IF EXISTS \`${db}\`.tv_$proc_save;
+CREATE PROCEDURE \`${db}\`.tv_$proc_save(
 	_schema VARCHAR(200),
 	_name VARCHAR(200),
 	_proc TEXT
@@ -399,6 +453,57 @@ __proc_exit: BEGIN
 END
 `;
             yield this.exec(saveProc, undefined);
+            let escapeFunction = `
+DROP FUNCTION IF EXISTS \`${db}\`.$unescape;
+CREATE FUNCTION \`${db}\`.\`$unescape\`(
+	\`t\` TEXT
+)
+RETURNS text CHARSET utf8 COLLATE utf8_unicode_ci
+LANGUAGE SQL
+DETERMINISTIC
+CONTAINS SQL
+SQL SECURITY DEFINER
+COMMENT ''
+BEGIN
+	declare ret text;
+	declare sep, sub, s char(10);
+	declare p, len, c int;
+	set sep = "\\\\";
+	set p = locate(sep, t, 1);
+	if p=0 then
+		return t;
+	end if;
+	
+	set c=1;
+	set ret = '';
+	set len=char_length(t);
+__while: while p<=len do
+		set s=substring(t, c, p-c);
+		set sub=substring(t, p+1, 1);
+		if sub="\\\\" then
+			set ret=concat(ret, s, "\\\\");
+			set p=p+2;
+		elseif sub="t" then
+			set ret=concat(ret, s, "\\t");
+			set p=p+2;
+		elseif sub="n" then
+			set ret=concat(ret, s, "\\n");
+			set p=p+2;
+		else
+			set ret=concat(ret, s, "\\\\");
+			set p=p+1;
+		end if;
+		set c=p;
+		set p=locate(sep, t, p);
+		if p=0 then
+			set ret=concat(ret, substr(t, c, len-c+1));
+			leave __while;
+		end if;
+	end while __while;
+	return ret;
+END
+`;
+            yield this.exec(escapeFunction, undefined);
             return;
         });
     }
@@ -424,7 +529,11 @@ declare _time timestamp(6);
     set _time=current_timestamp(6);
     _exit: loop
         if not exists(select \`unit\` from \`log\` where \`time\`=_time) then
-            insert into \`log\` (\`time\`, unit, uq, subject, content) values (_time, _unit, (select id from uq where \`name\`=_uq), _subject, _content);
+			insert into \`log\` (\`time\`, unit, uq, subject, content) 
+				values (_time, _unit, 
+					(select id from uq where \`name\`=_uq) collate utf8_unicode_ci, 
+					_subject collate utf8_unicode_ci, 
+					_content collate utf8_unicode_ci);
             leave _exit;
 		else
 			set _time = ADDDATE(_time,interval 1 microsecond );
@@ -445,7 +554,8 @@ create procedure $uq.performance(_tick bigint, _log text, _ms int) begin
     end while;
 end;
 `;
-            let versionRows = yield this.sql('information_schema', 'select version() as v', []);
+            let versionResults = yield this.sql('information_schema', 'use information_schema; select version() as v', []);
+            let versionRows = versionResults[1];
             let version = versionRows[0]['v'];
             if (version >= '8.0') {
                 _.merge(sqls, sqls_8);
@@ -514,9 +624,8 @@ end;
         `;
             yield this.exec(sql, undefined);
             let proc = `
-            use ${resDbName};
-            DROP PROCEDURE IF EXISTS createItem;
-            CREATE PROCEDURE createItem (\`_fileName\` varchar(120), _mimetype varchar(50))
+            DROP PROCEDURE IF EXISTS ${resDbName}.createItem;
+            CREATE PROCEDURE ${resDbName}.createItem (\`_fileName\` varchar(120), _mimetype varchar(50))
             BEGIN
                 insert into item (fileName, mimetype) values (\`_fileName\`, _mimetype);
                 select last_insert_id() as id;
@@ -524,9 +633,8 @@ end;
         `;
             yield this.exec(proc, undefined);
             proc = `
-            use ${resDbName};
-            DROP PROCEDURE IF EXISTS useItem;
-            CREATE PROCEDURE useItem(_id int)
+            DROP PROCEDURE IF EXISTS ${resDbName}.useItem;
+            CREATE PROCEDURE ${resDbName}.useItem(_id int)
             BEGIN
                 update item set useDate=now() where id=_id;
             END;

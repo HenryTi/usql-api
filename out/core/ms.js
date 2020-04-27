@@ -2,12 +2,15 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const dbServer_1 = require("./dbServer");
 class MsDbServer extends dbServer_1.DbServer {
-    constructor(dbConfig) {
+    constructor(dbName, dbConfig) {
         super();
     }
     initProcObjs(db) { return; }
+    reset() { }
+    ;
     sql(db, sql, params) { return; }
     sqlProc(db, procName, procSql) { return; }
+    buildProc(db, procName, procSql) { return; }
     sqlDropProc(db, procName) { return; }
     call(db, proc, params) { return; }
     callEx(db, proc, params) { return; }

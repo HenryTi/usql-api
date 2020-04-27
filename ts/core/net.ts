@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { EntityRunner } from "./runner";
-import { getDb, isDevelopment, Db, getUnitxDb } from "./db";
+import { isDevelopment, Db } from "./db";
 import { OpenApi } from "./openApi";
 import { urlSetUqHost } from "./setHostUrl";
 import { centerApi } from "./centerApi";
@@ -27,7 +27,7 @@ export abstract class Net {
         if (runner === null) return;
         if (runner === undefined) {
             let dbName = this.getDbName(name);
-            let db = await getDb(dbName);
+            let db = Db.db(dbName);
             runner = await this.createRunnerFromDb(name, db);
             if (runner === undefined) return;
         }
@@ -44,14 +44,33 @@ export abstract class Net {
         return runner;
     }
 
-    async resetRunnerAfterCompile(runner: EntityRunner) {
-        if (this.executingNet === undefined) {
-            debugger;
-            return;
-        }
-        await runner.buildTuidAutoId();
-        this.resetRunner(runner);
-        this.executingNet.resetRunner(runner);
+	async runnerCompiling(db:Db) {
+		for (let i in this.runners) {
+			let runner: EntityRunner = this.runners[i];
+			if (runner === undefined) continue;
+			if (runner.equDb(db) === true) runner.isCompiling = true;
+			//if (this.executingNet === undefined) this.executingNet..isCompiling = true;
+		}
+	}
+
+    async resetRunnerAfterCompile(db:Db) {
+		/*
+		if (this.executingNet === undefined) {
+			debugger;
+			return;
+		}*/
+		let runners:EntityRunner[] = [];
+		for (let i in this.runners) {
+			let runner: EntityRunner = this.runners[i];
+			if (runner === undefined) continue;
+			if (runner.equDb(db) === true) runners.push(runner);
+		}
+
+		for (let runner of runners) {
+			await runner.buildTuidAutoId();
+			this.resetRunner(runner);
+			if (this.executingNet !== undefined) this.executingNet.resetRunner(runner);
+		}
     }
 
     private resetRunner(runner: EntityRunner) {
@@ -60,6 +79,7 @@ export abstract class Net {
             if (i !== runnerName) continue;
             let runner = this.runners[i];
             if (runner) {
+				runner.reset();
                 console.error('--- === --- === ' + runnerName + ' resetRunner ' + ' net is ' + this.id);
                 this.runners[i] = undefined;
             }
@@ -241,7 +261,7 @@ class ProdNet extends Net {
     get isTest():boolean {return false}
     getDbName(name:string):string {return name}
     getUqFullName(uq:string):string {return uq}
-    protected getUnitxDb(): Db {return getUnitxDb(false)}
+    protected getUnitxDb(): Db {return Db.unitxDb(false);/* getUnitxDb(false)*/}
     protected getUrl(db:string, url:string):string {
         return url + 'uq/prod/' + db + '/';
     }
@@ -253,7 +273,7 @@ class TestNet extends Net {
     get isTest():boolean {return true}
     getDbName(name:string):string {return name + '$test'}
     getUqFullName(uq:string):string {return uq + '$test'}
-    protected getUnitxDb(): Db {return getUnitxDb(true)}
+    protected getUnitxDb(): Db {return Db.unitxDb(true);/* getUnitxDb(true)*/}
     protected getUrl(db:string, url:string):string {
         return url + 'uq/test/' + db + '/';
     }

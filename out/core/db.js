@@ -13,18 +13,76 @@ const config = require("config");
 const _ = require("lodash");
 const ms_1 = require("./ms");
 const my_1 = require("./my");
+const runner_1 = require("./runner");
 const const_connectionUnitx = 'connection_$unitx';
 const const_connection = 'connection';
 const const_development = 'development';
+const const_devdo = 'devdo';
 const const_unitx = '$unitx';
-exports.isDevelopment = (function () {
-    return (process.env.NODE_ENV === const_development);
-})();
+function isNodeEnvEqu(env) {
+    let nodeEnv = process.env.NODE_ENV;
+    if (!nodeEnv)
+        return false;
+    return (nodeEnv.toLowerCase() === env);
+}
+exports.isDevelopment = isNodeEnvEqu(const_development);
+exports.isDevdo = isNodeEnvEqu(const_devdo);
 class Db {
     constructor(dbName) {
         this.dbName = dbName;
         this.dbServer = this.createDbServer();
         this.isExists = false;
+    }
+    /*(function () {
+        const dbColl = "db";
+        if (!config.has(dbColl)) return {};
+        return config.get<any>(dbColl);
+    })();*/
+    /*
+    private static getDb(name:string):Db {
+        let db = Db.dbs[name]; //.getCacheDb(name);
+        if (db !== undefined) return db;
+        let dbName = Db.getDbName(name);
+        db = new Db(dbName);
+        return Db.dbs[name] = db;
+    }*/
+    /*
+    private static getUnitxDb(testing:boolean):Db {
+        let name = const_unitx;
+        if (testing === true) name += '$test';
+        let db = Db.dbs[name]; //.getCacheDb(name);
+        if (db !== undefined) return db;
+        let dbName = Db.getDbName(name);
+        return Db.dbs[name] = new UnitxDb(dbName);
+    }*/
+    static getDbName(name) {
+        return Db.dbCollection[name] || name;
+    }
+    /*
+    private static getCacheDb(name:string):Db {
+        return Db.dbs[name];
+    }*/
+    static db(name) {
+        name = name || $uq;
+        let db = Db.dbs[name]; //.getCacheDb(name);
+        if (db !== undefined)
+            return db;
+        let dbName = Db.getDbName(name);
+        db = new Db(dbName);
+        return Db.dbs[name] = db;
+    }
+    static unitxDb(testing) {
+        let name = const_unitx;
+        if (testing === true)
+            name += '$test';
+        let db = Db.dbs[name]; // getCacheDb(name);
+        if (db !== undefined)
+            return db;
+        let dbName = Db.getDbName(name);
+        return Db.dbs[name] = new UnitxDb(dbName);
+    }
+    reset() {
+        this.dbServer.reset();
     }
     getDbName() { return this.dbName; }
     getDbConfig() {
@@ -38,8 +96,8 @@ class Db {
         if (dbConfig === undefined)
             throw 'dbConfig not defined';
         switch (sqlType) {
-            case 'mysql': return new my_1.MyDbServer(dbConfig);
-            case 'mssql': return new ms_1.MsDbServer(dbConfig);
+            case 'mysql': return new my_1.MyDbServer(this.dbName, dbConfig);
+            case 'mssql': return new ms_1.MsDbServer(this.dbName, dbConfig);
         }
     }
     exists() {
@@ -49,11 +107,6 @@ class Db {
             return this.isExists = yield this.dbServer.existsDatabase(this.dbName);
         });
     }
-    /*
-    private devLog(proc:string, params:any[]) {
-        if (isDevelopment===true) console.log(this.dbName, '.', proc, ': ', params && params.join(','))
-    }
-    */
     buildTuidAutoId() {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.dbServer.buildTuidAutoId(this.dbName);
@@ -100,6 +153,11 @@ class Db {
     sqlProc(procName, procSql) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.dbServer.sqlProc(this.dbName, procName, procSql);
+        });
+    }
+    buildProc(procName, procSql) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.dbServer.buildProc(this.dbName, procName, procSql);
         });
     }
     call(proc, params) {
@@ -158,6 +216,9 @@ class Db {
     }
 }
 exports.Db = Db;
+Db.dbs = {};
+// 数据库名称对照表
+Db.dbCollection = {};
 class UnitxDb extends Db {
     getDbConfig() {
         if (config.has(const_connectionUnitx) === true) {
@@ -168,63 +229,12 @@ class UnitxDb extends Db {
         }
     }
 }
-const dbs = {};
-/*
-const projects = config.get<any>("projects");
-
-export function dbNameFromProject(projectName:string) {
-    let proj = projects[projectName];
-    return proj && proj.db;
-}
-*/
-// 数据库名称对照表
-const dbCollection = (function () {
-    const dbColl = "db";
-    if (!config.has(dbColl))
-        return {};
-    return config.get(dbColl);
-})();
-function getDb(name) {
-    return __awaiter(this, void 0, void 0, function* () {
-        let db = getCacheDb(name);
-        if (db !== undefined)
-            return db;
-        let dbName = getDbName(name);
-        db = new Db(dbName);
-        return dbs[name] = db;
-    });
-}
-exports.getDb = getDb;
-function getUnitxDb(testing) {
-    let name = const_unitx;
-    if (testing === true)
-        name += '$test';
-    let db = getCacheDb(name);
-    if (db !== undefined)
-        return db;
-    let dbName = getDbName(name);
-    return dbs[name] = new UnitxDb(dbName);
-}
-exports.getUnitxDb = getUnitxDb;
-function getDbName(name) {
-    return dbCollection[name] || name;
-}
-function getCacheDb(name) {
-    return dbs[name];
-}
 class SpanLog {
     constructor(logger, log) {
         this.logger = logger;
         if (log) {
             if (log.length > 2048)
                 log = log.substr(0, 2048);
-            /*
-            if (log.indexOf('\r')>=0) {
-                let reg = new RegExp('\r' , "g" );
-                log = log.replace(reg, '');
-                if (log.indexOf('\r')>=0) debugger;
-            }
-            */
         }
         this._log = log;
         this.tick = Date.now();
@@ -246,6 +256,15 @@ class SpanLog {
     }
 }
 exports.SpanLog = SpanLog;
+const $uq = '$uq';
+function init$UqDb() {
+    return __awaiter(this, void 0, void 0, function* () {
+        let db = Db.db($uq);
+        let runner = new runner_1.EntityRunner($uq, db);
+        yield runner.init$UqDb();
+    });
+}
+exports.init$UqDb = init$UqDb;
 const tSep = '\r';
 const nSep = '\r\r';
 class DbLogger {
@@ -257,7 +276,7 @@ class DbLogger {
     open(log) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.db === undefined) {
-                this.db = new Db(undefined);
+                this.db = Db.db(undefined);
             }
             return new SpanLog(this, log);
         });

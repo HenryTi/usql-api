@@ -14,6 +14,10 @@ const core_2 = require("../../core");
 function buildBuildRouter(router, rb) {
     router.post('/start', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
+            let dbName = req.params.db;
+            let db = core_1.Db.db(rb.getDbName(dbName));
+            yield core_1.prodNet.runnerCompiling(db);
+            yield core_1.testNet.runnerCompiling(db);
             let { enc } = req.body;
             core_1.setUqBuildSecret(enc);
             res.json({
@@ -28,7 +32,7 @@ function buildBuildRouter(router, rb) {
     router.post('/build-database', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
             let dbName = req.params.db;
-            let db = new core_1.Db(rb.getDbName(dbName));
+            let db = core_1.Db.db(rb.getDbName(dbName));
             let runner = new core_2.BuildRunner(db);
             let exists = yield runner.buildDatabase();
             res.json({
@@ -42,27 +46,45 @@ function buildBuildRouter(router, rb) {
             res.json({ error: err });
         }
     }));
-    rb.post(router, '/finish', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
-        let { uqId } = runner;
-        let { uqId: paramUqId, uqVersion } = body;
-        if (!uqId) {
+    //rb.post(router, '/finish',
+    //async (runner:EntityRunner, body:any, params:any):Promise<any> => {
+    router.post('/finish', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            let dbName = req.params.db;
+            let db = core_1.Db.db(rb.getDbName(dbName));
+            let runner = new core_2.BuildRunner(db);
+            //let {uqId} = runner;
+            let { uqId: paramUqId, uqVersion } = req.body;
+            //if (!uqId) {
             yield Promise.all([
                 runner.setSetting(0, 'uqId', String(paramUqId)),
                 runner.setSetting(0, 'uqVersion', String(uqVersion))
             ]);
-            uqId = paramUqId;
+            //uqId = paramUqId;
+            //}
+            yield runner.initSetting();
+            //if (String(uqId) !== String(paramUqId)) {
+            //    debugger;
+            //    throw 'error uqId';
+            //}
+            //await runner.reset();
+            //async reset() {
+            yield core_1.prodNet.resetRunnerAfterCompile(db);
+            yield core_1.testNet.resetRunnerAfterCompile(db);
+            //await this.net.resetRunnerAfterCompile(this);
+            //}
+            res.json({
+                ok: true,
+            });
         }
-        yield runner.initSetting();
-        if (String(uqId) !== String(paramUqId)) {
-            debugger;
-            throw 'error uqId';
+        catch (err) {
+            res.json({ error: err });
         }
-        yield runner.reset();
     }));
     router.post('/sql', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
             let dbName = req.params.db;
-            let db = new core_1.Db(rb.getDbName(dbName));
+            let db = core_1.Db.db(rb.getDbName(dbName));
             let runner = new core_2.BuildRunner(db);
             let { sql, params } = req.body;
             let result = yield runner.sql(sql, params);
@@ -86,7 +108,7 @@ function buildBuildRouter(router, rb) {
     router.post('/proc-sql', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
             let dbName = req.params.db;
-            let db = new core_1.Db(rb.getDbName(dbName));
+            let db = core_1.Db.db(rb.getDbName(dbName));
             let runner = new core_2.BuildRunner(db);
             let { name, proc } = req.body;
             let result = yield runner.procSql(name, proc);
@@ -110,7 +132,7 @@ function buildBuildRouter(router, rb) {
     router.post('/proc-core-sql', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
             let dbName = req.params.db;
-            let db = new core_1.Db(rb.getDbName(dbName));
+            let db = core_1.Db.db(rb.getDbName(dbName));
             let runner = new core_2.BuildRunner(db);
             let { name, proc } = req.body;
             let result = yield runner.procCoreSql(name, proc);
@@ -133,7 +155,7 @@ function buildBuildRouter(router, rb) {
     router.post('/create-database', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
             let dbName = req.params.db;
-            let db = new core_1.Db(rb.getDbName(dbName));
+            let db = core_1.Db.db(rb.getDbName(dbName));
             let runner = new core_2.BuildRunner(db);
             let result = yield runner.createDatabase();
             res.json({
@@ -154,7 +176,7 @@ function buildBuildRouter(router, rb) {
     router.post('/exists-database', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
             let dbName = req.params.db;
-            let db = new core_1.Db(rb.getDbName(dbName));
+            let db = core_1.Db.db(rb.getDbName(dbName));
             let runner = new core_2.BuildRunner(db);
             let result = yield runner.existsDatabase();
             res.json({
@@ -172,19 +194,45 @@ function buildBuildRouter(router, rb) {
         return await runner.existsDatabase();
     });
     */
-    rb.post(router, '/set-setting', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        let promises = [];
-        for (let i in body) {
-            promises.push(runner.setSetting(0, i, body[i]));
+    //rb.post(router, '/set-setting',
+    //async (runner:EntityRunner, body: {[name:string]: any}): Promise<void> => {
+    router.post('/set-setting', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            let dbName = req.params.db;
+            let db = core_1.Db.db(rb.getDbName(dbName));
+            let runner = new core_2.BuildRunner(db);
+            let promises = [];
+            let { body } = req;
+            for (let i in body) {
+                promises.push(runner.setSetting(0, i, body[i]));
+            }
+            yield Promise.all(promises);
+            res.json({
+                ok: true,
+            });
         }
-        yield Promise.all(promises);
+        catch (err) {
+            res.json({ error: err });
+        }
     }));
-    rb.get(router, '/setting', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        //let ret = await this.unitTableFromProc('tv_$get_setting', unit, [name]);
-        let ret = yield runner.getSetting(0, body.name);
-        if (ret.length === 0)
-            return undefined;
-        return ret[0].value;
+    //rb.get(router, '/setting',
+    //async (runner:EntityRunner, body: {name:string}):Promise<string> => {
+    router.get('/setting', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            let dbName = req.params.db;
+            let db = core_1.Db.db(rb.getDbName(dbName));
+            let runner = new core_2.BuildRunner(db);
+            let ret = yield runner.getSetting(0, req.body.name);
+            if (ret.length === 0)
+                return undefined;
+            res.json({
+                ok: true,
+                result: ret[0].value
+            });
+        }
+        catch (err) {
+            res.json({ error: err });
+        }
     }));
     rb.get(router, '/entitys', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         //return await this.db.call('tv_$entitys', [hasSource===true? 1:0]);

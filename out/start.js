@@ -14,14 +14,10 @@ const express_1 = require("express");
 const bodyParser = require("body-parser");
 const config = require("config");
 const router_1 = require("./router");
-//import {buildSettingRouter} from './router'; 
 const res_1 = require("./res");
 const core_1 = require("./core");
-//import { /*buildUnitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
 const auth_1 = require("./core/auth");
 const jobs_1 = require("./jobs");
-const _uq_1 = require("./$uq");
-//import { importData } from './import';
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
@@ -81,7 +77,7 @@ function init() {
                 console.log('port=', port);
                 app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
                     yield res_1.initResDb();
-                    yield _uq_1.init$UqDb();
+                    yield core_1.init$UqDb();
                     console.log('UQ-API listening on port ' + port);
                     let connection = config.get("connection");
                     let { host, user } = connection;

@@ -55,7 +55,9 @@ export function buildImportRouter(router:Router, rb:RouterBuilder) {
 }
 
 const uploadPath = config.get<string>("uploadPath");
-var upload = multer({ dest: uploadPath });
+var upload = (function() {
+	return multer({ dest: uploadPath });
+})();
 
 /*
 async function uploadImport(req:Request, res:Response) {

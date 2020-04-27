@@ -34,7 +34,7 @@ class Net {
                 return;
             if (runner === undefined) {
                 let dbName = this.getDbName(name);
-                let db = yield db_1.getDb(dbName);
+                let db = db_1.Db.db(dbName);
                 runner = yield this.createRunnerFromDb(name, db);
                 if (runner === undefined)
                     return;
@@ -54,15 +54,39 @@ class Net {
             return runner;
         });
     }
-    resetRunnerAfterCompile(runner) {
+    runnerCompiling(db) {
         return __awaiter(this, void 0, void 0, function* () {
+            for (let i in this.runners) {
+                let runner = this.runners[i];
+                if (runner === undefined)
+                    continue;
+                if (runner.equDb(db) === true)
+                    runner.isCompiling = true;
+                //if (this.executingNet === undefined) this.executingNet..isCompiling = true;
+            }
+        });
+    }
+    resetRunnerAfterCompile(db) {
+        return __awaiter(this, void 0, void 0, function* () {
+            /*
             if (this.executingNet === undefined) {
                 debugger;
                 return;
+            }*/
+            let runners = [];
+            for (let i in this.runners) {
+                let runner = this.runners[i];
+                if (runner === undefined)
+                    continue;
+                if (runner.equDb(db) === true)
+                    runners.push(runner);
             }
-            yield runner.buildTuidAutoId();
-            this.resetRunner(runner);
-            this.executingNet.resetRunner(runner);
+            for (let runner of runners) {
+                yield runner.buildTuidAutoId();
+                this.resetRunner(runner);
+                if (this.executingNet !== undefined)
+                    this.executingNet.resetRunner(runner);
+            }
         });
     }
     resetRunner(runner) {
@@ -72,6 +96,7 @@ class Net {
                 continue;
             let runner = this.runners[i];
             if (runner) {
+                runner.reset();
                 console.error('--- === --- === ' + runnerName + ' resetRunner ' + ' net is ' + this.id);
                 this.runners[i] = undefined;
             }
@@ -269,7 +294,7 @@ class ProdNet extends Net {
     get isTest() { return false; }
     getDbName(name) { return name; }
     getUqFullName(uq) { return uq; }
-    getUnitxDb() { return db_1.getUnitxDb(false); }
+    getUnitxDb() { return db_1.Db.unitxDb(false); /* getUnitxDb(false)*/ }
     getUrl(db, url) {
         return url + 'uq/prod/' + db + '/';
     }
@@ -281,7 +306,7 @@ class TestNet extends Net {
     get isTest() { return true; }
     getDbName(name) { return name + '$test'; }
     getUqFullName(uq) { return uq + '$test'; }
-    getUnitxDb() { return db_1.getUnitxDb(true); }
+    getUnitxDb() { return db_1.Db.unitxDb(true); /* getUnitxDb(true)*/ }
     getUrl(db, url) {
         return url + 'uq/test/' + db + '/';
     }

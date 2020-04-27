@@ -3,14 +3,14 @@ import { Request, Response, NextFunction, Router } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
 import {buildOpenRouter, buildEntityRouter, buildUnitxRouter, buildBuildRouter} from './router';
-//import {buildSettingRouter} from './router'; 
 import {initResDb, router as resRouter, initResPath} from './res';
-import {Auth, authCheck, authDebug, authUnitx, RouterBuilder, uqProdRouterBuilder, uqTestRouterBuilder, unitxTestRouterBuilder, unitxProdRouterBuilder, compileProdRouterBuilder, compileTestRouterBuilder, CompileRouterBuilder} from './core';
-//import { /*buildUnitxQueueRouter, startSheetQueue, startToUnitxQueue, startUnitxInQueue*/ } from './queue';
+import {authCheck, authUnitx, RouterBuilder, 
+	uqProdRouterBuilder, uqTestRouterBuilder, 
+	unitxTestRouterBuilder, unitxProdRouterBuilder, 
+	compileProdRouterBuilder, compileTestRouterBuilder, CompileRouterBuilder, 
+	init$UqDb} from './core';
 import { authJoint, authUpBuild } from './core/auth';
 import { startJobsLoop } from './jobs';
-import { init$UqDb } from './$uq';
-//import { importData } from './import';
 
 export async function init():Promise<void> {
     return new Promise<void>((resolve, reject) => {

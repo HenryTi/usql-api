@@ -3,12 +3,36 @@ import { Db } from '../db';
 
 export class BuildRunner {
 	private readonly db:Db;
+    private readonly setting: {[name:string]: any} = {};
 
     constructor(db:Db) {
         this.db = db;
     }
 
     getDb():string {return this.db.getDbName()}
+
+    async initSetting():Promise<void> {
+        await this.db.call('tv_$init_setting', []);
+    }
+    async setSetting(unit:number, name: string, value: string): Promise<void> {
+        name = name.toLowerCase();
+        await this.unitCall('tv_$set_setting', unit, name, value);
+        if (unit === 0) {
+            let n = Number(value);
+            this.setting[name] = n === NaN? value : n;
+        }
+    }
+    async getSetting(unit:number, name: string):Promise<any> {
+        name = name.toLowerCase();
+        let ret = await this.unitTableFromProc('tv_$get_setting', unit, name);
+        if (ret.length===0) return undefined;
+        let v = ret[0].value;
+        if (unit === 0) {
+            let n = Number(v);
+            v = this.setting[name] = isNaN(n)===true? v : n;
+        }
+        return v;
+    }
 
     async sql(sql:string, params:any[]): Promise<any> {
         try {
@@ -30,11 +54,12 @@ export class BuildRunner {
     }
     async procCoreSql(procName:string, procSql:string): Promise<any> {
         try {
-        	//let sqlDrop = 'DROP PROCEDURE IF EXISTS ' + procName;
-			//await this.db.sql(sqlDrop, undefined);
 			await this.db.sqlProc(procName, procSql);
+			await this.db.buildProc(procName, procSql);
+			/*
 			await this.db.sqlDropProc(procName);
-            return await this.db.sql(procSql, undefined);
+			return await this.db.sql(procSql, undefined);
+			*/
         }
         catch (err) {
             debugger;
