@@ -63,7 +63,7 @@ import { createPool, MysqlError } from "mysql";
 	}
 	
 	async function charsetCollateDb(dbName:string, charset:string, collate:string) {
-		let sqlDbFileNames = `select SCHEMA_NAME from information_schema.SCHEMATA where SCHEMA_NAME='${dbName}'`;
+		let sqlDbFileNames = `select SCHEMA_NAME from information_schema.SCHEMATA where SCHEMA_NAME=LOWER('${dbName}')`;
 		let dbFileNames:any[] = await runSql(sqlDbFileNames);
 		if (dbFileNames.length === 0) {
 			console.log(`Database ${dbName} not exists`);
@@ -134,7 +134,7 @@ import { createPool, MysqlError } from "mysql";
 		let charset = params['character_set_connection']; //'utf8mb4';
 		let collate = params['collation_connection']; //'utf8mb4_general_ci';
 
-		let dbIdStart = 21; // 有些数据库升级的时候，出错的。从出错地方重新开始。
+		let dbIdStart = 0; // 有些数据库升级的时候，出错的。从出错地方重新开始。
 		if (!dbIdStart) {
 			await charsetCollateDb('$res', charset, collate);
 			await charsetCollateDb('$uq', charset, collate);

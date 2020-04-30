@@ -75,7 +75,7 @@ const mysql_1 = require("mysql");
         }
         function charsetCollateDb(dbName, charset, collate) {
             return __awaiter(this, void 0, void 0, function* () {
-                let sqlDbFileNames = `select SCHEMA_NAME from information_schema.SCHEMATA where SCHEMA_NAME='${dbName}'`;
+                let sqlDbFileNames = `select SCHEMA_NAME from information_schema.SCHEMATA where SCHEMA_NAME=LOWER('${dbName}')`;
                 let dbFileNames = yield runSql(sqlDbFileNames);
                 if (dbFileNames.length === 0) {
                     console.log(`Database ${dbName} not exists`);
@@ -142,7 +142,7 @@ const mysql_1 = require("mysql");
             console.log('========================================');
             let charset = params['character_set_connection']; //'utf8mb4';
             let collate = params['collation_connection']; //'utf8mb4_general_ci';
-            let dbIdStart = 21; // 有些数据库升级的时候，出错的。从出错地方重新开始。
+            let dbIdStart = 0; // 有些数据库升级的时候，出错的。从出错地方重新开始。
             if (!dbIdStart) {
                 yield charsetCollateDb('$res', charset, collate);
                 yield charsetCollateDb('$uq', charset, collate);
