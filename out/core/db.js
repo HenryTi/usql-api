@@ -134,9 +134,9 @@ class Db {
             }
         });
     }
-    initProcObjs() {
+    createProcObjs() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.dbServer.initProcObjs(this.dbName);
+            yield this.dbServer.createProcObjs(this.dbName);
         });
     }
     sql(sql, params) {
@@ -204,14 +204,14 @@ class Db {
             return yield this.dbServer.uqDbs();
         });
     }
-    initResDb(resDbName) {
+    createResDb(resDbName) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.dbServer.initResDb(resDbName);
+            yield this.dbServer.createResDb(resDbName);
         });
     }
-    init$UqDb() {
+    create$UqDb() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.dbServer.init$UqDb();
+            yield this.dbServer.create$UqDb();
         });
     }
 }
@@ -257,14 +257,14 @@ class SpanLog {
 }
 exports.SpanLog = SpanLog;
 const $uq = '$uq';
-function init$UqDb() {
+function create$UqDb() {
     return __awaiter(this, void 0, void 0, function* () {
         let db = Db.db($uq);
         let runner = new runner_1.EntityRunner($uq, db);
-        yield runner.init$UqDb();
+        yield runner.create$UqDb();
     });
 }
-exports.init$UqDb = init$UqDb;
+exports.create$UqDb = create$UqDb;
 const tSep = '\r';
 const nSep = '\r\r';
 class DbLogger {

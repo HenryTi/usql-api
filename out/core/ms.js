@@ -5,7 +5,7 @@ class MsDbServer extends dbServer_1.DbServer {
     constructor(dbName, dbConfig) {
         super();
     }
-    initProcObjs(db) { return; }
+    createProcObjs(db) { return; }
     reset() { }
     ;
     sql(db, sql, params) { return; }
@@ -22,8 +22,8 @@ class MsDbServer extends dbServer_1.DbServer {
     existsDatabase(db) { return; }
     setDebugJobs() { return; }
     uqDbs() { return; }
-    initResDb(resDbName) { return; }
-    init$UqDb() { return; }
+    createResDb(resDbName) { return; }
+    create$UqDb() { return; }
 }
 exports.MsDbServer = MsDbServer;
 //# sourceMappingURL=ms.js.map

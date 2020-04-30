@@ -24,7 +24,8 @@
                 "NODE_ENV": "stage"
             },
             "port": 5857,
-            "program": "${workspaceRoot}/out/index.js",
+			//"program0": "${workspaceRoot}/out/cli/charset-collate.js",
+			"program": "${workspaceRoot}/out/index.js",
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceRoot}/out/**/*.js"

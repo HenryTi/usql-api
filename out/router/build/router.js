@@ -21,10 +21,11 @@ function buildBuildRouter(router, rb) {
             let { enc } = req.body;
             core_1.setUqBuildSecret(enc);
             let runner = new core_2.BuildRunner(db);
-            yield runner.initProcObjs();
+            let exists = yield runner.buildDatabase();
+            //await runner.initProcObjs();
             res.json({
                 ok: true,
-                res: undefined
+                res: exists
             });
         }
         catch (err) {

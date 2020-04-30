@@ -76,8 +76,8 @@ function init() {
                 let port = config.get('port');
                 console.log('port=', port);
                 app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
-                    yield res_1.initResDb();
-                    yield core_1.init$UqDb();
+                    yield res_1.createResDb();
+                    yield core_1.create$UqDb();
                     console.log('UQ-API listening on port ' + port);
                     let connection = config.get("connection");
                     let { host, user } = connection;

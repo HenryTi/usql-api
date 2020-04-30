@@ -11,14 +11,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
 const resDbName = '$res';
-function initResDb() {
+function createResDb() {
     return __awaiter(this, void 0, void 0, function* () {
         let db = core_1.Db.db(resDbName);
         let runner = new core_1.EntityRunner(resDbName, db);
-        yield runner.initResDb(resDbName);
+        yield runner.createResDb(resDbName);
     });
 }
-exports.initResDb = initResDb;
+exports.createResDb = createResDb;
 let resDbRunner;
 function getResDbRunner() {
     return __awaiter(this, void 0, void 0, function* () {

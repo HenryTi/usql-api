@@ -261,11 +261,11 @@ export class EntityRunner {
     async start(unit:number, user:number): Promise<void> {
         return await this.unitUserCall('tv_$start', unit, user);
     }
-    async initResDb(resDbName:string): Promise<void> {
-        await this.db.initResDb(resDbName);
+    async createResDb(resDbName:string): Promise<void> {
+        await this.db.createResDb(resDbName);
     }
-    async init$UqDb(): Promise<void> {
-        await this.db.init$UqDb();
+    async create$UqDb(): Promise<void> {
+        await this.db.create$UqDb();
 	}
 /*	
     async initSetting():Promise<void> {

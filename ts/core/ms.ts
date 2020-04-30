@@ -4,7 +4,7 @@ export class MsDbServer extends DbServer {
 	constructor(dbName:string, dbConfig: any) {
 		super();
 	}
-	initProcObjs(db:string): Promise<void> {return}
+	createProcObjs(db:string): Promise<void> {return}
 	reset():void {};
     sql(db:string, sql:string, params:any[]): Promise<any> {return}
 	sqlProc(db:string, procName:string, procSql:string): Promise<any> {return}
@@ -20,6 +20,6 @@ export class MsDbServer extends DbServer {
     existsDatabase(db:string): Promise<boolean> {return}
     setDebugJobs():Promise<void> {return}
     uqDbs():Promise<any[]> {return}
-    initResDb(resDbName:string):Promise<void> {return}
-    init$UqDb():Promise<void> {return}
+    createResDb(resDbName:string):Promise<void> {return}
+    create$UqDb():Promise<void> {return}
 }

@@ -3,12 +3,12 @@ import { Request, Response, NextFunction, Router } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
 import {buildOpenRouter, buildEntityRouter, buildUnitxRouter, buildBuildRouter} from './router';
-import {initResDb, router as resRouter, initResPath} from './res';
+import {createResDb, router as resRouter, initResPath} from './res';
 import {authCheck, authUnitx, RouterBuilder, 
 	uqProdRouterBuilder, uqTestRouterBuilder, 
 	unitxTestRouterBuilder, unitxProdRouterBuilder, 
 	compileProdRouterBuilder, compileTestRouterBuilder, CompileRouterBuilder, 
-	init$UqDb} from './core';
+	create$UqDb} from './core';
 import { authJoint, authUpBuild } from './core/auth';
 import { startJobsLoop } from './jobs';
 
@@ -75,8 +75,8 @@ export async function init():Promise<void> {
             console.log('port=', port);
 
             app.listen(port, async ()=>{
-                await initResDb();
-                await init$UqDb();
+                await createResDb();
+                await create$UqDb();
                 console.log('UQ-API listening on port ' + port);
                 let connection = config.get<any>("connection");
                 let {host, user} = connection;

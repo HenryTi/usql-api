@@ -80,16 +80,13 @@ export class BuildRunner {
 	
     async buildDatabase(): Promise<boolean> {
 		let ret = await this.db.buildDatabase();
-		await this.db.initProcObjs();
+		await this.db.createProcObjs();
 		return ret;
     }
     async createDatabase(): Promise<void> {
 		let ret = await this.db.createDatabase();
-		await this.db.initProcObjs();
+		await this.db.createProcObjs();
 		return ret;
-	}
-	async initProcObjs() {
-		await this.db.initProcObjs();
 	}
     async existsDatabase(): Promise<boolean> {
         return await this.db.exists();
@@ -172,10 +169,10 @@ export class BuildRunner {
     async start(unit:number, user:number): Promise<void> {
         return await this.unitUserCall('tv_$start', unit, user);
     }
-    async initResDb(resDbName:string): Promise<void> {
-        await this.db.initResDb(resDbName);
+    async createResDb(resDbName:string): Promise<void> {
+        await this.db.createResDb(resDbName);
     }
-    async init$UqDb(): Promise<void> {
-        await this.db.init$UqDb();
+    async create$UqDb(): Promise<void> {
+        await this.db.create$UqDb();
     }
 }

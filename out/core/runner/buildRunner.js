@@ -100,20 +100,15 @@ class BuildRunner {
     buildDatabase() {
         return __awaiter(this, void 0, void 0, function* () {
             let ret = yield this.db.buildDatabase();
-            yield this.db.initProcObjs();
+            yield this.db.createProcObjs();
             return ret;
         });
     }
     createDatabase() {
         return __awaiter(this, void 0, void 0, function* () {
             let ret = yield this.db.createDatabase();
-            yield this.db.initProcObjs();
+            yield this.db.createProcObjs();
             return ret;
-        });
-    }
-    initProcObjs() {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.initProcObjs();
         });
     }
     existsDatabase() {
@@ -226,14 +221,14 @@ class BuildRunner {
             return yield this.unitUserCall('tv_$start', unit, user);
         });
     }
-    initResDb(resDbName) {
+    createResDb(resDbName) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.initResDb(resDbName);
+            yield this.db.createResDb(resDbName);
         });
     }
-    init$UqDb() {
+    create$UqDb() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.init$UqDb();
+            yield this.db.create$UqDb();
         });
     }
 }

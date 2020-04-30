@@ -2,9 +2,6 @@ import { Router, Request, Response } from 'express';
 import { EntityRunner, RouterBuilder, setUqBuildSecret, Db, prodNet, testNet } from '../../core';
 import { BuildRunner } from '../../core';
 
-
-
-
 export function buildBuildRouter(router:Router, rb: RouterBuilder) {
     router.post('/start', async (req:Request, res:Response) => {
         try {
@@ -15,10 +12,11 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
 			let {enc} = req.body;
 			setUqBuildSecret(enc);
 			let runner = new BuildRunner(db);
-			await runner.initProcObjs();
+			let exists = await runner.buildDatabase();
+			//await runner.initProcObjs();
             res.json({
                 ok: true,
-                res: undefined
+                res: exists
             });
         }
         catch (err) {

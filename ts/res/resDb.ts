@@ -2,10 +2,10 @@ import { EntityRunner, Db } from "../core";
 
 const resDbName = '$res';
 
-export async function initResDb() {
+export async function createResDb() {
 	let db = Db.db(resDbName);
     let runner = new EntityRunner(resDbName, db);
-    await runner.initResDb(resDbName);
+    await runner.createResDb(resDbName);
 }
 
 let resDbRunner: EntityRunner;

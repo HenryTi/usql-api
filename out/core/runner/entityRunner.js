@@ -250,14 +250,14 @@ class EntityRunner {
             return yield this.unitUserCall('tv_$start', unit, user);
         });
     }
-    initResDb(resDbName) {
+    createResDb(resDbName) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.initResDb(resDbName);
+            yield this.db.createResDb(resDbName);
         });
     }
-    init$UqDb() {
+    create$UqDb() {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.init$UqDb();
+            yield this.db.create$UqDb();
         });
     }
     /*

@@ -33,11 +33,12 @@ const sqls_5 = {
 	performanceExists: `SELECT name FROM mysql.proc WHERE db='$uq' AND name='performance';`,
 };
 
+/*
 const collationConnection = `
 	SET character_set_client = 'utf8';
 	SET collation_connection = 'utf8_unicode_ci';
 `;
-
+*/
 const sysProcColl = {
 	tv_$entitys: true,
 	tv_$entity: true,
@@ -80,6 +81,7 @@ export class MyDbServer extends DbServer {
 		let conf = _.clone(dbConfig);
 		conf.timezone = 'UTC';
 		conf.typeCast = castField;
+		//conf.charset = 'utf8mb4';
 		//let newPool = await this.createPool(conf);
 		let newPool = createPool(conf);
 		pools.push({config: dbConfig, pool: newPool});
@@ -103,9 +105,11 @@ export class MyDbServer extends DbServer {
 		});
 	}
 */
+
     private async exec(sql:string, values:any[], log?: SpanLog): Promise<any> {
 		if (this.pool === undefined) {
 			this.pool = await this.getPool(this.dbConfig);
+			// await this.assertPool();
 		}
         return await new Promise<any>((resolve, reject) => {
             let retryCount = 0;
@@ -222,7 +226,7 @@ export class MyDbServer extends DbServer {
 
 	async buildProc(db:string, procName:string, procSql:string):Promise<any> {
 		let drop = `USE \`${db}\`; DROP PROCEDURE IF EXISTS \`${db}\`.\`${procName}\`;`;
-		await this.sql(db, drop + collationConnection + procSql, undefined);
+		await this.sql(db, drop + /*collationConnection + */procSql, undefined);
 		// clear changed flag
 		await this.callProcBase(db, 'tv_$proc_save', [db, procName, undefined]);
 	}
@@ -312,23 +316,27 @@ export class MyDbServer extends DbServer {
         let sql1 = `UPDATE \`${db}\`.tv_$entity a 
 			SET a.tuidVid=(select b.AUTO_INCREMENT 
 				from information_schema.tables b
-				where b.table_name=concat('tv_', CONVERT(a.name USING utf8) COLLATE utf8_general_ci)
+				where b.table_name=concat('tv_', a.name)
 				AND b.TABLE_SCHEMA='${db}'
 			);
         `;
+		//where b.table_name=concat('tv_', CONVERT(a.name USING utf8) COLLATE utf8_general_ci)
+		/*
         let sql2 = `UPDATE \`${db}\`.tv_$entity a 
 			SET a.tuidVid=(select b.AUTO_INCREMENT 
 				from information_schema.tables b
-				where b.table_name=concat('tv_', CONVERT(a.name USING utf8) COLLATE utf8_unicode_ci)
+				where b.table_name=concat('tv_', a.name)
 				AND b.TABLE_SCHEMA='${db}'
 			);
 		`;
-        try {
+		*/
+		//where b.table_name=concat('tv_', CONVERT(a.name USING utf8) COLLATE utf8_unicode_ci)
+        //try {
             await this.exec(sql1, []);
-        }
-        catch {
-            await this.exec(sql2, []);
-        }
+        //}
+        //catch {
+			//await this.exec(sql2, []);
+        //}
     }
     async tableFromProc(db:string, proc:string, params:any[]): Promise<any[]> {
         let res = await this.execProc(db, proc, params);
@@ -360,20 +368,22 @@ export class MyDbServer extends DbServer {
         let exists = `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
         let ret = await this.exec(exists, []);
         if (ret.length > 0) return true;
-        let sql = `CREATE DATABASE IF NOT EXISTS \`${db}\` default CHARACTER SET utf8 COLLATE utf8_unicode_ci`;
+        let sql = `CREATE DATABASE IF NOT EXISTS \`${db}\``; // default CHARACTER SET utf8 COLLATE utf8_unicode_ci`;
         await this.exec(sql, undefined);
-        await this.build$Uq(db);
+        await this.insertInto$Uq(db);
         return false;
     }
-	async initProcObjs(db:string): Promise<void> {
+	async createProcObjs(db:string): Promise<void> {
 		//let useDb = 'use `' + db + '`;';
 		let createProcTable = `
 CREATE TABLE IF NOT EXISTS \`${db}\`.\`tv_$proc\` (
 	\`name\` VARCHAR(200) NOT NULL,
 	\`proc\` TEXT NULL, 
 	\`changed\` TINYINT(4) NULL DEFAULT NULL,
-	PRIMARY KEY (\`name\`))
+	PRIMARY KEY (\`name\`));
 `;
+ // CHARACTER SET utf8 COLLATE utf8_unicode_ci
+
         await this.exec(createProcTable, undefined);
 		let getProc = `
 DROP PROCEDURE IF EXISTS \`${db}\`.tv_$proc_get;
@@ -383,12 +393,14 @@ CREATE PROCEDURE \`${db}\`.tv_$proc_get(
 ) BEGIN	
 	SELECT proc, CASE WHEN (changed=1 OR NOT (exists(SELECT ROUTINE_BODY
 	FROM information_schema.routines
-	WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed
+	WHERE 1=1 AND ROUTINE_SCHEMA=_schema AND ROUTINE_NAME=_name))) THEN 1 ELSE 0 END AS changed
 	FROM tv_$proc
 	WHERE 1=1 AND name=_name FOR UPDATE;
 END
 `;
-        await this.exec(getProc, undefined);
+//WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed
+		await this.exec(getProc, undefined);
+
 		let saveProc = `
 DROP PROCEDURE IF EXISTS \`${db}\`.tv_$proc_save;
 CREATE PROCEDURE \`${db}\`.tv_$proc_save(
@@ -417,9 +429,10 @@ __proc_exit: BEGIN
 	END IF;
 	SELECT CASE WHEN (_changed=1 OR NOT (exists(SELECT ROUTINE_BODY
 	FROM information_schema.routines 
-	WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed;
+	WHERE 1=1 AND ROUTINE_SCHEMA=_schema AND ROUTINE_NAME=_name))) THEN 1 ELSE 0 END AS changed;
 END
 `;
+//WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed;
 		await this.exec(saveProc, undefined);
 
 		let escapeFunction = `
@@ -427,7 +440,7 @@ DROP FUNCTION IF EXISTS \`${db}\`.$unescape;
 CREATE FUNCTION \`${db}\`.\`$unescape\`(
 	\`t\` TEXT
 )
-RETURNS text CHARSET utf8 COLLATE utf8_unicode_ci
+RETURNS text
 LANGUAGE SQL
 DETERMINISTIC
 CONTAINS SQL
@@ -475,11 +488,11 @@ END
 		await this.exec(escapeFunction, undefined);
 		return;
 	}
-    async init$UqDb():Promise<void> {
+    async create$UqDb():Promise<void> {
         let exists = 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'$uq\'';
         let rows:any[] = await this.exec(exists, undefined);
         if (rows.length == 0) {
-            let sql = 'CREATE DATABASE IF NOT EXISTS $uq default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
+            let sql = 'CREATE DATABASE IF NOT EXISTS $uq'; // default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
             await this.exec(sql, undefined);
         }
         let createUqTable = 'CREATE TABLE IF NOT EXISTS $uq.uq (id int not null auto_increment, `name` varchar(50), create_time timestamp not null default current_timestamp, primary key(`name`), unique key unique_id (id))';
@@ -499,9 +512,9 @@ declare _time timestamp(6);
         if not exists(select \`unit\` from \`log\` where \`time\`=_time) then
 			insert into \`log\` (\`time\`, unit, uq, subject, content) 
 				values (_time, _unit, 
-					(select id from uq where \`name\`=_uq) collate utf8_unicode_ci, 
-					_subject collate utf8_unicode_ci, 
-					_content collate utf8_unicode_ci);
+					(select id from uq where \`name\`=_uq), 
+					_subject, 
+					_content);
             leave _exit;
 		else
 			set _time = ADDDATE(_time,interval 1 microsecond );
@@ -540,7 +553,7 @@ end;
             await this.exec(performanceLog, undefined);
         }
     }
-    private async build$Uq(db:string): Promise<void> {
+    private async insertInto$Uq(db:string): Promise<void> {
         let insertUqDb = `insert into $uq.uq (\`name\`) values ('${db}') on duplicate key update create_time=current_timestamp();`;
         await this.exec(insertUqDb, undefined);
     }
@@ -567,7 +580,7 @@ end;
         let rows:any[] = await this.exec(sql, undefined);
         return rows;
     }
-    async initResDb(resDbName:string):Promise<void> {
+    async createResDb(resDbName:string):Promise<void> {
         await this.createDatabase(resDbName);
         let sql = `
             CREATE TABLE if not exists ${resDbName}.item(

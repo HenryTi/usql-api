@@ -129,8 +129,8 @@ export class Db {
             await this.dbServer.call('$uq', 'performance', [Date.now(), msg, 0]);
         }
 	}
-	async initProcObjs():Promise<void> {
-		await this.dbServer.initProcObjs(this.dbName);
+	async createProcObjs():Promise<void> {
+		await this.dbServer.createProcObjs(this.dbName);
 	}
     async sql(sql:string, params:any[]): Promise<any> {
         //this.devLog('sql', params);
@@ -174,11 +174,11 @@ export class Db {
         return await this.dbServer.uqDbs();
     }
 
-    async initResDb(resDbName:string):Promise<void> {
-        await this.dbServer.initResDb(resDbName);
+    async createResDb(resDbName:string):Promise<void> {
+        await this.dbServer.createResDb(resDbName);
     }
-    async init$UqDb():Promise<void> {
-        await this.dbServer.init$UqDb();
+    async create$UqDb():Promise<void> {
+        await this.dbServer.create$UqDb();
     }
 }
 
@@ -229,10 +229,10 @@ export class SpanLog {
 
 const $uq = '$uq';
 
-export async function init$UqDb() {
+export async function create$UqDb() {
 	let db = Db.db($uq);
     let runner = new EntityRunner($uq, db);
-    await runner.init$UqDb();
+    await runner.create$UqDb();
 }
 
 const tSep = '\r';
