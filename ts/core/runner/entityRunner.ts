@@ -78,9 +78,11 @@ export class EntityRunner {
 
 	getDb():string {return this.db.getDbName()}
 
-	reset() {
+	async reset() {
 		this.isCompiling = false;
 		this.db.reset();
+		this.schemas = undefined;
+		await this.init();
 	}
 	
     async getRoles(unit:number, app:any, user:number, inRoles:string): Promise<{roles:number, version:number}> {

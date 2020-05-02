@@ -31,8 +31,12 @@ class EntityRunner {
     }
     getDb() { return this.db.getDbName(); }
     reset() {
-        this.isCompiling = false;
-        this.db.reset();
+        return __awaiter(this, void 0, void 0, function* () {
+            this.isCompiling = false;
+            this.db.reset();
+            this.schemas = undefined;
+            yield this.init();
+        });
     }
     getRoles(unit, app, user, inRoles) {
         return __awaiter(this, void 0, void 0, function* () {

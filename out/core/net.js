@@ -83,24 +83,26 @@ class Net {
             }
             for (let runner of runners) {
                 yield runner.buildTuidAutoId();
-                this.resetRunner(runner);
+                yield this.resetRunner(runner);
                 if (this.executingNet !== undefined)
                     this.executingNet.resetRunner(runner);
             }
         });
     }
     resetRunner(runner) {
-        let runnerName = runner.name;
-        for (let i in this.runners) {
-            if (i !== runnerName)
-                continue;
-            let runner = this.runners[i];
-            if (runner) {
-                runner.reset();
-                console.error('--- === --- === ' + runnerName + ' resetRunner ' + ' net is ' + this.id);
-                this.runners[i] = undefined;
+        return __awaiter(this, void 0, void 0, function* () {
+            let runnerName = runner.name;
+            for (let i in this.runners) {
+                if (i !== runnerName)
+                    continue;
+                let runner = this.runners[i];
+                if (runner) {
+                    yield runner.reset();
+                    console.error('--- === --- === ' + runnerName + ' resetRunner ' + ' net is ' + this.id);
+                    this.runners[i] = undefined;
+                }
             }
-        }
+        });
     }
     getUnitxRunner() {
         return __awaiter(this, void 0, void 0, function* () {

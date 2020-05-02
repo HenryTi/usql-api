@@ -68,18 +68,18 @@ export abstract class Net {
 
 		for (let runner of runners) {
 			await runner.buildTuidAutoId();
-			this.resetRunner(runner);
+			await this.resetRunner(runner);
 			if (this.executingNet !== undefined) this.executingNet.resetRunner(runner);
 		}
     }
 
-    private resetRunner(runner: EntityRunner) {
+    private async resetRunner(runner: EntityRunner) {
         let runnerName = runner.name;
         for (let i in this.runners) {
             if (i !== runnerName) continue;
             let runner = this.runners[i];
             if (runner) {
-				runner.reset();
+				await runner.reset();
                 console.error('--- === --- === ' + runnerName + ' resetRunner ' + ' net is ' + this.id);
                 this.runners[i] = undefined;
             }
