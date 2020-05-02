@@ -15,12 +15,18 @@ const mysql_1 = require("mysql");
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
         let node_env;
+        let db;
         process.argv.forEach(v => {
             let parts = v.split('=');
             if (parts.length = 2) {
-                let p = parts[0].trim().toLowerCase();
-                if (p === 'node_env') {
-                    node_env = parts[1].trim().toLowerCase();
+                let v = parts[1].trim().toLowerCase();
+                switch (parts[0].trim().toLowerCase()) {
+                    case 'node_env':
+                        node_env = v;
+                        break;
+                    case 'db':
+                        db = v;
+                        break;
                 }
             }
         });
@@ -142,13 +148,17 @@ const mysql_1 = require("mysql");
             console.log('========================================');
             let charset = params['character_set_connection']; //'utf8mb4';
             let collate = params['collation_connection']; //'utf8mb4_general_ci';
-            let dbIdStart = 0; // 有些数据库升级的时候，出错的。从出错地方重新开始。
-            if (!dbIdStart) {
-                yield charsetCollateDb('$res', charset, collate);
-                yield charsetCollateDb('$uq', charset, collate);
+            if (db) {
+                yield charsetCollateDb(db, charset, collate);
             }
-            yield charsetCollateAllUqs(charset, collate, dbIdStart);
-            // await charsetCollateDb('chemical$test', charset, collate);
+            else {
+                let dbIdStart = 0; // 有些数据库升级的时候，出错的。从出错地方重新开始。
+                if (!dbIdStart) {
+                    yield charsetCollateDb('$res', charset, collate);
+                    yield charsetCollateDb('$uq', charset, collate);
+                }
+                yield charsetCollateAllUqs(charset, collate, dbIdStart);
+            }
             console.log('=== Job done!');
         }
         catch (err) {
