@@ -51,34 +51,25 @@ function buildBuildRouter(router, rb) {
         }
     }));
     router.post('/finish', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let n = 0;
-        let steps = 'step' + n++;
         try {
             let dbName = req.params.db;
             let db = core_1.Db.db(rb.getDbName(dbName));
             let runner = new core_2.BuildRunner(db);
-            steps += '-step' + n++;
             let { uqId: paramUqId, uqVersion } = req.body;
             yield Promise.all([
                 runner.setSetting(0, 'uqId', String(paramUqId)),
                 runner.setSetting(0, 'uqVersion', String(uqVersion))
             ]);
-            steps += '-step' + n++;
             yield runner.initSetting();
-            steps += '-step' + n++;
             yield core_1.prodNet.resetRunnerAfterCompile(db);
-            steps += '-step' + n++;
             yield core_1.testNet.resetRunnerAfterCompile(db);
-            steps += '-step' + n++;
             res.json({
                 ok: true,
             });
-            steps += '-step' + n++;
         }
         catch (err) {
             res.json({
                 error: err,
-                steps: steps,
             });
         }
     }));
