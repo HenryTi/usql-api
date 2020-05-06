@@ -50,39 +50,36 @@ function buildBuildRouter(router, rb) {
             res.json({ error: err });
         }
     }));
-    //rb.post(router, '/finish',
-    //async (runner:EntityRunner, body:any, params:any):Promise<any> => {
     router.post('/finish', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        let n = 0;
+        let steps = 'step' + n++;
         try {
             let dbName = req.params.db;
             let db = core_1.Db.db(rb.getDbName(dbName));
             let runner = new core_2.BuildRunner(db);
-            //let {uqId} = runner;
+            steps += '-step' + n++;
             let { uqId: paramUqId, uqVersion } = req.body;
-            //if (!uqId) {
             yield Promise.all([
                 runner.setSetting(0, 'uqId', String(paramUqId)),
                 runner.setSetting(0, 'uqVersion', String(uqVersion))
             ]);
-            //uqId = paramUqId;
-            //}
+            steps += '-step' + n++;
             yield runner.initSetting();
-            //if (String(uqId) !== String(paramUqId)) {
-            //    debugger;
-            //    throw 'error uqId';
-            //}
-            //await runner.reset();
-            //async reset() {
+            steps += '-step' + n++;
             yield core_1.prodNet.resetRunnerAfterCompile(db);
+            steps += '-step' + n++;
             yield core_1.testNet.resetRunnerAfterCompile(db);
-            //await this.net.resetRunnerAfterCompile(this);
-            //}
+            steps += '-step' + n++;
             res.json({
                 ok: true,
             });
+            steps += '-step' + n++;
         }
         catch (err) {
-            res.json({ error: err });
+            res.json({
+                error: err,
+                steps: steps,
+            });
         }
     }));
     router.post('/sql', (req, res) => __awaiter(this, void 0, void 0, function* () {
