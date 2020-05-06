@@ -70,7 +70,7 @@ class Net {
             let runners = [];
             for (let i in this.runners) {
                 let runner = this.runners[i];
-                if (runner === undefined)
+                if (!runner)
                     continue;
                 if (runner.equDb(db) === true)
                     runners.push(runner);

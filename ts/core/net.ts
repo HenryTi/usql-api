@@ -56,7 +56,7 @@ export abstract class Net {
 		let runners:EntityRunner[] = [];
 		for (let i in this.runners) {
 			let runner: EntityRunner = this.runners[i];
-			if (runner === undefined) continue;
+			if (!runner) continue;
 			if (runner.equDb(db) === true) runners.push(runner);
 		}
 
