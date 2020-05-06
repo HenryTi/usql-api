@@ -13,32 +13,23 @@ const core_1 = require("../../core");
 const core_2 = require("../../core");
 function buildBuildRouter(router, rb) {
     router.post('/start', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        let steps = 'step0';
         try {
             let dbName = req.params.db;
             let db = core_1.Db.db(rb.getDbName(dbName));
-            steps += '-step1';
             yield core_1.prodNet.runnerCompiling(db);
-            steps += '-step2';
             yield core_1.testNet.runnerCompiling(db);
-            steps += '-step3';
             let { enc } = req.body;
             core_1.setUqBuildSecret(enc);
-            steps += '-step4';
             let runner = new core_2.BuildRunner(db);
-            steps += '-step5';
             let exists = yield runner.buildDatabase();
-            steps += '-step6';
             res.json({
                 ok: true,
                 res: exists
             });
-            steps += '-end';
         }
         catch (err) {
             res.json({
                 error: err,
-                steps: steps,
             });
         }
     }));

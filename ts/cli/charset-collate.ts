@@ -9,7 +9,7 @@ import { createPool, MysqlError } from "mysql";
 
 	process.argv.forEach(v => {
 		let parts:string[] = v.split('=');
-		if (parts.length = 2) {
+		if (parts.length === 2) {
 			let v = parts[1].trim().toLowerCase();
 			switch (parts[0].trim().toLowerCase()) {
 				case 'node_env':

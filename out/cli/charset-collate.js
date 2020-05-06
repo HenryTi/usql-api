@@ -18,7 +18,7 @@ const mysql_1 = require("mysql");
         let db;
         process.argv.forEach(v => {
             let parts = v.split('=');
-            if (parts.length = 2) {
+            if (parts.length === 2) {
                 let v = parts[1].trim().toLowerCase();
                 switch (parts[0].trim().toLowerCase()) {
                     case 'node_env':
