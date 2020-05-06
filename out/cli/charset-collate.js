@@ -90,9 +90,9 @@ const mysql_1 = require("mysql");
                 dbName = dbFileNames[0]['SCHEMA_NAME'];
                 console.log('=== charsetCollateDb: ' + dbName + ' ' + charset + ' ' + collate);
                 let sql = `ALTER DATABASE \`${dbName}\` CHARACTER SET ${charset} COLLATE ${collate};`;
-                console.log(sql);
+                console.log('runing... ' + sql);
                 yield runSql(sql);
-                console.log('done: ' + sql);
+                console.log('done! ' + sql);
                 let sqlTables = `select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA='${dbName}'`;
                 let tables = yield runSql(sqlTables);
                 for (let tblRow of tables) {
