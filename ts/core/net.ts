@@ -47,18 +47,12 @@ export abstract class Net {
 	async runnerCompiling(db:Db) {
 		for (let i in this.runners) {
 			let runner: EntityRunner = this.runners[i];
-			if (runner === undefined) continue;
+			if (!runner) continue;
 			if (runner.equDb(db) === true) runner.isCompiling = true;
-			//if (this.executingNet === undefined) this.executingNet..isCompiling = true;
 		}
 	}
 
     async resetRunnerAfterCompile(db:Db) {
-		/*
-		if (this.executingNet === undefined) {
-			debugger;
-			return;
-		}*/
 		let runners:EntityRunner[] = [];
 		for (let i in this.runners) {
 			let runner: EntityRunner = this.runners[i];

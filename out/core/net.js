@@ -58,21 +58,15 @@ class Net {
         return __awaiter(this, void 0, void 0, function* () {
             for (let i in this.runners) {
                 let runner = this.runners[i];
-                if (runner === undefined)
+                if (!runner)
                     continue;
                 if (runner.equDb(db) === true)
                     runner.isCompiling = true;
-                //if (this.executingNet === undefined) this.executingNet..isCompiling = true;
             }
         });
     }
     resetRunnerAfterCompile(db) {
         return __awaiter(this, void 0, void 0, function* () {
-            /*
-            if (this.executingNet === undefined) {
-                debugger;
-                return;
-            }*/
             let runners = [];
             for (let i in this.runners) {
                 let runner = this.runners[i];
