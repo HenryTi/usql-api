@@ -80,7 +80,9 @@ import { createPool, MysqlError } from "mysql";
 
 		console.log('=== charsetCollateDb: ' + dbName + ' ' + charset + ' ' + collate);
 		let sql = `ALTER DATABASE \`${dbName}\` CHARACTER SET ${charset} COLLATE ${collate};`;
+		console.log(sql);
 		await runSql(sql);
+		console.log('done: ' + sql);
 	
 		let sqlTables = `select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA='${dbName}'`;
 		let tables:any[] = await runSql(sqlTables);
