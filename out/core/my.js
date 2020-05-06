@@ -394,6 +394,7 @@ class MyDbServer extends dbServer_1.DbServer {
     // return exists
     buildDatabase(db) {
         return __awaiter(this, void 0, void 0, function* () {
+            this.resetProcColl();
             let exists = `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
             let ret = yield this.exec(exists, []);
             if (ret.length > 0)

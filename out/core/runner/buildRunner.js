@@ -71,10 +71,6 @@ class BuildRunner {
             try {
                 yield this.db.sqlProc(procName, procSql);
                 yield this.db.buildProc(procName, procSql);
-                /*
-                await this.db.sqlDropProc(procName);
-                return await this.db.sql(procSql, undefined);
-                */
             }
             catch (err) {
                 debugger;

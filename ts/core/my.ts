@@ -365,7 +365,8 @@ export class MyDbServer extends DbServer {
     }
     // return exists
     async buildDatabase(db:string): Promise<boolean> {
-        let exists = `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
+		this.resetProcColl();
+		let exists = `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
         let ret = await this.exec(exists, []);
         if (ret.length > 0) return true;
         let sql = `CREATE DATABASE IF NOT EXISTS \`${db}\``; // default CHARACTER SET utf8 COLLATE utf8_unicode_ci`;

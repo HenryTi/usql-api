@@ -4,23 +4,33 @@ import { BuildRunner } from '../../core';
 
 export function buildBuildRouter(router:Router, rb: RouterBuilder) {
     router.post('/start', async (req:Request, res:Response) => {
+		let steps = 'step0';
         try {
             let dbName:string = req.params.db;
 			let db = Db.db(rb.getDbName(dbName));
+			steps += '-step1';
 			await prodNet.runnerCompiling(db);
+			steps += '-step2';
 			await testNet.runnerCompiling(db);
+			steps += '-step3';
 			let {enc} = req.body;
 			setUqBuildSecret(enc);
+			steps += '-step4';
 			let runner = new BuildRunner(db);
+			steps += '-step5';
 			let exists = await runner.buildDatabase();
-			//await runner.initProcObjs();
+			steps += '-step6';
             res.json({
                 ok: true,
                 res: exists
             });
+			steps += '-end';
         }
         catch (err) {
-            res.json({error: err});
+            res.json({
+				error: err,
+				steps: steps,
+			});
         }
     });
     router.post('/build-database', async (req:Request, res:Response) => {
@@ -143,13 +153,6 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
 			res.json({error: err});
 		}
 	});
-	/*
-	rb.post(router, '/proc-core-sql',
-    async (runner:EntityRunner, body:{name:string, proc:string}): Promise<any> => {
-        let {name, proc} = body;
-        return await runner.procCoreSql(name, proc);
-    });
-	*/
 	router.post('/create-database', async (req:Request, res:Response) => {
 		try {
 			let dbName:string = req.params.db;

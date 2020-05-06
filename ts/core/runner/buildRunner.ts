@@ -56,10 +56,6 @@ export class BuildRunner {
         try {
 			await this.db.sqlProc(procName, procSql);
 			await this.db.buildProc(procName, procSql);
-			/*
-			await this.db.sqlDropProc(procName);
-			return await this.db.sql(procSql, undefined);
-			*/
         }
         catch (err) {
             debugger;
