@@ -449,7 +449,8 @@ SQL SECURITY DEFINER
 COMMENT ''
 BEGIN
 	declare ret text;
-	declare sep, sub, s char(10);
+	declare sep, sub char(10);
+	declare s longtext;
 	declare p, len, c int;
 	set sep = "\\\\";
 	set p = locate(sep, t, 1);
