@@ -75,7 +75,7 @@ import { createPool, MysqlError } from "mysql";
 		  select p.db, p.name, p.type, 3 as intord, p.character_set_client,
 			concat('CREATE DEFINER=\`',replace(p.definer,'@','\`@\`'),'\` ',
 			  p.type, 
-			  ' ',p.db,'.\`',p.name,
+			  ' \`',p.db,'\`.\`',p.name,
 			  '\`(',convert(p.param_list USING utf8),') ',
 			  case 
 				when length(p.returns) > 1 
