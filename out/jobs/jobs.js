@@ -33,8 +33,8 @@ function startJobsLoop() {
         let db = core_1.Db.db(undefined);
         if (core_1.isDevelopment === true || core_1.isDevdo === true) {
             // 只有在开发状态下，才可以屏蔽jobs
-            console.log('jobs loop: developing, no loop!');
-            return;
+            //console.log('jobs loop: developing, no loop!');
+            //return;
             console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
             yield db.setDebugJobs();
             yield sleep(waitForOtherStopJobs);
@@ -50,10 +50,6 @@ function startJobsLoop() {
                 let uqs = yield db.uqDbs();
                 for (let uqRow of uqs) {
                     let { db: uqDb } = uqRow;
-                    if (core_1.isDevelopment === true) {
-                        yield db.setDebugJobs();
-                    }
-                    console.info('====== job loop for ' + uqDb + '======');
                     let net;
                     let dbName;
                     ;
@@ -65,6 +61,11 @@ function startJobsLoop() {
                         dbName = uqDb;
                         net = core_1.prodNet;
                     }
+                    if (core_1.isDevelopment === true) {
+                        // if (dbName !== 'rms') continue;
+                        yield db.setDebugJobs();
+                    }
+                    console.info('====== job loop for ' + uqDb + '======');
                     let runner = yield net.getRunner(dbName);
                     if (runner === undefined)
                         continue;

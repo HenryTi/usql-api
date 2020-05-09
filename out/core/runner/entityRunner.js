@@ -462,8 +462,10 @@ class EntityRunner {
         let name = sheetName + '$verify';
         let inBusAction = this.parametersBusCache[name];
         if (inBusAction === undefined) {
-            inBusAction = this.parametersBusCache[name] = new inBusAction_1.SheetVerifyParametersBus(this, sheetName);
-            inBusAction.init();
+            let svpb = new inBusAction_1.SheetVerifyParametersBus(this, sheetName);
+            if (svpb.init() === true) {
+                inBusAction = this.parametersBusCache[name];
+            }
         }
         return inBusAction;
     }
@@ -517,8 +519,10 @@ class EntityRunner {
         let name = `${sheetName}_${stateName}_${actionName}`;
         let inBusAction = this.parametersBusCache[name];
         if (inBusAction === undefined) {
-            inBusAction = this.parametersBusCache[name] = new inBusAction_1.SheetActionParametersBus(this, sheetName, stateName, actionName);
-            inBusAction.init();
+            let sapb = new inBusAction_1.SheetActionParametersBus(this, sheetName, stateName, actionName);
+            if (sapb.init() === true) {
+                inBusAction = this.parametersBusCache[name] = sapb;
+            }
         }
         return inBusAction;
     }
@@ -526,6 +530,8 @@ class EntityRunner {
         return __awaiter(this, void 0, void 0, function* () {
             let inBusActionName = sheet + '_' + (state === '$' ? action : state + '_' + action);
             let inBusAction = this.getSheetActionParametersBus(sheet, state, action);
+            if (inBusAction === undefined)
+                return;
             let inBusActionData = yield inBusAction.buildData(unit, user, id);
             //await this.log(unit, 'sheetAct', 'before ' + inBusActionName);
             let ret = inBusActionData === '' ?
@@ -586,8 +592,10 @@ class EntityRunner {
     getActionParametersBus(actionName) {
         let inBusAction = this.parametersBusCache[actionName];
         if (inBusAction === undefined) {
-            inBusAction = this.parametersBusCache[actionName] = new inBusAction_1.ActionParametersBus(this, actionName);
-            inBusAction.init();
+            let apb = new inBusAction_1.ActionParametersBus(this, actionName);
+            if (apb.init() === true) {
+                inBusAction = this.parametersBusCache[actionName] = apb;
+            }
         }
         return inBusAction;
     }
@@ -626,8 +634,10 @@ class EntityRunner {
         let name = bus + '_' + face;
         let inBusAction = this.parametersBusCache[name];
         if (inBusAction == undefined) {
-            inBusAction = this.parametersBusCache[name] = new inBusAction_1.AcceptParametersBus(this, bus, face);
-            inBusAction.init();
+            let apb = new inBusAction_1.AcceptParametersBus(this, bus, face);
+            if (apb.init() === true) {
+                inBusAction = this.parametersBusCache[name] = apb;
+            }
         }
         return inBusAction;
     }

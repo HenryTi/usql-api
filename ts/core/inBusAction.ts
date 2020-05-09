@@ -27,12 +27,13 @@ export abstract class ParametersBus {
         this.entityName = entityName;
     }
 
-    init() {
-        this.initSchema();
-        this.initInBuses();
+    init():boolean {
+        let ret = this.initSchema();
+		this.initInBuses();
+		return ret;
     }
 
-    protected abstract initSchema():void;
+    protected abstract initSchema():boolean;
     protected getQueryProc(bus:string, face:string):string {
         return `${this.entityName}$bus$${bus}_${face}`;
     }
@@ -134,9 +135,10 @@ export abstract class ParametersBus {
 }
 
 export class ActionParametersBus extends ParametersBus {
-    protected initSchema():void {
+    protected initSchema():boolean {
         let schema = this.runner.getSchema(this.entityName);
-        this.schema = schema.call;
+		this.schema = schema.call;
+		return true;
     }
 }
 
@@ -150,18 +152,20 @@ export class AcceptParametersBus extends ParametersBus {
         let ret = `${this.entityName}_${this.faceName}$bus$${busName}_${face}`
         return ret;
     }
-    protected initSchema():void {
+    protected initSchema():boolean {
         let schema = this.runner.getSchema(this.entityName);
         this.schema = schema.call.schema[this.faceName];
         let {accept} = this.schema;
-        this.schema.inBuses = accept.inBuses;
+		this.schema.inBuses = accept.inBuses;
+		return true;
     }
 }
 
 export class SheetVerifyParametersBus extends ParametersBus {
-    protected initSchema():void {
+    protected initSchema():boolean {
         let schema = this.runner.getSchema(this.entityName);
-        this.schema = schema.call.verify;
+		this.schema = schema.call.verify;
+		return true;
     }
     protected getQueryProc(bus:string, face:string):string {return `${this.entityName}$verify$bus$${bus}_${face}`}
 }
@@ -175,20 +179,21 @@ export class SheetActionParametersBus extends ParametersBus {
         this.actionName = actionName.toLowerCase();
     }
 
-    protected initSchema():void {
+    protected initSchema():boolean {
         let schema = this.runner.getSchema(this.entityName);
         this.schema = schema.call;
         let state = (this.schema.states as any[]).find(v => v.name === this.stateName);
         if (state === undefined) {
-            debugger;
-            return;
+            console.error('Sheet %s 没有定义 State %s', this.entityName, this.stateName);
+            return false;
         }
         let action = (state.actions as any[]).find(v => v.name === this.actionName);
         if (action === undefined) {
-            debugger;
-            return;
+            console.error('Sheet %s State %s 没有定义 Action %s', this.entityName, this.stateName, this.actionName);
+            return false;
         }
-        this.schema.inBuses = action.inBuses;
+		this.schema.inBuses = action.inBuses;
+		return true;
     }
     protected getQueryProc(bus:string, face:string):string {
         return `${this.entityName}_${this.stateName}_${this.actionName}$bus$${bus}_${face}`

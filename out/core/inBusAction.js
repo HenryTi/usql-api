@@ -16,8 +16,9 @@ class ParametersBus {
         this.entityName = entityName;
     }
     init() {
-        this.initSchema();
+        let ret = this.initSchema();
         this.initInBuses();
+        return ret;
     }
     getQueryProc(bus, face) {
         return `${this.entityName}$bus$${bus}_${face}`;
@@ -126,6 +127,7 @@ class ActionParametersBus extends ParametersBus {
     initSchema() {
         let schema = this.runner.getSchema(this.entityName);
         this.schema = schema.call;
+        return true;
     }
 }
 exports.ActionParametersBus = ActionParametersBus;
@@ -143,6 +145,7 @@ class AcceptParametersBus extends ParametersBus {
         this.schema = schema.call.schema[this.faceName];
         let { accept } = this.schema;
         this.schema.inBuses = accept.inBuses;
+        return true;
     }
 }
 exports.AcceptParametersBus = AcceptParametersBus;
@@ -150,6 +153,7 @@ class SheetVerifyParametersBus extends ParametersBus {
     initSchema() {
         let schema = this.runner.getSchema(this.entityName);
         this.schema = schema.call.verify;
+        return true;
     }
     getQueryProc(bus, face) { return `${this.entityName}$verify$bus$${bus}_${face}`; }
 }
@@ -165,15 +169,16 @@ class SheetActionParametersBus extends ParametersBus {
         this.schema = schema.call;
         let state = this.schema.states.find(v => v.name === this.stateName);
         if (state === undefined) {
-            debugger;
-            return;
+            console.error('Sheet %s 没有定义 State %s', this.entityName, this.stateName);
+            return false;
         }
         let action = state.actions.find(v => v.name === this.actionName);
         if (action === undefined) {
-            debugger;
-            return;
+            console.error('Sheet %s State %s 没有定义 Action %s', this.entityName, this.stateName, this.actionName);
+            return false;
         }
         this.schema.inBuses = action.inBuses;
+        return true;
     }
     getQueryProc(bus, face) {
         return `${this.entityName}_${this.stateName}_${this.actionName}$bus$${bus}_${face}`;

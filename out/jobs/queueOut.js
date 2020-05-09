@@ -85,7 +85,7 @@ function queueOut(runner) {
         catch (err) {
             yield runner.log(0, 'jobs queueOut loop', tool_1.getErrorString(err));
             if (core_1.isDevelopment === true)
-                console.log(err);
+                console.error(err);
         }
     });
 }

@@ -25,8 +25,8 @@ export async function startJobsLoop(): Promise<void> {
 	let db = Db.db(undefined);
     if ( isDevelopment === true || isDevdo === true) {
 		// 只有在开发状态下，才可以屏蔽jobs
-		console.log('jobs loop: developing, no loop!');
-        return;
+		//console.log('jobs loop: developing, no loop!');
+        //return;
         console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
         await db.setDebugJobs();
         await sleep(waitForOtherStopJobs);
@@ -43,10 +43,6 @@ export async function startJobsLoop(): Promise<void> {
             let uqs = await db.uqDbs();
             for (let uqRow of uqs) {
                 let {db:uqDb} = uqRow;
-                if (isDevelopment as any === true) {
-                    await db.setDebugJobs();
-                }
-                console.info('====== job loop for ' + uqDb + '======');
                 let net:Net;
                 let dbName:string;;
                 if (uqDb.endsWith($test) === true) {
@@ -56,7 +52,14 @@ export async function startJobsLoop(): Promise<void> {
                 else {
                     dbName = uqDb;
                     net = prodNet;
+				}
+
+                if (isDevelopment as any === true) {
+					// if (dbName !== 'rms') continue;
+					await db.setDebugJobs();
                 }
+                console.info('====== job loop for ' + uqDb + '======');
+
                 let runner = await net.getRunner(dbName);
                 if (runner === undefined) continue;
                 let {buses} = runner;

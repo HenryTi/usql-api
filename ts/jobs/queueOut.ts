@@ -69,7 +69,7 @@ export async function queueOut(runner: EntityRunner): Promise<void> {
     }
     catch (err) {
         await runner.log(0, 'jobs queueOut loop', getErrorString(err));
-        if (isDevelopment===true) console.log(err);
+        if (isDevelopment===true) console.error(err);
     }
 }
 
