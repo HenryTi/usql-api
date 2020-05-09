@@ -30,8 +30,9 @@ const mysql_1 = require("mysql");
                 }
             }
         });
-        process.env.NODE_ENV = node_env;
-        console.log('db = ' + db);
+        if (node_env)
+            process.env.NODE_ENV = node_env;
+        console.log('node_env=' + node_env + ', ' + 'db = ' + db);
         const config = require('config');
         console.log('NODE_ENV ' + process.env.NODE_ENV);
         if (!process.env.NODE_ENV) {
