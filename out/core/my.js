@@ -593,7 +593,7 @@ end;
     }
     createDatabase(db) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = 'CREATE DATABASE IF NOT EXISTS `' + db + '` default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
+            let sql = 'CREATE DATABASE IF NOT EXISTS `' + db + '` default CHARACTER SET utf8 '; //COLLATE utf8_unicode_ci';
             yield this.exec(sql, undefined);
         });
     }

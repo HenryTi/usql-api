@@ -559,7 +559,7 @@ end;
         await this.exec(insertUqDb, undefined);
     }
     async createDatabase(db:string): Promise<void> {
-        let sql = 'CREATE DATABASE IF NOT EXISTS `'+db+'` default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
+        let sql = 'CREATE DATABASE IF NOT EXISTS `'+db+'` default CHARACTER SET utf8 '; //COLLATE utf8_unicode_ci';
         await this.exec(sql, undefined);
     }
     async existsDatabase(db:string): Promise<boolean> {
