@@ -18,10 +18,15 @@ const res_1 = require("./res");
 const core_1 = require("./core");
 const auth_1 = require("./core/auth");
 const jobs_1 = require("./jobs");
+const { version: uq_api_version } = require('../package.json');
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise((resolve, reject) => {
             try {
+                if (!process.env.NODE_ENV) {
+                    console.error('NODE_ENV not defined, exit');
+                    process.exit();
+                }
                 console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
                 let connection = config.get("connection");
                 if (connection === undefined || connection.host === '0.0.0.0') {
@@ -74,14 +79,13 @@ function init() {
                 app.use('/uq/unitx-prod/', router_1.buildUnitxRouter(core_1.unitxProdRouterBuilder));
                 app.use('/uq/unitx-test/', router_1.buildUnitxRouter(core_1.unitxTestRouterBuilder));
                 let port = config.get('port');
-                console.log('port=', port);
                 app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
                     yield res_1.createResDb();
                     yield core_1.create$UqDb();
-                    console.log('UQ-API listening on port ' + port);
+                    console.log('UQ-API ' + uq_api_version + ' listening on port ' + port);
                     let connection = config.get("connection");
                     let { host, user } = connection;
-                    console.log('process.env.NODE_ENV: %s\nDB host: %s, user: %s', process.env.NODE_ENV, host, user);
+                    console.log('DB host: %s, user: %s', host, user);
                     resolve();
                 }));
             }

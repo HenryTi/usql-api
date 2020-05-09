@@ -24,7 +24,8 @@ export function jobsLoopNoWait() {
 export async function startJobsLoop(): Promise<void> {
 	let db = Db.db(undefined);
     if ( isDevelopment === true || isDevdo === true) {
-        // 只有在开发状态下，才可以屏蔽jobs
+		// 只有在开发状态下，才可以屏蔽jobs
+		console.log('jobs loop: developing, no loop!');
         return;
         console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
         await db.setDebugJobs();

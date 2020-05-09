@@ -12,9 +12,15 @@ import {authCheck, authUnitx, RouterBuilder,
 import { authJoint, authUpBuild } from './core/auth';
 import { startJobsLoop } from './jobs';
 
+const {version: uq_api_version} = require('../package.json');
+
 export async function init():Promise<void> {
     return new Promise<void>((resolve, reject) => {
         try {
+			if (!process.env.NODE_ENV) {
+				console.error('NODE_ENV not defined, exit');
+				process.exit();
+			}
             console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
             
             let connection = config.get<any>("connection");
@@ -72,18 +78,14 @@ export async function init():Promise<void> {
             app.use('/uq/unitx-test/', buildUnitxRouter(unitxTestRouterBuilder));
 
             let port = config.get<number>('port');
-            console.log('port=', port);
 
             app.listen(port, async ()=>{
                 await createResDb();
                 await create$UqDb();
-                console.log('UQ-API listening on port ' + port);
+                console.log('UQ-API ' + uq_api_version + ' listening on port ' + port);
                 let connection = config.get<any>("connection");
                 let {host, user} = connection;
-                console.log('process.env.NODE_ENV: %s\nDB host: %s, user: %s',
-                    process.env.NODE_ENV,
-                    host,
-                    user);
+                console.log('DB host: %s, user: %s', host, user);
 
                 resolve();
             });
