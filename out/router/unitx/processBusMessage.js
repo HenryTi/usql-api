@@ -9,22 +9,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = require("../../core");
-let lastHour = 0;
+//let lastHour: number = 0;
 function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
     return __awaiter(this, void 0, void 0, function* () {
-        let hour = core_1.busQueuehour();
+        /*
+        let hour = busQueuehour();
         if (hour > lastHour) {
-            let seed = core_1.busQueueSeedFromHour(hour);
-            let seedRet = yield runner.call('$get_table_seed', ['busqueue']);
+            let seed = busQueueSeedFromHour(hour);
+            let seedRet = await runner.call('$get_table_seed', ['busqueue']);
             let s = seedRet[0].seed;
-            if (!s)
-                s = 1;
+            if (!s) s = 1;
             if (seed > s) {
-                yield runner.call('$set_bus_queue_seed', ['busqueue', seed]);
+                await runner.call('$set_bus_queue_seed', ['busqueue', seed]);
             }
             lastHour = hour;
         }
+        */
         yield runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, body);
     });
 }

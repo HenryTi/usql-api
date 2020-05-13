@@ -1,46 +1,7 @@
 import { Router } from 'express';
-import { EntityRunner, busQueueSeed, RouterBuilder, testNet } from '../../core';
+import { EntityRunner, RouterBuilder } from '../../core';
 
-//type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
-
-export function buildOpenRouter(router:Router, rb: RouterBuilder) {
-    /*
-    function post(router:Router, path:string, processer:Processer) {
-        router.post(path, async (req:Request, res:Response) => {
-            await process(req, res, processer, (req as any).body, req.params);
-        });
-    };
-    
-    function get(router:Router, path:string, processer:Processer) {
-        router.get(path, async (req:Request, res:Response) => {
-            await process(req, res, processer, req.query, req.params);
-        });
-    };
-    
-    function put(router:Router, path:string, processer:Processer) {
-        router.put(path, async (req:Request, res:Response) => {
-            await process(req, res, processer, (req as any).body, req.params);
-        });
-    };
-    
-    async function process(req:Request, res:Response, processer:Processer, queryOrBody:any, params:any):Promise<void> {
-        try {
-            let db = req.params.db;
-            let runner = await checkRunner(db, res);
-            if (runner === undefined) return;
-            //let body = (req as any).body;
-            let result = await processer(runner, queryOrBody, params);
-            res.json({
-                ok: true,
-                res: result
-            });
-        }
-        catch (err) {
-            res.json({error: err});
-        }
-    }
-    */
-    
+export function buildOpenRouter(router:Router, rb: RouterBuilder) {    
     rb.get(router, '/entities/:unit',
     async (runner:EntityRunner, body:any, params:any):Promise<any> => {
         return await runner.getEntities(params.unit);

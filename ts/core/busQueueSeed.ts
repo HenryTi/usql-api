@@ -1,4 +1,4 @@
-const bigNumber = 1000000000;
+/*
 
 export function busQueuehour():number {
     return Math.floor(Date.now()/(3600*1000));
@@ -11,7 +11,9 @@ export function busQueueSeedFromHour(hour:number):number {
 export function busQueueHourFromSeed(seed:number):number {
     return seed / bigNumber;
 }
+*/
 
+const bigNumber = 1000000000;
 export function busQueueSeed():number {
     return Math.floor(Date.now()/(3600*1000)) * bigNumber;
 }

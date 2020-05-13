@@ -1,8 +1,9 @@
-import { EntityRunner, consts, BusMessage, busQueuehour, busQueueSeedFromHour, busQueueHourFromSeed } from '../../core';
+import { EntityRunner, BusMessage /*, consts, busQueuehour, busQueueSeedFromHour, busQueueHourFromSeed*/ } from '../../core';
 
-let lastHour: number = 0;
+//let lastHour: number = 0;
 
 export async function writeDataToBus(runner:EntityRunner, face:string, unit:number, from:string, fromQueueId:number, version:number, body:string) {
+	/*
     let hour = busQueuehour();
     if (hour > lastHour) {
         let seed = busQueueSeedFromHour(hour);
@@ -14,7 +15,7 @@ export async function writeDataToBus(runner:EntityRunner, face:string, unit:numb
         }
         lastHour = hour;
     }
-
+	*/
     await runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, body);
 }
 

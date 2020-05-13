@@ -9,44 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-//type Processer = (runner:Runner, body:any, params?:any) => Promise<any>;
 function buildOpenRouter(router, rb) {
-    /*
-    function post(router:Router, path:string, processer:Processer) {
-        router.post(path, async (req:Request, res:Response) => {
-            await process(req, res, processer, (req as any).body, req.params);
-        });
-    };
-    
-    function get(router:Router, path:string, processer:Processer) {
-        router.get(path, async (req:Request, res:Response) => {
-            await process(req, res, processer, req.query, req.params);
-        });
-    };
-    
-    function put(router:Router, path:string, processer:Processer) {
-        router.put(path, async (req:Request, res:Response) => {
-            await process(req, res, processer, (req as any).body, req.params);
-        });
-    };
-    
-    async function process(req:Request, res:Response, processer:Processer, queryOrBody:any, params:any):Promise<void> {
-        try {
-            let db = req.params.db;
-            let runner = await checkRunner(db, res);
-            if (runner === undefined) return;
-            //let body = (req as any).body;
-            let result = await processer(runner, queryOrBody, params);
-            res.json({
-                ok: true,
-                res: result
-            });
-        }
-        catch (err) {
-            res.json({error: err});
-        }
-    }
-    */
     rb.get(router, '/entities/:unit', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         return yield runner.getEntities(params.unit);
     }));
