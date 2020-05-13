@@ -110,7 +110,17 @@ function startJobsLoop() {
             }
             finally {
                 if (loopWait === true) {
-                    yield sleep(runGap);
+                    try {
+                        // 在测试服务器上，jobs loop经常会断掉出来。看来只有这一种可能了。
+                        // 执行这个sleep的时候，出现问题，从而跳出loop
+                        yield sleep(runGap);
+                    }
+                    catch (errSleep) {
+                        console.error('=========================');
+                        console.error('===== sleep error =======');
+                        console.error(errSleep);
+                        console.error('=========================');
+                    }
                 }
                 else {
                     loopWait = true;
