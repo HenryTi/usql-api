@@ -31,7 +31,7 @@ exports.jobsLoopNoWait = jobsLoopNoWait;
 function startJobsLoop() {
     return __awaiter(this, void 0, void 0, function* () {
         let db = core_1.Db.db(undefined);
-        if (core_1.isDevelopment === true || core_1.isDevdo === true) {
+        if (core_1.isDev === true) {
             // 只有在开发状态下，才可以屏蔽jobs
             //console.log('jobs loop: developing, no loop!');
             //return;
@@ -45,7 +45,7 @@ function startJobsLoop() {
         console.log('Jobs loop started!');
         for (;;) {
             console.log();
-            console.error('===================== jobs loop once ===================');
+            console.error('========= Jobs loop at %s =========', new Date().toLocaleString());
             try {
                 let uqs = yield db.uqDbs();
                 for (let uqRow of uqs) {

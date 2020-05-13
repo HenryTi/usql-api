@@ -19,14 +19,16 @@ const const_connection = 'connection';
 const const_development = 'development';
 const const_devdo = 'devdo';
 const const_unitx = '$unitx';
-function isNodeEnvEqu(env) {
+function isNodeEnvEqu(...envs) {
     let nodeEnv = process.env.NODE_ENV;
     if (!nodeEnv)
         return false;
-    return (nodeEnv.toLowerCase() === env);
+    let e = nodeEnv.toLowerCase();
+    return envs.findIndex(v => v === e) >= 0;
 }
 exports.isDevelopment = isNodeEnvEqu(const_development);
 exports.isDevdo = isNodeEnvEqu(const_devdo);
+exports.isDev = isNodeEnvEqu(const_development, const_devdo);
 class Db {
     constructor(dbName) {
         this.dbName = dbName;

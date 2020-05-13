@@ -11,14 +11,16 @@ const const_development = 'development';
 const const_devdo = 'devdo';
 const const_unitx = '$unitx';
 
-function isNodeEnvEqu(env:string):boolean {
+function isNodeEnvEqu(...envs:string[]):boolean {
 	let nodeEnv = process.env.NODE_ENV as string;
 	if (!nodeEnv) return false;
-	return (nodeEnv.toLowerCase() === env);
+	let e = nodeEnv.toLowerCase();
+	return envs.findIndex(v => v === e) >= 0;
 }
 
 export const isDevelopment:boolean = isNodeEnvEqu(const_development);
 export const isDevdo:boolean = isNodeEnvEqu(const_devdo);
+export const isDev = isNodeEnvEqu(const_development, const_devdo);
 
 export class Db {
 	private static dbs:{[name:string]:Db} = {

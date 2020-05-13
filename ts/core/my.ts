@@ -1,7 +1,7 @@
 import {createPool, Pool, MysqlError, TypeCast, FieldInfo, QueryOptions, queryCallback, Connection} from 'mysql';
 import * as _ from 'lodash';
 import {DbServer} from './dbServer';
-import { isDevelopment, dbLogger, SpanLog } from './db';
+import { isDevelopment, dbLogger, SpanLog, isDev } from './db';
 
 const retries = 5;
 const minMillis = 1;
@@ -574,7 +574,7 @@ end;
         await this.exec(sql, undefined);
     }
     async uqDbs():Promise<any[]> {
-        let sql = isDevelopment===true?
+        let sql = isDev===true?
         'select name as db from $uq.uq;' :
         `select name as db 
 	            from $uq.uq 

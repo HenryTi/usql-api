@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Net, Db, isDevelopment, prodNet, testNet, isDevdo } from '../core';
+import { Net, Db, isDevelopment, prodNet, testNet, isDev } from '../core';
 import { pullEntities } from './pullEntities';
 import { pullBus } from './pullBus';
 import { queueIn } from './queueIn';
@@ -23,7 +23,7 @@ export function jobsLoopNoWait() {
 
 export async function startJobsLoop(): Promise<void> {
 	let db = Db.db(undefined);
-    if ( isDevelopment === true || isDevdo === true) {
+    if (isDev === true) {
 		// 只有在开发状态下，才可以屏蔽jobs
 		//console.log('jobs loop: developing, no loop!');
         //return;
@@ -38,7 +38,7 @@ export async function startJobsLoop(): Promise<void> {
     console.log('Jobs loop started!');
     for (;;) {
         console.log();
-        console.error('===================== jobs loop once ===================')
+        console.error('========= Jobs loop at %s =========', new Date().toLocaleString());
         try {
             let uqs = await db.uqDbs();
             for (let uqRow of uqs) {

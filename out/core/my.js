@@ -614,7 +614,7 @@ end;
     }
     uqDbs() {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = db_1.isDevelopment === true ?
+            let sql = db_1.isDev === true ?
                 'select name as db from $uq.uq;' :
                 `select name as db 
 	            from $uq.uq 
