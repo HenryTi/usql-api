@@ -62,9 +62,6 @@ function buildUnitxRouter(rb) {
     });
     rb.post(router, '/joint-read-bus', jointReadBus);
     let jointWriteBus = (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        for (let i = 0; i < 10; i++) {
-            console.error('=========================');
-        }
         let { unit, face, from, fromQueueId, version, body: message } = body;
         let ret = yield processBusMessage_1.writeDataToBus(runner, face, unit, from, fromQueueId, version, message);
         return ret;

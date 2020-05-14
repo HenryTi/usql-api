@@ -231,7 +231,6 @@ class MyDbServer extends dbServer_1.DbServer {
     }
     buildProc(db, procName, procSql) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.error('build proc', db, procName, procSql);
             let drop = `USE \`${db}\`; DROP PROCEDURE IF EXISTS \`${db}\`.\`${procName}\`;`;
             yield this.sql(db, drop + /*collationConnection + */ procSql, undefined);
             // clear changed flag

@@ -225,7 +225,6 @@ export class MyDbServer extends DbServer {
 	}
 
 	async buildProc(db:string, procName:string, procSql:string):Promise<any> {
-		console.error('build proc', db, procName, procSql);
 		let drop = `USE \`${db}\`; DROP PROCEDURE IF EXISTS \`${db}\`.\`${procName}\`;`;
 		await this.sql(db, drop + /*collationConnection + */procSql, undefined);
 		// clear changed flag
