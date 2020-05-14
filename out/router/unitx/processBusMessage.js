@@ -25,7 +25,10 @@ function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
             lastHour = hour;
         }
         */
-        yield runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, body);
+        let ret = yield runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, body);
+        if (ret && ret.length > 0) {
+            return ret[0]['queueid'];
+        }
     });
 }
 exports.writeDataToBus = writeDataToBus;
@@ -34,7 +37,10 @@ function processBusMessage(unitxRunner, msg) {
         // 处理 bus message，发送到相应的uq服务器
         let { unit, body, from, queueId, busOwner, bus, face, version } = msg;
         let faceUrl = busOwner + '/' + bus + '/' + face;
-        yield writeDataToBus(unitxRunner, faceUrl, unit, from, queueId, version, body);
+        let ret = yield writeDataToBus(unitxRunner, faceUrl, unit, from, queueId, version, body);
+        if (ret < 0) {
+            console.error('writeDataToBus message duplicated!', msg, -ret);
+        }
     });
 }
 exports.processBusMessage = processBusMessage;
