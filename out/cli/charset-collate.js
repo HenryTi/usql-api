@@ -93,7 +93,7 @@ const mysql_1 = require("mysql");
                 console.log('runing... ' + sql);
                 yield runSql(sql);
                 console.log('done! ' + sql);
-                let sqlTables = `select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA='${dbName}'`;
+                let sqlTables = `select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA='${dbName}' AND TABLE_TYPE='BASE TABLE'`;
                 let tables = yield runSql(sqlTables);
                 for (let tblRow of tables) {
                     yield charsetCollateTable(dbName, tblRow['TABLE_NAME'], charset, collate);

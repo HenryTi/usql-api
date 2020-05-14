@@ -84,7 +84,7 @@ import { createPool, MysqlError } from "mysql";
 		await runSql(sql);
 		console.log('done! ' + sql);
 	
-		let sqlTables = `select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA='${dbName}'`;
+		let sqlTables = `select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA='${dbName}' AND TABLE_TYPE='BASE TABLE'`;
 		let tables:any[] = await runSql(sqlTables);
 		for (let tblRow of tables) {
 			await charsetCollateTable(dbName, tblRow['TABLE_NAME'], charset, collate);
