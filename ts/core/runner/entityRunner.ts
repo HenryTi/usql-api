@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Db, isDevelopment } from '../db';
+import { Db, env } from '../db';
 import { packReturns, packParam } from '..';
 import { ImportData } from '../importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from '../inBusAction';
@@ -627,7 +627,7 @@ export class EntityRunner {
         let uu = setting['uniqueunit'];
         this.uniqueUnit = uu? uu as number: 0;
         
-        if (isDevelopment) console.log('init schemas: ', this.uq, this.author, this.version);
+        if (env.isDevelopment) console.log('init schemas: ', this.uq, this.author, this.version);
 
         this.schemas = {};
         this.accessSchemaArr = [];
@@ -880,7 +880,7 @@ export class EntityRunner {
 
             }
         }
-        if (isDevelopment) console.log('access: ', this.access);
+        if (env.isDevelopment) console.log('access: ', this.access);
     }
     private async getUserAccess(unit:number, user:number):Promise<number[]> {
         let result = await this.db.tablesFromProc('tv_$get_access', [unit]);

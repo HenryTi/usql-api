@@ -1,7 +1,7 @@
 import {createPool, Pool, MysqlError, TypeCast, FieldInfo, QueryOptions, queryCallback, Connection} from 'mysql';
 import * as _ from 'lodash';
 import {DbServer} from './dbServer';
-import { isDevelopment, dbLogger, SpanLog, isDev } from './db';
+import { dbLogger, SpanLog, env } from './db';
 
 const retries = 5;
 const minMillis = 1;
@@ -112,7 +112,8 @@ export class MyDbServer extends DbServer {
 			// await this.assertPool();
 		}
         return await new Promise<any>((resolve, reject) => {
-            let retryCount = 0;
+			let retryCount = 0;
+			let isDevelopment = env.isDevelopment;
             let handleResponse = (err:MysqlError, result:any) => {
                 if (err === null) {
                     if (log !== undefined) {
@@ -574,7 +575,7 @@ end;
         await this.exec(sql, undefined);
     }
     async uqDbs():Promise<any[]> {
-        let sql = isDev===true?
+        let sql = env.isDev===true?
         'select name as db from $uq.uq;' :
         `select name as db 
 	            from $uq.uq 

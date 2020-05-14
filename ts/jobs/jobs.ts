@@ -1,12 +1,12 @@
 import * as _ from 'lodash';
-import { Net, Db, isDevelopment, prodNet, testNet, isDev } from '../core';
+import { Net, Db, prodNet, testNet, env } from '../core';
 import { pullEntities } from './pullEntities';
 import { pullBus } from './pullBus';
 import { queueIn } from './queueIn';
 import { queueOut } from './queueOut';
 
-const firstRun: number = isDevelopment === true? 3000 : 30*1000;
-const runGap: number = isDevelopment === true? 15*1000 : 30*1000;
+const firstRun: number = env.isDevelopment === true? 3000 : 30*1000;
+const runGap: number = env.isDevelopment === true? 15*1000 : 30*1000;
 const waitForOtherStopJobs = 1*1000; // 等1分钟，等其它服务器uq-api停止jobs
 const $test = '$test';
 
@@ -23,10 +23,11 @@ export function jobsLoopNoWait() {
 
 export async function startJobsLoop(): Promise<void> {
 	let db = Db.db(undefined);
-    if (isDev === true) {
+    if (env.isDev === true) {
 		// 只有在开发状态下，才可以屏蔽jobs
 		//console.log('jobs loop: developing, no loop!');
-        //return;
+		//return;
+		if (env.isDevdo === true) return;
         console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
         await db.setDebugJobs();
         await sleep(waitForOtherStopJobs);
@@ -54,7 +55,7 @@ export async function startJobsLoop(): Promise<void> {
                     net = prodNet;
 				}
 
-                if (isDevelopment as any === true) {
+                if (env.isDevelopment as any === true) {
 					// if (dbName !== 'rms') continue;
 					await db.setDebugJobs();
                 }

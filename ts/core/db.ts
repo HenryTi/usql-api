@@ -5,11 +5,7 @@ import {MsDbServer} from './ms';
 import {MyDbServer} from './my';
 import { EntityRunner } from './runner';
 
-const const_connectionUnitx = 'connection_$unitx';
-const const_connection = 'connection';
-const const_development = 'development';
-const const_devdo = 'devdo';
-const const_unitx = '$unitx';
+/*
 
 function isNodeEnvEqu(...envs:string[]):boolean {
 	let nodeEnv = process.env.NODE_ENV as string;
@@ -21,6 +17,51 @@ function isNodeEnvEqu(...envs:string[]):boolean {
 export const isDevelopment:boolean = isNodeEnvEqu(const_development);
 export const isDevdo:boolean = isNodeEnvEqu(const_devdo);
 export const isDev = isNodeEnvEqu(const_development, const_devdo);
+*/
+class Env {
+	private static const_connectionUnitx = 'connection_$unitx';
+	private static const_connection = 'connection';
+	private static const_development = 'development';
+	private static const_devdo = 'devdo';
+
+	readonly isDev: boolean = false;
+	readonly isDevelopment: boolean = false;
+	readonly isDevdo: boolean = false;
+	readonly const_unitx = '$unitx';
+
+	constructor() {
+		let nodeEnv = process.env.NODE_ENV as string;
+		if (!nodeEnv) return;
+		switch (nodeEnv.toLowerCase()) {
+			case Env.const_development: 
+				this.isDevelopment = true; 
+				this.isDev = true;
+				break;
+			case Env.const_devdo: 
+				this.isDevdo = true; 
+				this.isDev = true;
+				break;
+		}
+	}
+
+	getUnitxConnection():any {
+        if (config.has(Env.const_connectionUnitx) === true) {
+            return config.get<any>(Env.const_connectionUnitx);
+        }
+        throw `server '${config.get<string>('servername')}' has no connection_$unitx defined in config.json`;
+	}
+
+	getConnection():any {
+		if (config.has(Env.const_connection) === true) {
+			return _.clone(config.get<any>(Env.const_connection));
+		}
+		throw `server '${config.get<string>('servername')}' has no connection defined in config.json`;
+	}
+
+
+}
+
+export const env = new Env();
 
 export class Db {
 	private static dbs:{[name:string]:Db} = {
@@ -70,7 +111,7 @@ export class Db {
 	}
 
 	static unitxDb(testing:boolean):Db {
-		let name = const_unitx;
+		let name = env.const_unitx;
 		if (testing === true) name += '$test';
 		let db = Db.dbs[name]; // getCacheDb(name);
 		if (db !== undefined) return db;
@@ -94,7 +135,8 @@ export class Db {
 
     getDbName():string {return this.dbName}
     protected getDbConfig() {
-        let ret = _.clone(config.get<any>(const_connection));
+		//let ret = _.clone(config.get<any>(const_connection));
+		let ret = env.getConnection();
         ret.flags = '-FOUND_ROWS';
         return ret;
     }
@@ -185,14 +227,7 @@ export class Db {
 }
 
 class UnitxDb extends Db {
-    protected getDbConfig() {
-        if (config.has(const_connectionUnitx) === true) {
-            return config.get<any>(const_connectionUnitx);
-        }
-        else {
-            throw `server '${config.get<string>('servername')}' has no connection_$unitx defined in config.json`;
-        }
-    }
+    protected getDbConfig() { return env.getUnitxConnection() }
 }
 
 export class SpanLog {

@@ -14,8 +14,8 @@ const pullEntities_1 = require("./pullEntities");
 const pullBus_1 = require("./pullBus");
 const queueIn_1 = require("./queueIn");
 const queueOut_1 = require("./queueOut");
-const firstRun = core_1.isDevelopment === true ? 3000 : 30 * 1000;
-const runGap = core_1.isDevelopment === true ? 15 * 1000 : 30 * 1000;
+const firstRun = core_1.env.isDevelopment === true ? 3000 : 30 * 1000;
+const runGap = core_1.env.isDevelopment === true ? 15 * 1000 : 30 * 1000;
 const waitForOtherStopJobs = 1 * 1000; // 等1分钟，等其它服务器uq-api停止jobs
 const $test = '$test';
 function sleep(ms) {
@@ -31,10 +31,12 @@ exports.jobsLoopNoWait = jobsLoopNoWait;
 function startJobsLoop() {
     return __awaiter(this, void 0, void 0, function* () {
         let db = core_1.Db.db(undefined);
-        if (core_1.isDev === true) {
+        if (core_1.env.isDev === true) {
             // 只有在开发状态下，才可以屏蔽jobs
             //console.log('jobs loop: developing, no loop!');
             //return;
+            if (core_1.env.isDevdo === true)
+                return;
             console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
             yield db.setDebugJobs();
             yield sleep(waitForOtherStopJobs);
@@ -61,7 +63,7 @@ function startJobsLoop() {
                         dbName = uqDb;
                         net = core_1.prodNet;
                     }
-                    if (core_1.isDevelopment === true) {
+                    if (core_1.env.isDevelopment === true) {
                         // if (dbName !== 'rms') continue;
                         yield db.setDebugJobs();
                     }

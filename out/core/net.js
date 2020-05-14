@@ -247,7 +247,7 @@ class Net {
         return __awaiter(this, void 0, void 0, function* () {
             let url;
             let { db } = urls;
-            if (db_1.isDevelopment === true) {
+            if (db_1.env.isDevelopment === true) {
                 let urlDebug = yield this.getUrlDebug();
                 if (urlDebug !== undefined)
                     url = urlDebug;
@@ -276,7 +276,7 @@ class Net {
     getUnitxUrl(urls) {
         return __awaiter(this, void 0, void 0, function* () {
             let { db, url } = urls;
-            if (db_1.isDevelopment === true) {
+            if (db_1.env.isDevelopment === true) {
                 let urlDebug = yield this.getUrlDebug();
                 if (urlDebug !== undefined)
                     url = urlDebug;

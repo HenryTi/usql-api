@@ -1,6 +1,6 @@
 import fetch from "node-fetch";
 import { EntityRunner } from "./runner";
-import { isDevelopment, Db } from "./db";
+import { Db, env } from "./db";
 import { OpenApi } from "./openApi";
 import { urlSetUqHost } from "./setHostUrl";
 import { centerApi } from "./centerApi";
@@ -214,7 +214,7 @@ export abstract class Net {
     private async getUqUrlOrDebug(urls: {db:string; url:string; urlTest:string}):Promise<string> {
         let url:string;
         let {db} = urls;
-        if (isDevelopment === true) {
+        if (env.isDevelopment === true) {
             let urlDebug = await this.getUrlDebug();
             if (urlDebug !== undefined) url = urlDebug;
         }
@@ -242,7 +242,7 @@ export abstract class Net {
 
     private async getUnitxUrl(urls: {db:string, url:string;}):Promise<string> {
         let {db, url} = urls;
-        if (isDevelopment === true) {
+        if (env.isDevelopment === true) {
             let urlDebug = await this.getUrlDebug();
             if (urlDebug !== undefined) url = urlDebug;
         }

@@ -1,13 +1,11 @@
-import { EntityRunner, packParam, Net } from '../core';
+import { EntityRunner, packParam } from '../core';
 import { OpenApi } from '../core/openApi';
-import { debugUqs } from './debugUqs';
 
 export async function pullEntities(runner:EntityRunner):Promise<void> {
-    let {uq, froms, hasPullEntities} = runner;
+    let {froms, hasPullEntities} = runner;
     if (hasPullEntities === false) return;
     if (froms === undefined) return;
     try {
-        if (debugUqs!==undefined && debugUqs.indexOf(uq)<0) return;
         await pullNew(runner);
         await pullModify(runner);
     }

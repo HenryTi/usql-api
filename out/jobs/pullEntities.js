@@ -10,17 +10,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
-const debugUqs_1 = require("./debugUqs");
 function pullEntities(runner) {
     return __awaiter(this, void 0, void 0, function* () {
-        let { uq, froms, hasPullEntities } = runner;
+        let { froms, hasPullEntities } = runner;
         if (hasPullEntities === false)
             return;
         if (froms === undefined)
             return;
         try {
-            if (debugUqs_1.debugUqs !== undefined && debugUqs_1.debugUqs.indexOf(uq) < 0)
-                return;
             yield pullNew(runner);
             yield pullModify(runner);
         }

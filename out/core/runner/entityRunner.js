@@ -719,7 +719,7 @@ class EntityRunner {
             this.hasUnit = !(setting['hasunit'] === 0);
             let uu = setting['uniqueunit'];
             this.uniqueUnit = uu ? uu : 0;
-            if (db_1.isDevelopment)
+            if (db_1.env.isDevelopment)
                 console.log('init schemas: ', this.uq, this.author, this.version);
             this.schemas = {};
             this.accessSchemaArr = [];
@@ -991,7 +991,7 @@ class EntityRunner {
                     };
             }
         }
-        if (db_1.isDevelopment)
+        if (db_1.env.isDevelopment)
             console.log('access: ', this.access);
     }
     getUserAccess(unit, user) {

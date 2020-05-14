@@ -14,21 +14,57 @@ const _ = require("lodash");
 const ms_1 = require("./ms");
 const my_1 = require("./my");
 const runner_1 = require("./runner");
-const const_connectionUnitx = 'connection_$unitx';
-const const_connection = 'connection';
-const const_development = 'development';
-const const_devdo = 'devdo';
-const const_unitx = '$unitx';
-function isNodeEnvEqu(...envs) {
-    let nodeEnv = process.env.NODE_ENV;
-    if (!nodeEnv)
-        return false;
+/*
+
+function isNodeEnvEqu(...envs:string[]):boolean {
+    let nodeEnv = process.env.NODE_ENV as string;
+    if (!nodeEnv) return false;
     let e = nodeEnv.toLowerCase();
     return envs.findIndex(v => v === e) >= 0;
 }
-exports.isDevelopment = isNodeEnvEqu(const_development);
-exports.isDevdo = isNodeEnvEqu(const_devdo);
-exports.isDev = isNodeEnvEqu(const_development, const_devdo);
+
+export const isDevelopment:boolean = isNodeEnvEqu(const_development);
+export const isDevdo:boolean = isNodeEnvEqu(const_devdo);
+export const isDev = isNodeEnvEqu(const_development, const_devdo);
+*/
+class Env {
+    constructor() {
+        this.isDev = false;
+        this.isDevelopment = false;
+        this.isDevdo = false;
+        this.const_unitx = '$unitx';
+        let nodeEnv = process.env.NODE_ENV;
+        if (!nodeEnv)
+            return;
+        switch (nodeEnv.toLowerCase()) {
+            case Env.const_development:
+                this.isDevelopment = true;
+                this.isDev = true;
+                break;
+            case Env.const_devdo:
+                this.isDevdo = true;
+                this.isDev = true;
+                break;
+        }
+    }
+    getUnitxConnection() {
+        if (config.has(Env.const_connectionUnitx) === true) {
+            return config.get(Env.const_connectionUnitx);
+        }
+        throw `server '${config.get('servername')}' has no connection_$unitx defined in config.json`;
+    }
+    getConnection() {
+        if (config.has(Env.const_connection) === true) {
+            return _.clone(config.get(Env.const_connection));
+        }
+        throw `server '${config.get('servername')}' has no connection defined in config.json`;
+    }
+}
+Env.const_connectionUnitx = 'connection_$unitx';
+Env.const_connection = 'connection';
+Env.const_development = 'development';
+Env.const_devdo = 'devdo';
+exports.env = new Env();
 class Db {
     constructor(dbName) {
         this.dbName = dbName;
@@ -74,7 +110,7 @@ class Db {
         return Db.dbs[name] = db;
     }
     static unitxDb(testing) {
-        let name = const_unitx;
+        let name = exports.env.const_unitx;
         if (testing === true)
             name += '$test';
         let db = Db.dbs[name]; // getCacheDb(name);
@@ -88,7 +124,8 @@ class Db {
     }
     getDbName() { return this.dbName; }
     getDbConfig() {
-        let ret = _.clone(config.get(const_connection));
+        //let ret = _.clone(config.get<any>(const_connection));
+        let ret = exports.env.getConnection();
         ret.flags = '-FOUND_ROWS';
         return ret;
     }
@@ -222,14 +259,7 @@ Db.dbs = {};
 // 数据库名称对照表
 Db.dbCollection = {};
 class UnitxDb extends Db {
-    getDbConfig() {
-        if (config.has(const_connectionUnitx) === true) {
-            return config.get(const_connectionUnitx);
-        }
-        else {
-            throw `server '${config.get('servername')}' has no connection_$unitx defined in config.json`;
-        }
-    }
+    getDbConfig() { return exports.env.getUnitxConnection(); }
 }
 class SpanLog {
     constructor(logger, log) {

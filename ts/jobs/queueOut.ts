@@ -1,4 +1,4 @@
-import { EntityRunner, Net, isDevelopment, centerApi, SheetQueueData, BusMessage } from "../core";
+import { EntityRunner, centerApi, SheetQueueData, BusMessage, env } from "../core";
 import { Finish } from "./finish";
 import { getErrorString } from "../tool";
 
@@ -69,7 +69,7 @@ export async function queueOut(runner: EntityRunner): Promise<void> {
     }
     catch (err) {
         await runner.log(0, 'jobs queueOut loop', getErrorString(err));
-        if (isDevelopment===true) console.error(err);
+        if (env.isDevelopment===true) console.error(err);
     }
 }
 

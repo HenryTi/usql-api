@@ -109,6 +109,7 @@ class MyDbServer extends dbServer_1.DbServer {
             }
             return yield new Promise((resolve, reject) => {
                 let retryCount = 0;
+                let isDevelopment = db_1.env.isDevelopment;
                 let handleResponse = (err, result) => {
                     if (err === null) {
                         if (log !== undefined) {
@@ -122,11 +123,11 @@ class MyDbServer extends dbServer_1.DbServer {
                         case +ER_LOCK_WAIT_TIMEOUT:
                         case +ER_LOCK_TIMEOUT:
                         case +ER_LOCK_DEADLOCK:
-                            if (db_1.isDevelopment === true)
+                            if (isDevelopment === true)
                                 console.error(`ERROR - ${err.errno} ${err.message}`);
                             ++retryCount;
                             if (retryCount > retries) {
-                                if (db_1.isDevelopment === true)
+                                if (isDevelopment === true)
                                     console.error(`Out of retries so just returning the error.`);
                                 if (log !== undefined) {
                                     log.tries = retryCount;
@@ -137,14 +138,14 @@ class MyDbServer extends dbServer_1.DbServer {
                                 return;
                             }
                             let sleepMillis = Math.floor((Math.random() * maxMillis) + minMillis);
-                            if (db_1.isDevelopment === true) {
+                            if (isDevelopment === true) {
                                 console.error(sql + ': ---- Retrying request with', retries - retryCount, 'retries left. Timeout', sleepMillis);
                             }
                             return setTimeout(() => {
                                 this.pool.query(sql, values, handleResponse);
                             }, sleepMillis);
                         default:
-                            if (db_1.isDevelopment === true) {
+                            if (isDevelopment === true) {
                                 console.error(err);
                                 console.error(sql);
                             }
@@ -614,7 +615,7 @@ end;
     }
     uqDbs() {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = db_1.isDev === true ?
+            let sql = db_1.env.isDev === true ?
                 'select name as db from $uq.uq;' :
                 `select name as db 
 	            from $uq.uq 
