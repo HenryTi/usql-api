@@ -16,7 +16,7 @@ export async function writeDataToBus(runner:EntityRunner, face:string, unit:numb
         lastHour = hour;
     }
 	*/
-	console.log('writebusqueue', face, from, body);
+	console.log('writebusqueue', face, from, fromQueueId, body);
     await runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, body);
 }
 

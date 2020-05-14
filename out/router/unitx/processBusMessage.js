@@ -25,7 +25,7 @@ function writeDataToBus(runner, face, unit, from, fromQueueId, version, body) {
             lastHour = hour;
         }
         */
-        console.log('writebusqueue', face, from, body);
+        console.log('writebusqueue', face, from, fromQueueId, body);
         yield runner.actionDirect('writebusqueue', unit, undefined, face, from, fromQueueId, version, body);
     });
 }
