@@ -53,7 +53,9 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
     rb.post(router, '/joint-read-bus',jointReadBus);
 
     let jointWriteBus = async (runner:EntityRunner, body:any):Promise<any> => {
-
+		for (let i=0; i<10; i++) {
+			console.error('=========================');
+		}	
         let {unit, face, from, fromQueueId, version, body:message} = body;
         let ret = await writeDataToBus(runner, face, unit, from, fromQueueId, version, message);
         return ret;
