@@ -38,6 +38,9 @@ class EntityRunner {
             yield this.init();
         });
     }
+    getSchemasText() {
+        return JSON.stringify(this.schemas);
+    }
     getRoles(unit, app, user, inRoles) {
         return __awaiter(this, void 0, void 0, function* () {
             let [rolesBin, rolesVersion] = inRoles.split('.');

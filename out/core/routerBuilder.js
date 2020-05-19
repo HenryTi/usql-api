@@ -44,8 +44,9 @@ class RouterBuilder {
                 let call, run;
                 if (name !== undefined) {
                     let schema = runner.getSchema(name);
-                    if (schema === undefined)
-                        return this.unknownEntity(res, name);
+                    if (schema === undefined) {
+                        return this.unknownEntity(res, name, runner);
+                    }
                     call = schema.call;
                     run = schema.run;
                     if (this.validEntity(res, call, entityType) === false)
@@ -162,8 +163,8 @@ class RouterBuilder {
             return yield this.net.getUnitxRunner();
         });
     }
-    unknownEntity(res, name) {
-        res.json({ error: 'unknown entity: ' + name });
+    unknownEntity(res, name, runner) {
+        res.json({ error: 'unknown entity: ' + name + ' all entities: ' + runner.getSchemasText() });
     }
     validEntity(res, schema, type) {
         if (schema.type === type)

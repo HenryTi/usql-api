@@ -84,6 +84,10 @@ export class EntityRunner {
 		this.schemas = undefined;
 		await this.init();
 	}
+
+	getSchemasText() {
+		return JSON.stringify(this.schemas);
+	}
 	
     async getRoles(unit:number, app:any, user:number, inRoles:string): Promise<{roles:number, version:number}> {
         let [rolesBin, rolesVersion] = inRoles.split('.');
