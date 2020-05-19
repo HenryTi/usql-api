@@ -164,7 +164,7 @@ class RouterBuilder {
         });
     }
     unknownEntity(res, name, runner) {
-        res.json({ error: 'unknown entity: ' + name + ' all entities: ' + runner.getSchemasText() });
+        res.json({ error: 'unknown entity: ' + name + ' all entities: ' + runner.getEntityNameList() });
     }
     validEntity(res, schema, type) {
         if (schema.type === type)

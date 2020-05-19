@@ -38,8 +38,9 @@ class EntityRunner {
             yield this.init();
         });
     }
-    getSchemasText() {
-        return JSON.stringify(this.schemas);
+    getEntityNameList() {
+        return Object.keys(this.schemas).join(', ');
+        //return JSON.stringify(this.schemas);
     }
     getRoles(unit, app, user, inRoles) {
         return __awaiter(this, void 0, void 0, function* () {

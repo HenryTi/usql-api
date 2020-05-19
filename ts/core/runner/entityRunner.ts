@@ -85,8 +85,9 @@ export class EntityRunner {
 		await this.init();
 	}
 
-	getSchemasText() {
-		return JSON.stringify(this.schemas);
+	getEntityNameList() {
+		return Object.keys(this.schemas).join(', ');
+		//return JSON.stringify(this.schemas);
 	}
 	
     async getRoles(unit:number, app:any, user:number, inRoles:string): Promise<{roles:number, version:number}> {
