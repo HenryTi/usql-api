@@ -20,9 +20,6 @@ function queueIn(runner) {
         while (hasError === false && count < 200) {
             try {
                 let queueInArr = yield runner.call('$queue_in_get', [start]);
-                if (runner.name === 'salestask') {
-                    console.error('saletask queueIn', queueInArr);
-                }
                 if (queueInArr.length === 0)
                     break;
                 for (let queueIn of queueInArr) {
