@@ -34,7 +34,7 @@ function startJobsLoop() {
         if (core_1.env.isDev === true) {
             // 只有在开发状态下，才可以屏蔽jobs
             //console.log('jobs loop: developing, no loop!');
-            //return;
+            return;
             if (core_1.env.isDevdo === true)
                 return;
             console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);

@@ -161,7 +161,7 @@ export class RouterBuilder {
     }
 
     private unknownEntity(res:Response, name:string, runner: EntityRunner) {
-        res.json({error: 'unknown entity: ' + name + ' all entities: ' + runner.getEntityNameList()});
+        res.json({error: `uq:${runner.name} unknown entity ${name} all entities:${runner.getEntityNameList()}`});
     }
     
     private validEntity(res:Response, schema:any, type:string):boolean {

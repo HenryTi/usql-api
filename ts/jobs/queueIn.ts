@@ -9,7 +9,10 @@ export async function queueIn(runner: EntityRunner) {
     let count = 0;
     while (hasError === false && count < 200) {
         try {
-            let queueInArr:any[] = await runner.call('$queue_in_get',[start]);
+			let queueInArr:any[] = await runner.call('$queue_in_get',[start]);
+			if (runner.name === 'salestask') {
+				console.error('saletask queueIn', queueInArr);
+			}
             if (queueInArr.length === 0) break;
             for (let queueIn of queueInArr) {
                 let {bus, faceName, id, unit, data, tries, update_time, now} = queueIn;
