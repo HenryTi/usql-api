@@ -168,7 +168,6 @@ export class MyDbServer extends DbServer {
 				else {
 					//connection.query(collationConnection, function(errCollation) {
 					//if (errCollation) reject(collationConnection);
-					console.error('exec sql', sql, values);
 					connection.query(sql, values, function(error, results) {
 						//(results as any[]).shift();
 						//(results as any[]).shift();
@@ -239,8 +238,7 @@ export class MyDbServer extends DbServer {
 			let p = this.procColl[procLower];
 			if (p !== true) {
 				let results = await this.callProcBase(db, 'tv_$proc_get', [db, proc]);
-				console.error('tv_$proc_get', db, proc, results);
-				let ret = results;
+				let ret = results[0];
 				if (ret.length === 0) {
 					debugger;
 					throw new Error(`proc not defined: ${db}.${proc}`);
