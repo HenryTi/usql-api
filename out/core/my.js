@@ -248,7 +248,7 @@ class MyDbServer extends dbServer_1.DbServer {
                     let ret = results[0];
                     if (ret.length === 0) {
                         debugger;
-                        throw new Error('proc not defined ' + proc);
+                        throw new Error(`proc not defined: + ${db}.${proc}`);
                     }
                     let r0 = ret[0];
                     let changed = r0['changed'];
