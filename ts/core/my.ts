@@ -238,10 +238,10 @@ export class MyDbServer extends DbServer {
 			let p = this.procColl[procLower];
 			if (p !== true) {
 				let results = await this.callProcBase(db, 'tv_$proc_get', [db, proc]);
-				let ret = results[0];
+				let ret = results;
 				if (ret.length === 0) {
 					debugger;
-					throw new Error(`proc not defined: + ${db}.${proc}`);
+					throw new Error(`proc not defined: ${db}.${proc}`);
 				}
 				let r0 = ret[0];
 				let changed = r0['changed'];
