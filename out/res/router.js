@@ -38,6 +38,11 @@ exports.initResPath = initResPath;
 exports.router.get('/hello', (req, res) => {
     res.end('hello! ' + req.method + '#' + req.originalUrl);
 });
+exports.router.get('/path/:resId', (req, res) => {
+    let resId = req.params['resId'];
+    let p = path.resolve(resFilesPath, resId.replace('-', '/'));
+    res.end('res path: ' + p);
+});
 exports.router.get('/:resId', (req, res) => {
     let resId = req.params['resId'];
     let p = path.resolve(resFilesPath, resId.replace('-', '/'));

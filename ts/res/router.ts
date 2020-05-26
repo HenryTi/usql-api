@@ -30,6 +30,12 @@ router.get('/hello', (req, res) => {
     res.end('hello! ' + req.method + '#' +  req.originalUrl);
 });
 
+router.get('/path/:resId', (req, res) => {
+    let resId:string = req.params['resId'];
+    let p = path.resolve(resFilesPath, resId.replace('-', '/'));
+    res.end('res path: ' + p);
+});
+
 router.get('/:resId', (req, res) => {
     let resId:string = req.params['resId'];
     let p = path.resolve(resFilesPath, resId.replace('-', '/'));
