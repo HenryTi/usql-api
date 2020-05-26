@@ -166,7 +166,7 @@ class MyDbServer extends dbServer_1.DbServer {
                     else {
                         //connection.query(collationConnection, function(errCollation) {
                         //if (errCollation) reject(collationConnection);
-                        console.error('exec sql', sql);
+                        console.error('exec sql', sql, values);
                         connection.query(sql, values, function (error, results) {
                             //(results as any[]).shift();
                             //(results as any[]).shift();
