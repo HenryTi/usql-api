@@ -245,6 +245,7 @@ class MyDbServer extends dbServer_1.DbServer {
                 let p = this.procColl[procLower];
                 if (p !== true) {
                     let results = yield this.callProcBase(db, 'tv_$proc_get', [db, proc]);
+                    console.error('tv_$proc_get', db, proc, results);
                     let ret = results;
                     if (ret.length === 0) {
                         debugger;
