@@ -482,6 +482,9 @@ BEGIN
 	declare sep, sub char(10);
 	declare s longtext;
 	declare p, len, c int;
+	if t is null then
+		return null;
+	end if;
 	set sep = "\\\\";
 	set p = locate(sep, t, 1);
 	if p=0 then

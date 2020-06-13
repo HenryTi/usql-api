@@ -397,7 +397,7 @@ export class EntityRunner {
         return await this.unitUserTablesFromProc(proc, unit, user, key||'', pageStart, pageSize);
 	}
 	async saveProp(tuid:string, unit:number, user:number, id:number, prop:string, value:any) {
-		let proc = 'tv_' + tuid + '$prop_' + prop;
+		let proc = 'tv_' + tuid + '$prop';
 		await this.unitUserCall(proc, unit, user, id, prop, value);
 	}	
     async tuidArrSeach(tuid:string, unit:number, user:number, arr:string, ownerId:number, key:string, pageStart:number, pageSize:number): Promise<any> {

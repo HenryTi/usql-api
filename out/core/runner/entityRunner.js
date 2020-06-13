@@ -440,7 +440,7 @@ class EntityRunner {
     }
     saveProp(tuid, unit, user, id, prop, value) {
         return __awaiter(this, void 0, void 0, function* () {
-            let proc = 'tv_' + tuid + '$prop_' + prop;
+            let proc = 'tv_' + tuid + '$prop';
             yield this.unitUserCall(proc, unit, user, id, prop, value);
         });
     }

@@ -33,7 +33,7 @@ function startJobsLoop() {
         let db = core_1.Db.db(undefined);
         if (core_1.env.isDev === true) {
             // 只有在开发状态下，才可以屏蔽jobs
-            //console.log('jobs loop: developing, no loop!');
+            console.log('jobs loop: developing, no loop!');
             return;
             if (core_1.env.isDevdo === true)
                 return;
@@ -63,6 +63,8 @@ function startJobsLoop() {
                         dbName = uqDb;
                         net = core_1.prodNet;
                     }
+                    if (dbName !== 'bi')
+                        continue;
                     if (core_1.env.isDevelopment === true) {
                         // if (dbName !== 'rms') continue;
                         yield db.setDebugJobs();
