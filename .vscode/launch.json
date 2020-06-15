@@ -24,7 +24,7 @@
                 "NODE_ENV": "stage"
             },
             "port": 5857,
-			//"program0": "${workspaceRoot}/out/cli/charset-collate.js",
+			//"program": "${workspaceRoot}/out/cli/upgrade-modify-queue.js",
 			"program": "${workspaceRoot}/out/index.js",
             "sourceMaps": true,
             "outFiles": [

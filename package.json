@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "debug": "SET NODE_ENV=development&&node --nolazy --inspect-brk=5857 out/index.js",
-    "debug0": "SET NODE_ENV=development&&node --nolazy --inspect-brk=5857 out/cli/charset-collate-routines.js",
+    "debug0": "SET NODE_ENV=development&&node --nolazy --inspect-brk=5857 out/cli/upgrade-modify-queue.js",
     "devdo": "SET NODE_ENV=devdo&&node --nolazy --inspect-brk=5857 out/index.js"
   },
   "keywords": [],
