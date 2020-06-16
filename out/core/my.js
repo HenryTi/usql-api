@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MyDbServer = void 0;
 const mysql_1 = require("mysql");
 const _ = require("lodash");
 const dbServer_1 = require("./dbServer");

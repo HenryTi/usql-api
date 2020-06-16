@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.pageQueryProcess = exports.queryProcess = exports.buildQueryRouter = void 0;
 const core_1 = require("../core");
 function buildQueryRouter(router, rb) {
     rb.entityPost(router, 'query', '/:name', exports.queryProcess);

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildTuidRouter = void 0;
 //import { getTuidArr } from './router';
 const core_1 = require("../core");
 const tuidType = 'tuid';

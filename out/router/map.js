@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildMapRouter = void 0;
 const actionProcess_1 = require("./actionProcess");
 const query_1 = require("./query");
 const actionType = 'map';

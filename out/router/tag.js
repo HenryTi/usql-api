@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildTagRouter = void 0;
 function buildTagRouter(router, rb) {
     rb.get(router, '/tag/values/:name', (runner, body, urlParams, userToken) => __awaiter(this, void 0, void 0, function* () {
         let { id: userId, unit } = userToken;

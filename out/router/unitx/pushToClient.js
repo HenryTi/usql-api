@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.pushToClient = void 0;
 const core_1 = require("../../core");
 // 现在简单的把client message推送给center，由center来分发给client
 // 以后需要做client消息分发服务器

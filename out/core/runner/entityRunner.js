@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.EntityRunner = void 0;
 const _ = require("lodash");
 const db_1 = require("../db");
 const __1 = require("..");

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.MsDbServer = void 0;
 const dbServer_1 = require("./dbServer");
 class MsDbServer extends dbServer_1.DbServer {
     constructor(dbName, dbConfig) {

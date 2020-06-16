@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.OpenApi = void 0;
 //import fetch from "node-fetch";
 const _1 = require(".");
 class OpenApi extends _1.Fetch {

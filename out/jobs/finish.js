@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Finish = void 0;
 var Finish;
 (function (Finish) {
     Finish[Finish["done"] = 1] = "done";

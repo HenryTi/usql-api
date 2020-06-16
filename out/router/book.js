@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildBookRouter = void 0;
 const core_1 = require("../core");
 //import { entityPost } from './entityProcess';
 function buildBookRouter(router, rb) {

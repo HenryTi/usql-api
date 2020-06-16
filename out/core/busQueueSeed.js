@@ -14,6 +14,7 @@ export function busQueueHourFromSeed(seed:number):number {
 }
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.busQueueSeed = void 0;
 const bigNumber = 1000000000;
 function busQueueSeed() {
     return Math.floor(Date.now() / (3600 * 1000)) * bigNumber;

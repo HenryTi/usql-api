@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.operators = void 0;
 class Operator {
     run(stack) { }
 }

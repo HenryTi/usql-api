@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildSchemaRouter = void 0;
 function buildSchemaRouter(router, rb) {
     rb.get(router, '/schema/:name', (runner, body, urlParams) => __awaiter(this, void 0, void 0, function* () {
         let { name } = urlParams;

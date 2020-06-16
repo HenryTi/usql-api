@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildBuildRouter = void 0;
 const core_1 = require("../../core");
 const core_2 = require("../../core");
 function buildBuildRouter(router, rb) {

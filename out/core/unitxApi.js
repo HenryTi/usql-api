@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.UnitxApi = void 0;
 const fetch_1 = require("./fetch");
 class UnitxApi extends fetch_1.Fetch {
     send(msg) {

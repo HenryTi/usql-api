@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var action_1 = require("./action");
-exports.unitxActionProcess = action_1.unitxActionProcess;
+Object.defineProperty(exports, "unitxActionProcess", { enumerable: true, get: function () { return action_1.unitxActionProcess; } });
 var router_1 = require("./router");
-exports.buildUnitxRouter = router_1.buildUnitxRouter;
+Object.defineProperty(exports, "buildUnitxRouter", { enumerable: true, get: function () { return router_1.buildUnitxRouter; } });
 //# sourceMappingURL=index.js.map

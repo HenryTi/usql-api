@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildUnitxRouter = void 0;
 const express_1 = require("express");
 const core_1 = require("../../core");
 const messageProcesser_1 = require("./messageProcesser");

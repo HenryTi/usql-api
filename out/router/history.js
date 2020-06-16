@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildHistoryRouter = void 0;
 const core_1 = require("../core");
 function buildHistoryRouter(router, rb) {
     //router.post('/history/:name', async (req:Request, res:Response) => {

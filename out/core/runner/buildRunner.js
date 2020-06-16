@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.BuildRunner = void 0;
 class BuildRunner {
     constructor(db) {
         this.setting = {};

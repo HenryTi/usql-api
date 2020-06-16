@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getErrorString = void 0;
 function getErrorString(err) {
     if (err === null)
         return 'error=null';

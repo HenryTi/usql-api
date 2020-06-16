@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getResDbRunner = exports.createResDb = void 0;
 const core_1 = require("../core");
 const resDbName = '$res';
 function createResDb() {

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.unitxActionProcess = void 0;
 const core_1 = require("../../core");
 const actionProcess_1 = require("../actionProcess");
 function unitxActionProcess(unit, user, name, db, urlParams, runner, body, schema, run, net) {

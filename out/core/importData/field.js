@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Field = void 0;
 const __1 = require("..");
 class Field {
     static create(runner, schema, fieldName, header, source) {

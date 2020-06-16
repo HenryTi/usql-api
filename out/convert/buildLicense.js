@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildLicense = void 0;
 const crypto = require("crypto");
 const constants = require("constants");
 //const algorithm = 'aes-128-cbc';
