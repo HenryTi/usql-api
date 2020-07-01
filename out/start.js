@@ -75,6 +75,7 @@ function init() {
                 }));
                 app.use('/res', res_1.router);
                 app.use('/hello', dbHello);
+                app.use('/uq/hello', dbHello);
                 app.use('/uq/prod/:db/', buildUqRouter(core_1.uqProdRouterBuilder, core_1.compileProdRouterBuilder));
                 app.use('/uq/test/:db/', buildUqRouter(core_1.uqTestRouterBuilder, core_1.compileTestRouterBuilder));
                 app.use('/uq/unitx-prod/', router_1.buildUnitxRouter(core_1.unitxProdRouterBuilder));
@@ -106,8 +107,11 @@ function start() {
 }
 exports.start = start;
 function dbHello(req, res) {
-    let db = req.params.db;
-    res.json({ "hello": 'uq-api: hello, db is ' + db });
+    let { db } = req.params;
+    let text = 'uq-api: hello';
+    if (db)
+        text += ', db is ' + db;
+    res.json({ "hello": text });
 }
 function buildUqRouter(rb, rbCompile) {
     // 正常的tonva uq接口 uqRouter

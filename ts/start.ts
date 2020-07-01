@@ -71,6 +71,7 @@ export async function init():Promise<void> {
 
             app.use('/res', resRouter);
             app.use('/hello', dbHello);
+            app.use('/uq/hello', dbHello);
 
             app.use('/uq/prod/:db/', buildUqRouter(uqProdRouterBuilder, compileProdRouterBuilder));
             app.use('/uq/test/:db/', buildUqRouter(uqTestRouterBuilder, compileTestRouterBuilder));
@@ -103,8 +104,10 @@ export async function start() {
 }
 
 function dbHello(req:Request, res:Response) {
-    let db = req.params.db;
-    res.json({"hello": 'uq-api: hello, db is ' + db});
+	let {db} = req.params;
+	let text = 'uq-api: hello';
+	if (db) text += ', db is ' + db;
+    res.json({"hello": text});
 }
 
 function buildUqRouter(rb: RouterBuilder, rbCompile: CompileRouterBuilder): Router {
