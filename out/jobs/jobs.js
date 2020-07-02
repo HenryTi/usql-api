@@ -64,8 +64,8 @@ function startJobsLoop() {
                         dbName = uqDb;
                         net = core_1.prodNet;
                     }
-                    if (dbName !== 'bi')
-                        continue;
+                    // 2020-7-1：我太蠢了。居然带着这一句发布了 ？！！！
+                    // if (dbName !== 'bi') continue;
                     if (core_1.env.isDevelopment === true) {
                         // if (dbName !== 'rms') continue;
                         yield db.setDebugJobs();
