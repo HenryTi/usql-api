@@ -65,7 +65,8 @@ export async function startJobsLoop(): Promise<void> {
 
                 let runner = await net.getRunner(dbName);
                 if (runner === undefined) continue;
-                let {buses} = runner;
+				let {buses} = runner;
+				console.log('buses', buses);
                 if (buses !== undefined) {
                     let {outCount, faces} = buses;
                     if (outCount > 0 || runner.hasSheet === true) {

@@ -75,6 +75,7 @@ function startJobsLoop() {
                     if (runner === undefined)
                         continue;
                     let { buses } = runner;
+                    console.log('buses', buses);
                     if (buses !== undefined) {
                         let { outCount, faces } = buses;
                         if (outCount > 0 || runner.hasSheet === true) {
