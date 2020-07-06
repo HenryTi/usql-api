@@ -71,6 +71,7 @@ function startJobsLoop() {
                         yield db.setDebugJobs();
                     }
                     console.info('====== job loop for ' + uqDb + '======');
+                    console.log('net.getRunner', dbName);
                     let runner = yield net.getRunner(dbName);
                     if (runner === undefined)
                         continue;

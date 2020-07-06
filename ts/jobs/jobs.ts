@@ -63,6 +63,7 @@ export async function startJobsLoop(): Promise<void> {
                 }
                 console.info('====== job loop for ' + uqDb + '======');
 
+				console.log('net.getRunner', dbName);
                 let runner = await net.getRunner(dbName);
                 if (runner === undefined) continue;
 				let {buses} = runner;
