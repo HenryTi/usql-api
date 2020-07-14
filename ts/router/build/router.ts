@@ -224,11 +224,10 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
 
     rb.post(router, '/entity',
     async (runner:EntityRunner, body:any):Promise<any> => {
-        //let params = [user, id, name, type, schema, run, source, from, open];
-        let {id, name, type, schema, run, source, from, open} = body;
-        //unit:number, user:number, */id:number, name:string, type:number, schema:string, run:string, source:string, from:string, open:number
-        return await runner.saveSchema(0, 0, id, name, type, schema, run, source, from, open);
-    });
+		let {id, name, type, schema, run, source, from, open} = body;
+		let ret = await runner.saveSchema(0, 0, id, name, type, schema, run, source, from, open);
+		return ret;
+	});
 
     rb.get(router, '/const-strs',
     async (runner:EntityRunner, body:any): Promise<{[name:string]:number}[]> => {

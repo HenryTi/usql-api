@@ -25,8 +25,8 @@ export async function startJobsLoop(): Promise<void> {
 	let db = Db.db(undefined);
     if (env.isDev === true) {
 		// 只有在开发状态下，才可以屏蔽jobs
-		console.log('jobs loop: developing, no loop!');
-		return;
+		//console.log('jobs loop: developing, no loop!');
+		//return;
 		if (env.isDevdo === true) return;
         console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
         await db.setDebugJobs();
@@ -63,11 +63,9 @@ export async function startJobsLoop(): Promise<void> {
                 }
                 console.info('====== job loop for ' + uqDb + '======');
 
-				console.log('net.getRunner', dbName);
                 let runner = await net.getRunner(dbName);
                 if (runner === undefined) continue;
 				let {buses} = runner;
-				console.log('buses', buses);
                 if (buses !== undefined) {
                     let {outCount, faces} = buses;
                     if (outCount > 0 || runner.hasSheet === true) {

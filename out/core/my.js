@@ -58,7 +58,7 @@ const sysProcColl = {
 class MyDbServer extends dbServer_1.DbServer {
     constructor(dbName, dbConfig) {
         super();
-        this.dbName = dbName;
+        //this.dbName = dbName;
         this.dbConfig = dbConfig;
         this.resetProcColl();
     }
@@ -67,20 +67,24 @@ class MyDbServer extends dbServer_1.DbServer {
     }
     reset() { this.resetProcColl(); }
     ;
-    getPool(dbConfig) {
+    getPool() {
         return __awaiter(this, void 0, void 0, function* () {
             for (let p of pools) {
                 let { config, pool } = p;
-                if (_.isEqual(dbConfig, config) === true)
+                if (_.isEqual(this.dbConfig, config) === true)
                     return pool;
             }
-            let conf = _.clone(dbConfig);
+            let conf = _.clone(this.dbConfig);
             conf.timezone = 'UTC';
             conf.typeCast = castField;
+            conf.connectionLimit = 10;
+            conf.waitForConnections = true;
+            conf.acquireTimeout = 10000;
+            conf.multipleStatements = true;
             //conf.charset = 'utf8mb4';
             //let newPool = await this.createPool(conf);
             let newPool = mysql_1.createPool(conf);
-            pools.push({ config: dbConfig, pool: newPool });
+            pools.push({ config: this.dbConfig, pool: newPool });
             return newPool;
         });
     }
@@ -105,7 +109,7 @@ class MyDbServer extends dbServer_1.DbServer {
     exec(sql, values, log) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.pool === undefined) {
-                this.pool = yield this.getPool(this.dbConfig);
+                this.pool = yield this.getPool();
                 // await this.assertPool();
             }
             return yield new Promise((resolve, reject) => {
@@ -143,6 +147,7 @@ class MyDbServer extends dbServer_1.DbServer {
                                 console.error(sql + ': ---- Retrying request with', retries - retryCount, 'retries left. Timeout', sleepMillis);
                             }
                             return setTimeout(() => {
+                                debugger;
                                 this.pool.query(sql, values, handleResponse);
                             }, sleepMillis);
                         default:
@@ -159,44 +164,32 @@ class MyDbServer extends dbServer_1.DbServer {
                             return;
                     }
                 };
-                //this.pool.query(sql, values, handleResponse);
-                this.pool.getConnection(function (err, connection) {
+                this.pool.query(sql, values, handleResponse);
+                /*
+                this.pool.getConnection(function(err, connection) {
                     if (err) {
+                        console.error(err);
+                        debugger;
                         reject(err);
+                        return;
                     }
-                    else {
-                        //connection.query(collationConnection, function(errCollation) {
-                        //if (errCollation) reject(collationConnection);
-                        connection.query(sql, values, function (error, results) {
-                            //(results as any[]).shift();
-                            //(results as any[]).shift();
-                            //console.log(sql, results, error);
-                            connection.release();
-                            handleResponse(error, results);
-                        });
-                        //});
-                    }
-                });
+                    connection.query(sql, values, function(error, results) {
+                        connection.release();
+                        handleResponse(error, results);
+                    });
+                })
+                */
             });
         });
     }
     sql(db, sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            //let result = await this.exec('use `'+db+'`;'+sql, params);
             let result = yield this.exec(sql, params);
             return result;
-            /*
-            if (Array.isArray(result) === false) return [];
-            let arr = result as any[];
-            arr.shift();
-            if (arr.length === 1) return arr[0];
-            return arr;
-            */
         });
     }
     sqlDropProc(db, procName) {
         return __awaiter(this, void 0, void 0, function* () {
-            //let sql = 'use `'+db+'`;' + 'DROP PROCEDURE IF EXISTS ' + procName;
             let sql = `DROP PROCEDURE IF EXISTS  \`${db}\`.\`${procName}\``;
             yield this.exec(sql, []);
         });

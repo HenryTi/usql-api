@@ -16,13 +16,15 @@
                 "runtimeExecutable": "npm.cmd"
             },
             "runtimeArgs": [
-                "run-script", "debug",
-                //"run-script", "devdo"
+                //"run-script", "debug",
+                "run-script", "devdo"
             ],
-            "restart": true,
+			"restart": true,
+			/*
             "env": {
                 "NODE_ENV": "stage"
-            },
+			},
+			*/
             "port": 5857,
 			//"program": "${workspaceRoot}/out/cli/upgrade-modify-queue.js",
 			"program": "${workspaceRoot}/out/index.js",

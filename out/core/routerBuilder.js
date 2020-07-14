@@ -97,19 +97,22 @@ class RouterBuilder {
     }
     post(router, path, processer) {
         router.post(path, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            yield this.process(req, res, processer, req.body, req.params);
+            let { body, params } = req;
+            yield this.process(req, res, processer, body, params);
         }));
     }
     ;
     get(router, path, processer) {
         router.get(path, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            yield this.process(req, res, processer, req.query, req.params);
+            let { query, params } = req;
+            yield this.process(req, res, processer, query, params);
         }));
     }
     ;
     put(router, path, processer) {
         router.put(path, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            yield this.process(req, res, processer, req.body, req.params);
+            let { body, params } = req;
+            yield this.process(req, res, processer, body, params);
         }));
     }
     ;

@@ -225,10 +225,9 @@ function buildBuildRouter(router, rb) {
         return yield runner.loadSchemas(Number(body.hasSource));
     }));
     rb.post(router, '/entity', (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        //let params = [user, id, name, type, schema, run, source, from, open];
         let { id, name, type, schema, run, source, from, open } = body;
-        //unit:number, user:number, */id:number, name:string, type:number, schema:string, run:string, source:string, from:string, open:number
-        return yield runner.saveSchema(0, 0, id, name, type, schema, run, source, from, open);
+        let ret = yield runner.saveSchema(0, 0, id, name, type, schema, run, source, from, open);
+        return ret;
     }));
     rb.get(router, '/const-strs', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         return yield runner.loadConstStrs();

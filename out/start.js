@@ -45,13 +45,6 @@ function init() {
                         error: err
                     });
                 });
-                /*
-                app.use(async (req:Request, res:Response, next:NextFunction) => {
-                    let r = req;
-                    debugger;
-                    next();
-                });
-                */
                 app.use(bodyParser.json());
                 app.use(cors());
                 app.set('json replacer', (key, value) => {
@@ -62,8 +55,11 @@ function init() {
                 app.use((req, res, next) => __awaiter(this, void 0, void 0, function* () {
                     let s = req.socket;
                     let p = '';
-                    if (req.method !== 'GET')
+                    if (req.method !== 'GET') {
                         p = JSON.stringify(req.body);
+                        if (p.length > 100)
+                            p = p.substr(0, 100);
+                    }
                     let t = new Date();
                     console.log('%s-%s %s:%s - %s %s %s', t.getMonth() + 1, t.getDate(), t.getHours(), t.getMinutes(), req.method, req.originalUrl, p);
                     try {

@@ -96,38 +96,6 @@ class EntityRunner {
             }
         });
     }
-    /*
-    private async sql(sql:string, params:any[]): Promise<any> {
-        try {
-            return await this.db.sql(sql, params || []);
-        }
-        catch (err) {
-            debugger;
-            throw err;
-        }
-    }
-    private async procSql(procName:string, procSql:string): Promise<any> {
-        try {
-            return await this.db.sqlProc(procName, procSql);
-        }
-        catch (err) {
-            debugger;
-            throw err;
-        }
-    }
-    private async procCoreSql(procName:string, procSql:string): Promise<any> {
-        try {
-            //let sqlDrop = 'DROP PROCEDURE IF EXISTS ' + procName;
-            //await this.db.sql(sqlDrop, undefined);
-            await this.db.sqlDropProc(procName);
-            return await this.db.sql(procSql, undefined);
-        }
-        catch (err) {
-            debugger;
-            throw err;
-        }
-    }
-    */
     log(unit, subject, content) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.db.log(unit, this.net.getUqFullName(this.uq), subject, content);
@@ -143,18 +111,6 @@ class EntityRunner {
             return yield this.db.call('tv_' + proc, params);
         });
     }
-    /*
-    private async buildDatabase(): Promise<boolean> {
-        return await this.db.buildDatabase();
-    }
-    
-    async createDatabase(): Promise<void> {
-        return await this.db.createDatabase();
-    }
-    async existsDatabase(): Promise<boolean> {
-        return await this.db.exists();
-    }
-    */
     buildTuidAutoId() {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.db.buildTuidAutoId();

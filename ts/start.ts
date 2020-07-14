@@ -40,13 +40,6 @@ export async function init():Promise<void> {
                     error: err
                 });
             });
-            /*
-            app.use(async (req:Request, res:Response, next:NextFunction) => {
-                let r = req;
-                debugger;
-                next();
-            });
-            */
             app.use(bodyParser.json());
             app.use(cors());
             app.set('json replacer', (key:any, value:any) => {
@@ -57,7 +50,10 @@ export async function init():Promise<void> {
             app.use(async (req:Request, res:Response, next:NextFunction) => {
                 let s= req.socket;
                 let p = '';
-                if (req.method !== 'GET') p = JSON.stringify(req.body);
+                if (req.method !== 'GET') {
+					p = JSON.stringify(req.body);
+					if (p.length > 100) p = p.substr(0, 100);
+				}
                 let t = new Date();
                 console.log('%s-%s %s:%s - %s %s %s', 
                     t.getMonth()+1, t.getDate(), t.getHours(), t.getMinutes(), req.method, req.originalUrl, p);

@@ -138,38 +138,6 @@ export class EntityRunner {
             this.modifyMaxes[unit] = null;
         }
     }
-	/*
-    private async sql(sql:string, params:any[]): Promise<any> {
-        try {
-            return await this.db.sql(sql, params || []);
-        }
-        catch (err) {
-            debugger;
-            throw err;
-        }
-    }
-    private async procSql(procName:string, procSql:string): Promise<any> {
-        try {
-            return await this.db.sqlProc(procName, procSql);
-        }
-        catch (err) {
-            debugger;
-            throw err;
-        }
-    }
-    private async procCoreSql(procName:string, procSql:string): Promise<any> {
-        try {
-        	//let sqlDrop = 'DROP PROCEDURE IF EXISTS ' + procName;
-			//await this.db.sql(sqlDrop, undefined);
-			await this.db.sqlDropProc(procName);
-            return await this.db.sql(procSql, undefined);
-        }
-        catch (err) {
-            debugger;
-            throw err;
-        }
-	}
-	*/
     async log(unit:number, subject:string, content:string):Promise<void> {
         await this.db.log(unit, this.net.getUqFullName(this.uq), subject, content);
     }
@@ -179,18 +147,6 @@ export class EntityRunner {
     async call(proc:string, params:any[]): Promise<any> {
         return await this.db.call('tv_' + proc, params);
 	}
-	/*
-    private async buildDatabase(): Promise<boolean> {
-        return await this.db.buildDatabase();
-	}
-	
-    async createDatabase(): Promise<void> {
-        return await this.db.createDatabase();
-    }
-    async existsDatabase(): Promise<boolean> {
-        return await this.db.exists();
-    }
-	*/
     async buildTuidAutoId(): Promise<void> {
         await this.db.buildTuidAutoId();
 	}

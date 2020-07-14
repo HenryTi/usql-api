@@ -22,20 +22,23 @@ export class RouterBuilder {
 
     post(router:Router, path:string, processer:Processer) {
         router.post(path, async (req:Request, res:Response) => {
-            await this.process(req, res, processer, (req as any).body, req.params);
+			let {body, params} = req;
+			await this.process(req, res, processer, body, params);
         });
     };
 
     get(router:Router, path:string, processer:Processer) {
         router.get(path, async (req:Request, res:Response) => {
-            await this.process(req, res, processer, req.query, req.params);
-        });
+			let {query, params} = req;
+			await this.process(req, res, processer, query, params);
+		});
     };
 
     put(router:Router, path:string, processer:Processer) {
         router.put(path, async (req:Request, res:Response) => {
-            await this.process(req, res, processer, (req as any).body, req.params);
-        });
+			let {body, params} = req;
+			await this.process(req, res, processer, body, params);
+		});
     };
     getDbName(name:string):string {return this.net.getDbName(name);}
     protected async routerRunner(req:Request):Promise<EntityRunner> {

@@ -54,7 +54,6 @@ export async function pullBus(runner: EntityRunner) {
         }
     }
     catch (err) {
-        //debugger;
         console.error(err);
         await runner.log(0, 'jobs pullBus loop', getErrorString(err));
     }

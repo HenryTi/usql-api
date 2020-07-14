@@ -69,7 +69,6 @@ function pullBus(runner) {
             }
         }
         catch (err) {
-            //debugger;
             console.error(err);
             yield runner.log(0, 'jobs pullBus loop', tool_1.getErrorString(err));
         }

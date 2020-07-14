@@ -57,12 +57,12 @@ const sysProcColl = {
 };
 
 export class MyDbServer extends DbServer {
-	private dbName: string;
+	//private dbName: string;
 	private dbConfig: any;
     private pool: Pool;
     constructor(dbName:string, dbConfig:any) {
 		super();
-		this.dbName = dbName;
+		//this.dbName = dbName;
 		this.dbConfig = dbConfig;
 		this.resetProcColl();
 	}
@@ -73,18 +73,22 @@ export class MyDbServer extends DbServer {
 
 	reset():void { this.resetProcColl();};
 
-	private async getPool(dbConfig: any): Promise<Pool> {
+	private async getPool(): Promise<Pool> {
 		for (let p of pools) {
 			let {config, pool} = p;
-			if (_.isEqual(dbConfig, config) === true) return pool;
+			if (_.isEqual(this.dbConfig, config) === true) return pool;
 		}
-		let conf = _.clone(dbConfig);
+		let conf = _.clone(this.dbConfig);
 		conf.timezone = 'UTC';
 		conf.typeCast = castField;
+		conf.connectionLimit = 10;
+		conf.waitForConnections = true;
+		conf.acquireTimeout = 10000;
+		conf.multipleStatements = true;
 		//conf.charset = 'utf8mb4';
 		//let newPool = await this.createPool(conf);
 		let newPool = createPool(conf);
-		pools.push({config: dbConfig, pool: newPool});
+		pools.push({config: this.dbConfig, pool: newPool});
 		return newPool;
 	}
 /*
@@ -108,7 +112,7 @@ export class MyDbServer extends DbServer {
 
     private async exec(sql:string, values:any[], log?: SpanLog): Promise<any> {
 		if (this.pool === undefined) {
-			this.pool = await this.getPool(this.dbConfig);
+			this.pool = await this.getPool();
 			// await this.assertPool();
 		}
         return await new Promise<any>((resolve, reject) => {
@@ -144,6 +148,7 @@ export class MyDbServer extends DbServer {
                         console.error(sql + ': ---- Retrying request with',retries-retryCount,'retries left. Timeout',sleepMillis);
                     }    
                     return setTimeout(() => {
+						debugger;
                         this.pool.query(sql, values, handleResponse);
                     }, sleepMillis);
                 default:
@@ -160,40 +165,28 @@ export class MyDbServer extends DbServer {
                     return;
                 }
             }
-			//this.pool.query(sql, values, handleResponse);
+			this.pool.query(sql, values, handleResponse);
+			/*
 			this.pool.getConnection(function(err, connection) {
 				if (err) {
+					console.error(err);
+					debugger;
 					reject(err);
+					return;
 				}
-				else {
-					//connection.query(collationConnection, function(errCollation) {
-					//if (errCollation) reject(collationConnection);
-					connection.query(sql, values, function(error, results) {
-						//(results as any[]).shift();
-						//(results as any[]).shift();
-						//console.log(sql, results, error);
-						connection.release();
-						handleResponse(error, results);
-					});
-					//});
-				}
+				connection.query(sql, values, function(error, results) {
+					connection.release();
+					handleResponse(error, results);
+				});
 			})
+			*/
         });
     }
     async sql(db:string, sql:string, params:any[]): Promise<any> {
-		//let result = await this.exec('use `'+db+'`;'+sql, params);
 		let result = await this.exec(sql, params);
 		return result;
-		/*
-        if (Array.isArray(result) === false) return [];
-        let arr = result as any[];
-        arr.shift();
-        if (arr.length === 1) return arr[0];
-		return arr;
-		*/
 	}
 	async sqlDropProc(db:string, procName:string): Promise<any> {
-		//let sql = 'use `'+db+'`;' + 'DROP PROCEDURE IF EXISTS ' + procName;
 		let sql = `DROP PROCEDURE IF EXISTS  \`${db}\`.\`${procName}\``;
 		await this.exec(sql, []);
 	}
