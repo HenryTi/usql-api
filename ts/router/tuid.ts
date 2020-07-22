@@ -158,10 +158,16 @@ export function buildTuidRouter(router: Router, rb: RouterBuilder) {
         let ids = (body as number[]).join(',');
         let result = await runner.tuidIds(name, arr, unit, user, ids);
         if (arr === '$') {
-            let {mainFields} = schema;
+            let {mainFields, $create, $update, stampOnMain} = schema;
             if (mainFields !== undefined) {
-                let ret:string[] = [];
-                packArr(ret, mainFields, result);
+				let ret:string[] = [];
+				let exFields:string[];
+				if (stampOnMain === true) {
+					exFields = [];
+					if ($create === true) exFields.push('$create');
+					if ($update === true) exFields.push('$update');
+				}
+                packArr(ret, mainFields, result, exFields);
                 return ret.join('');
             }
         }

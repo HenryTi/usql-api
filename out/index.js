@@ -1,7 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const start_1 = require("./start");
-//import { centerApi } from "./core";
 start_1.start().then(() => {
     console.log('Tonva uq-api started!');
     /*

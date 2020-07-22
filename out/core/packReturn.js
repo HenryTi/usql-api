@@ -103,7 +103,7 @@ function escape(d, field) {
         case 'undefined': return '';
     }
 }
-function packRow(result, fields, data) {
+function packRow(result, fields, data, exFields) {
     let ret = '';
     let len = fields.length;
     let f;
@@ -115,12 +115,17 @@ function packRow(result, fields, data) {
         f = fields[i];
         ret += tab + escape(data[f.name], f);
     }
+    if (exFields !== undefined) {
+        for (let xf of exFields) {
+            ret += tab + data[xf];
+        }
+    }
     result.push(ret + ln);
 }
-function packArr(result, fields, data) {
+function packArr(result, fields, data, exFields) {
     if (data !== undefined) {
         for (let row of data) {
-            packRow(result, fields, row);
+            packRow(result, fields, row, exFields);
         }
     }
     result.push(ln);

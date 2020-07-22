@@ -102,7 +102,7 @@ function escape(d:any, field: Field):any {
     }
 }
 
-function packRow(result:string[], fields:Field[], data:any) {
+function packRow(result:string[], fields:Field[], data:any, exFields?:string[]) {
     let ret = '';
     let len = fields.length;
     let f: Field;
@@ -113,14 +113,19 @@ function packRow(result:string[], fields:Field[], data:any) {
     for (let i=1;i<len;i++) {
         f = fields[i];
         ret += tab + escape(data[f.name], f);
-    }
+	}
+	if (exFields !== undefined) {
+		for (let xf of exFields) {
+			ret += tab + data[xf];
+		}
+	}
     result.push(ret + ln);
 }
 
-export function packArr(result:string[], fields:Field[], data:any[]) {
+export function packArr(result:string[], fields:Field[], data:any[], exFields?:string[]) {
     if (data !== undefined) {
         for (let row of data) {
-            packRow(result, fields, row);
+            packRow(result, fields, row, exFields);
         }
     }
     result.push(ln);

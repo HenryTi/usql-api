@@ -17,6 +17,15 @@ const {version: uq_api_version} = require('../package.json');
 export async function init():Promise<void> {
     return new Promise<void>((resolve, reject) => {
         try {
+			process.on('uncaughtException', function(err:any) {				
+				console.error('uncaughtException', err);
+				reject(err);
+			});
+			process.on('unhandledRejection', (err:any, promise:any) => {
+				console.log('unhandledRejection', err);
+				reject(err);
+			});
+
 			if (!process.env.NODE_ENV) {
 				console.error('NODE_ENV not defined, exit');
 				process.exit();

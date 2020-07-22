@@ -148,10 +148,18 @@ function buildTuidRouter(router, rb) {
         let ids = body.join(',');
         let result = yield runner.tuidIds(name, arr, unit, user, ids);
         if (arr === '$') {
-            let { mainFields } = schema;
+            let { mainFields, $create, $update, stampOnMain } = schema;
             if (mainFields !== undefined) {
                 let ret = [];
-                core_1.packArr(ret, mainFields, result);
+                let exFields;
+                if (stampOnMain === true) {
+                    exFields = [];
+                    if ($create === true)
+                        exFields.push('$create');
+                    if ($update === true)
+                        exFields.push('$update');
+                }
+                core_1.packArr(ret, mainFields, result, exFields);
                 return ret.join('');
             }
         }

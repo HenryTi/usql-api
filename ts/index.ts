@@ -1,5 +1,4 @@
 import { start } from "./start";
-//import { centerApi } from "./core";
 
 start().then(() => {
     console.log('Tonva uq-api started!');
