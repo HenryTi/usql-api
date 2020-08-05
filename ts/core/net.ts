@@ -101,10 +101,10 @@ export abstract class Net {
         return await new Promise<EntityRunner>((resolve, reject) => {
             let promiseArr = this.createRunnerFromDbPromises[name];
             if (promiseArr !== undefined) {
-                promiseArr.push({resolve: resolve, reject: reject});
+                promiseArr.push({resolve, reject});
                 return;
             }
-            this.createRunnerFromDbPromises[name] = promiseArr =[{resolve: resolve, reject: reject}];
+            this.createRunnerFromDbPromises[name] = promiseArr =[{resolve, reject}];
             db.exists().then(isExists => {
                 let runner: EntityRunner;
                 if (isExists === false) {

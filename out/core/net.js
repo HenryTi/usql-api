@@ -123,10 +123,10 @@ class Net {
             return yield new Promise((resolve, reject) => {
                 let promiseArr = this.createRunnerFromDbPromises[name];
                 if (promiseArr !== undefined) {
-                    promiseArr.push({ resolve: resolve, reject: reject });
+                    promiseArr.push({ resolve, reject });
                     return;
                 }
-                this.createRunnerFromDbPromises[name] = promiseArr = [{ resolve: resolve, reject: reject }];
+                this.createRunnerFromDbPromises[name] = promiseArr = [{ resolve, reject }];
                 db.exists().then(isExists => {
                     let runner;
                     if (isExists === false) {

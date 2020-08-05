@@ -17,7 +17,8 @@
             },
             "runtimeArgs": [
                 //"run-script", "debug",
-                "run-script", "devdo"
+				"run-script", "devdo",
+				//"run-script", "test_queue_in",
             ],
 			"restart": true,
 			/*
@@ -25,9 +26,9 @@
                 "NODE_ENV": "stage"
 			},
 			*/
-            "port": 5857,
-			//"program": "${workspaceRoot}/out/cli/upgrade-modify-queue.js",
-			"program": "${workspaceRoot}/out/index.js",
+            //"port": 5857,
+			//"program": "${workspaceRoot}/out/cli/test-queue-in.js",
+			//"program": "${workspaceRoot}/out/index.js",
             "sourceMaps": true,
             "outFiles": [
                 "${workspaceRoot}/out/**/*.js"
