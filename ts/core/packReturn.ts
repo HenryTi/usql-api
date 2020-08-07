@@ -87,7 +87,8 @@ function escape(d:any, field: Field):any {
         case 'string':
             if (field.type === 'datetime') {
                 return new Date(d).getTime()/1000;
-            }
+			}
+			/*
             let len = d.length;
             let r = '', p = 0;
             for (let i=0;i<len;i++) {
@@ -97,7 +98,9 @@ function escape(d:any, field: Field):any {
                     case 10: r += d.substring(p, i) + '\\n'; p = i+1; break;
                 }
             }
-            return r + d.substring(p);
+			return r + d.substring(p);
+			*/
+			return d;
         case 'undefined': return '';
     }
 }
