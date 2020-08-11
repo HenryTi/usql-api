@@ -16,8 +16,8 @@
                 "runtimeExecutable": "npm.cmd"
             },
             "runtimeArgs": [
-                //"run-script", "debug",
-				"run-script", "devdo",
+                "run-script", "debug",
+				//"run-script", "devdo",
 				//"run-script", "test_queue_in",
             ],
 			"restart": true,
