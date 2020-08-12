@@ -61,6 +61,8 @@ function pullNew(runner) {
                     if (schema === undefined)
                         continue;
                     let { from } = schema;
+                    if (!from)
+                        continue;
                     let openApi = yield net.openApiUnitUq(unit, from);
                     if (!openApi)
                         continue;

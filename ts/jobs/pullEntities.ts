@@ -37,7 +37,8 @@ async function pullNew(runner:EntityRunner) {
                 }
                 let schema = runner.getSchema(entity);
                 if (schema === undefined) continue;
-                let {from} = schema;
+				let {from} = schema;
+				if (!from) continue;
                 let openApi = await net.openApiUnitUq(unit, from);
                 if (!openApi) continue;
                 await pullEntity(runner, openApi, schema, unit, entity, key);
