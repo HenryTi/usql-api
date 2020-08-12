@@ -10,11 +10,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core_1 = require("../core");
-const queueIn_1 = require("../jobs/queueIn");
+const queueOut_1 = require("../jobs/queueOut");
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('test-queue-in');
-        let dbName = 'pointshop';
+        console.log('test-queue-out');
+        // 停掉其它服务器操作消息队列
+        //let db = Db.db(undefined);
+        //await db.setDebugJobs();
+        let dbName = 'order';
         let node_env = process.env.NODE_ENV;
         console.log('node_env=' + node_env + ', ' + 'db = ' + dbName);
         //let net = prodNet;
@@ -24,11 +27,11 @@ const queueIn_1 = require("../jobs/queueIn");
         if (buses !== undefined) {
             let { outCount, faces } = buses;
             if (outCount > 0 || runner.hasSheet === true) {
-                //await queueOut(runner);
+                yield queueOut_1.queueOut(runner);
             }
             if (faces !== undefined) {
                 //await pullBus(runner);
-                yield queueIn_1.queueIn(runner);
+                //await queueIn(runner);
             }
         }
         // process.exit();
