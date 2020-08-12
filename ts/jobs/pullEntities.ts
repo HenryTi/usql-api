@@ -80,7 +80,8 @@ async function pullModify(runner:EntityRunner) {
         if (!unit) unit = runner.uniqueUnit;
         let schema = runner.getSchema(entity);
         if (schema === undefined) debugger;
-        let {type, from} = schema;
+		let {type, from} = schema;
+		if (!from) continue;
         let openApiPromise = net.openApiUnitUq(unit, from);
         promises.push(openApiPromise);
         params.push({from:from, unit:unit, modifyMax:modifyMax, entity:entity});

@@ -101,6 +101,8 @@ function pullModify(runner) {
             if (schema === undefined)
                 debugger;
             let { type, from } = schema;
+            if (!from)
+                continue;
             let openApiPromise = net.openApiUnitUq(unit, from);
             promises.push(openApiPromise);
             params.push({ from: from, unit: unit, modifyMax: modifyMax, entity: entity });
