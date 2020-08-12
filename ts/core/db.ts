@@ -24,7 +24,6 @@ class Env {
 	private static const_development = 'development';
 	private static const_devdo = 'devdo';
 
-	readonly isDev: boolean = false;
 	readonly isDevelopment: boolean = false;
 	readonly isDevdo: boolean = false;
 	readonly const_unitx = '$unitx';
@@ -35,11 +34,9 @@ class Env {
 		switch (nodeEnv.toLowerCase()) {
 			case Env.const_development: 
 				this.isDevelopment = true; 
-				this.isDev = true;
 				break;
 			case Env.const_devdo: 
 				this.isDevdo = true; 
-				this.isDev = true;
 				break;
 		}
 	}

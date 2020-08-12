@@ -181,12 +181,21 @@ class Net {
     openApiUnitUq(unit, uqFullName) {
         return __awaiter(this, void 0, void 0, function* () {
             let openApi = this.getOpenApiFromCache(uqFullName, unit);
+            if (openApi === null)
+                return null;
             if (openApi !== undefined)
                 return openApi;
-            let uqUrl = yield centerApi_1.centerApi.urlFromUq(unit, uqFullName);
-            if (!uqUrl)
-                return;
-            return yield this.buildOpenApiFrom(uqFullName, unit, uqUrl);
+            if (openApi === undefined) {
+                let uqUrl = yield centerApi_1.centerApi.urlFromUq(unit, uqFullName);
+                if (!uqUrl) {
+                    let openApis = this.uqOpenApis[uqFullName];
+                    if (openApis) {
+                        openApis[unit] = null;
+                    }
+                    return;
+                }
+                return yield this.buildOpenApiFrom(uqFullName, unit, uqUrl);
+            }
         });
     }
     openApiUnitFace(unit, busOwner, busName, face) {

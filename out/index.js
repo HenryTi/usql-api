@@ -12,11 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const start_1 = require("./start");
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!process.env.NODE_ENV) {
-            console.error('NODE_ENV not defined, exit');
-            process.exit();
-        }
-        console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
         yield start_1.start();
         console.log('Tonva uq-api started!');
     });

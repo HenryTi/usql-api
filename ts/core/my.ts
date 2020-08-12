@@ -571,7 +571,7 @@ end;
         await this.exec(sql, undefined);
     }
     async uqDbs():Promise<any[]> {
-        let sql = env.isDev===true?
+        let sql = env.isDevelopment===true?
         'select name as db from $uq.uq;' :
         `select name as db 
 	            from $uq.uq 

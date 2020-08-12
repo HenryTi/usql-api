@@ -156,11 +156,20 @@ export abstract class Net {
         return openApi;
     }
     async openApiUnitUq(unit:number, uqFullName:string):Promise<OpenApi> {
-        let openApi = this.getOpenApiFromCache(uqFullName, unit);
-        if (openApi !== undefined) return openApi;
-        let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
-        if (!uqUrl) return;
-        return await this.buildOpenApiFrom(uqFullName, unit, uqUrl);
+		let openApi = this.getOpenApiFromCache(uqFullName, unit);
+		if (openApi === null) return null;
+		if (openApi !== undefined) return openApi;
+		if (openApi === undefined) {
+			let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
+			if (!uqUrl) {
+				let openApis = this.uqOpenApis[uqFullName];
+				if (openApis) {
+					openApis[unit] = null;
+				}
+				return;
+			}
+			return await this.buildOpenApiFrom(uqFullName, unit, uqUrl);
+		}
     }
 
     async openApiUnitFace(unit:number, busOwner:string, busName:string, face:string):Promise<OpenApi> {

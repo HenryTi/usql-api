@@ -30,7 +30,6 @@ export const isDev = isNodeEnvEqu(const_development, const_devdo);
 */
 class Env {
     constructor() {
-        this.isDev = false;
         this.isDevelopment = false;
         this.isDevdo = false;
         this.const_unitx = '$unitx';
@@ -40,11 +39,9 @@ class Env {
         switch (nodeEnv.toLowerCase()) {
             case Env.const_development:
                 this.isDevelopment = true;
-                this.isDev = true;
                 break;
             case Env.const_devdo:
                 this.isDevdo = true;
-                this.isDev = true;
                 break;
         }
     }

@@ -23,7 +23,7 @@ export function jobsLoopNoWait() {
 
 export async function startJobsLoop(): Promise<void> {
 	let db = Db.db(undefined);
-    if (env.isDev === true) {
+    if (env.isDevelopment === true) {
 		// 只有在开发状态下，才可以屏蔽jobs
 		//console.log('jobs loop: developing, no loop!');
 		//return;

@@ -32,7 +32,7 @@ exports.jobsLoopNoWait = jobsLoopNoWait;
 function startJobsLoop() {
     return __awaiter(this, void 0, void 0, function* () {
         let db = core_1.Db.db(undefined);
-        if (core_1.env.isDev === true) {
+        if (core_1.env.isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
             //console.log('jobs loop: developing, no loop!');
             //return;
