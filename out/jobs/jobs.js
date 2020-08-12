@@ -68,7 +68,7 @@ function startJobsLoop() {
                     // if (dbName !== 'bi') continue;
                     if (core_1.env.isDevelopment === true) {
                         // if (dbName !== 'rms') continue;
-                        console.info('====== env.isDevelopment as any === true: setDebugJobs');
+                        console.error('====== env.isDevelopment as any === true: setDebugJobs');
                         yield db.setDebugJobs();
                     }
                     console.info('====== job loop for ' + uqDb + '======');

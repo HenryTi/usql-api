@@ -73,8 +73,10 @@ function queueOut(runner) {
                                 finish = finish_1.Finish.bad; // fail
                             }
                             let errSubject = `error on ${action}:  ${subject}`;
-                            let error = typeof (err) === 'object' ?
-                                err.message : err;
+                            /*
+                            let error = typeof(err)==='object'?
+                                err.message : err; */
+                            let error = tool_1.getErrorString(err);
                             yield runner.log($unit, errSubject, error);
                         }
                     }

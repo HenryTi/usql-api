@@ -57,9 +57,11 @@ export async function queueOut(runner: EntityRunner): Promise<void> {
                         else {
                             finish = Finish.bad;  // fail
                         }
-                        let errSubject = `error on ${action}:  ${subject}`;
+						let errSubject = `error on ${action}:  ${subject}`;
+						/*
                         let error = typeof(err)==='object'?
-                            err.message : err;
+							err.message : err; */
+						let error = getErrorString(err);
                         await runner.log($unit, errSubject, error);
                     }
                 }
