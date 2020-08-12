@@ -28,5 +28,5 @@ const start_1 = require("./start");
         });
         */
     });
-});
+})();
 //# sourceMappingURL=index.js.map

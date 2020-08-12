@@ -18,4 +18,5 @@ import { start } from "./start";
         console.error(reason);
     });
     */
-});
+})();
+
