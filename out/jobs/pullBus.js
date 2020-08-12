@@ -70,7 +70,7 @@ function pullBus(runner) {
         }
         catch (err) {
             console.error(err);
-            yield runner.log(0, 'jobs pullBus loop', tool_1.getErrorString(err));
+            yield runner.log(0, 'jobs pullBus loop error: ', tool_1.getErrorString(err));
         }
     });
 }
