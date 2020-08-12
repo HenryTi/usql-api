@@ -17,16 +17,8 @@ const start_1 = require("./start");
             process.exit();
         }
         console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
-        process.exit();
         yield start_1.start();
         console.log('Tonva uq-api started!');
-        /*
-        centerApi.queueOut(0, 100).then(value => {
-            console.log(value);
-        }).catch(reason => {
-            console.error(reason);
-        });
-        */
     });
 })();
 //# sourceMappingURL=index.js.map
