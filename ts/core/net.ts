@@ -157,11 +157,15 @@ export abstract class Net {
     }
     async openApiUnitUq(unit:number, uqFullName:string):Promise<OpenApi> {
 		let openApi = this.getOpenApiFromCache(uqFullName, unit);
-		if (openApi === null) return null;
+		if (openApi === null) {
+			console.error('openApiUnitUq null ', uqFullName, unit);
+			return null;
+		}
 		if (openApi !== undefined) return openApi;
 		if (openApi === undefined) {
 			let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
 			if (!uqUrl) {
+				console.error('openApiUnitUq centerApi.urlFromUq not exists', uqFullName, unit);
 				let openApis = this.uqOpenApis[uqFullName];
 				if (openApis) {
 					openApis[unit] = null;

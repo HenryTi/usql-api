@@ -181,13 +181,16 @@ class Net {
     openApiUnitUq(unit, uqFullName) {
         return __awaiter(this, void 0, void 0, function* () {
             let openApi = this.getOpenApiFromCache(uqFullName, unit);
-            if (openApi === null)
+            if (openApi === null) {
+                console.error('openApiUnitUq null ', uqFullName, unit);
                 return null;
+            }
             if (openApi !== undefined)
                 return openApi;
             if (openApi === undefined) {
                 let uqUrl = yield centerApi_1.centerApi.urlFromUq(unit, uqFullName);
                 if (!uqUrl) {
+                    console.error('openApiUnitUq centerApi.urlFromUq not exists', uqFullName, unit);
                     let openApis = this.uqOpenApis[uqFullName];
                     if (openApis) {
                         openApis[unit] = null;
