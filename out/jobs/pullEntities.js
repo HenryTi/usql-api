@@ -98,8 +98,10 @@ function pullModify(runner) {
             if (!unit)
                 unit = runner.uniqueUnit;
             let schema = runner.getSchema(entity);
-            if (schema === undefined)
+            if (schema === undefined) {
                 debugger;
+                continue;
+            }
             let { type, from } = schema;
             if (!from)
                 continue;

@@ -67,8 +67,6 @@ function startJobsLoop() {
                     // 2020-7-1：我太蠢了。居然带着这一句发布了 ？！！！
                     // if (dbName !== 'bi') continue;
                     if (core_1.env.isDevelopment === true) {
-                        // if (dbName !== 'rms') continue;
-                        console.error('====== env.isDevelopment as any === true: setDebugJobs');
                         yield db.setDebugJobs();
                     }
                     console.info('====== job loop for ' + uqDb + '======');

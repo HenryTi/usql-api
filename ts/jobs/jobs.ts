@@ -58,8 +58,6 @@ export async function startJobsLoop(): Promise<void> {
 				// if (dbName !== 'bi') continue;
 
                 if (env.isDevelopment as any === true) {
-					// if (dbName !== 'rms') continue;
-					console.error('====== env.isDevelopment as any === true: setDebugJobs');
 					await db.setDebugJobs();
                 }
                 console.info('====== job loop for ' + uqDb + '======');
