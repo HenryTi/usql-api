@@ -63,7 +63,11 @@ export abstract class Net {
 		for (let runner of runners) {
 			await runner.buildTuidAutoId();
 			await this.resetRunner(runner);
-			if (this.executingNet !== undefined) this.executingNet.resetRunner(runner);
+			console.error('=== resetRunnerAfterCompile: ' + runner.name);
+			if (this.executingNet !== undefined) {
+				this.executingNet.resetRunner(runner);
+				console.error('=== executingNet resetRunnerAfterCompile: ' + runner.name);
+			}
 		}
     }
 

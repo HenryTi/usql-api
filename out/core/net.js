@@ -79,8 +79,11 @@ class Net {
             for (let runner of runners) {
                 yield runner.buildTuidAutoId();
                 yield this.resetRunner(runner);
-                if (this.executingNet !== undefined)
+                console.error('=== resetRunnerAfterCompile: ' + runner.name);
+                if (this.executingNet !== undefined) {
                     this.executingNet.resetRunner(runner);
+                    console.error('=== executingNet resetRunnerAfterCompile: ' + runner.name);
+                }
             }
         });
     }
