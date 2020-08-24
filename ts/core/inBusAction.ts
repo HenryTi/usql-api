@@ -196,6 +196,8 @@ export class SheetActionParametersBus extends ParametersBus {
 		return true;
     }
     protected getQueryProc(bus:string, face:string):string {
-        return `${this.entityName}_${this.stateName}_${this.actionName}$bus$${bus}_${face}`
+		let ret = this.entityName + '_';
+		if (this.stateName !== '$') ret += this.stateName + '_';
+        return ret + `${this.actionName}$bus$${bus}_${face}`;
     }
 }
