@@ -77,7 +77,13 @@ class ParametersBus {
             }
             let params = [];
             let proc = this.getQueryProc(bus.name, face);
-            let retParam = yield this.runner.tablesFromProc(proc, [unit, user, data]);
+            let retParam;
+            try {
+                retParam = yield this.runner.tablesFromProc(proc, [unit, user, data]);
+            }
+            catch (err) {
+                throw 'error in busQuery getQueryProc = ' + proc;
+            }
             let retParamMain = retParam[0][0];
             if (param !== undefined) {
                 let retIndex = 1;

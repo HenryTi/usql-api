@@ -86,8 +86,14 @@ export abstract class ParametersBus {
             throw 'error await this.runner.net.openApiUnitFace nothing returned';
         }
         let params:any[] = [];
-        let proc = this.getQueryProc(bus.name, face);
-        let retParam = await this.runner.tablesFromProc(proc, [unit, user, data]);
+		let proc = this.getQueryProc(bus.name, face);
+		let retParam:any[][];
+		try {
+			retParam = await this.runner.tablesFromProc(proc, [unit, user, data]);
+		}
+		catch (err) {
+			throw 'error in busQuery getQueryProc = ' + proc;
+		}
         let retParamMain = retParam[0][0];
         if (param !== undefined) {
             let retIndex = 1;
