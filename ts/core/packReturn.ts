@@ -127,10 +127,18 @@ function packRow(result:string[], fields:Field[], data:any, exFields?:string[]) 
 
 export function packArr(result:string[], fields:Field[], data:any[], exFields?:string[]) {
     if (data !== undefined) {
-        for (let row of data) {
-            packRow(result, fields, row, exFields);
-        }
-    }
+		if (data.length === 0) {
+			result.push(ln);
+		}
+		else {
+			for (let row of data) {
+				packRow(result, fields, row, exFields);
+			}
+		}
+	}
+	else {
+		result.push(ln);
+	}
     result.push(ln);
 }
 
@@ -184,12 +192,20 @@ function unpackRow(ret:any, fields:Field[], data:string, p:number):number {
 }
 
 function unpackArr(ret:any, arr:Arr, data:string, p:number):number {
+	let p0 = p;
     let vals:any[] = [], len = data.length;
     let {name, fields} = arr;
     while (p<len) {
         let ch = data.charCodeAt(p);
         if (ch === 10) {
-            ++p;
+			if (p === p0) {
+				ch = data.charCodeAt(p);
+				if (ch !== 10) {
+					throw new Error('upackArr: arr第一个字符是10，则必须紧跟一个10，表示整个arr的结束')
+				}
+				++p;
+			}
+		++p;
             break;
         }
         let val:any = {};

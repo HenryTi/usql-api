@@ -121,9 +121,17 @@ function packRow(result, fields, data, exFields) {
 }
 function packArr(result, fields, data, exFields) {
     if (data !== undefined) {
-        for (let row of data) {
-            packRow(result, fields, row, exFields);
+        if (data.length === 0) {
+            result.push(ln);
         }
+        else {
+            for (let row of data) {
+                packRow(result, fields, row, exFields);
+            }
+        }
+    }
+    else {
+        result.push(ln);
     }
     result.push(ln);
 }

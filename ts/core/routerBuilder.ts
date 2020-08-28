@@ -116,7 +116,7 @@ export class RouterBuilder {
                 $roles = await runner.getRoles(unit, app, userId, roles);
             }
             let entityVersion = req.header('en');
-            let uqVersion = req.header('uq');
+			let uqVersion = req.header('uq');
             let eqEntity = entityVersion === undefined || call.version === Number(entityVersion);
             let eqUq = uqVersion === undefined || runner.uqVersion === Number(uqVersion);
             if (eqEntity === true && eqUq === true)
