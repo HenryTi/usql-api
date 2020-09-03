@@ -45,6 +45,7 @@ export async function queueOut(runner: EntityRunner): Promise<void> {
                                 break;
                             case 'sheet':
                                 await sheet(runner, content);
+								await runner.log($unit, 'sheet-action', content);
                                 finish = Finish.done;
                                 break;
                         }

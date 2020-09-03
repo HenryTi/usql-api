@@ -60,6 +60,7 @@ function queueOut(runner) {
                                     break;
                                 case 'sheet':
                                     yield sheet(runner, content);
+                                    yield runner.log($unit, 'sheet-action', content);
                                     finish = finish_1.Finish.done;
                                     break;
                             }
