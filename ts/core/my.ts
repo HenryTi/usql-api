@@ -225,6 +225,20 @@ export class MyDbServer extends DbServer {
 		await this.callProcBase(db, 'tv_$proc_save', [db, procName, undefined]);
 	}
 
+	async buildRealProcFrom$ProcTable(db:string, proc:string): Promise<void> {
+		let results = await this.callProcBase(db, 'tv_$proc_get', [db, proc]);
+		let ret = results[0];
+		if (ret.length === 0) {
+			debugger;
+			throw new Error(`proc not defined: ${db}.${proc}`);
+		}
+		let r0 = ret[0];
+		let procSql = r0['proc'];
+		let drop = `USE \`${db}\`; DROP PROCEDURE IF EXISTS \`${db}\`.\`${proc}\`;`;
+		await this.sql(db, drop + procSql, undefined);
+		await this.callProcBase(db, 'tv_$proc_save', [db, proc, undefined]);
+	}
+
     private async execProc(db:string, proc:string, params:any[]): Promise<any> {
 		if (db[0] !== '$') {
 			let procLower = proc.toLowerCase();
@@ -370,7 +384,7 @@ export class MyDbServer extends DbServer {
     }
 	async createProcObjs(db:string): Promise<void> {
 		//let useDb = 'use `' + db + '`;';
-		let createProcTable = `
+		const createProcTable = `
 CREATE TABLE IF NOT EXISTS \`${db}\`.\`tv_$proc\` (
 	\`name\` VARCHAR(200) NOT NULL,
 	\`proc\` TEXT NULL, 
@@ -380,7 +394,7 @@ CREATE TABLE IF NOT EXISTS \`${db}\`.\`tv_$proc\` (
  // CHARACTER SET utf8 COLLATE utf8_unicode_ci
 
         await this.exec(createProcTable, undefined);
-		let getProc = `
+		const getProc = `
 DROP PROCEDURE IF EXISTS \`${db}\`.tv_$proc_get;
 CREATE PROCEDURE \`${db}\`.tv_$proc_get(
 	IN _schema VARCHAR(200),
@@ -396,7 +410,7 @@ END
 //WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed
 		await this.exec(getProc, undefined);
 
-		let saveProc = `
+		const saveProc = `
 DROP PROCEDURE IF EXISTS \`${db}\`.tv_$proc_save;
 CREATE PROCEDURE \`${db}\`.tv_$proc_save(
 	_schema VARCHAR(200),
@@ -430,7 +444,7 @@ END
 //WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed;
 		await this.exec(saveProc, undefined);
 
-		let escapeFunction = `
+		const escapeFunction = `
 DROP FUNCTION IF EXISTS \`${db}\`.$unescape;
 CREATE FUNCTION \`${db}\`.\`$unescape\`(
 	\`t\` TEXT

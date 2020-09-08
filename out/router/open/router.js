@@ -86,6 +86,10 @@ function buildOpenRouter(router, rb) {
         let suffix = (all === true ? '$id' : '$main');
         return yield runner.unitUserCall(`tv_${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
     }));
+    rb.get(router, '/proc/:name', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+        let { name } = params;
+        return yield runner.buildProc(name);
+    }));
 }
 exports.buildOpenRouter = buildOpenRouter;
 ;

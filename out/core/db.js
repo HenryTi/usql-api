@@ -197,6 +197,11 @@ class Db {
             yield this.dbServer.buildProc(this.dbName, procName, procSql);
         });
     }
+    buildRealProcFrom$ProcTable(proc) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.dbServer.buildRealProcFrom$ProcTable(this.dbName, proc);
+        });
+    }
     call(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             //this.devLog(proc, params);

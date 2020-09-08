@@ -80,10 +80,10 @@ class Net {
                 yield runner.buildTuidAutoId();
                 yield this.resetRunner(runner);
                 console.error('=== resetRunnerAfterCompile: ' + runner.name);
-                if (this.executingNet !== undefined) {
-                    this.executingNet.resetRunner(runner);
-                    console.error('=== executingNet resetRunnerAfterCompile: ' + runner.name);
-                }
+            }
+            if (this.executingNet !== undefined) {
+                this.executingNet.resetRunnerAfterCompile(db);
+                console.error('=== executingNet resetRunnerAfterCompile: ' + db.getDbName());
             }
         });
     }

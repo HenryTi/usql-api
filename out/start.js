@@ -19,6 +19,7 @@ const res_1 = require("./res");
 const core_1 = require("./core");
 const auth_1 = require("./core/auth");
 const jobs_1 = require("./jobs");
+const proc_1 = require("./router/proc");
 const { version: uq_api_version } = require('../package.json');
 function init() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -80,6 +81,7 @@ function init() {
                 app.use('/res', res_1.router);
                 app.use('/hello', dbHello);
                 app.use('/uq/hello', dbHello);
+                app.use('/proc/:db/:proc', proc_1.buildProcRouter());
                 app.use('/uq/prod/:db/', buildUqRouter(core_1.uqProdRouterBuilder, core_1.compileProdRouterBuilder));
                 app.use('/uq/test/:db/', buildUqRouter(core_1.uqTestRouterBuilder, core_1.compileTestRouterBuilder));
                 app.use('/uq/unitx-prod/', router_1.buildUnitxRouter(core_1.unitxProdRouterBuilder));

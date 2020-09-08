@@ -186,6 +186,9 @@ export class Db {
     async buildProc(procName:string, procSql:string): Promise<void> {
         await this.dbServer.buildProc(this.dbName, procName, procSql);
 	}
+	async buildRealProcFrom$ProcTable(proc:string): Promise<void> {
+		await this.dbServer.buildRealProcFrom$ProcTable(this.dbName, proc);
+	}
 	async call(proc:string, params:any[]): Promise<any> {
         //this.devLog(proc, params);
         return await this.dbServer.call(this.dbName, proc, params);

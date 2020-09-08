@@ -64,12 +64,13 @@ export abstract class Net {
 			await runner.buildTuidAutoId();
 			await this.resetRunner(runner);
 			console.error('=== resetRunnerAfterCompile: ' + runner.name);
-			if (this.executingNet !== undefined) {
-				this.executingNet.resetRunner(runner);
-				console.error('=== executingNet resetRunnerAfterCompile: ' + runner.name);
-			}
 		}
-    }
+
+		if (this.executingNet !== undefined) {
+			this.executingNet.resetRunnerAfterCompile(db);
+			console.error('=== executingNet resetRunnerAfterCompile: ' + db.getDbName());
+		}
+	}
 
     private async resetRunner(runner: EntityRunner) {
         let runnerName = runner.name;

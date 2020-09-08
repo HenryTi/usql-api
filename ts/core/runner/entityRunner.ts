@@ -219,7 +219,10 @@ export class EntityRunner {
         if (params !== undefined) p.push(...params);
         let ret = await this.db.tablesFromProc(proc, p);
         return ret;
-    }
+	}
+	async buildProc(proc:string):Promise<void> {
+		
+	}
 
     async start(unit:number, user:number): Promise<void> {
         return await this.unitUserCall('tv_$start', unit, user);

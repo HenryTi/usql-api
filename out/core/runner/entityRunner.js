@@ -210,6 +210,10 @@ class EntityRunner {
             return ret;
         });
     }
+    buildProc(proc) {
+        return __awaiter(this, void 0, void 0, function* () {
+        });
+    }
     start(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.unitUserCall('tv_$start', unit, user);

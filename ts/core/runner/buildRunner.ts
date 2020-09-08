@@ -62,11 +62,9 @@ export class BuildRunner {
             throw err;
         }
 	}
-	/*
-    async log(unit:number, subject:string, content:string):Promise<void> {
-        await this.db.log(unit, this.net.getUqFullName(this.uq), subject, content);
+	async buildProc(proc:string):Promise<any> {
+		await this.db.buildRealProcFrom$ProcTable(proc);
 	}
-	*/
     async procCall(proc:string, params:any[]): Promise<any> {
         return await this.db.call(proc, params);
     }

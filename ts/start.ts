@@ -11,6 +11,7 @@ import {authCheck, authUnitx, RouterBuilder,
 	create$UqDb} from './core';
 import { authJoint, authUpBuild } from './core/auth';
 import { startJobsLoop } from './jobs';
+import { buildProcRouter } from './router/proc';
 
 const {version: uq_api_version} = require('../package.json');
 
@@ -76,7 +77,8 @@ export async function init():Promise<void> {
 
             app.use('/res', resRouter);
             app.use('/hello', dbHello);
-            app.use('/uq/hello', dbHello);
+			app.use('/uq/hello', dbHello);
+			app.use('/proc/:db/:proc', buildProcRouter())
 
             app.use('/uq/prod/:db/', buildUqRouter(uqProdRouterBuilder, compileProdRouterBuilder));
             app.use('/uq/test/:db/', buildUqRouter(uqTestRouterBuilder, compileTestRouterBuilder));

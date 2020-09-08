@@ -232,6 +232,21 @@ class MyDbServer extends dbServer_1.DbServer {
             yield this.callProcBase(db, 'tv_$proc_save', [db, procName, undefined]);
         });
     }
+    buildRealProcFrom$ProcTable(db, proc) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let results = yield this.callProcBase(db, 'tv_$proc_get', [db, proc]);
+            let ret = results[0];
+            if (ret.length === 0) {
+                debugger;
+                throw new Error(`proc not defined: ${db}.${proc}`);
+            }
+            let r0 = ret[0];
+            let procSql = r0['proc'];
+            let drop = `USE \`${db}\`; DROP PROCEDURE IF EXISTS \`${db}\`.\`${proc}\`;`;
+            yield this.sql(db, drop + procSql, undefined);
+            yield this.callProcBase(db, 'tv_$proc_save', [db, proc, undefined]);
+        });
+    }
     execProc(db, proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             if (db[0] !== '$') {
@@ -403,7 +418,7 @@ class MyDbServer extends dbServer_1.DbServer {
     createProcObjs(db) {
         return __awaiter(this, void 0, void 0, function* () {
             //let useDb = 'use `' + db + '`;';
-            let createProcTable = `
+            const createProcTable = `
 CREATE TABLE IF NOT EXISTS \`${db}\`.\`tv_$proc\` (
 	\`name\` VARCHAR(200) NOT NULL,
 	\`proc\` TEXT NULL, 
@@ -412,7 +427,7 @@ CREATE TABLE IF NOT EXISTS \`${db}\`.\`tv_$proc\` (
 `;
             // CHARACTER SET utf8 COLLATE utf8_unicode_ci
             yield this.exec(createProcTable, undefined);
-            let getProc = `
+            const getProc = `
 DROP PROCEDURE IF EXISTS \`${db}\`.tv_$proc_get;
 CREATE PROCEDURE \`${db}\`.tv_$proc_get(
 	IN _schema VARCHAR(200),
@@ -427,7 +442,7 @@ END
 `;
             //WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed
             yield this.exec(getProc, undefined);
-            let saveProc = `
+            const saveProc = `
 DROP PROCEDURE IF EXISTS \`${db}\`.tv_$proc_save;
 CREATE PROCEDURE \`${db}\`.tv_$proc_save(
 	_schema VARCHAR(200),
@@ -460,7 +475,7 @@ END
 `;
             //WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed;
             yield this.exec(saveProc, undefined);
-            let escapeFunction = `
+            const escapeFunction = `
 DROP FUNCTION IF EXISTS \`${db}\`.$unescape;
 CREATE FUNCTION \`${db}\`.\`$unescape\`(
 	\`t\` TEXT

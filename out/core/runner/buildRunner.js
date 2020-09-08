@@ -79,11 +79,11 @@ class BuildRunner {
             }
         });
     }
-    /*
-    async log(unit:number, subject:string, content:string):Promise<void> {
-        await this.db.log(unit, this.net.getUqFullName(this.uq), subject, content);
+    buildProc(proc) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.db.buildRealProcFrom$ProcTable(proc);
+        });
     }
-    */
     procCall(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.db.call(proc, params);

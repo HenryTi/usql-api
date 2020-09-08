@@ -88,5 +88,11 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
         // maps: tab分隔的map名字
         let suffix = (all===true? '$id':'$main');
         return await runner.unitUserCall(`tv_${tuid}_${div}${suffix}`, unit, undefined, ownerId, id);
+	});
+	
+	rb.get(router, '/proc/:name',
+    async (runner:EntityRunner, body:any, params:any):Promise<any> => {
+        let {name} = params;
+        return await runner.buildProc(name);
     });
 };
