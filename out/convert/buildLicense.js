@@ -64,6 +64,7 @@ function buildLicense(result) {
         let { serialBin, code, userLimit, concurrentLimit, accountLimit, entityLimit, dateStart, monthLimit, dogType, ext } = result[0];
         if (monthLimit === null)
             monthLimit = -1;
+        // 先写32字节的授权，ext附加在后面
         let len = 32; // 4096;
         if (!serialBin)
             serialBin = 'FFFFFFFFFFFFFFFF';
@@ -156,10 +157,21 @@ function buildLicense(result) {
             + '|' + dateStart + '|' + monthLimit + '|' + dogType + '|' + ext
         return [ret];
         */
-        let arr = [dataLenBuf, buf, data1LenBuf, data1, data2LenBuf, data2, data3LenBuf, data3];
+        let extBuf;
+        if (ext !== null) {
+            let extByteLength = Buffer.byteLength(ext, 'utf8');
+            extBuf = new Buffer(extByteLength);
+            extBuf.write(ext, 'utf-8');
+        }
+        else {
+            extBuf = new Buffer(0);
+        }
+        let arr = [dataLenBuf, buf, data1LenBuf, data1, data2LenBuf, data2, data3LenBuf, data3, extBuf];
         let size = 0;
         arr.forEach(v => size += v.byteLength);
-        let encoded = Buffer.concat([dataLenBuf, buf, data1LenBuf, data1, data2LenBuf, data2, data3LenBuf, data3], size);
+        //let encoded = Buffer.concat([dataLenBuf, buf, data1LenBuf, data1, data2LenBuf, data2, data3LenBuf, data3], 
+        //    size);
+        let encoded = Buffer.concat(arr, size);
         let ret = `License
 Dog Serial: ${serialBin}
 CPU Code: ${code}
