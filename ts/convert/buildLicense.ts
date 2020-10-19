@@ -179,7 +179,7 @@ export function buildLicense(result:any[]): any[] {
 		if (ext !== null) {
 			let extByteLength = Buffer.byteLength(ext, 'utf-8');
 			extBuf = Buffer.alloc(extByteLength + 4);
-			extBuf.writeInt32LE(extByteLength);
+			extBuf.writeInt32LE(extByteLength, 0);
 			extBuf.write(ext, 4, 'utf-8');
 		}
 		else {
