@@ -159,12 +159,13 @@ function buildLicense(result) {
         */
         let extBuf;
         if (ext !== null) {
-            let extByteLength = Buffer.byteLength(ext, 'utf8');
-            extBuf = new Buffer(extByteLength);
+            let extByteLength = Buffer.byteLength(ext, 'utf-8');
+            extBuf = Buffer.alloc(extByteLength + 4);
+            extBuf.writeInt32LE(extByteLength);
             extBuf.write(ext, 'utf-8');
         }
         else {
-            extBuf = new Buffer(0);
+            extBuf = Buffer.alloc(0);
         }
         let arr = [dataLenBuf, buf, data1LenBuf, data1, data2LenBuf, data2, data3LenBuf, data3, extBuf];
         let size = 0;
