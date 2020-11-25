@@ -1,6 +1,7 @@
 import { EntityRunner, centerApi, SheetQueueData, BusMessage, env } from "../core";
 import { Finish } from "./finish";
 import { getErrorString } from "../tool";
+import { getUserX } from "./getUserX";
 
 export async function queueOut(runner: EntityRunner): Promise<void> {
     try {
@@ -12,7 +13,7 @@ export async function queueOut(runner: EntityRunner): Promise<void> {
             let procMessageQueueSet = 'tv_$message_queue_set';
             for (let row of ret) {
                 // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
-                let {$unit, id, action, subject, content, tries, update_time, now} = row;
+                let {$unit, id, to, action, subject, content, tries, update_time, now} = row;
                 console.log('queueOut 1: ', action, subject, content, update_time);
                 start = id;
                 if (!$unit) $unit = runner.uniqueUnit;
@@ -40,7 +41,7 @@ export async function queueOut(runner: EntityRunner): Promise<void> {
                                 finish = Finish.done;
                                 break;
                             case 'bus':
-                                await bus(runner, $unit, id, subject, content);
+                                await bus(runner, $unit, id, to, subject, content);
                                 finish = Finish.done;
                                 break;
                             case 'sheet':
@@ -128,10 +129,11 @@ async function email(runner:EntityRunner, unit:number, id:number, content:string
     });
 }
 
-async function bus(runner:EntityRunner, unit:number, id:number, subject:string, content:string): Promise<void> {
+// bus参数，调用的时候，就是project
+async function bus(runner:EntityRunner, unit:number, id:number, to:number, bus:string, content:string): Promise<void> {
     if (!unit) return;
     
-    let parts = subject.split('/');
+    let parts = bus.split('/');
     let busEntityName = parts[0];
     let face = parts[1];
 
@@ -146,19 +148,37 @@ async function bus(runner:EntityRunner, unit:number, id:number, subject:string, 
 
     let {uqOwner, uq} = runner;
 
-    let {body, version} = toBusMessage(busSchema, face, content);
-    let message: BusMessage = {
-        unit: unit,
-        type: 'bus',
-        queueId: id,
-        from: uqOwner + '/' + uq,           // from uq
-        busOwner: busOwner,
-        bus: busName,
-        face: face,
-        version: version,
-        body: body,
-    };
-    await runner.net.sendToUnitx(unit, message);
+	let {body, version} = toBusMessage(busSchema, face, content);
+	
+	function buildMessage(u:number):BusMessage {
+		let message: BusMessage = {
+			unit: u,
+			type: 'bus',
+			queueId: id,
+			to,
+			from: uqOwner + '/' + uq,           // from uq
+			busOwner: busOwner,
+			bus: busName,
+			face: face,
+			version: version,
+			body: body,
+		};
+		return message;
+	}
+
+	if (to > 0) {
+		let unitXArr:number[] = await getUserX(runner, to, bus, face);
+		if (!unitXArr || unitXArr.length === 0) return;
+		let promises = unitXArr.map(v => {
+			let message: BusMessage = buildMessage(v);
+			runner.net.sendToUnitx(v, message);
+		});		
+		await Promise.all(promises);
+	}
+	else {
+		let message: BusMessage = buildMessage(unit);
+		await runner.net.sendToUnitx(unit, message);
+	}
 }
 
 async function sheet(runner: EntityRunner, content:string):Promise<void> {

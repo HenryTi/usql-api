@@ -41,7 +41,10 @@ export async function startJobsLoop(): Promise<void> {
         console.log();
         console.error('========= Jobs loop at %s =========', new Date().toLocaleString());
         try {
-            let uqs = await db.uqDbs();
+			let uqs = await db.uqDbs();
+			if (uqs.length === 0) {
+				console.error('debugging_jobs=yes, stop jobs loop');
+			}
             for (let uqRow of uqs) {
                 let {db:uqDb} = uqRow;
                 let net:Net;
@@ -57,13 +60,14 @@ export async function startJobsLoop(): Promise<void> {
 				// 2020-7-1：我太蠢了。居然带着这一句发布了 ？！！！
 				// if (dbName !== 'bi') continue;
 
-                if (env.isDevelopment as any === true) {
+                if (env.isDevelopment === true) {
+					// if (dbName === 'pointshop') debugger;
 					await db.setDebugJobs();
                 }
                 console.info('====== job loop for ' + uqDb + '======');
 
                 let runner = await net.getRunner(dbName);
-                if (runner === undefined) continue;
+				if (runner === undefined) continue;
 				let {buses} = runner;
                 if (buses !== undefined) {
                     let {outCount, faces} = buses;

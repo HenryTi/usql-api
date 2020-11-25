@@ -24,7 +24,7 @@ function queueIn(runner) {
                 if (queueInArr.length === 0)
                     break;
                 for (let queueIn of queueInArr) {
-                    let { bus, faceName, id, unit, data, tries, update_time, now } = queueIn;
+                    let { bus, faceName, id, unit, to, data, tries, update_time, now } = queueIn;
                     start = id;
                     if (!unit)
                         unit = runner.uniqueUnit;
@@ -39,7 +39,7 @@ function queueIn(runner) {
                             yield runner.call('$queue_in_set', [id, finish_1.Finish.done]);
                         }
                         else {
-                            yield runner.bus(bus, faceName, unit, id, data);
+                            yield runner.bus(bus, faceName, unit, to, id, data);
                         }
                         finish = finish_1.Finish.done;
                         ++count;

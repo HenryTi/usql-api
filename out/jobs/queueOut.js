@@ -13,6 +13,7 @@ exports.queueOut = void 0;
 const core_1 = require("../core");
 const finish_1 = require("./finish");
 const tool_1 = require("../tool");
+const getUserX_1 = require("./getUserX");
 function queueOut(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -25,7 +26,7 @@ function queueOut(runner) {
                 let procMessageQueueSet = 'tv_$message_queue_set';
                 for (let row of ret) {
                     // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
-                    let { $unit, id, action, subject, content, tries, update_time, now } = row;
+                    let { $unit, id, to, action, subject, content, tries, update_time, now } = row;
                     console.log('queueOut 1: ', action, subject, content, update_time);
                     start = id;
                     if (!$unit)
@@ -55,7 +56,7 @@ function queueOut(runner) {
                                     finish = finish_1.Finish.done;
                                     break;
                                 case 'bus':
-                                    yield bus(runner, $unit, id, subject, content);
+                                    yield bus(runner, $unit, id, to, subject, content);
                                     finish = finish_1.Finish.done;
                                     break;
                                 case 'sheet':
@@ -148,11 +149,12 @@ function email(runner, unit, id, content) {
         });
     });
 }
-function bus(runner, unit, id, subject, content) {
+// bus参数，调用的时候，就是project
+function bus(runner, unit, id, to, bus, content) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!unit)
             return;
-        let parts = subject.split('/');
+        let parts = bus.split('/');
         let busEntityName = parts[0];
         let face = parts[1];
         let schema = runner.getSchema(busEntityName);
@@ -165,18 +167,35 @@ function bus(runner, unit, id, subject, content) {
         let { schema: busSchema, busOwner, busName } = schema.call;
         let { uqOwner, uq } = runner;
         let { body, version } = toBusMessage(busSchema, face, content);
-        let message = {
-            unit: unit,
-            type: 'bus',
-            queueId: id,
-            from: uqOwner + '/' + uq,
-            busOwner: busOwner,
-            bus: busName,
-            face: face,
-            version: version,
-            body: body,
-        };
-        yield runner.net.sendToUnitx(unit, message);
+        function buildMessage(u) {
+            let message = {
+                unit: u,
+                type: 'bus',
+                queueId: id,
+                to,
+                from: uqOwner + '/' + uq,
+                busOwner: busOwner,
+                bus: busName,
+                face: face,
+                version: version,
+                body: body,
+            };
+            return message;
+        }
+        if (to > 0) {
+            let unitXArr = yield getUserX_1.getUserX(runner, to, bus, face);
+            if (!unitXArr || unitXArr.length === 0)
+                return;
+            let promises = unitXArr.map(v => {
+                let message = buildMessage(v);
+                runner.net.sendToUnitx(v, message);
+            });
+            yield Promise.all(promises);
+        }
+        else {
+            let message = buildMessage(unit);
+            yield runner.net.sendToUnitx(unit, message);
+        }
     });
 }
 function sheet(runner, content) {

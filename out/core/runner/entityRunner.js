@@ -606,12 +606,12 @@ class EntityRunner {
         }
         return inBusAction;
     }
-    bus(bus, face, unit, msgId, body) {
+    bus(bus, face, unit, to, msgId, body) {
         return __awaiter(this, void 0, void 0, function* () {
             let inBusAction = this.getAcceptParametersBus(bus, face);
-            let inBusResult = yield inBusAction.buildData(unit, 0, body);
+            let inBusResult = yield inBusAction.buildData(unit, to, body);
             let data = body + inBusResult;
-            yield this.unitUserCall('tv_' + bus + '_' + face, unit, 0, msgId, data);
+            yield this.unitUserCall('tv_' + bus + '_' + face, unit, to, msgId, data);
         });
     }
     checkPull(unit, entity, entityType, modifies) {

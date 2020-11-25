@@ -51,6 +51,9 @@ function startJobsLoop() {
             console.error('========= Jobs loop at %s =========', new Date().toLocaleString());
             try {
                 let uqs = yield db.uqDbs();
+                if (uqs.length === 0) {
+                    console.error('debugging_jobs=yes, stop jobs loop');
+                }
                 for (let uqRow of uqs) {
                     let { db: uqDb } = uqRow;
                     let net;
@@ -67,6 +70,7 @@ function startJobsLoop() {
                     // 2020-7-1：我太蠢了。居然带着这一句发布了 ？！！！
                     // if (dbName !== 'bi') continue;
                     if (core_1.env.isDevelopment === true) {
+                        // if (dbName === 'pointshop') debugger;
                         yield db.setDebugJobs();
                     }
                     console.info('====== job loop for ' + uqDb + '======');
