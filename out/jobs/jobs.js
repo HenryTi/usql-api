@@ -40,6 +40,7 @@ function startJobsLoop() {
                 return;
             console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
             yield db.setDebugJobs();
+            console.log('========= set debugging jobs =========');
             yield sleep(waitForOtherStopJobs);
         }
         else {
@@ -54,42 +55,44 @@ function startJobsLoop() {
                 if (uqs.length === 0) {
                     console.error('debugging_jobs=yes, stop jobs loop');
                 }
-                for (let uqRow of uqs) {
-                    let { db: uqDb } = uqRow;
-                    let net;
-                    let dbName;
-                    ;
-                    if (uqDb.endsWith($test) === true) {
-                        dbName = uqDb.substr(0, uqDb.length - $test.length);
-                        net = core_1.testNet;
-                    }
-                    else {
-                        dbName = uqDb;
-                        net = core_1.prodNet;
-                    }
-                    // 2020-7-1：我太蠢了。居然带着这一句发布了 ？！！！
-                    // if (dbName !== 'bi') continue;
-                    if (core_1.env.isDevelopment === true) {
-                        // if (dbName === 'pointshop') debugger;
-                        yield db.setDebugJobs();
-                    }
-                    console.info('====== job loop for ' + uqDb + '======');
-                    let runner = yield net.getRunner(dbName);
-                    if (runner === undefined)
-                        continue;
-                    let { buses } = runner;
-                    if (buses !== undefined) {
-                        let { outCount, faces } = buses;
-                        if (outCount > 0 || runner.hasSheet === true) {
-                            yield queueOut_1.queueOut(runner);
+                else
+                    for (let uqRow of uqs) {
+                        let { db: uqDb } = uqRow;
+                        let net;
+                        let dbName;
+                        ;
+                        if (uqDb.endsWith($test) === true) {
+                            dbName = uqDb.substr(0, uqDb.length - $test.length);
+                            net = core_1.testNet;
                         }
-                        if (faces !== undefined) {
-                            yield pullBus_1.pullBus(runner);
-                            yield queueIn_1.queueIn(runner);
+                        else {
+                            dbName = uqDb;
+                            net = core_1.prodNet;
                         }
+                        // 2020-7-1：我太蠢了。居然带着这一句发布了 ？！！！
+                        // if (dbName !== 'bi') continue;
+                        if (core_1.env.isDevelopment === true) {
+                            // if (dbName === 'pointshop') debugger;
+                            yield db.setDebugJobs();
+                            console.log('========= set debugging jobs =========');
+                        }
+                        console.info('====== job loop for ' + uqDb + '======');
+                        let runner = yield net.getRunner(dbName);
+                        if (runner === undefined)
+                            continue;
+                        let { buses } = runner;
+                        if (buses !== undefined) {
+                            let { outCount, faces } = buses;
+                            if (outCount > 0 || runner.hasSheet === true) {
+                                yield queueOut_1.queueOut(runner);
+                            }
+                            if (faces !== undefined) {
+                                yield pullBus_1.pullBus(runner);
+                                yield queueIn_1.queueIn(runner);
+                            }
+                        }
+                        yield pullEntities_1.pullEntities(runner);
                     }
-                    yield pullEntities_1.pullEntities(runner);
-                }
             }
             catch (err) {
                 console.error('jobs loop error!!!!');

@@ -29,7 +29,8 @@ export async function startJobsLoop(): Promise<void> {
 		//return;
 		if (env.isDevdo === true) return;
         console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
-        await db.setDebugJobs();
+		await db.setDebugJobs();
+		console.log('========= set debugging jobs =========');
         await sleep(waitForOtherStopJobs);
     }
     else {
@@ -45,7 +46,7 @@ export async function startJobsLoop(): Promise<void> {
 			if (uqs.length === 0) {
 				console.error('debugging_jobs=yes, stop jobs loop');
 			}
-            for (let uqRow of uqs) {
+			else for (let uqRow of uqs) {
                 let {db:uqDb} = uqRow;
                 let net:Net;
                 let dbName:string;;
@@ -63,6 +64,7 @@ export async function startJobsLoop(): Promise<void> {
                 if (env.isDevelopment === true) {
 					// if (dbName === 'pointshop') debugger;
 					await db.setDebugJobs();
+					console.log('========= set debugging jobs =========');
                 }
                 console.info('====== job loop for ' + uqDb + '======');
 
