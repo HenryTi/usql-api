@@ -86,9 +86,9 @@ class CenterApi extends fetch_1.Fetch {
             return yield this.post('open/app-roles', { unit, app, user });
         });
     }
-    userxBusFace(user, bus, face) {
+    userxBusFace(user, busOwner, busName, face) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.post('open/userx-bus-face', { user, bus, face });
+            return yield this.post('open/userx-bus-face', { user, busOwner, busName, face });
         });
     }
 }

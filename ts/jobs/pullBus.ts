@@ -20,7 +20,7 @@ export async function pullBus(runner: EntityRunner) {
                 // 新版：bus读来，直接写入queue_in。然后在队列里面处理
 
                 for (let row of messages) {
-                    let {face:faceUrl, id:msgId, body, version} = row;
+                    let {to, face:faceUrl, id:msgId, body, version} = row;
                     let face = coll[(faceUrl as string).toLowerCase()];
                     if (face === undefined) continue;
                     let {bus, faceName, version:runnerBusVersion} = face;
@@ -31,7 +31,7 @@ export async function pullBus(runner: EntityRunner) {
                             // 但是，现在先不处理
                             // 2019-07-23
                         }
-                        await runner.call('$queue_in_add', [unit, msgId, bus, faceName, body]);
+                        await runner.call('$queue_in_add', [unit, to, msgId, bus, faceName, body]);
                         ++pullBusItemCount;
                     }
                     catch (toQueueInErr) {
@@ -45,7 +45,7 @@ export async function pullBus(runner: EntityRunner) {
                 if (hasError === true) break;
                 if (messages.length < maxRows && maxId < maxMsgId) {
                     // 如果unit的所有mssage都处理完成了，则设为unit的最大msg，下次查找可以快些
-                    await runner.call('$queue_in_add', [unit, maxMsgId, undefined, undefined, undefined]);
+                    await runner.call('$queue_in_add', [unit, undefined, maxMsgId, undefined, undefined, undefined]);
                     //await runner.busSyncMax(unit, maxMsgId);
                 }
             }

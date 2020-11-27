@@ -84,7 +84,8 @@ export class Cache<K extends number|string, T> {
 			if (this.tail !== undefined) {
 				this.tail.next = node;
 			}
-			this.tail = node;
+			this.map[key] = this.tail = node;
+			++this.count;			
 			return;
 		}
 

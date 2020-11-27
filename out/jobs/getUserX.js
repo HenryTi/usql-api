@@ -13,14 +13,14 @@ exports.getUserX = void 0;
 const core_1 = require("../core");
 const tool_1 = require("../tool");
 const userxCache = new tool_1.Cache(3, 10);
-function buildUserX(runner, to, bus, face) {
+function buildUserX(runner, to, busOwner, busName, face) {
     return __awaiter(this, void 0, void 0, function* () {
         // runner 可以做本地数据库缓存，不一定每次都到中央服务器获取，减轻中央服务器压力
-        let results = yield core_1.centerApi.userxBusFace(to, bus, face);
+        let results = yield core_1.centerApi.userxBusFace(to, busOwner, busName, face);
         return results;
     });
 }
-function getUserX(runner, to, bus, face) {
+function getUserX(runner, to, bus, busOwner, busName, face) {
     return __awaiter(this, void 0, void 0, function* () {
         // 如果发给指定用户
         // unit为指定service id，并且为负数
@@ -37,7 +37,7 @@ function getUserX(runner, to, bus, face) {
         }
         userXArr = faceUserX[face];
         if (userXArr === undefined) {
-            userXArr = yield buildUserX(runner, to, bus, face);
+            userXArr = yield buildUserX(runner, to, busOwner, busName, face);
             faceUserX[face] = userXArr;
         }
         return userXArr.map(v => -v.service);

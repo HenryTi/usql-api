@@ -65,8 +65,8 @@ class CenterApi extends Fetch {
         return await this.post('open/app-roles', {unit, app, user});
 	}
 	
-	async userxBusFace(user:number, bus:string, face:string): Promise<{service:number, unitxUrl: string}[]> {
-		return await this.post('open/userx-bus-face', {user, bus, face});
+	async userxBusFace(user:number, busOwner:string, busName:string, face:string): Promise<{service:number, unitxUrl: string}[]> {
+		return await this.post('open/userx-bus-face', {user, busOwner, busName, face});
 	}
 }
 

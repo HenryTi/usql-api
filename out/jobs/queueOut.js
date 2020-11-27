@@ -152,7 +152,7 @@ function email(runner, unit, id, content) {
 // bus参数，调用的时候，就是project
 function bus(runner, unit, id, to, bus, content) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (!unit)
+        if (!unit && !to)
             return;
         let parts = bus.split('/');
         let busEntityName = parts[0];
@@ -183,7 +183,7 @@ function bus(runner, unit, id, to, bus, content) {
             return message;
         }
         if (to > 0) {
-            let unitXArr = yield getUserX_1.getUserX(runner, to, bus, face);
+            let unitXArr = yield getUserX_1.getUserX(runner, to, bus, busOwner, busName, face);
             if (!unitXArr || unitXArr.length === 0)
                 return;
             let promises = unitXArr.map(v => {

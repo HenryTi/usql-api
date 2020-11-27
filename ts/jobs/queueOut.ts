@@ -131,7 +131,7 @@ async function email(runner:EntityRunner, unit:number, id:number, content:string
 
 // bus参数，调用的时候，就是project
 async function bus(runner:EntityRunner, unit:number, id:number, to:number, bus:string, content:string): Promise<void> {
-    if (!unit) return;
+    if (!unit && !to) return;
     
     let parts = bus.split('/');
     let busEntityName = parts[0];
@@ -167,7 +167,7 @@ async function bus(runner:EntityRunner, unit:number, id:number, to:number, bus:s
 	}
 
 	if (to > 0) {
-		let unitXArr:number[] = await getUserX(runner, to, bus, face);
+		let unitXArr:number[] = await getUserX(runner, to, bus, busOwner, busName, face);
 		if (!unitXArr || unitXArr.length === 0) return;
 		let promises = unitXArr.map(v => {
 			let message: BusMessage = buildMessage(v);
