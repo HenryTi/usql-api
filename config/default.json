@@ -6,11 +6,6 @@
     "secret": "xxx-yyy-zzz-00110",
     "sqlType": "mysql",
     "uploadPath": "../uploads/",
-    "connection_$unitx": {
-        "host": "101.200.46.56",
-        "user": "root",
-        "password": "wpmKMPS2xwlG3ZC"
-    },
     "connection": {
         "host": "0.0.0.0",
         "user": "usr",
