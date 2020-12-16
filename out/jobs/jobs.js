@@ -84,13 +84,17 @@ function startJobsLoop() {
                         if (buses !== undefined) {
                             let { outCount, faces } = buses;
                             if (outCount > 0 || runner.hasSheet === true) {
+                                console.log(`==== in loop ${uqDb}: queueOut outCount=${outCount} ====`);
                                 yield queueOut_1.queueOut(runner);
                             }
                             if (faces !== undefined) {
+                                console.log(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
                                 yield pullBus_1.pullBus(runner);
+                                console.log(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
                                 yield queueIn_1.queueIn(runner);
                             }
                         }
+                        console.log(`==== in loop ${uqDb}: pullEntities ====`);
                         yield pullEntities_1.pullEntities(runner);
                     }
             }

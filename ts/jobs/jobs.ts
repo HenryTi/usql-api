@@ -72,15 +72,19 @@ export async function startJobsLoop(): Promise<void> {
 				if (runner === undefined) continue;
 				let {buses} = runner;
                 if (buses !== undefined) {
-                    let {outCount, faces} = buses;
+					let {outCount, faces} = buses;
                     if (outCount > 0 || runner.hasSheet === true) {
+						console.log(`==== in loop ${uqDb}: queueOut outCount=${outCount} ====`);
                         await queueOut(runner);
                     }
                     if (faces !== undefined) {
+						console.log(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
                         await pullBus(runner);
+						console.log(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
                         await queueIn(runner);
                     }
                 }
+				console.log(`==== in loop ${uqDb}: pullEntities ====`);
                 await pullEntities(runner);
             }
         }

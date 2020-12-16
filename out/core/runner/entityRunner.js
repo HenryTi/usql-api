@@ -86,7 +86,12 @@ class EntityRunner {
             }
             try {
                 let maxes = yield this.tableFromProc('$modify_queue_max', [unit]);
-                ret = maxes[0].max;
+                if (maxes.length === 0) {
+                    ret = null;
+                }
+                else {
+                    ret = maxes[0].max;
+                }
                 this.modifyMaxes[unit] = ret;
                 return ret;
             }

@@ -128,11 +128,16 @@ export class EntityRunner {
             return ret;
         }
         try {
-            let maxes:any[] = await this.tableFromProc('$modify_queue_max', [unit]);
-            ret = maxes[0].max;
-            this.modifyMaxes[unit] = ret;
-            return ret;
-        }
+			let maxes:any[] = await this.tableFromProc('$modify_queue_max', [unit]);
+			if (maxes.length === 0) {
+				ret = null;
+			}
+			else {
+				ret = maxes[0].max;
+			}
+			this.modifyMaxes[unit] = ret;
+			return ret;
+	}
         catch (err) {
             console.error(err);
             this.modifyMaxes[unit] = null;
