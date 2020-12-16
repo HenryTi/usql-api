@@ -49,7 +49,7 @@ function startJobsLoop() {
         console.log('Jobs loop started!');
         for (;;) {
             console.log();
-            console.error('========= Jobs loop at %s =========', new Date().toLocaleString());
+            console.info('========= Jobs loop at %s =========', new Date().toLocaleString());
             try {
                 let uqs = yield db.uqDbs();
                 if (uqs.length === 0) {
@@ -74,7 +74,7 @@ function startJobsLoop() {
                         if (core_1.env.isDevelopment === true) {
                             // if (dbName === 'pointshop') debugger;
                             yield db.setDebugJobs();
-                            console.log('========= set debugging jobs =========');
+                            console.info('========= set debugging jobs =========');
                         }
                         console.info('====== job loop for ' + uqDb + '======');
                         let runner = yield net.getRunner(dbName);
@@ -84,17 +84,17 @@ function startJobsLoop() {
                         if (buses !== undefined) {
                             let { outCount, faces } = buses;
                             if (outCount > 0 || runner.hasSheet === true) {
-                                console.log(`==== in loop ${uqDb}: queueOut outCount=${outCount} ====`);
+                                console.info(`==== in loop ${uqDb}: queueOut outCount=${outCount} ====`);
                                 yield queueOut_1.queueOut(runner);
                             }
                             if (faces !== undefined) {
-                                console.log(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
+                                console.info(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
                                 yield pullBus_1.pullBus(runner);
-                                console.log(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
+                                console.info(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
                                 yield queueIn_1.queueIn(runner);
                             }
                         }
-                        console.log(`==== in loop ${uqDb}: pullEntities ====`);
+                        console.info(`==== in loop ${uqDb}: pullEntities ====`);
                         yield pullEntities_1.pullEntities(runner);
                     }
             }

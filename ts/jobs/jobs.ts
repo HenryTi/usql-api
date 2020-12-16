@@ -40,7 +40,7 @@ export async function startJobsLoop(): Promise<void> {
     console.log('Jobs loop started!');
     for (;;) {
         console.log();
-        console.error('========= Jobs loop at %s =========', new Date().toLocaleString());
+        console.info('========= Jobs loop at %s =========', new Date().toLocaleString());
         try {
 			let uqs = await db.uqDbs();
 			if (uqs.length === 0) {
@@ -64,7 +64,7 @@ export async function startJobsLoop(): Promise<void> {
                 if (env.isDevelopment === true) {
 					// if (dbName === 'pointshop') debugger;
 					await db.setDebugJobs();
-					console.log('========= set debugging jobs =========');
+					console.info('========= set debugging jobs =========');
                 }
                 console.info('====== job loop for ' + uqDb + '======');
 
@@ -74,17 +74,17 @@ export async function startJobsLoop(): Promise<void> {
                 if (buses !== undefined) {
 					let {outCount, faces} = buses;
                     if (outCount > 0 || runner.hasSheet === true) {
-						console.log(`==== in loop ${uqDb}: queueOut outCount=${outCount} ====`);
+						console.info(`==== in loop ${uqDb}: queueOut outCount=${outCount} ====`);
                         await queueOut(runner);
                     }
                     if (faces !== undefined) {
-						console.log(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
+						console.info(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
                         await pullBus(runner);
-						console.log(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
+						console.info(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
                         await queueIn(runner);
                     }
                 }
-				console.log(`==== in loop ${uqDb}: pullEntities ====`);
+				console.info(`==== in loop ${uqDb}: pullEntities ====`);
                 await pullEntities(runner);
             }
         }
