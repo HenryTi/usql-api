@@ -37,10 +37,12 @@ export async function startJobsLoop(): Promise<void> {
         await sleep(firstRun);
     }
 
-    console.log('Jobs loop started!');
+	console.log('\n');
+	console.log('\n');
+    console.error('====== Jobs loop started! ======');
     for (;;) {
-        console.log('=');
-        console.info('========= Jobs loop at %s =========', new Date().toLocaleString());
+        console.log('\n');
+        console.info(`====== one loop at ${new Date().toLocaleString()} ======`);
         try {
 			let uqs = await db.uqDbs();
 			if (uqs.length === 0) {
@@ -66,7 +68,7 @@ export async function startJobsLoop(): Promise<void> {
 					await db.setDebugJobs();
 					console.info('========= set debugging jobs =========');
                 }
-                console.info('====== job loop for ' + uqDb + '======');
+                console.info('====== loop for ' + uqDb + '======');
 
                 let runner = await net.getRunner(dbName);
 				if (runner === undefined) continue;
@@ -86,6 +88,7 @@ export async function startJobsLoop(): Promise<void> {
                 }
 				console.info(`==== in loop ${uqDb}: pullEntities ====`);
                 await pullEntities(runner);
+				console.info(`###### end loop ${uqDb} ######`);
             }
         }
         catch (err) {
@@ -123,5 +126,6 @@ export async function startJobsLoop(): Promise<void> {
                 loopWait = true;
             }
         }
+        console.info(`###### one loop end at ${new Date().toLocaleString()} ######`);
     }
 }

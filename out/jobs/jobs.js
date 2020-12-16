@@ -46,10 +46,12 @@ function startJobsLoop() {
         else {
             yield sleep(firstRun);
         }
-        console.log('Jobs loop started!');
+        console.log('\n');
+        console.log('\n');
+        console.error('====== Jobs loop started! ======');
         for (;;) {
-            console.log('=');
-            console.info('========= Jobs loop at %s =========', new Date().toLocaleString());
+            console.log('\n');
+            console.info(`====== one loop at ${new Date().toLocaleString()} ======`);
             try {
                 let uqs = yield db.uqDbs();
                 if (uqs.length === 0) {
@@ -76,7 +78,7 @@ function startJobsLoop() {
                             yield db.setDebugJobs();
                             console.info('========= set debugging jobs =========');
                         }
-                        console.info('====== job loop for ' + uqDb + '======');
+                        console.info('====== loop for ' + uqDb + '======');
                         let runner = yield net.getRunner(dbName);
                         if (runner === undefined)
                             continue;
@@ -96,6 +98,7 @@ function startJobsLoop() {
                         }
                         console.info(`==== in loop ${uqDb}: pullEntities ====`);
                         yield pullEntities_1.pullEntities(runner);
+                        console.info(`###### end loop ${uqDb} ######`);
                     }
             }
             catch (err) {
@@ -141,6 +144,7 @@ function startJobsLoop() {
                     loopWait = true;
                 }
             }
+            console.info(`###### one loop end at ${new Date().toLocaleString()} ######`);
         }
     });
 }
