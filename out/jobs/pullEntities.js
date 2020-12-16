@@ -40,11 +40,13 @@ function pullNew(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         let { net } = runner;
         let count = 0;
+        console.log(`== pullNew count=${count} ==`);
         for (; count < 200;) {
             let items = yield runner.tableFromProc('$from_new', undefined);
             if (items.length === 0) {
                 break;
             }
+            console.log(`== pullNew count=${items.length} ==`);
             for (let item of items) {
                 count++;
                 let { id, unit, entity, key, tries, update_time, now } = item;
@@ -88,6 +90,7 @@ function pullModify(runner) {
         let items = yield runner.tableFromProc('$sync_from', undefined);
         if (items.length === 0)
             return;
+        console.log(`== pullModify count=${items.length} ==`);
         let unitOpenApiItems = {};
         // 把访问同一个openApi的整理到一起
         let promises = [];

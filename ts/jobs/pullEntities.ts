@@ -19,12 +19,14 @@ enum FromNewSet {ok=1, bad=2, moreTry=3}
 
 async function pullNew(runner:EntityRunner) {
     let {net} = runner;
-    let count = 0;
+	let count = 0;
+	console.log(`== pullNew count=${count} ==`);
     for (;count<200;) {
         let items = await runner.tableFromProc('$from_new', undefined);
         if (items.length === 0) {
             break;
         }
+		console.log(`== pullNew count=${items.length} ==`);
         for (let item of items) {
             count++;
             let {id, unit, entity, key, tries, update_time, now} = item;
@@ -70,6 +72,7 @@ async function pullModify(runner:EntityRunner) {
     let {net} = runner;
     let items = await runner.tableFromProc('$sync_from', undefined);
     if (items.length === 0) return;
+	console.log(`== pullModify count=${items.length} ==`);
     let unitOpenApiItems:UnitOpenApiItems = {};
     // 把访问同一个openApi的整理到一起
     let promises:Promise<OpenApi>[] = [];
