@@ -40,7 +40,7 @@ function pullNew(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         let { net } = runner;
         let count = 0;
-        console.log(`== pullNew count=${count} ==`);
+        console.log(`== pullNew start ==`);
         for (; count < 200;) {
             let items = yield runner.tableFromProc('$from_new', undefined);
             if (items.length === 0) {
@@ -81,11 +81,13 @@ function pullNew(runner) {
                     yield runner.call('$from_new_set', [unit, id, fns]);
                 }
             }
+            console.log(`## pullNew end ##`);
         }
     });
 }
 function pullModify(runner) {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log(`== pullModify start ==`);
         let { net } = runner;
         let items = yield runner.tableFromProc('$sync_from', undefined);
         if (items.length === 0)
@@ -197,6 +199,7 @@ function pullModify(runner) {
                     console.error(err);
                 }
             }
+            console.log(`## pullModify end ##`);
         }
     });
 }

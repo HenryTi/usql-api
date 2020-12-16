@@ -39,7 +39,7 @@ export async function startJobsLoop(): Promise<void> {
 
     console.log('Jobs loop started!');
     for (;;) {
-        console.log();
+        console.log('=');
         console.info('========= Jobs loop at %s =========', new Date().toLocaleString());
         try {
 			let uqs = await db.uqDbs();
@@ -74,7 +74,7 @@ export async function startJobsLoop(): Promise<void> {
                 if (buses !== undefined) {
 					let {outCount, faces} = buses;
                     if (outCount > 0 || runner.hasSheet === true) {
-						console.info(`==== in loop ${uqDb}: queueOut outCount=${outCount} ====`);
+						console.info(`==== in loop ${uqDb}: queueOut out bus number=${outCount} ====`);
                         await queueOut(runner);
                     }
                     if (faces !== undefined) {

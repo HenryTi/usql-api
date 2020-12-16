@@ -48,7 +48,7 @@ function startJobsLoop() {
         }
         console.log('Jobs loop started!');
         for (;;) {
-            console.log();
+            console.log('=');
             console.info('========= Jobs loop at %s =========', new Date().toLocaleString());
             try {
                 let uqs = yield db.uqDbs();
@@ -84,7 +84,7 @@ function startJobsLoop() {
                         if (buses !== undefined) {
                             let { outCount, faces } = buses;
                             if (outCount > 0 || runner.hasSheet === true) {
-                                console.info(`==== in loop ${uqDb}: queueOut outCount=${outCount} ====`);
+                                console.info(`==== in loop ${uqDb}: queueOut out bus number=${outCount} ====`);
                                 yield queueOut_1.queueOut(runner);
                             }
                             if (faces !== undefined) {

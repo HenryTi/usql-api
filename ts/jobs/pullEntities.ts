@@ -20,7 +20,7 @@ enum FromNewSet {ok=1, bad=2, moreTry=3}
 async function pullNew(runner:EntityRunner) {
     let {net} = runner;
 	let count = 0;
-	console.log(`== pullNew count=${count} ==`);
+	console.log(`== pullNew start ==`);
     for (;count<200;) {
         let items = await runner.tableFromProc('$from_new', undefined);
         if (items.length === 0) {
@@ -56,6 +56,7 @@ async function pullNew(runner:EntityRunner) {
                 await runner.call('$from_new_set', [unit, id, fns]);
             }
         }
+		console.log(`## pullNew end ##`);
     }
 }
 
@@ -69,6 +70,7 @@ interface UnitOpenApiItems {
 }
 
 async function pullModify(runner:EntityRunner) {
+	console.log(`== pullModify start ==`);
     let {net} = runner;
     let items = await runner.tableFromProc('$sync_from', undefined);
     if (items.length === 0) return;
@@ -179,6 +181,7 @@ async function pullModify(runner:EntityRunner) {
                 console.error(err);
             }
         }
+		console.log(`## pullModify end ##`);
     }
 }
 
