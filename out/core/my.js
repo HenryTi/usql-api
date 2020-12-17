@@ -14,6 +14,7 @@ const mysql_1 = require("mysql");
 const _ = require("lodash");
 const dbServer_1 = require("./dbServer");
 const db_1 = require("./db");
+const consts_1 = require("./consts");
 const retries = 5;
 const minMillis = 1;
 const maxMillis = 100;
@@ -249,7 +250,20 @@ class MyDbServer extends dbServer_1.DbServer {
     }
     execProc(db, proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (db[0] !== '$') {
+            let needBuildProc;
+            let dbFirstChar = db[0];
+            if (dbFirstChar === '$') {
+                if (db.startsWith(consts_1.consts.$unitx) === true) {
+                    needBuildProc = true;
+                }
+                else {
+                    needBuildProc = false;
+                }
+            }
+            else {
+                needBuildProc = true;
+            }
+            if (needBuildProc === true) {
                 let procLower = proc.toLowerCase();
                 let p = this.procColl[procLower];
                 if (p !== true) {

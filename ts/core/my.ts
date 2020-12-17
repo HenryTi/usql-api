@@ -2,6 +2,7 @@ import {createPool, Pool, MysqlError, TypeCast, FieldInfo, QueryOptions, queryCa
 import * as _ from 'lodash';
 import {DbServer} from './dbServer';
 import { dbLogger, SpanLog, env } from './db';
+import { consts } from './consts';
 
 const retries = 5;
 const minMillis = 1;
@@ -240,7 +241,20 @@ export class MyDbServer extends DbServer {
 	}
 
     private async execProc(db:string, proc:string, params:any[]): Promise<any> {
-		if (db[0] !== '$') {
+		let needBuildProc:boolean;
+		let dbFirstChar = db[0];
+		if (dbFirstChar === '$') {
+			if (db.startsWith(consts.$unitx) === true) {
+				needBuildProc = true;
+			}
+			else {
+				needBuildProc = false;
+			}
+		}
+		else {
+			needBuildProc = true;
+		}
+		if (needBuildProc === true) {
 			let procLower = proc.toLowerCase();
 			let p = this.procColl[procLower];
 			if (p !== true) {
