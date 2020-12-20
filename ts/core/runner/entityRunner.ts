@@ -667,7 +667,7 @@ export class EntityRunner {
                         onsave: runObj['$']!==undefined,
                         verify: schemaObj.verify,
                     };
-                    break;
+					break;
             }
             this.entityColl[id] = {
                 name: sName,
@@ -912,7 +912,11 @@ export class EntityRunner {
             tuids: this.tuids,
             role: this.role,
         };
-    }
+	}
+	
+	async getAllSchemas(): Promise<any> {
+		return this.schemas;
+	}
 
     getSchema(name:string):any {
 		return this.schemas[name.toLowerCase()];

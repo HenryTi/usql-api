@@ -17,9 +17,11 @@ function sleep(ms: number):Promise<void> {
 }
 
 let loopWait: boolean = true;
+/*
 export function jobsLoopNoWait() {
     loopWait = false;
 }
+*/
 
 export async function startJobsLoop(): Promise<void> {
 	let db = Db.db(undefined);

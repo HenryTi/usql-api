@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.startJobsLoop = exports.jobsLoopNoWait = void 0;
+exports.startJobsLoop = void 0;
 const core_1 = require("../core");
 const pullEntities_1 = require("./pullEntities");
 const pullBus_1 = require("./pullBus");
@@ -25,10 +25,11 @@ function sleep(ms) {
     });
 }
 let loopWait = true;
-function jobsLoopNoWait() {
+/*
+export function jobsLoopNoWait() {
     loopWait = false;
 }
-exports.jobsLoopNoWait = jobsLoopNoWait;
+*/
 function startJobsLoop() {
     return __awaiter(this, void 0, void 0, function* () {
         let db = core_1.Db.db(undefined);

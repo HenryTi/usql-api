@@ -28,4 +28,10 @@ export function buildAccessRouter(router:Router, rb:RouterBuilder) {
         let entities = await runner.getEntities(unit);
         return entities;
     });
+
+    rb.entityGet(router, 'all-schemas', '', 
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let entities = await runner.getAllSchemas();
+        return entities;
+    });
 }

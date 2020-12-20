@@ -34,6 +34,10 @@ function buildAccessRouter(router, rb) {
         let entities = yield runner.getEntities(unit);
         return entities;
     }));
+    rb.entityGet(router, 'all-schemas', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let entities = yield runner.getAllSchemas();
+        return entities;
+    }));
 }
 exports.buildAccessRouter = buildAccessRouter;
 //# sourceMappingURL=access.js.map

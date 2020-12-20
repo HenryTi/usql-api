@@ -1033,6 +1033,11 @@ class EntityRunner {
             };
         });
     }
+    getAllSchemas() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.schemas;
+        });
+    }
     getSchema(name) {
         return this.schemas[name.toLowerCase()];
     }

@@ -16,7 +16,7 @@ function buildQueryRouter(router, rb) {
     rb.entityPost(router, 'query', '-page/:name', exports.pageQueryProcess);
 }
 exports.buildQueryRouter = buildQueryRouter;
-exports.queryProcess = (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(void 0, void 0, void 0, function* () {
+const queryProcess = (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(void 0, void 0, void 0, function* () {
     let params = [];
     let fields = schema.fields;
     let len = fields.length;
@@ -27,7 +27,8 @@ exports.queryProcess = (unit, user, name, db, urlParams, runner, body, schema) =
     let data = core_1.packReturn(schema, result);
     return data;
 });
-exports.pageQueryProcess = (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(void 0, void 0, void 0, function* () {
+exports.queryProcess = queryProcess;
+const pageQueryProcess = (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(void 0, void 0, void 0, function* () {
     let pageStart = body['$pageStart'];
     if (pageStart !== undefined) {
         let page = schema.returns.find(v => v.name === '$page');
@@ -54,4 +55,5 @@ exports.pageQueryProcess = (unit, user, name, db, urlParams, runner, body, schem
     let data = core_1.packReturn(schema, result);
     return data;
 });
+exports.pageQueryProcess = pageQueryProcess;
 //# sourceMappingURL=query.js.map
