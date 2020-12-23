@@ -501,7 +501,7 @@ class EntityRunner {
             let inBusActionName = sheet + '_' + (state === '$' ? action : state + '_' + action);
             let inBusAction = this.getSheetActionParametersBus(sheet, state, action);
             if (inBusAction === undefined)
-                return;
+                return [`state ${state} is not sheet ${sheet} state`];
             let inBusActionData = yield inBusAction.buildData(unit, user, id);
             //await this.log(unit, 'sheetAct', 'before ' + inBusActionName);
             let ret = inBusActionData === '' ?

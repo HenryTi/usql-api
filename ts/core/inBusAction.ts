@@ -19,7 +19,8 @@ interface ParamBus {
 export abstract class ParametersBus {
     protected runner: EntityRunner;
     protected entityName: string;
-    protected schema: any;
+	protected schema: any;
+	protected run: any;
     private paramBuses:ParamBus[];
 
     constructor(runner:EntityRunner, entityName:string) {
@@ -181,13 +182,15 @@ export class SheetActionParametersBus extends ParametersBus {
 
     protected initSchema():boolean {
         let schema = this.runner.getSchema(this.entityName);
-        this.schema = schema.call;
-        let state = (this.schema.states as any[]).find(v => v.name === this.stateName);
+		this.schema = schema.call;
+		this.run = schema.run?.run;
+		//let state = (this.schema.states as any[]).find(v => v.name === this.stateName);
+		let state = this.run?.[this.stateName];
         if (state === undefined) {
             console.error('Sheet %s 没有定义 State %s', this.entityName, this.stateName);
             return false;
         }
-        let action = (state.actions as any[]).find(v => v.name === this.actionName);
+        let action = state[this.actionName]; // (state.actions as any[]).find(v => v.name === this.actionName);
         if (action === undefined) {
             console.error('Sheet %s State %s 没有定义 Action %s', this.entityName, this.stateName, this.actionName);
             return false;

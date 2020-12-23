@@ -435,7 +435,7 @@ export class EntityRunner {
     async sheetAct(sheet:string, state:string, action:string, unit:number, user:number, id:number, flow:number): Promise<any[]> {
         let inBusActionName = sheet + '_' + (state === '$'?  action : state + '_' + action);
 		let inBusAction = this.getSheetActionParametersBus(sheet, state, action);
-		if (inBusAction === undefined) return;
+		if (inBusAction === undefined) return [`state ${state} is not sheet ${sheet} state`];
         let inBusActionData = await inBusAction.buildData(unit, user, id);
         //await this.log(unit, 'sheetAct', 'before ' + inBusActionName);
         let ret = inBusActionData === ''?

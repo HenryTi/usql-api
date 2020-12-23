@@ -22,16 +22,25 @@ const pools: DbConfigPool[] = [];
 const sqls = {
 	procExists: undefined as string,
 	performanceExists: undefined as string,
+	uidExists: undefined as string,
+	dateToUidExists: undefined as string,
+	uidToDateExists: undefined as string,
 };
 
 const sqls_8 = {
 	procExists: `SELECT routine_name FROM information_schema.routines WHERE routine_schema='$uq' AND routine_name='log';`,
 	performanceExists: `SELECT routine_name FROM information_schema.routines WHERE routine_schema='$uq' AND routine_name='performance';`,
+	uidExists: `SELECT routine_name FROM information_schema.routines WHERE routine_schema='$uq' AND routine_name='uid';`,
+	dateToUidExists: `SELECT routine_name FROM information_schema.routines WHERE routine_schema='$uq' AND routine_name='datetouid';`,
+	uidToDateExists: `SELECT routine_name FROM information_schema.routines WHERE routine_schema='$uq' AND routine_name='uidtodate';`,
 };
 
 const sqls_5 = {
 	procExists: `SELECT name FROM mysql.proc WHERE db='$uq' AND name='log';`,
 	performanceExists: `SELECT name FROM mysql.proc WHERE db='$uq' AND name='performance';`,
+	uidExists: `SELECT name FROM mysql.proc WHERE db='$uq' AND name='uid';`,
+	dateToUidExists: `SELECT name FROM mysql.proc WHERE db='$uq' AND name='datetouid';`,
+	uidToDateExists: `SELECT routine_name FROM information_schema.routines WHERE routine_schema='$uq' AND routine_name='uidtodate';`,
 };
 
 /*
@@ -513,6 +522,7 @@ __while: while p<=len do
 END
 `;
 		await this.exec(escapeFunction, undefined);
+
 		return;
 	}
     async create$UqDb():Promise<void> {
@@ -522,7 +532,7 @@ END
             let sql = 'CREATE DATABASE IF NOT EXISTS $uq'; // default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
             await this.exec(sql, undefined);
         }
-        let createUqTable = 'CREATE TABLE IF NOT EXISTS $uq.uq (id int not null auto_increment, `name` varchar(50), create_time timestamp not null default current_timestamp, primary key(`name`), unique key unique_id (id))';
+        let createUqTable = 'CREATE TABLE IF NOT EXISTS $uq.uq (id int not null auto_increment, `name` varchar(50), create_time timestamp not null default current_timestamp, uid bigint not null default 0, primary key(`name`), unique key unique_id (id))';
         await this.exec(createUqTable, undefined);
         let createLog = 'CREATE TABLE IF NOT EXISTS $uq.log (`time` timestamp(6) not null, uq int, unit int, subject varchar(100), content text, primary key(`time`))';
         await this.exec(createLog, undefined);
@@ -578,8 +588,89 @@ end;
         let retPerformanceExists = await this.exec(sqls.performanceExists, undefined);
         if (retPerformanceExists.length === 0) {
             await this.exec(performanceLog, undefined);
-        }
-    }
+		}
+		
+		let uid = `
+CREATE FUNCTION $uq.uid(uqName VARCHAR(200))
+RETURNS bigint(20)
+LANGUAGE SQL
+DETERMINISTIC
+MODIFIES SQL DATA
+SQL SECURITY DEFINER
+COMMENT ''
+BEGIN
+	DECLARE id, saved BIGINT;
+	SET id = (UNIX_TIMESTAMP()<<18);
+	IF uqName IS NULL THEN
+		SET uqName='$uid';
+	END IF;
+	SELECT cast(uid as SIGNED) into saved FROM $uq.uq where \`name\`=uqName FOR update;
+	IF saved IS NULL THEN
+		INSERT IGNORE INTO $uq.uq (name, uid) VALUES ('$uid', id);
+		SET saved=id;
+	END IF;
+	IF id<=saved THEN
+		SET id=saved+1;
+	END IF;
+	UPDATE $uq.uq SET uid=id WHERE \`name\`=uqName;
+	RETURN id;
+END
+`;
+		let retUidExists = await this.exec(sqls.uidExists, undefined);
+		if (retUidExists.length === 0) {
+			await this.exec(uid, undefined);
+		}
+
+		let dateToUid = `
+CREATE FUNCTION $uq.DateToUid(
+	_date DATETIME
+)
+RETURNS bigint(20)
+LANGUAGE SQL
+DETERMINISTIC
+NO SQL
+SQL SECURITY DEFINER
+COMMENT ''
+BEGIN
+	DECLARE ret BIGINT;
+	SET ret=unix_timestamp(_date)<<18;
+	RETURN ret;
+END    
+`;
+		let retDateToUidExists = await this.exec(sqls.dateToUidExists, undefined);
+		if (retDateToUidExists.length === 0) {
+			await this.exec(dateToUid, undefined);
+		}
+
+		let uidToDate = `
+CREATE FUNCTION $uq.UidToDate(
+	_uid BIGINT
+)
+RETURNS DATETIME
+LANGUAGE SQL
+DETERMINISTIC
+NO SQL
+SQL SECURITY DEFINER
+COMMENT ''
+BEGIN
+	DECLARE ret DATETIME;
+	SET ret=from_unixtime(_uid>>18);
+	RETURN ret;
+END    
+`;
+		let retUidToDateExists = await this.exec(sqls.uidToDateExists, undefined);
+		if (retUidToDateExists.length === 0) {
+			await this.exec(uidToDate, undefined);
+		}
+
+		let addUqUidColumnExists = `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'uq' AND table_schema = '$uq' AND column_name = 'uid';`;
+		let addUqUidColumn = `ALTER TABLE $uq.uq ADD uid bigint NOT NULL default '0';`;
+		let retAddUqUidColumnExists = await this.exec(addUqUidColumnExists, undefined);
+		if (retAddUqUidColumnExists.length === 0) {
+			await this.exec(addUqUidColumn, undefined);
+		}
+	}
+
     private async insertInto$Uq(db:string): Promise<void> {
         let insertUqDb = `insert into $uq.uq (\`name\`) values ('${db}') on duplicate key update create_time=current_timestamp();`;
         await this.exec(insertUqDb, undefined);
@@ -600,10 +691,11 @@ end;
     }
     async uqDbs():Promise<any[]> {
         let sql = env.isDevelopment===true?
-        'select name as db from $uq.uq;' :
+        `select name as db from $uq.uq WHERE name<>'$uid';` :
         `select name as db 
 	            from $uq.uq 
-        	    where not exists(SELECT \`name\` FROM $uq.setting WHERE \`name\`='debugging_jobs' AND \`value\`='yes' AND UNIX_TIMESTAMP()-unix_timestamp(update_time)<600);`;
+				where name<>'$uid' AND
+					not exists(SELECT \`name\` FROM $uq.setting WHERE \`name\`='debugging_jobs' AND \`value\`='yes' AND UNIX_TIMESTAMP()-unix_timestamp(update_time)<600);`;
         let rows:any[] = await this.exec(sql, undefined);
         return rows;
     }

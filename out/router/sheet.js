@@ -10,8 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildSheetRouter = void 0;
-//import { /*queueSheet, queueToUnitx, */SheetMessage } from '../queue';
-//import { entityPost, entityPut, entityGet } from './entityProcess';
 const core_1 = require("../core");
 const constSheet = 'sheet';
 function buildSheetRouter(router, rb) {
@@ -21,7 +19,16 @@ function buildSheetRouter(router, rb) {
             return (ret[0].ret === 1);
         });
     }
-    rb.entityPost(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    function directSheet(runner, unit, name, sheetId, content) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { state, action, flow, user } = content;
+            let ret = yield runner.sheetAct(name, state, action, unit, user, sheetId, flow);
+            //let ret = await runner.unitTableFromProc('tv_$sheet_to_queue', unit, name, sheetId, JSON.stringify(content));
+            return ret[0];
+        });
+    }
+    rb.entityPost(router, constSheet, '/:name', (unit, user, name, db, urlParams, runner, body, schema, run) => __awaiter(this, void 0, void 0, function* () {
+        var _a;
         let { app, discription, data } = body;
         try {
             let verify = yield runner.sheetVerify(name, unit, user, data);
@@ -31,24 +38,56 @@ function buildSheetRouter(router, rb) {
             let result = yield runner.sheetSave(name, unit, user, app, discription, data);
             let sheetRet = result[0];
             if (sheetRet !== undefined) {
-                let states = schema.states;
-                let startState = states.find(v => v.name === '$');
+                //let states:any[] = schema.states;
+                let startState = (_a = run === null || run === void 0 ? void 0 : run.run) === null || _a === void 0 ? void 0 : _a['$']; // states.find(v => v.name === '$');
                 if (startState !== undefined) {
-                    let actions = startState.actions;
-                    if (actions !== undefined) {
-                        let $onsave = actions.find(v => v.name === '$onsave');
-                        if ($onsave !== undefined) {
-                            let { id, flow } = sheetRet;
-                            let retQueue = yield queueSheet(runner, unit, name, id, {
-                                sheet: name,
-                                state: '$',
-                                action: '$onsave',
-                                unit: unit,
-                                user: user,
-                                id: id,
-                                flow: flow,
-                            });
-                        }
+                    let $onsave = startState['$onsave'];
+                    if ($onsave !== undefined) {
+                        let { id, flow } = sheetRet;
+                        let retQueue = yield queueSheet(runner, unit, name, id, {
+                            sheet: name,
+                            state: '$',
+                            action: '$onsave',
+                            unit: unit,
+                            user: user,
+                            id: id,
+                            flow: flow,
+                        });
+                    }
+                }
+            }
+            return sheetRet;
+        }
+        catch (err) {
+            yield runner.log(unit, 'sheet save ' + name, data);
+        }
+    }));
+    rb.entityPost(router, constSheet, '/:name/direct', (unit, user, name, db, urlParams, runner, body, schema, run) => __awaiter(this, void 0, void 0, function* () {
+        var _b;
+        let { app, discription, data } = body;
+        try {
+            let verify = yield runner.sheetVerify(name, unit, user, data);
+            if (verify !== undefined) {
+                return verify;
+            }
+            let result = yield runner.sheetSave(name, unit, user, app, discription, data);
+            let sheetRet = result[0];
+            if (sheetRet !== undefined) {
+                //let states:any[] = schema.states;
+                let startState = (_b = run === null || run === void 0 ? void 0 : run.run) === null || _b === void 0 ? void 0 : _b['$']; // states.find(v => v.name === '$');
+                if (startState !== undefined) {
+                    let $onsave = startState['$onsave'];
+                    if ($onsave !== undefined) {
+                        let { id, flow } = sheetRet;
+                        let retQueue = yield directSheet(runner, unit, name, id, {
+                            sheet: name,
+                            state: '$',
+                            action: '$onsave',
+                            unit: unit,
+                            user: user,
+                            id: id,
+                            flow: flow,
+                        });
                     }
                 }
             }
@@ -75,23 +114,28 @@ function buildSheetRouter(router, rb) {
                 type: 'sheet-processing',
                 message: '不可以同时操作单据'
             };
-        /*
-        await runner.sheetProcessing(id);
-        await queueSheet({
-            db: db,
-            from: user,
-            sheetHead: {
-                sheet: name,
-                state: state,
-                action: action,
-                unit: unit,
-                user: user,
-                id: id,
-                flow: flow,
-            }
-        });
-        */
         return { msg: 'add to queue' };
+    }));
+    rb.entityPut(router, constSheet, '/:name/direct', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { state, action, id, flow } = body;
+        let ret = yield directSheet(runner, unit, name, id, {
+            sheet: name,
+            state: state,
+            action: action,
+            unit: unit,
+            user: user,
+            id: id,
+            flow: flow,
+        });
+        // 这个地方以后需要更多的判断和返回。提供给界面操作
+        /*
+        if (retQueue === false) throw {
+            type: 'sheet-processing',
+            message: '不可以同时操作单据'
+        };
+        return {msg: 'add to queue'};
+        */
+        return ret;
     }));
     rb.entityPost(router, constSheet, '/:name/states', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { state, pageStart, pageSize } = body;

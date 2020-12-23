@@ -166,14 +166,17 @@ class SheetActionParametersBus extends ParametersBus {
         this.actionName = actionName.toLowerCase();
     }
     initSchema() {
+        var _a, _b;
         let schema = this.runner.getSchema(this.entityName);
         this.schema = schema.call;
-        let state = this.schema.states.find(v => v.name === this.stateName);
+        this.run = (_a = schema.run) === null || _a === void 0 ? void 0 : _a.run;
+        //let state = (this.schema.states as any[]).find(v => v.name === this.stateName);
+        let state = (_b = this.run) === null || _b === void 0 ? void 0 : _b[this.stateName];
         if (state === undefined) {
             console.error('Sheet %s 没有定义 State %s', this.entityName, this.stateName);
             return false;
         }
-        let action = state.actions.find(v => v.name === this.actionName);
+        let action = state[this.actionName]; // (state.actions as any[]).find(v => v.name === this.actionName);
         if (action === undefined) {
             console.error('Sheet %s State %s 没有定义 Action %s', this.entityName, this.stateName, this.actionName);
             return false;
