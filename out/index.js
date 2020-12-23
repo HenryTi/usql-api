@@ -13,7 +13,6 @@ const start_1 = require("./start");
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
         yield start_1.start();
-        console.log('Tonva uq-api started!');
     });
 })();
 //# sourceMappingURL=index.js.map

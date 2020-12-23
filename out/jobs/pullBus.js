@@ -31,6 +31,7 @@ function pullBus(runner) {
                     let { maxMsgId, maxRows } = ret[0][0];
                     let messages = ret[1];
                     // 新版：bus读来，直接写入queue_in。然后在队列里面处理
+                    console.log(`total ${messages.length} arrived from unitx`);
                     for (let row of messages) {
                         let { to, face: faceUrl, id: msgId, body, version } = row;
                         let face = coll[faceUrl.toLowerCase()];

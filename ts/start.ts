@@ -95,7 +95,7 @@ export async function init():Promise<void> {
                 let connection = config.get<any>("connection");
                 let {host, user} = connection;
                 console.log('DB host: %s, user: %s', host, user);
-
+				console.log('Tonva uq-api started!');
                 resolve();
             });
         }
