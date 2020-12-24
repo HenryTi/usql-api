@@ -232,7 +232,12 @@ function buildBuildRouter(router, rb) {
     rb.get(router, '/const-strs', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         return yield runner.loadConstStrs();
     }));
+    // to be removed in the future
+    // const # is removed when use get
     rb.get(router, '/const-str', (runner, body) => __awaiter(this, void 0, void 0, function* () {
+        return yield runner.saveConstStr(body.type);
+    }));
+    rb.post(router, '/const-str', (runner, body) => __awaiter(this, void 0, void 0, function* () {
         return yield runner.saveConstStr(body.type);
     }));
     rb.get(router, '/entity-version', (runner, body) => __awaiter(this, void 0, void 0, function* () {

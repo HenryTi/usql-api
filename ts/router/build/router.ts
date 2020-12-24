@@ -234,7 +234,14 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
         return await runner.loadConstStrs();
     });
 
+	// to be removed in the future
+	// const # is removed when use get
     rb.get(router, '/const-str',
+    async (runner:EntityRunner, body:{type:string}): Promise<number> => {
+        return await runner.saveConstStr(body.type);
+    });
+
+    rb.post(router, '/const-str',
     async (runner:EntityRunner, body:{type:string}): Promise<number> => {
         return await runner.saveConstStr(body.type);
     });
