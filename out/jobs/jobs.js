@@ -52,7 +52,7 @@ function startJobsLoop() {
         console.error('====== Jobs loop started! ======');
         for (;;) {
             console.log('\n');
-            console.info(`====== one loop at ${new Date().toLocaleString()} ======`);
+            console.info(`====== ${process.env.NODE_ENV} one loop at ${new Date().toLocaleString()} ======`);
             try {
                 let uqs = yield db.uqDbs();
                 if (uqs.length === 0) {
