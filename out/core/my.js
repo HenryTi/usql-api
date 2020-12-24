@@ -288,17 +288,6 @@ class MyDbServer extends dbServer_1.DbServer {
                         // await this.sqlDropProc(db, proc);
                         let sql = r0['proc'];
                         yield this.buildProc(db, proc, sql);
-                        /*
-                        let collationConnection = `
-                            SET character_set_client = 'utf8';
-                            SET collation_connection = 'utf8_unicode_ci';
-                        `;
-                
-                        let drop = 'DROP PROCEDURE IF EXISTS ' + proc + ';';
-                        await this.sql(db, drop + collationConnection + sql, undefined);
-                        // clear changed flag
-                        await this.callProcBase(db, 'tv_$proc_save', [db, proc, undefined]);
-                        */
                     }
                     this.procColl[procLower] = true;
                 }
@@ -498,61 +487,6 @@ END
 `;
             //WHERE 1=1 AND ROUTINE_SCHEMA COLLATE utf8_general_ci=_schema COLLATE utf8_general_ci AND ROUTINE_NAME COLLATE utf8_general_ci=_name COLLATE utf8_general_ci))) THEN 1 ELSE 0 END AS changed;
             yield this.exec(saveProc, undefined);
-            const escapeFunction = `
-DROP FUNCTION IF EXISTS \`${db}\`.$unescape;
-CREATE FUNCTION \`${db}\`.\`$unescape\`(
-	\`t\` TEXT
-)
-RETURNS text
-LANGUAGE SQL
-DETERMINISTIC
-CONTAINS SQL
-SQL SECURITY DEFINER
-COMMENT ''
-BEGIN
-	declare ret text;
-	declare sep, sub char(10);
-	declare s longtext;
-	declare p, len, c int;
-	if t is null then
-		return null;
-	end if;
-	set sep = "\\\\";
-	set p = locate(sep, t, 1);
-	if p=0 then
-		return t;
-	end if;
-	
-	set c=1;
-	set ret = '';
-	set len=char_length(t);
-__while: while p<=len do
-		set s=substring(t, c, p-c);
-		set sub=substring(t, p+1, 1);
-		if sub="\\\\" then
-			set ret=concat(ret, s, "\\\\");
-			set p=p+2;
-		elseif sub="t" then
-			set ret=concat(ret, s, "\\t");
-			set p=p+2;
-		elseif sub="n" then
-			set ret=concat(ret, s, "\\n");
-			set p=p+2;
-		else
-			set ret=concat(ret, s, "\\\\");
-			set p=p+1;
-		end if;
-		set c=p;
-		set p=locate(sep, t, p);
-		if p=0 then
-			set ret=concat(ret, substr(t, c, len-c+1));
-			leave __while;
-		end if;
-	end while __while;
-	return ret;
-END
-`;
-            yield this.exec(escapeFunction, undefined);
             return;
         });
     }
