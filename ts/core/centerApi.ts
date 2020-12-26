@@ -25,8 +25,8 @@ class CenterApi extends Fetch {
         });
     }
 
-    async unitx(unit:number):Promise<any> {
-        return await this.get('open/unitx', {unit:unit});
+    async unitx(unit:number, direction: 'push'|'pull'):Promise<any> {
+        return await this.get('open/unitx', {unit, direction});
     }
 
     async uqUrl(unit:number, uq:number):Promise<any> {

@@ -29,7 +29,6 @@ Object.defineProperty(exports, "packReturns", { enumerable: true, get: function 
 Object.defineProperty(exports, "packArr", { enumerable: true, get: function () { return packReturn_1.packArr; } });
 var fetch_1 = require("./fetch");
 Object.defineProperty(exports, "Fetch", { enumerable: true, get: function () { return fetch_1.Fetch; } });
-__exportStar(require("./setHostUrl"), exports);
 __exportStar(require("./consts"), exports);
 __exportStar(require("./busQueueSeed"), exports);
 __exportStar(require("./routerBuilder"), exports);
@@ -38,5 +37,4 @@ __exportStar(require("./routerBuilder"), exports);
 __exportStar(require("./db"), exports);
 __exportStar(require("./model"), exports);
 __exportStar(require("./net"), exports);
-//export * from './logger';
 //# sourceMappingURL=index.js.map

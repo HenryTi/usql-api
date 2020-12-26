@@ -2,7 +2,6 @@ export {default as Auth, AuthUser, authCheck, authDebug, authUnitx, authUpBuild,
 export {centerApi} from './centerApi';
 export {packReturnsFromSchema as packReturn, packBus, packParam, unpack, packReturns, packArr} from './packReturn';
 export {Fetch} from './fetch';
-export * from './setHostUrl';
 export * from './consts';
 export * from './busQueueSeed';
 export * from './routerBuilder';
@@ -11,4 +10,3 @@ export * from './routerBuilder';
 export * from './db';
 export * from './model';
 export * from './net';
-//export * from './logger';

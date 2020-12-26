@@ -14,7 +14,6 @@ const node_fetch_1 = require("node-fetch");
 const runner_1 = require("./runner");
 const db_1 = require("./db");
 const openApi_1 = require("./openApi");
-const setHostUrl_1 = require("./setHostUrl");
 const centerApi_1 = require("./centerApi");
 const unitxApi_1 = require("./unitxApi");
 class Net {
@@ -22,10 +21,10 @@ class Net {
         this.runners = {};
         this.createRunnerFromDbPromises = {};
         this.uqOpenApis = {};
-        this.unitxApis = {};
-        //this.initRunner = initRunner;
+        this.unitxApisColl = {};
         this.executingNet = executingNet;
         this.id = id;
+        this.buildUnitxDb();
     }
     innerRunner(name) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -109,8 +108,7 @@ class Net {
             if (runner === null)
                 return;
             if (runner === undefined) {
-                let db = this.getUnitxDb();
-                runner = yield this.createRunnerFromDb(name, db);
+                runner = yield this.createRunnerFromDb(name, this.unitxDb);
                 if (runner === undefined)
                     return;
             }
@@ -190,18 +188,16 @@ class Net {
             }
             if (openApi !== undefined)
                 return openApi;
-            if (openApi === undefined) {
-                let uqUrl = yield centerApi_1.centerApi.urlFromUq(unit, uqFullName);
-                if (!uqUrl) {
-                    console.error('openApiUnitUq centerApi.urlFromUq not exists', uqFullName, unit);
-                    let openApis = this.uqOpenApis[uqFullName];
-                    if (openApis) {
-                        openApis[unit] = null;
-                    }
-                    return;
+            let uqUrl = yield centerApi_1.centerApi.urlFromUq(unit, uqFullName);
+            if (!uqUrl) {
+                console.error('openApiUnitUq centerApi.urlFromUq not exists', uqFullName, unit);
+                let openApis = this.uqOpenApis[uqFullName];
+                if (openApis) {
+                    openApis[unit] = null;
                 }
-                return yield this.buildOpenApiFrom(uqFullName, unit, uqUrl);
+                return null;
             }
+            return yield this.buildOpenApiFrom(uqFullName, unit, uqUrl);
         });
     }
     openApiUnitFace(unit, busOwner, busName, face) {
@@ -226,23 +222,28 @@ class Net {
             return openApi;
         });
     }
-    getUnitxApi(unit) {
+    getUnitxApi(unit, direction) {
         return __awaiter(this, void 0, void 0, function* () {
-            let unitxApi = this.unitxApis[unit];
+            let unitxApis = this.unitxApisColl[unit];
+            if (unitxApis === undefined) {
+                this.unitxApisColl[unit] = unitxApis = {};
+            }
+            let unitxApi = unitxApis[direction];
             if (unitxApi === null)
                 return null;
             if (unitxApi !== undefined)
                 return unitxApi;
-            let unitx = yield centerApi_1.centerApi.unitx(unit);
-            if (unitx === undefined)
-                return this.unitxApis[unit] = null;
+            let unitx = yield centerApi_1.centerApi.unitx(unit, direction);
+            if (unitx === undefined) {
+                return unitxApis[direction] = null;
+            }
             let url = yield this.getUnitxUrl(unitx);
-            return this.unitxApis[unit] = new unitxApi_1.UnitxApi(url);
+            return unitxApis[direction] = new unitxApi_1.UnitxApi(url);
         });
     }
     sendToUnitx(unit, msg) {
         return __awaiter(this, void 0, void 0, function* () {
-            let unitxApi = yield this.getUnitxApi(unit);
+            let unitxApi = yield this.getUnitxApi(unit, 'push');
             if (!unitxApi) {
                 let err = `Center unit ${unit} not binding $unitx service!!!`;
                 //return ret;
@@ -276,55 +277,87 @@ class Net {
     }
     getUrlDebug() {
         return __awaiter(this, void 0, void 0, function* () {
+            let urlDebug = `http://${db_1.env.localhost}/`; //urlSetUqHost();
+            let urlDebugPromise = Net.urlDebugPromises[urlDebug];
+            if (urlDebugPromise === true)
+                return urlDebug;
+            if (urlDebugPromise === false)
+                return undefined;
+            if (urlDebugPromise === undefined) {
+                urlDebugPromise = this.fetchHello(urlDebug);
+                Net.urlDebugPromises[urlDebug] = urlDebugPromise;
+            }
+            let ret = yield urlDebugPromise;
+            if (ret === null) {
+                Net.urlDebugPromises[urlDebug] = false;
+                return undefined;
+            }
+            else {
+                Net.urlDebugPromises[urlDebug] = true;
+                return ret;
+            }
+        });
+    }
+    fetchHello(url) {
+        return __awaiter(this, void 0, void 0, function* () {
             try {
-                let urlDebug = setHostUrl_1.urlSetUqHost();
-                //urlDebug = urlSetUnitxHost(urlDebug);
-                let ret = yield node_fetch_1.default(urlDebug + 'hello');
+                let ret = yield node_fetch_1.default(url + 'hello');
                 if (ret.status !== 200)
                     throw 'not ok';
                 let text = yield ret.text();
-                return urlDebug;
+                return url;
             }
-            catch (err) {
+            catch (_a) {
+                return null;
             }
         });
     }
     getUnitxUrl(urls) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { db, url } = urls;
+            let ret = this.getFromUrls(urls);
+            let { url, server } = ret;
             if (db_1.env.isDevelopment === true) {
-                let urlDebug = yield this.getUrlDebug();
-                if (urlDebug !== undefined)
-                    url = urlDebug;
+                if (server === this.unitxDb.serverId) {
+                    let urlDebug = yield this.getUrlDebug();
+                    if (urlDebug !== undefined)
+                        url = urlDebug;
+                }
             }
             return this.unitxUrl(url);
         });
     }
 }
 exports.Net = Net;
+Net.urlDebugPromises = {};
 class ProdNet extends Net {
-    get isTest() { return false; }
+    buildUnitxDb() { this.unitxDb = db_1.Db.unitxProdDb(); }
     getDbName(name) { return name; }
     getUqFullName(uq) { return uq; }
-    getUnitxDb() { return db_1.Db.unitxDb(false); /* getUnitxDb(false)*/ }
     getUrl(db, url) {
         return url + 'uq/prod/' + db + '/';
     }
     chooseUrl(urls) { return urls.url; }
     unitxUrl(url) { return url + 'uq/unitx-prod/'; }
     ;
+    getFromUrls(urls) {
+        let { url, server } = urls;
+        return { url, server };
+    }
 }
 class TestNet extends Net {
-    get isTest() { return true; }
+    buildUnitxDb() { this.unitxDb = db_1.Db.unitxTestDb(); }
     getDbName(name) { return name + '$test'; }
     getUqFullName(uq) { return uq + '$test'; }
-    getUnitxDb() { return db_1.Db.unitxDb(true); /* getUnitxDb(true)*/ }
     getUrl(db, url) {
         return url + 'uq/test/' + db + '/';
     }
     chooseUrl(urls) { return urls.urlTest; }
     unitxUrl(url) { return url + 'uq/unitx-test/'; }
     ;
+    getFromUrls(urls) {
+        let { urlTest, serverTest } = urls;
+        return { url: urlTest, server: serverTest };
+    }
 }
 // 在entity正常状态下，每个runner都需要init，loadSchema
 exports.prodNet = new ProdNet(undefined, 'prodNet');

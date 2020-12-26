@@ -98,24 +98,9 @@ class MyDbServer extends dbServer_1.DbServer {
             return newPool;
         });
     }
-    /*
-        private async createPool(dbConfig:any):Promise<Pool> {
-            return await new Promise<Pool>((resolve, reject) => {
-                let newPool = createPool(dbConfig);
-                let handleResponse = (err:MysqlError, result:any) => {
-                    if (err === null) {
-                        resolve(newPool);
-                        return;
-                    }
-                    reject(err);
-                };
-                newPool.query(`
-                    SET character_set_client = 'utf8';
-                    SET collation_connection = 'utf8_unicode_ci';
-                `, handleResponse);
-            });
-        }
-    */
+    sqlExists(db) {
+        return `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
+    }
     exec(sql, values, log) {
         return __awaiter(this, void 0, void 0, function* () {
             if (this.pool === undefined) {
@@ -162,6 +147,7 @@ class MyDbServer extends dbServer_1.DbServer {
                             }, sleepMillis);
                         default:
                             if (isDevelopment === true) {
+                                debugger;
                                 console.error(err);
                                 console.error(sql);
                             }
@@ -417,7 +403,8 @@ class MyDbServer extends dbServer_1.DbServer {
     buildDatabase(db) {
         return __awaiter(this, void 0, void 0, function* () {
             this.resetProcColl();
-            let exists = `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
+            let exists = this.sqlExists(db);
+            // `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
             let ret = yield this.exec(exists, []);
             if (ret.length > 0)
                 return true;
@@ -492,7 +479,8 @@ END
     }
     create$UqDb() {
         return __awaiter(this, void 0, void 0, function* () {
-            let exists = 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'$uq\'';
+            let exists = this.sqlExists('$uq');
+            // 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'$uq\'';
             let rows = yield this.exec(exists, undefined);
             if (rows.length == 0) {
                 let sql = 'CREATE DATABASE IF NOT EXISTS $uq'; // default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
@@ -646,7 +634,8 @@ END
     }
     existsDatabase(db) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'' + db + '\'';
+            let sql = this.sqlExists(db);
+            // 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'' + db + '\'';
             let rows = yield this.exec(sql, undefined);
             return rows.length > 0;
         });

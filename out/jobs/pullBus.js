@@ -24,7 +24,7 @@ function pullBus(runner) {
                     let { unit, maxId } = row;
                     if (maxId === null)
                         maxId = 0;
-                    let openApi = yield net.getUnitxApi(unit);
+                    let openApi = yield net.getUnitxApi(unit, 'pull');
                     if (!openApi)
                         continue;
                     let ret = yield openApi.fetchBus(unit, maxId, faces);

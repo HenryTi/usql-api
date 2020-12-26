@@ -18,8 +18,16 @@ export const isDevelopment:boolean = isNodeEnvEqu(const_development);
 export const isDevdo:boolean = isNodeEnvEqu(const_devdo);
 export const isDev = isNodeEnvEqu(const_development, const_devdo);
 */
+interface ConfigDebugging {
+	"unitx": {
+		test: string; 
+		prod: string;
+	};
+	"uq-api": string, 
+}
+
 class Env {
-	private static const_connectionUnitx = 'connection_$unitx';
+	//private static const_connectionUnitx = 'connection_$unitx';
 	private static const_connection = 'connection';
 	private static const_development = 'development';
 	private static const_devdo = 'devdo';
@@ -27,6 +35,9 @@ class Env {
 	readonly isDevelopment: boolean = false;
 	readonly isDevdo: boolean = false;
 	readonly const_unitx = '$unitx';
+	readonly configDebugging: ConfigDebugging;
+	readonly configServers: {[name:string]: any};
+	readonly localhost: string;
 
 	constructor() {
 		let nodeEnv = process.env.NODE_ENV as string;
@@ -34,6 +45,9 @@ class Env {
 		switch (nodeEnv.toLowerCase()) {
 			case Env.const_development: 
 				this.isDevelopment = true; 
+				this.configDebugging = config.get('debugging');
+				this.localhost = 'localhost:' + config.get('port');
+				this.configServers = config.get('servers');
 				break;
 			case Env.const_devdo: 
 				this.isDevdo = true; 
@@ -41,111 +55,124 @@ class Env {
 		}
 	}
 
-	getUnitxConnection():any {
-        if (config.has(Env.const_connectionUnitx) === true) {
-            return config.get<any>(Env.const_connectionUnitx);
-        }
-        throw `server '${config.get<string>('servername')}' has no connection_$unitx defined in config.json`;
-	}
-
-	getConnection():any {
-		if (config.has(Env.const_connection) === true) {
-			return _.clone(config.get<any>(Env.const_connection));
+	private unitxTestConn: any;
+	getUnitxTestConnection():any {
+		if (this.unitxTestConn) return this.unitxTestConn;
+		let conn:any;
+		if (this.isDevelopment === true) {
+			let unitx = this.configDebugging?.['unitx'];
+			if (unitx) {
+				conn = this.configServers?.[unitx.test];
+			}
 		}
-		throw `server '${config.get<string>('servername')}' has no connection defined in config.json`;
+		if (!conn) {
+			conn = this.getConnection();
+		}
+		return this.unitxTestConn = _.clone(conn);
 	}
 
+	private unitxProdConn: any;
+	getUnitxProdConnection():any {
+		if (this.unitxProdConn) return this.unitxProdConn;
+		let conn:any;
+		if (this.isDevelopment === true) {
+			let unitx = this.configDebugging?.['unitx'];
+			if (unitx) {
+				conn = this.configServers?.[unitx.prod];
+			}
+		}
+		if (!conn) {
+			conn = this.getConnection();
+		}
+		return this.unitxProdConn = _.clone(conn);
+	}
 
+	private conn: any;
+	getConnection():any {
+		if (this.conn) return this.conn;
+		let conn:any;
+		if (this.isDevelopment === true) {
+			let uqApi = this.configDebugging?.['uq-api'];
+			if (uqApi) {
+				conn = this.configServers?.[uqApi];
+			}
+		}
+
+		if (!conn) {
+			if (config.has(Env.const_connection) === true) {
+				conn = config.get<any>(Env.const_connection);
+			}
+		}
+		if (!conn) {
+			throw `connection need to be defined in config.json`;
+		}
+		return this.conn = _.clone(conn);
+	}
 }
 
 export const env = new Env();
 
-export class Db {
+export abstract class Db {
 	private static dbs:{[name:string]:Db} = {
 	}
 	// 数据库名称对照表
 	private static dbCollection:{[name:string]:string} = {}
-	/*(function () {
-		const dbColl = "db";
-		if (!config.has(dbColl)) return {};
-		return config.get<any>(dbColl);
-	})();*/
-	/*
-	private static getDb(name:string):Db {
-		let db = Db.dbs[name]; //.getCacheDb(name);
-		if (db !== undefined) return db;
-		let dbName = Db.getDbName(name);
-		db = new Db(dbName);
-		return Db.dbs[name] = db;
-	}*/
-	
-	/*
-	private static getUnitxDb(testing:boolean):Db {
-		let name = const_unitx;
-		if (testing === true) name += '$test';
-		let db = Db.dbs[name]; //.getCacheDb(name);
-		if (db !== undefined) return db;
-		let dbName = Db.getDbName(name);
-		return Db.dbs[name] = new UnitxDb(dbName);
-	}*/
 	
 	private static getDbName(name:string): string {
 		return Db.dbCollection[name] || name;
 	}
-	
-	/*
-	private static getCacheDb(name:string):Db {
-		return Db.dbs[name];
-	}*/
 	
 	static db(name:string):Db {
 		name = name || $uq;
 		let db = Db.dbs[name]; //.getCacheDb(name);
 		if (db !== undefined) return db;
 		let dbName = Db.getDbName(name);
-		db = new Db(dbName);
+		db = new UqDb(dbName);
 		return Db.dbs[name] = db;
 	}
 
-	static unitxDb(testing:boolean):Db {
-		let name = env.const_unitx;
-		if (testing === true) name += '$test';
-		let db = Db.dbs[name]; // getCacheDb(name);
-		if (db !== undefined) return db;
+	private static _unitxTestDb: UnitxDb;
+	static unitxTestDb():UnitxDb {
+		if (Db._unitxTestDb) return Db._unitxTestDb;
+		let name = env.const_unitx + '$test';
 		let dbName = Db.getDbName(name);
-		return Db.dbs[name] = new UnitxDb(dbName);
+		return Db._unitxTestDb = new UnitxTestDb(dbName);
+	}
+
+	private static _unitxProdDb: UnitxDb;
+	static unitxProdDb():UnitxDb {
+		if (Db._unitxProdDb) return Db._unitxProdDb;
+		let name = env.const_unitx;
+		let dbName = Db.getDbName(name);
+		return Db._unitxProdDb = new UnitxProdDb(dbName);
 	}
 
     private dbName: string;
-    private isExists: boolean;
-    private dbServer:DbServer;
+    private isExists: boolean = false;
+	protected dbServer: DbServer;
+	serverId: number;
 
-    protected constructor(dbName: string) {
-        this.dbName = dbName;
-        this.dbServer = this.createDbServer();
-        this.isExists = false;
-	}
-
-	reset() {
-		this.dbServer.reset();
+	constructor(dbName: string) {
+		this.dbName = dbName;
+		this.dbServer = this.createDbServer();
 	}
 
     getDbName():string {return this.dbName}
-    protected getDbConfig() {
-		//let ret = _.clone(config.get<any>(const_connection));
-		let ret = env.getConnection();
-        ret.flags = '-FOUND_ROWS';
-        return ret;
-    }
-    private createDbServer() {
+    protected abstract getDbConfig():any;
+    protected createDbServer() {
         let sqlType = config.get<string>('sqlType');
-        let dbConfig:any = this.getDbConfig();
+        let dbConfig = this.getDbConfig();
         if (dbConfig === undefined) throw 'dbConfig not defined';
+		this.serverId = dbConfig['server-id'];
         switch (sqlType) {
             case 'mysql': return new MyDbServer(this.dbName, dbConfig);
             case 'mssql': return new MsDbServer(this.dbName, dbConfig);
         }
     }
+
+	reset() {
+		this.dbServer.reset();
+	}
 
     async exists(): Promise<boolean> {
         if (this.isExists === true) return true;
@@ -226,8 +253,29 @@ export class Db {
     }
 }
 
-class UnitxDb extends Db {
-    protected getDbConfig() { return env.getUnitxConnection() }
+export class UqDb extends Db {
+	protected getDbConfig() {
+		let ret = env.getConnection();
+        ret.flags = '-FOUND_ROWS';
+        return ret;
+    }
+}
+
+export abstract class UnitxDb extends Db {
+}
+
+class UnitxProdDb extends UnitxDb {
+	protected getDbConfig() {
+		let ret = env.getUnitxProdConnection();
+        return ret;
+    }
+}
+
+class UnitxTestDb extends UnitxDb {
+	protected getDbConfig() {
+		let ret = env.getUnitxTestConnection();
+        return ret;
+    }
 }
 
 export class SpanLog {

@@ -101,24 +101,10 @@ export class MyDbServer extends DbServer {
 		pools.push({config: this.dbConfig, pool: newPool});
 		return newPool;
 	}
-/*
-	private async createPool(dbConfig:any):Promise<Pool> {
-		return await new Promise<Pool>((resolve, reject) => {
-			let newPool = createPool(dbConfig);
-            let handleResponse = (err:MysqlError, result:any) => {
-				if (err === null) {
-					resolve(newPool);
-					return;
-				}
-				reject(err);
-			};
-			newPool.query(`
-				SET character_set_client = 'utf8';
-				SET collation_connection = 'utf8_unicode_ci';
-			`, handleResponse);
-		});
+
+	private sqlExists(db:string):string {
+		return `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
 	}
-*/
 
     private async exec(sql:string, values:any[], log?: SpanLog): Promise<any> {
 		if (this.pool === undefined) {
@@ -163,6 +149,7 @@ export class MyDbServer extends DbServer {
                     }, sleepMillis);
                 default:
                     if (isDevelopment===true) {
+						debugger;
                         console.error(err);
                         console.error(sql);
                     }
@@ -386,7 +373,8 @@ export class MyDbServer extends DbServer {
     // return exists
     async buildDatabase(db:string): Promise<boolean> {
 		this.resetProcColl();
-		let exists = `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
+		let exists = this.sqlExists(db);
+		// `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '${db}';`;
         let ret = await this.exec(exists, []);
         if (ret.length > 0) return true;
         let sql = `CREATE DATABASE IF NOT EXISTS \`${db}\``; // default CHARACTER SET utf8 COLLATE utf8_unicode_ci`;
@@ -459,7 +447,8 @@ END
 		return;
 	}
     async create$UqDb():Promise<void> {
-        let exists = 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'$uq\'';
+		let exists = this.sqlExists('$uq');
+		// 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'$uq\'';
         let rows:any[] = await this.exec(exists, undefined);
         if (rows.length == 0) {
             let sql = 'CREATE DATABASE IF NOT EXISTS $uq'; // default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
@@ -613,7 +602,8 @@ END
         await this.exec(sql, undefined);
     }
     async existsDatabase(db:string): Promise<boolean> {
-        let sql = 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'' + db + '\'';
+		let sql = this.sqlExists(db);
+		// 'SELECT SCHEMA_NAME as sname FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = \'' + db + '\'';
         let rows:any[] = await this.exec(sql, undefined);
         return rows.length > 0;
     }

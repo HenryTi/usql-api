@@ -1,24 +1,28 @@
 import fetch from "node-fetch";
 import { EntityRunner } from "./runner";
-import { Db, env } from "./db";
+import { Db, env, UnitxDb } from "./db";
 import { OpenApi } from "./openApi";
-import { urlSetUqHost } from "./setHostUrl";
 import { centerApi } from "./centerApi";
 import { Message } from "./model";
 import { UnitxApi } from "./unitxApi";
 
+interface UnitxApis {
+	[direction: string]: UnitxApi;
+}
+
 export abstract class Net {
     private readonly id:string;
     private runners: {[name:string]: EntityRunner} = {};
-    private executingNet: Net;  // 编译Net指向对应的执行Net，编译完成后，reset runner
+	private executingNet: Net;  // 编译Net指向对应的执行Net，编译完成后，reset runner
+	protected unitxDb: UnitxDb;
 
     constructor(executingNet: Net, id:string) {
-        //this.initRunner = initRunner;
         this.executingNet = executingNet;
-        this.id = id;
+		this.id = id;
+		this.buildUnitxDb();
     }
 
-    abstract get isTest():boolean;
+    protected abstract buildUnitxDb():void;
     abstract getUqFullName(uq:string):string;
 
     protected async innerRunner(name:string):Promise<EntityRunner> {
@@ -90,8 +94,7 @@ export abstract class Net {
         let runner = this.runners[name];
         if (runner === null) return;
         if (runner === undefined) {            
-            let db = this.getUnitxDb();
-            runner = await this.createRunnerFromDb(name, db);
+            runner = await this.createRunnerFromDb(name, this.unitxDb);
             if (runner === undefined) return;
         }
         // 执行版的net，this.execeutingNet undefined，所以需要init
@@ -136,7 +139,6 @@ export abstract class Net {
     }
 
     abstract getDbName(name:string):string;
-    protected abstract getUnitxDb(): Db;
 
     private uqOpenApis: {[uqFullName:string]: {[unit:number]:OpenApi}} = {};
     private getOpenApiFromCache(uqFullName:string, unit:number):OpenApi {
@@ -167,18 +169,16 @@ export abstract class Net {
 			return null;
 		}
 		if (openApi !== undefined) return openApi;
-		if (openApi === undefined) {
-			let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
-			if (!uqUrl) {
-				console.error('openApiUnitUq centerApi.urlFromUq not exists', uqFullName, unit);
-				let openApis = this.uqOpenApis[uqFullName];
-				if (openApis) {
-					openApis[unit] = null;
-				}
-				return;
+		let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
+		if (!uqUrl) {
+			console.error('openApiUnitUq centerApi.urlFromUq not exists', uqFullName, unit);
+			let openApis = this.uqOpenApis[uqFullName];
+			if (openApis) {
+				openApis[unit] = null;
 			}
-			return await this.buildOpenApiFrom(uqFullName, unit, uqUrl);
+			return null;
 		}
+		return await this.buildOpenApiFrom(uqFullName, unit, uqUrl);
     }
 
     async openApiUnitFace(unit:number, busOwner:string, busName:string, face:string):Promise<OpenApi> {
@@ -201,19 +201,26 @@ export abstract class Net {
         return openApi;
     }
 
-    private unitxApis: {[unit:number]:UnitxApi} = {};
-    async getUnitxApi(unit:number):Promise<UnitxApi> {
-        let unitxApi = this.unitxApis[unit];
-        if (unitxApi === null) return null;
-        if (unitxApi !== undefined) return unitxApi;
-        let unitx = await centerApi.unitx(unit);
-        if (unitx === undefined) return this.unitxApis[unit] = null;
-        let url = await this.getUnitxUrl(unitx);
-        return this.unitxApis[unit] = new UnitxApi(url);
-    }
+    private unitxApisColl: {[unit:number]:UnitxApis} = {};
+    async getUnitxApi(unit:number, direction: 'push'|'pull'):Promise<UnitxApi> {
+		let unitxApis = this.unitxApisColl[unit];
+		if (unitxApis === undefined) {
+			this.unitxApisColl[unit] = unitxApis = {};
+		}
+		let unitxApi = unitxApis[direction];
+		if (unitxApi === null) return null;
+		if (unitxApi !== undefined) return unitxApi;
 
+        let unitx = await centerApi.unitx(unit, direction);
+        if (unitx === undefined) {
+			return unitxApis[direction] = null;
+		}
+        let url = await this.getUnitxUrl(unitx);
+        return unitxApis[direction] = new UnitxApi(url);
+	}
+	
     async sendToUnitx(unit:number, msg:Message):Promise<number[]|string> {
-        let unitxApi = await this.getUnitxApi(unit);
+        let unitxApi = await this.getUnitxApi(unit, 'push');
         if (!unitxApi) {
             let err = `Center unit ${unit} not binding $unitx service!!!`;
             //return ret;
@@ -245,52 +252,83 @@ export abstract class Net {
     protected abstract getUrl(db:string, url:string):string;
     protected abstract chooseUrl(urls: {url:string; urlTest:string}):string;
 
+	static urlDebugPromises:{[url:string]: Promise<string>|boolean} = {};
     private async getUrlDebug():Promise<string> {
-        try {
-            let urlDebug = urlSetUqHost();
-            //urlDebug = urlSetUnitxHost(urlDebug);
-            let ret = await fetch(urlDebug + 'hello');
-            if (ret.status !== 200) throw 'not ok';
-            let text = await ret.text();
-            return urlDebug;
-        }
-        catch (err) {
-        }
-    }
+		let urlDebug = `http://${env.localhost}/`; //urlSetUqHost();
+		let urlDebugPromise = Net.urlDebugPromises[urlDebug];
+		if (urlDebugPromise === true) return urlDebug;
+		if (urlDebugPromise === false) return undefined;
+		if (urlDebugPromise === undefined) {
+			urlDebugPromise = this.fetchHello(urlDebug);
+			Net.urlDebugPromises[urlDebug] = urlDebugPromise;
+		}
+		let ret = await urlDebugPromise;
+		if (ret === null) {
+			Net.urlDebugPromises[urlDebug] = false;
+			return undefined;
+		}
+		else {
+			Net.urlDebugPromises[urlDebug] = true;
+			return ret;
+		}
 
-    private async getUnitxUrl(urls: {db:string, url:string;}):Promise<string> {
-        let {db, url} = urls;
+	}
+	
+	private async fetchHello(url:string):Promise<string> {
+		try {
+			let ret = await fetch(url + 'hello');
+			if (ret.status !== 200) throw 'not ok';
+			let text = await ret.text();
+			return url;
+		}
+		catch {
+			return null;
+		}
+}
+
+    private async getUnitxUrl(urls: {url:string; server:number; urlTest:string; serverTest:number}):Promise<string> {
+		let ret = this.getFromUrls(urls);
+		let {url, server} = ret;
         if (env.isDevelopment === true) {
-            let urlDebug = await this.getUrlDebug();
-            if (urlDebug !== undefined) url = urlDebug;
+			if (server === this.unitxDb.serverId) {
+				let urlDebug = await this.getUrlDebug();
+				if (urlDebug !== undefined) url = urlDebug;
+			}
         }
         return this.unitxUrl(url);
     }
-    protected abstract unitxUrl(url:string):string;
+	protected abstract unitxUrl(url:string):string;
+	protected abstract getFromUrls(urls: {url:string; server:number; urlTest:string; serverTest:number}):{url:string;server:number};
 }
 
 class ProdNet extends Net {
-    get isTest():boolean {return false}
-    getDbName(name:string):string {return name}
+	protected buildUnitxDb():void {this.unitxDb = Db.unitxProdDb();}
+	getDbName(name:string):string {return name}
     getUqFullName(uq:string):string {return uq}
-    protected getUnitxDb(): Db {return Db.unitxDb(false);/* getUnitxDb(false)*/}
     protected getUrl(db:string, url:string):string {
         return url + 'uq/prod/' + db + '/';
     }
     protected chooseUrl(urls: {url:string; urlTest:string}):string {return urls.url}
     protected unitxUrl(url:string):string {return url + 'uq/unitx-prod/'};
+	protected getFromUrls(urls: {url:string; server:number; urlTest:string; serverTest:number}):{url:string;server:number} {
+		let {url, server} = urls;
+		return {url, server};
+	}
 }
 
 class TestNet extends Net {
-    get isTest():boolean {return true}
+	protected buildUnitxDb():void {this.unitxDb = Db.unitxTestDb();}
     getDbName(name:string):string {return name + '$test'}
     getUqFullName(uq:string):string {return uq + '$test'}
-    protected getUnitxDb(): Db {return Db.unitxDb(true);/* getUnitxDb(true)*/}
     protected getUrl(db:string, url:string):string {
         return url + 'uq/test/' + db + '/';
     }
     protected chooseUrl(urls: {url:string; urlTest:string}):string {return urls.urlTest}
     protected unitxUrl(url:string):string {return url + 'uq/unitx-test/'};
+	protected getFromUrls(urls: {url:string; server:number; urlTest:string; serverTest:number}):{url:string;server:number} {
+		let {urlTest, serverTest} = urls;
+		return {url:urlTest, server:serverTest};
+	}
 }
 
 // 在entity正常状态下，每个runner都需要init，loadSchema

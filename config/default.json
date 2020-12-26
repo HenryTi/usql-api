@@ -1,7 +1,6 @@
 {
     "center": "http://centerhost/tv/",
     "centerhost": "localhost:3000",
-    "unitxhost": "localhost:3015",
     "port": 3015,
     "secret": "xxx-yyy-zzz-00110",
     "sqlType": "mysql",
@@ -9,7 +8,6 @@
     "connection": {
         "host": "0.0.0.0",
         "user": "usr",
-        "password": "pwd",
-        "multipleStatements": true
+        "password": "pwd"
     }
 }

@@ -12,7 +12,7 @@ export async function pullBus(runner: EntityRunner) {
             for (let row of unitMaxIds) {
                 let {unit, maxId} = row;
                 if (maxId === null) maxId = 0;
-                let openApi = await net.getUnitxApi(unit);
+                let openApi = await net.getUnitxApi(unit, 'pull');
                 if (!openApi) continue;
                 let ret = await openApi.fetchBus(unit, maxId, faces);
                 let {maxMsgId, maxRows} = ret[0][0];

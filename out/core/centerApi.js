@@ -36,9 +36,9 @@ class CenterApi extends fetch_1.Fetch {
             });
         });
     }
-    unitx(unit) {
+    unitx(unit, direction) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.get('open/unitx', { unit: unit });
+            return yield this.get('open/unitx', { unit, direction });
         });
     }
     uqUrl(unit, uq) {
