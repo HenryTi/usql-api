@@ -19,7 +19,6 @@ function pullBus(runner) {
             let pullBusItemCount = 0;
             while (hasError === false && pullBusItemCount < 200) {
                 let unitMaxIds = yield getSyncUnits(runner);
-                console.log('unitMaxIds: ', unitMaxIds);
                 let msgCount = 0;
                 for (let row of unitMaxIds) {
                     let { unit, maxId } = row;
