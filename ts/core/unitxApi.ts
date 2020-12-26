@@ -15,7 +15,8 @@ export class UnitxApi extends Fetch {
 			return ret;
 		}
 		catch (err) {
-			console.error('UnitxApi.fetchBus', err);
+			console.error('UnitxApi.fetchBus ', err);
+			console.error('UnitxApi.fetchBus url:%s, unit:%s, msgStart:%s,faces:%s', this.baseUrl, unit, msgStart, faces);
 		}
     }
 }
