@@ -224,26 +224,21 @@ class Net {
     }
     getUnitxApi(unit, direction) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                let unitxApis = this.unitxApisColl[unit];
-                if (unitxApis === undefined) {
-                    this.unitxApisColl[unit] = unitxApis = {};
-                }
-                let unitxApi = unitxApis[direction];
-                if (unitxApi === null)
-                    return null;
-                if (unitxApi !== undefined)
-                    return unitxApi;
-                let unitx = yield centerApi_1.centerApi.unitx(unit, direction);
-                if (unitx === undefined) {
-                    return unitxApis[direction] = null;
-                }
-                let url = yield this.getUnitxUrl(unitx);
-                return unitxApis[direction] = new unitxApi_1.UnitxApi(url);
+            let unitxApis = this.unitxApisColl[unit];
+            if (unitxApis === undefined) {
+                this.unitxApisColl[unit] = unitxApis = {};
             }
-            catch (err) {
-                console.error('getUnitxApi', err);
+            let unitxApi = unitxApis[direction];
+            if (unitxApi === null)
+                return null;
+            if (unitxApi !== undefined)
+                return unitxApi;
+            let unitx = yield centerApi_1.centerApi.unitx(unit, direction);
+            if (unitx === undefined) {
+                return unitxApis[direction] = null;
             }
+            let url = yield this.getUnitxUrl(unitx);
+            return unitxApis[direction] = new unitxApi_1.UnitxApi(url);
         });
     }
     sendToUnitx(unit, msg) {
@@ -348,6 +343,7 @@ class ProdNet extends Net {
         let { url, server } = urls;
         return { url, server };
     }
+    get isTest() { return false; }
 }
 class TestNet extends Net {
     buildUnitxDb() { this.unitxDb = db_1.Db.unitxTestDb(); }
@@ -363,6 +359,7 @@ class TestNet extends Net {
         let { urlTest, serverTest } = urls;
         return { url: urlTest, server: serverTest };
     }
+    get isTest() { return true; }
 }
 // 在entity正常状态下，每个runner都需要init，loadSchema
 exports.prodNet = new ProdNet(undefined, 'prodNet');

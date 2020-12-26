@@ -24,6 +24,7 @@ export abstract class Net {
 
     protected abstract buildUnitxDb():void;
     abstract getUqFullName(uq:string):string;
+	abstract get isTest():boolean;
 
     protected async innerRunner(name:string):Promise<EntityRunner> {
         name = name.toLowerCase();
@@ -203,25 +204,20 @@ export abstract class Net {
 
     private unitxApisColl: {[unit:number]:UnitxApis} = {};
     async getUnitxApi(unit:number, direction: 'push'|'pull'):Promise<UnitxApi> {
-		try {
-			let unitxApis = this.unitxApisColl[unit];
-			if (unitxApis === undefined) {
-				this.unitxApisColl[unit] = unitxApis = {};
-			}
-			let unitxApi = unitxApis[direction];
-			if (unitxApi === null) return null;
-			if (unitxApi !== undefined) return unitxApi;
+		let unitxApis = this.unitxApisColl[unit];
+		if (unitxApis === undefined) {
+			this.unitxApisColl[unit] = unitxApis = {};
+		}
+		let unitxApi = unitxApis[direction];
+		if (unitxApi === null) return null;
+		if (unitxApi !== undefined) return unitxApi;
 
-			let unitx = await centerApi.unitx(unit, direction);
-			if (unitx === undefined) {
-				return unitxApis[direction] = null;
-			}
-			let url = await this.getUnitxUrl(unitx);
-			return unitxApis[direction] = new UnitxApi(url);
+		let unitx = await centerApi.unitx(unit, direction);
+		if (unitx === undefined) {
+			return unitxApis[direction] = null;
 		}
-		catch (err) {
-			console.error('getUnitxApi', err);
-		}
+		let url = await this.getUnitxUrl(unitx);
+		return unitxApis[direction] = new UnitxApi(url);
 	}
 	
     async sendToUnitx(unit:number, msg:Message):Promise<number[]|string> {
@@ -319,6 +315,7 @@ class ProdNet extends Net {
 		let {url, server} = urls;
 		return {url, server};
 	}
+	get isTest():boolean {return false}
 }
 
 class TestNet extends Net {
@@ -334,6 +331,7 @@ class TestNet extends Net {
 		let {urlTest, serverTest} = urls;
 		return {url:urlTest, server:serverTest};
 	}
+	get isTest():boolean {return true}
 }
 
 // 在entity正常状态下，每个runner都需要init，loadSchema

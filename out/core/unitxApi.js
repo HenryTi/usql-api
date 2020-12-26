@@ -20,18 +20,12 @@ class UnitxApi extends fetch_1.Fetch {
     }
     fetchBus(unit, msgStart, faces) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                let ret = yield this.post('fetch-bus', {
-                    unit: unit,
-                    msgStart: msgStart,
-                    faces: faces,
-                });
-                return ret;
-            }
-            catch (err) {
-                console.error('UnitxApi.fetchBus ', err);
-                console.error('UnitxApi.fetchBus url:%s, unit:%s, msgStart:%s,faces:%s', this.baseUrl, unit, msgStart, faces);
-            }
+            let ret = yield this.post('fetch-bus', {
+                unit: unit,
+                msgStart: msgStart,
+                faces: faces,
+            });
+            return ret;
         });
     }
 }

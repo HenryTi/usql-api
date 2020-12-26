@@ -19,7 +19,8 @@ export async function pullBus(runner: EntityRunner) {
 				}
 				let ret = await openApi.fetchBus(unit, maxId, faces);
 				if (ret === undefined) {
-					console.error('undefined return from await openApi.fetchBus(unit, maxId, faces);');
+					console.error('undefined return from await openApi.fetchBus; unit=%s, url=%s, isTest=%s',
+						unit, openApi.url, net.isTest);
 					continue;
 				}
                 let {maxMsgId, maxRows} = ret[0][0];
@@ -69,36 +70,6 @@ export async function pullBus(runner: EntityRunner) {
 }
 
 async function getSyncUnits(runner: EntityRunner): Promise<any[]> {
-	try {
-		let syncUnits = await runner.call('$sync_units', []);
-		return syncUnits;
-	}
-	catch (err) {
-		console.error('getSyncUnits', err);
-	}
+	let syncUnits = await runner.call('$sync_units', []);
+	return syncUnits;
 }
-/*
-async function getBusFaces(runner: Runner): Promise<BusFaces> {
-    let busFaces:any[] = await runner.call('$bus_faces', []);
-    if (busFaces.length === 0) return;
-    let faces:string[] = [];
-    let faceColl:{[faceUrl:string]: Face} = {};
-    let outBusCount = 0;
-    busFaces.forEach(v => {
-        let {id, bus, busOwner, busName, faceName} = v;
-        if (faceName === null) {
-            ++outBusCount;
-            return;
-        }
-        let faceUrl = busOwner + '/' + busName + '/' + faceName;
-        faces.push(faceUrl);
-        faceColl[faceUrl] = v; //{id:id, bus:bus, faceUrl:faceUrl, face:faceName};
-    });
-    if (faces.length === 0) return;
-    return {
-        faces: faces.join('\n'),
-        faceColl: faceColl,
-        outBusCount: outBusCount,
-    };
-}
-*/
