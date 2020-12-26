@@ -6,11 +6,17 @@ export class UnitxApi extends Fetch {
         return ret;
     }
     async fetchBus(unit:number, msgStart:number, faces:string):Promise<any[][]> {
-		let ret = await this.post('fetch-bus', {
-			unit: unit,
-			msgStart: msgStart,
-			faces: faces,
-		});
-		return ret;
+		try {
+			let ret = await this.post('fetch-bus', {
+				unit: unit,
+				msgStart: msgStart,
+				faces: faces,
+			});
+			return ret;
+		}
+		catch (err) {
+			console.error('fetchBus error: url=%s, unit=%s', this.baseUrl, unit);
+			return undefined;
+		}
     }
 }
