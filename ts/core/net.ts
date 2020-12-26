@@ -203,20 +203,25 @@ export abstract class Net {
 
     private unitxApisColl: {[unit:number]:UnitxApis} = {};
     async getUnitxApi(unit:number, direction: 'push'|'pull'):Promise<UnitxApi> {
-		let unitxApis = this.unitxApisColl[unit];
-		if (unitxApis === undefined) {
-			this.unitxApisColl[unit] = unitxApis = {};
-		}
-		let unitxApi = unitxApis[direction];
-		if (unitxApi === null) return null;
-		if (unitxApi !== undefined) return unitxApi;
+		try {
+			let unitxApis = this.unitxApisColl[unit];
+			if (unitxApis === undefined) {
+				this.unitxApisColl[unit] = unitxApis = {};
+			}
+			let unitxApi = unitxApis[direction];
+			if (unitxApi === null) return null;
+			if (unitxApi !== undefined) return unitxApi;
 
-        let unitx = await centerApi.unitx(unit, direction);
-        if (unitx === undefined) {
-			return unitxApis[direction] = null;
+			let unitx = await centerApi.unitx(unit, direction);
+			if (unitx === undefined) {
+				return unitxApis[direction] = null;
+			}
+			let url = await this.getUnitxUrl(unitx);
+			return unitxApis[direction] = new UnitxApi(url);
 		}
-        let url = await this.getUnitxUrl(unitx);
-        return unitxApis[direction] = new UnitxApi(url);
+		catch (err) {
+			console.error('getUnitxApi', err);
+		}
 	}
 	
     async sendToUnitx(unit:number, msg:Message):Promise<number[]|string> {

@@ -224,21 +224,26 @@ class Net {
     }
     getUnitxApi(unit, direction) {
         return __awaiter(this, void 0, void 0, function* () {
-            let unitxApis = this.unitxApisColl[unit];
-            if (unitxApis === undefined) {
-                this.unitxApisColl[unit] = unitxApis = {};
+            try {
+                let unitxApis = this.unitxApisColl[unit];
+                if (unitxApis === undefined) {
+                    this.unitxApisColl[unit] = unitxApis = {};
+                }
+                let unitxApi = unitxApis[direction];
+                if (unitxApi === null)
+                    return null;
+                if (unitxApi !== undefined)
+                    return unitxApi;
+                let unitx = yield centerApi_1.centerApi.unitx(unit, direction);
+                if (unitx === undefined) {
+                    return unitxApis[direction] = null;
+                }
+                let url = yield this.getUnitxUrl(unitx);
+                return unitxApis[direction] = new unitxApi_1.UnitxApi(url);
             }
-            let unitxApi = unitxApis[direction];
-            if (unitxApi === null)
-                return null;
-            if (unitxApi !== undefined)
-                return unitxApi;
-            let unitx = yield centerApi_1.centerApi.unitx(unit, direction);
-            if (unitx === undefined) {
-                return unitxApis[direction] = null;
+            catch (err) {
+                console.error('getUnitxApi', err);
             }
-            let url = yield this.getUnitxUrl(unitx);
-            return unitxApis[direction] = new unitxApi_1.UnitxApi(url);
         });
     }
     sendToUnitx(unit, msg) {

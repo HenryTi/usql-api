@@ -13,12 +13,17 @@ export async function pullBus(runner: EntityRunner) {
                 let {unit, maxId} = row;
                 if (maxId === null) maxId = 0;
                 let openApi = await net.getUnitxApi(unit, 'pull');
-                if (!openApi) continue;
+                if (!openApi) {
+					console.error(`getUnitxApi unit=${unit}, pull return nothing`);
+					continue;
+				}
                 let ret = await openApi.fetchBus(unit, maxId, faces);
                 let {maxMsgId, maxRows} = ret[0][0];
-                let messages = ret[1];
-                // 新版：bus读来，直接写入queue_in。然后在队列里面处理
-				console.log(`total ${messages.length} arrived from unitx`);
+				let messages = ret[1];
+				let {length: messagesLen} = messages;
+				if (messagesLen === 0) continue;
+				// 新版：bus读来，直接写入queue_in。然后在队列里面处理
+				console.log(`total ${messagesLen} arrived from unitx`);
                 for (let row of messages) {
                     let {to, face:faceUrl, id:msgId, body, version} = row;
                     let face = coll[(faceUrl as string).toLowerCase()];
@@ -43,7 +48,7 @@ export async function pullBus(runner: EntityRunner) {
                     ++msgCount;
                 }
                 if (hasError === true) break;
-                if (messages.length < maxRows && maxId < maxMsgId) {
+                if (messagesLen < maxRows && maxId < maxMsgId) {
                     // 如果unit的所有mssage都处理完成了，则设为unit的最大msg，下次查找可以快些
                     await runner.call('$queue_in_add', [unit, undefined, maxMsgId, undefined, undefined, undefined]);
                     //await runner.busSyncMax(unit, maxMsgId);
@@ -60,8 +65,13 @@ export async function pullBus(runner: EntityRunner) {
 }
 
 async function getSyncUnits(runner: EntityRunner): Promise<any[]> {
-    let syncUnits = await runner.call('$sync_units', []);
-    return syncUnits;
+	try {
+		let syncUnits = await runner.call('$sync_units', []);
+		return syncUnits;
+	}
+	catch (err) {
+		console.error('getSyncUnits', err);
+	}
 }
 /*
 async function getBusFaces(runner: Runner): Promise<BusFaces> {
