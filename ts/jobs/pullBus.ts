@@ -17,7 +17,11 @@ export async function pullBus(runner: EntityRunner) {
 					console.error(`getUnitxApi unit=${unit}, pull return nothing`);
 					continue;
 				}
-                let ret = await openApi.fetchBus(unit, maxId, faces);
+				let ret = await openApi.fetchBus(unit, maxId, faces);
+				if (ret === undefined) {
+					console.error('undefined return from await openApi.fetchBus(unit, maxId, faces);');
+					continue;
+				}
                 let {maxMsgId, maxRows} = ret[0][0];
 				let messages = ret[1];
 				let {length: messagesLen} = messages;

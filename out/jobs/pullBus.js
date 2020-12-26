@@ -30,6 +30,10 @@ function pullBus(runner) {
                         continue;
                     }
                     let ret = yield openApi.fetchBus(unit, maxId, faces);
+                    if (ret === undefined) {
+                        console.error('undefined return from await openApi.fetchBus(unit, maxId, faces);');
+                        continue;
+                    }
                     let { maxMsgId, maxRows } = ret[0][0];
                     let messages = ret[1];
                     let { length: messagesLen } = messages;
