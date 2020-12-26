@@ -7,7 +7,8 @@ export async function pullBus(runner: EntityRunner) {
         let {faces, coll, hasError} = buses;
         let pullBusItemCount = 0;
         while (hasError === false && pullBusItemCount < 200) {
-            let unitMaxIds:{unit:number; maxId:number}[] = await getSyncUnits(runner);
+			let unitMaxIds:{unit:number; maxId:number}[] = await getSyncUnits(runner);
+			console.log('unitMaxIds: ', unitMaxIds);
             let msgCount = 0;
             for (let row of unitMaxIds) {
                 let {unit, maxId} = row;
