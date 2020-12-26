@@ -47,9 +47,14 @@ function buildUnitxRouter(rb) {
         }
     }));
     let fetchBus = (runner, body) => __awaiter(this, void 0, void 0, function* () {
-        let { unit, msgStart, faces } = body;
-        let ret = yield runner.unitUserTablesFromProc('tv_GetBusMessages', unit, undefined, msgStart, faces);
-        return ret;
+        try {
+            let { unit, msgStart, faces } = body;
+            let ret = yield runner.unitUserTablesFromProc('tv_GetBusMessages', unit, undefined, msgStart, faces);
+            return ret;
+        }
+        catch (err) {
+            console.error('fetchBus in router', err);
+        }
     });
     rb.post(router, '/fetch-bus', fetchBus);
     let jointReadBus = (runner, body) => __awaiter(this, void 0, void 0, function* () {

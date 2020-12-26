@@ -37,9 +37,14 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
     });
 
     let fetchBus = async (runner:EntityRunner, body:any):Promise<any[][]> => {
-        let {unit, msgStart, faces} = body;
-        let ret = await runner.unitUserTablesFromProc('tv_GetBusMessages', unit, undefined, msgStart, faces);
-        return ret;
+		try {
+			let {unit, msgStart, faces} = body;
+			let ret = await runner.unitUserTablesFromProc('tv_GetBusMessages', unit, undefined, msgStart, faces);
+			return ret;
+		}
+		catch (err) {
+			console.error('fetchBus in router', err);
+		}
     }
     rb.post(router, '/fetch-bus', fetchBus);
 
