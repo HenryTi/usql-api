@@ -382,7 +382,7 @@ export class EntityRunner {
         if (inBusAction === undefined) {
 			let svpb = new SheetVerifyParametersBus(this, sheetName);
             if (svpb.init() === true) {
-				inBusAction = this.parametersBusCache[name];
+				inBusAction = this.parametersBusCache[name] = svpb;
 			}
         }
         return inBusAction;
@@ -664,7 +664,7 @@ export class EntityRunner {
                 case 'sheet':
                     this.hasSheet = true;
                     this.sheetRuns[name] = {
-                        onsave: runObj['$']!==undefined,
+                        onsave: runObj?.run['$']?.['$onsave'] !== undefined,
                         verify: schemaObj.verify,
                     };
 					break;

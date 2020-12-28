@@ -227,7 +227,10 @@ export abstract class Net {
             //return ret;
             console.error(err);
             throw new Error(err);
-        }
+		}
+		else {
+			console.error('get unitx push url in sendToUnitx: ',  unitxApi.url);
+		}
         let toArr:number[] = await unitxApi.send(msg);
         return toArr;
     }

@@ -33,7 +33,7 @@ function buildSheetRouter(router, rb) {
         try {
             let verify = yield runner.sheetVerify(name, unit, user, data);
             if (verify !== undefined) {
-                return verify;
+                return { error: verify };
             }
             let result = yield runner.sheetSave(name, unit, user, app, discription, data);
             let sheetRet = result[0];
@@ -68,7 +68,7 @@ function buildSheetRouter(router, rb) {
         try {
             let verify = yield runner.sheetVerify(name, unit, user, data);
             if (verify !== undefined) {
-                return verify;
+                return { error: verify };
             }
             let result = yield runner.sheetSave(name, unit, user, app, discription, data);
             let sheetRet = result[0];

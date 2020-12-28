@@ -44,6 +44,7 @@ class RouterBuilder {
                 let { name } = params;
                 let call, run;
                 if (name !== undefined) {
+                    name = name.toLowerCase();
                     let schema = runner.getSchema(name);
                     if (schema === undefined) {
                         return this.unknownEntity(res, name, runner);

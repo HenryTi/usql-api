@@ -17,6 +17,9 @@ export async function pullBus(runner: EntityRunner) {
 					console.error(`getUnitxApi unit=${unit}, pull return nothing`);
 					continue;
 				}
+				else {
+					console.error('get unitx pull url in pullBus: ',  openApi.url);
+				}
 				let ret = await openApi.fetchBus(unit, maxId, faces);
 				if (ret === undefined) {
 					console.error('undefined return from await openApi.fetchBus; unit=%s, url=%s, isTest=%s',

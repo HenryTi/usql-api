@@ -434,7 +434,7 @@ class EntityRunner {
         if (inBusAction === undefined) {
             let svpb = new inBusAction_1.SheetVerifyParametersBus(this, sheetName);
             if (svpb.init() === true) {
-                inBusAction = this.parametersBusCache[name];
+                inBusAction = this.parametersBusCache[name] = svpb;
             }
         }
         return inBusAction;
@@ -662,6 +662,7 @@ class EntityRunner {
         });
     }
     initInternal() {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             let rows = yield this.loadSchemas(0);
             let schemaTable = rows[0];
@@ -765,7 +766,7 @@ class EntityRunner {
                     case 'sheet':
                         this.hasSheet = true;
                         this.sheetRuns[name] = {
-                            onsave: runObj['$'] !== undefined,
+                            onsave: ((_a = runObj === null || runObj === void 0 ? void 0 : runObj.run['$']) === null || _a === void 0 ? void 0 : _a['$onsave']) !== undefined,
                             verify: schemaObj.verify,
                         };
                         break;

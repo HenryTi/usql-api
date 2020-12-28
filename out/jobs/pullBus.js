@@ -29,6 +29,9 @@ function pullBus(runner) {
                         console.error(`getUnitxApi unit=${unit}, pull return nothing`);
                         continue;
                     }
+                    else {
+                        console.error('get unitx pull url in pullBus: ', openApi.url);
+                    }
                     let ret = yield openApi.fetchBus(unit, maxId, faces);
                     if (ret === undefined) {
                         console.error('undefined return from await openApi.fetchBus; unit=%s, url=%s, isTest=%s', unit, openApi.url, net.isTest);

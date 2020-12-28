@@ -250,6 +250,9 @@ class Net {
                 console.error(err);
                 throw new Error(err);
             }
+            else {
+                console.error('get unitx push url in sendToUnitx: ', unitxApi.url);
+            }
             let toArr = yield unitxApi.send(msg);
             return toArr;
         });
