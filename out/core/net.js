@@ -243,6 +243,7 @@ class Net {
     }
     sendToUnitx(unit, msg) {
         return __awaiter(this, void 0, void 0, function* () {
+            console.error('sendToUnitx', unit, msg);
             let unitxApi = yield this.getUnitxApi(unit, 'push');
             if (!unitxApi) {
                 let err = `Center unit ${unit} not binding $unitx service!!!`;

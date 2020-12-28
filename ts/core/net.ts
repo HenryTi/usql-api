@@ -221,6 +221,7 @@ export abstract class Net {
 	}
 	
     async sendToUnitx(unit:number, msg:Message):Promise<number[]|string> {
+		console.error('sendToUnitx', unit, msg);
         let unitxApi = await this.getUnitxApi(unit, 'push');
         if (!unitxApi) {
             let err = `Center unit ${unit} not binding $unitx service!!!`;
