@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dbLogger = exports.create$UqDb = exports.SpanLog = exports.UnitxDb = exports.UqDb = exports.Db = exports.env = void 0;
+exports.dbLogger = exports.create$UqDb = exports.SpanLog = exports.UnitxTestDb = exports.UnitxProdDb = exports.UnitxDb = exports.UqDb = exports.Db = exports.env = void 0;
 const config = require("config");
 const _ = require("lodash");
 const ms_1 = require("./ms");
@@ -19,7 +19,6 @@ class Env {
     constructor() {
         this.isDevelopment = false;
         this.isDevdo = false;
-        this.const_unitx = '$unitx';
         let nodeEnv = process.env.NODE_ENV;
         if (!nodeEnv)
             return;
@@ -34,38 +33,6 @@ class Env {
                 this.isDevdo = true;
                 break;
         }
-    }
-    getUnitxTestConnection() {
-        var _a, _b;
-        if (this.unitxTestConn)
-            return this.unitxTestConn;
-        let conn;
-        if (this.isDevelopment === true) {
-            let unitx = (_a = this.configDebugging) === null || _a === void 0 ? void 0 : _a['unitx'];
-            if (unitx) {
-                conn = (_b = this.configServers) === null || _b === void 0 ? void 0 : _b[unitx.test];
-            }
-        }
-        if (!conn) {
-            conn = this.getConnection();
-        }
-        return this.unitxTestConn = _.clone(conn);
-    }
-    getUnitxProdConnection() {
-        var _a, _b;
-        if (this.unitxProdConn)
-            return this.unitxProdConn;
-        let conn;
-        if (this.isDevelopment === true) {
-            let unitx = (_a = this.configDebugging) === null || _a === void 0 ? void 0 : _a['unitx'];
-            if (unitx) {
-                conn = (_b = this.configServers) === null || _b === void 0 ? void 0 : _b[unitx.prod];
-            }
-        }
-        if (!conn) {
-            conn = this.getConnection();
-        }
-        return this.unitxProdConn = _.clone(conn);
     }
     getConnection() {
         var _a, _b;
@@ -89,7 +56,6 @@ class Env {
         return this.conn = _.clone(conn);
     }
 }
-//private static const_connectionUnitx = 'connection_$unitx';
 Env.const_connection = 'connection';
 Env.const_development = 'development';
 Env.const_devdo = 'devdo';
@@ -100,31 +66,21 @@ class Db {
         this.dbName = dbName;
         this.dbServer = this.createDbServer();
     }
-    static getDbName(name) {
+    /*
+    // 数据库名称对照表
+    private static dbCollection:{[name:string]:string} = {}
+    
+    private static getDbName(name:string): string {
         return Db.dbCollection[name] || name;
     }
+    */
     static db(name) {
-        name = name || $uq;
         let db = Db.dbs[name]; //.getCacheDb(name);
         if (db !== undefined)
             return db;
-        let dbName = Db.getDbName(name);
+        let dbName = name; // Db.getDbName(name);
         db = new UqDb(dbName);
         return Db.dbs[name] = db;
-    }
-    static unitxTestDb() {
-        if (Db._unitxTestDb)
-            return Db._unitxTestDb;
-        let name = exports.env.const_unitx + '$test';
-        let dbName = Db.getDbName(name);
-        return Db._unitxTestDb = new UnitxTestDb(dbName);
-    }
-    static unitxProdDb() {
-        if (Db._unitxProdDb)
-            return Db._unitxProdDb;
-        let name = exports.env.const_unitx;
-        let dbName = Db.getDbName(name);
-        return Db._unitxProdDb = new UnitxProdDb(dbName);
     }
     getDbName() { return this.dbName; }
     createDbServer() {
@@ -208,25 +164,21 @@ class Db {
     }
     call(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            //this.devLog(proc, params);
             return yield this.dbServer.call(this.dbName, proc, params);
         });
     }
     callEx(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            //this.devLog(proc, params);
             return yield this.dbServer.callEx(this.dbName, proc, params);
         });
     }
     tableFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            //this.devLog(proc, params);
             return yield this.dbServer.tableFromProc(this.dbName, proc, params);
         });
     }
     tablesFromProc(proc, params) {
         return __awaiter(this, void 0, void 0, function* () {
-            //this.devLog(proc, params);
             return yield this.dbServer.tablesFromProc(this.dbName, proc, params);
         });
     }
@@ -263,8 +215,6 @@ class Db {
 }
 exports.Db = Db;
 Db.dbs = {};
-// 数据库名称对照表
-Db.dbCollection = {};
 class UqDb extends Db {
     getDbConfig() {
         let ret = exports.env.getConnection();
@@ -274,20 +224,39 @@ class UqDb extends Db {
 }
 exports.UqDb = UqDb;
 class UnitxDb extends Db {
+    getDbConfig() {
+        let ret = this.getUnitxConnection();
+        return ret;
+    }
+    getUnitxConnection() {
+        var _a, _b;
+        if (this.unitxConn)
+            return this.unitxConn;
+        let conn;
+        if (exports.env.isDevelopment === true) {
+            let unitx = (_a = exports.env.configDebugging) === null || _a === void 0 ? void 0 : _a['unitx'];
+            if (unitx) {
+                let debugConfigName = this.getDebugConfigName(unitx);
+                if (debugConfigName) {
+                    conn = (_b = exports.env.configServers) === null || _b === void 0 ? void 0 : _b[debugConfigName];
+                }
+            }
+        }
+        if (!conn) {
+            conn = exports.env.getConnection();
+        }
+        return this.unitxConn = _.clone(conn);
+    }
 }
 exports.UnitxDb = UnitxDb;
 class UnitxProdDb extends UnitxDb {
-    getDbConfig() {
-        let ret = exports.env.getUnitxProdConnection();
-        return ret;
-    }
+    getDebugConfigName(unitx) { return unitx.prod; }
 }
+exports.UnitxProdDb = UnitxProdDb;
 class UnitxTestDb extends UnitxDb {
-    getDbConfig() {
-        let ret = exports.env.getUnitxTestConnection();
-        return ret;
-    }
+    getDebugConfigName(unitx) { return unitx.test; }
 }
+exports.UnitxTestDb = UnitxTestDb;
 class SpanLog {
     constructor(logger, log) {
         this.logger = logger;

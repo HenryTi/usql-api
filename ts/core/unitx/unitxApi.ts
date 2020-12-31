@@ -1,6 +1,12 @@
-import { Fetch } from "./fetch";
+import { Fetch } from "../fetch";
 
 export class UnitxApi extends Fetch {
+	readonly tickCreate: number;
+	constructor(url:string, tickCreate:number) {
+		super(url);
+		this.tickCreate = tickCreate;
+	}
+
     async send(msg: any):Promise<number[]> {
         let ret:number[] = await this.post('', msg);
         return ret;

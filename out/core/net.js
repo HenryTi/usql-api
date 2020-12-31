@@ -10,21 +10,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.testCompileNet = exports.prodCompileNet = exports.testNet = exports.prodNet = exports.Net = void 0;
-const node_fetch_1 = require("node-fetch");
 const runner_1 = require("./runner");
 const db_1 = require("./db");
 const openApi_1 = require("./openApi");
 const centerApi_1 = require("./centerApi");
-const unitxApi_1 = require("./unitxApi");
+const getUrlDebug_1 = require("./getUrlDebug");
+const unitx_1 = require("./unitx");
 class Net {
     constructor(executingNet, id) {
         this.runners = {};
         this.createRunnerFromDbPromises = {};
         this.uqOpenApis = {};
-        this.unitxApisColl = {};
         this.executingNet = executingNet;
         this.id = id;
-        this.buildUnitxDb();
+        this.buildUnitx();
     }
     innerRunner(name) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -108,7 +107,7 @@ class Net {
             if (runner === null)
                 return;
             if (runner === undefined) {
-                runner = yield this.createRunnerFromDb(name, this.unitxDb);
+                runner = yield this.createRunnerFromDb(name, this.unitx.db);
                 if (runner === undefined)
                     return;
             }
@@ -222,29 +221,32 @@ class Net {
             return openApi;
         });
     }
-    getUnitxApi(unit, direction) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let unitxApis = this.unitxApisColl[unit];
-            if (unitxApis === undefined) {
-                this.unitxApisColl[unit] = unitxApis = {};
-            }
-            let unitxApi = unitxApis[direction];
-            if (unitxApi === null)
-                return null;
-            if (unitxApi !== undefined)
-                return unitxApi;
-            let unitx = yield centerApi_1.centerApi.unitx(unit, direction);
-            if (unitx === undefined) {
-                return unitxApis[direction] = null;
-            }
-            let url = yield this.getUnitxUrl(unitx);
-            return unitxApis[direction] = new unitxApi_1.UnitxApi(url);
-        });
+    // private unitxApisColl: {[unit:number]:UnitxApis} = {};
+    //async getUnitxApi(unit:number, direction: 'push'|'pull'):Promise<UnitxApi> {
+    //	return await this.unitx.getUnitxApi(unit, direction);
+    /*
+    let unitxApis = this.unitxApisColl[unit];
+    if (unitxApis === undefined) {
+        this.unitxApisColl[unit] = unitxApis = {};
     }
+    let unitxApi = unitxApis[direction];
+    if (unitxApi === null) return null;
+    if (unitxApi !== undefined) return unitxApi;
+
+    let unitx = await centerApi.unitx(unit, direction);
+    if (unitx === undefined) {
+        return unitxApis[direction] = null;
+    }
+    let url = await this.getUnitxUrl(unitx);
+    return unitxApis[direction] = new UnitxApi(url);
+    */
+    //}
     sendToUnitx(unit, msg) {
         return __awaiter(this, void 0, void 0, function* () {
+            return yield this.unitx.sendToUnitx(unit, msg);
+            /*
             console.error('sendToUnitx', unit, msg);
-            let unitxApi = yield this.getUnitxApi(unit, 'push');
+            let unitxApi = await this.getUnitxApi(unit, 'push');
             if (!unitxApi) {
                 let err = `Center unit ${unit} not binding $unitx service!!!`;
                 //return ret;
@@ -252,10 +254,16 @@ class Net {
                 throw new Error(err);
             }
             else {
-                console.error('get unitx push url in sendToUnitx: ', unitxApi.url);
+                console.error('get unitx push url in sendToUnitx: ',  unitxApi.url);
             }
-            let toArr = yield unitxApi.send(msg);
+            let toArr:number[] = await unitxApi.send(msg);
             return toArr;
+            */
+        });
+    }
+    pullBus(unit, maxId, faces) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.unitx.pullBus(unit, maxId, faces);
         });
     }
     uqUrl(unit, uq) {
@@ -269,7 +277,7 @@ class Net {
             let url;
             let { db } = urls;
             if (db_1.env.isDevelopment === true) {
-                let urlDebug = yield this.getUrlDebug();
+                let urlDebug = yield getUrlDebug_1.getUrlDebug();
                 if (urlDebug !== undefined)
                     url = urlDebug;
             }
@@ -279,91 +287,25 @@ class Net {
             return this.getUrl(db, url);
         });
     }
-    getUrlDebug() {
-        return __awaiter(this, void 0, void 0, function* () {
-            let urlDebug = `http://${db_1.env.localhost}/`; //urlSetUqHost();
-            let urlDebugPromise = Net.urlDebugPromises[urlDebug];
-            if (urlDebugPromise === true)
-                return urlDebug;
-            if (urlDebugPromise === false)
-                return undefined;
-            if (urlDebugPromise === undefined) {
-                urlDebugPromise = this.fetchHello(urlDebug);
-                Net.urlDebugPromises[urlDebug] = urlDebugPromise;
-            }
-            let ret = yield urlDebugPromise;
-            if (ret === null) {
-                Net.urlDebugPromises[urlDebug] = false;
-                return undefined;
-            }
-            else {
-                Net.urlDebugPromises[urlDebug] = true;
-                return ret;
-            }
-        });
-    }
-    fetchHello(url) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                let ret = yield node_fetch_1.default(url + 'hello');
-                if (ret.status !== 200)
-                    throw 'not ok';
-                let text = yield ret.text();
-                return url;
-            }
-            catch (_a) {
-                return null;
-            }
-        });
-    }
-    getUnitxUrl(urls) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let ret = this.getFromUrls(urls);
-            let { url, server } = ret;
-            if (db_1.env.isDevelopment === true) {
-                if (server === this.unitxDb.serverId) {
-                    let urlDebug = yield this.getUrlDebug();
-                    if (urlDebug !== undefined)
-                        url = urlDebug;
-                }
-            }
-            return this.unitxUrl(url);
-        });
-    }
 }
 exports.Net = Net;
-Net.urlDebugPromises = {};
 class ProdNet extends Net {
-    buildUnitxDb() { this.unitxDb = db_1.Db.unitxProdDb(); }
+    buildUnitx() { this.unitx = new unitx_1.UnitxProd(); }
     getDbName(name) { return name; }
     getUqFullName(uq) { return uq; }
     getUrl(db, url) {
         return url + 'uq/prod/' + db + '/';
     }
     chooseUrl(urls) { return urls.url; }
-    unitxUrl(url) { return url + 'uq/unitx-prod/'; }
-    ;
-    getFromUrls(urls) {
-        let { url, server } = urls;
-        return { url, server };
-    }
-    get isTest() { return false; }
 }
 class TestNet extends Net {
-    buildUnitxDb() { this.unitxDb = db_1.Db.unitxTestDb(); }
+    buildUnitx() { this.unitx = new unitx_1.UnitxTest(); }
     getDbName(name) { return name + '$test'; }
     getUqFullName(uq) { return uq + '$test'; }
     getUrl(db, url) {
         return url + 'uq/test/' + db + '/';
     }
     chooseUrl(urls) { return urls.urlTest; }
-    unitxUrl(url) { return url + 'uq/unitx-test/'; }
-    ;
-    getFromUrls(urls) {
-        let { urlTest, serverTest } = urls;
-        return { url: urlTest, server: serverTest };
-    }
-    get isTest() { return true; }
 }
 // 在entity正常状态下，每个runner都需要init，loadSchema
 exports.prodNet = new ProdNet(undefined, 'prodNet');

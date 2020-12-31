@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EntityRunner = void 0;
 const _ = require("lodash");
 const db_1 = require("../db");
-const __1 = require("..");
+const packReturn_1 = require("../packReturn");
 const importData_1 = require("../importData");
 const inBusAction_1 = require("../inBusAction");
 const centerApi_1 = require("../centerApi");
@@ -464,7 +464,7 @@ class EntityRunner {
             for (let i = 0; i < length; i++) {
                 let t = ret[i];
                 if (t.length > 0) {
-                    return __1.packReturns(returns, ret);
+                    return packReturn_1.packReturns(returns, ret);
                 }
             }
             return;

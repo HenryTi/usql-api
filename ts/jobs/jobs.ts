@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import { Net, Db, prodNet, testNet, env } from '../core';
+import { Net, Db, prodNet, testNet, env, consts } from '../core';
 import { pullEntities } from './pullEntities';
 import { pullBus } from './pullBus';
 import { queueIn } from './queueIn';
@@ -24,14 +24,14 @@ export function jobsLoopNoWait() {
 */
 
 export async function startJobsLoop(): Promise<void> {
-	let db = Db.db(undefined);
+	let $uqDb = Db.db(consts.$uq);
     if (env.isDevelopment === true) {
 		// 只有在开发状态下，才可以屏蔽jobs
 		//console.log('jobs loop: developing, no loop!');
 		//return;
 		if (env.isDevdo === true) return;
         console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
-		await db.setDebugJobs();
+		await $uqDb.setDebugJobs();
 		console.log('========= set debugging jobs =========');
         await sleep(waitForOtherStopJobs);
     }
@@ -46,7 +46,7 @@ export async function startJobsLoop(): Promise<void> {
         console.log('\n');
         console.info(`====== ${process.env.NODE_ENV} one loop at ${new Date().toLocaleString()} ======`);
         try {
-			let uqs = await db.uqDbs();
+			let uqs = await $uqDb.uqDbs();
 			if (uqs.length === 0) {
 				console.error('debugging_jobs=yes, stop jobs loop');
 			}
@@ -67,7 +67,7 @@ export async function startJobsLoop(): Promise<void> {
 
                 if (env.isDevelopment === true) {
 					// if (dbName === 'pointshop') debugger;
-					await db.setDebugJobs();
+					await $uqDb.setDebugJobs();
 					console.info('========= set debugging jobs =========');
                 }
                 console.info('====== loop for ' + uqDb + '======');
@@ -108,7 +108,7 @@ export async function startJobsLoop(): Promise<void> {
                     case 'object': errText = 'object: ' + err.messsage; break;
                 }
             }
-            await db.log(0, '$jobs', '$jobs loop error', errText);
+            await $uqDb.log(0, '$jobs', '$jobs loop error', errText);
         }
         finally {
             if (loopWait === true) {

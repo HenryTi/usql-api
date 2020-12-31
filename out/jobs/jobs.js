@@ -32,7 +32,7 @@ export function jobsLoopNoWait() {
 */
 function startJobsLoop() {
     return __awaiter(this, void 0, void 0, function* () {
-        let db = core_1.Db.db(undefined);
+        let $uqDb = core_1.Db.db(core_1.consts.$uq);
         if (core_1.env.isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
             //console.log('jobs loop: developing, no loop!');
@@ -40,7 +40,7 @@ function startJobsLoop() {
             if (core_1.env.isDevdo === true)
                 return;
             console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
-            yield db.setDebugJobs();
+            yield $uqDb.setDebugJobs();
             console.log('========= set debugging jobs =========');
             yield sleep(waitForOtherStopJobs);
         }
@@ -54,7 +54,7 @@ function startJobsLoop() {
             console.log('\n');
             console.info(`====== ${process.env.NODE_ENV} one loop at ${new Date().toLocaleString()} ======`);
             try {
-                let uqs = yield db.uqDbs();
+                let uqs = yield $uqDb.uqDbs();
                 if (uqs.length === 0) {
                     console.error('debugging_jobs=yes, stop jobs loop');
                 }
@@ -76,7 +76,7 @@ function startJobsLoop() {
                         // if (dbName !== 'bi') continue;
                         if (core_1.env.isDevelopment === true) {
                             // if (dbName === 'pointshop') debugger;
-                            yield db.setDebugJobs();
+                            yield $uqDb.setDebugJobs();
                             console.info('========= set debugging jobs =========');
                         }
                         console.info('====== loop for ' + uqDb + '======');
@@ -125,7 +125,7 @@ function startJobsLoop() {
                             break;
                     }
                 }
-                yield db.log(0, '$jobs', '$jobs loop error', errText);
+                yield $uqDb.log(0, '$jobs', '$jobs loop error', errText);
             }
             finally {
                 if (loopWait === true) {

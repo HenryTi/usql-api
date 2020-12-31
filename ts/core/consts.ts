@@ -1,6 +1,7 @@
 
 export const consts = {
-    $unitx: '$unitx',
+	$unitx: '$unitx',
+	$uq: '$uq',
     $$$unitx: '$$$/$unitx',
     sheetMessage: 'sheetMessage',
     Face: 'Face',

@@ -27,14 +27,12 @@ interface ConfigDebugging {
 }
 
 class Env {
-	//private static const_connectionUnitx = 'connection_$unitx';
 	private static const_connection = 'connection';
 	private static const_development = 'development';
 	private static const_devdo = 'devdo';
 
 	readonly isDevelopment: boolean = false;
 	readonly isDevdo: boolean = false;
-	readonly const_unitx = '$unitx';
 	readonly configDebugging: ConfigDebugging;
 	readonly configServers: {[name:string]: any};
 	readonly localhost: string;
@@ -53,38 +51,6 @@ class Env {
 				this.isDevdo = true; 
 				break;
 		}
-	}
-
-	private unitxTestConn: any;
-	getUnitxTestConnection():any {
-		if (this.unitxTestConn) return this.unitxTestConn;
-		let conn:any;
-		if (this.isDevelopment === true) {
-			let unitx = this.configDebugging?.['unitx'];
-			if (unitx) {
-				conn = this.configServers?.[unitx.test];
-			}
-		}
-		if (!conn) {
-			conn = this.getConnection();
-		}
-		return this.unitxTestConn = _.clone(conn);
-	}
-
-	private unitxProdConn: any;
-	getUnitxProdConnection():any {
-		if (this.unitxProdConn) return this.unitxProdConn;
-		let conn:any;
-		if (this.isDevelopment === true) {
-			let unitx = this.configDebugging?.['unitx'];
-			if (unitx) {
-				conn = this.configServers?.[unitx.prod];
-			}
-		}
-		if (!conn) {
-			conn = this.getConnection();
-		}
-		return this.unitxProdConn = _.clone(conn);
 	}
 
 	private conn: any;
@@ -115,36 +81,20 @@ export const env = new Env();
 export abstract class Db {
 	private static dbs:{[name:string]:Db} = {
 	}
+	/*
 	// 数据库名称对照表
 	private static dbCollection:{[name:string]:string} = {}
 	
 	private static getDbName(name:string): string {
 		return Db.dbCollection[name] || name;
 	}
-	
+	*/
 	static db(name:string):Db {
-		name = name || $uq;
 		let db = Db.dbs[name]; //.getCacheDb(name);
 		if (db !== undefined) return db;
-		let dbName = Db.getDbName(name);
+		let dbName = name; // Db.getDbName(name);
 		db = new UqDb(dbName);
 		return Db.dbs[name] = db;
-	}
-
-	private static _unitxTestDb: UnitxDb;
-	static unitxTestDb():UnitxDb {
-		if (Db._unitxTestDb) return Db._unitxTestDb;
-		let name = env.const_unitx + '$test';
-		let dbName = Db.getDbName(name);
-		return Db._unitxTestDb = new UnitxTestDb(dbName);
-	}
-
-	private static _unitxProdDb: UnitxDb;
-	static unitxProdDb():UnitxDb {
-		if (Db._unitxProdDb) return Db._unitxProdDb;
-		let name = env.const_unitx;
-		let dbName = Db.getDbName(name);
-		return Db._unitxProdDb = new UnitxProdDb(dbName);
 	}
 
     private dbName: string;
@@ -217,19 +167,15 @@ export abstract class Db {
 		await this.dbServer.buildRealProcFrom$ProcTable(this.dbName, proc);
 	}
 	async call(proc:string, params:any[]): Promise<any> {
-        //this.devLog(proc, params);
         return await this.dbServer.call(this.dbName, proc, params);
     }
     async callEx(proc:string, params:any[]): Promise<any> {
-        //this.devLog(proc, params);
         return await this.dbServer.callEx(this.dbName, proc, params);
     }
     async tableFromProc(proc:string, params:any[]): Promise<any[]> {
-        //this.devLog(proc, params);
         return await this.dbServer.tableFromProc(this.dbName, proc, params);
     }
     async tablesFromProc(proc:string, params:any[]): Promise<any[][]> {
-        //this.devLog(proc, params);
         return await this.dbServer.tablesFromProc(this.dbName, proc, params);
     }
     async createDatabase(): Promise<void> {
@@ -262,20 +208,39 @@ export class UqDb extends Db {
 }
 
 export abstract class UnitxDb extends Db {
+	protected getDbConfig() {
+		let ret = this.getUnitxConnection();
+        return ret;
+	}
+	
+	private unitxConn: any;
+	getUnitxConnection():any {
+		if (this.unitxConn) return this.unitxConn;
+		let conn:any;
+		if (env.isDevelopment === true) {
+			let unitx = env.configDebugging?.['unitx'];
+			if (unitx) {
+				let debugConfigName = this.getDebugConfigName(unitx);
+				if (debugConfigName) {
+					conn = env.configServers?.[debugConfigName];
+				}
+			}
+		}
+		if (!conn) {
+			conn = env.getConnection();
+		}
+		return this.unitxConn = _.clone(conn);
+	}
+
+	protected abstract getDebugConfigName(unitx:any):string;
 }
 
-class UnitxProdDb extends UnitxDb {
-	protected getDbConfig() {
-		let ret = env.getUnitxProdConnection();
-        return ret;
-    }
+export class UnitxProdDb extends UnitxDb {
+	protected getDebugConfigName(unitx:any):string {return unitx.prod}
 }
 
-class UnitxTestDb extends UnitxDb {
-	protected getDbConfig() {
-		let ret = env.getUnitxTestConnection();
-        return ret;
-    }
+export class UnitxTestDb extends UnitxDb {
+	protected getDebugConfigName(unitx:any):string {return unitx.test}
 }
 
 export class SpanLog {

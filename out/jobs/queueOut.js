@@ -13,7 +13,7 @@ exports.queueOut = void 0;
 const core_1 = require("../core");
 const finish_1 = require("./finish");
 const tool_1 = require("../tool");
-const getUserX_1 = require("./getUserX");
+const unitx_1 = require("../core/unitx");
 function queueOut(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -183,7 +183,7 @@ function bus(runner, unit, id, to, bus, content) {
             return message;
         }
         if (to > 0) {
-            let unitXArr = yield getUserX_1.getUserX(runner, to, bus, busOwner, busName, face);
+            let unitXArr = yield unitx_1.getUserX(runner, to, bus, busOwner, busName, face);
             if (!unitXArr || unitXArr.length === 0)
                 return;
             let promises = unitXArr.map(v => {

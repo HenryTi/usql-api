@@ -1,7 +1,7 @@
 import { EntityRunner, centerApi, SheetQueueData, BusMessage, env } from "../core";
 import { Finish } from "./finish";
 import { getErrorString } from "../tool";
-import { getUserX } from "./getUserX";
+import { getUserX } from "../core/unitx";
 
 export async function queueOut(runner: EntityRunner): Promise<void> {
     try {

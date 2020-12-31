@@ -1,5 +1,6 @@
-import { centerApi, EntityRunner } from "../core";
-import { Cache } from "../tool";
+import { centerApi } from "../centerApi";
+import { EntityRunner } from '../runner';
+import { Cache } from "../../tool";
 
 interface UserX {
 	service: number;

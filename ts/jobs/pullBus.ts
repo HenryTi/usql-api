@@ -11,21 +11,27 @@ export async function pullBus(runner: EntityRunner) {
             let msgCount = 0;
             for (let row of unitMaxIds) {
                 let {unit, maxId} = row;
-                if (maxId === null) maxId = 0;
-                let openApi = await net.getUnitxApi(unit, 'pull');
-                if (!openApi) {
+				if (maxId === null) maxId = 0;
+				
+				/*
+                let unitxApi = await net.getUnitxApi(unit, 'pull');
+                if (!unitxApi) {
 					console.error(`getUnitxApi unit=${unit}, pull return nothing`);
 					continue;
 				}
 				else {
-					console.error('get unitx pull url in pullBus: ',  openApi.url);
+					console.error('get unitx pull url in pullBus: ',  unitxApi.url);
 				}
-				let ret = await openApi.fetchBus(unit, maxId, faces);
+				let ret = await unitxApi.fetchBus(unit, maxId, faces);
 				if (ret === undefined) {
 					console.error('undefined return from await openApi.fetchBus; unit=%s, url=%s, isTest=%s',
-						unit, openApi.url, net.isTest);
+						unit, unitxApi.url, net.isTest);
 					continue;
 				}
+				*/
+				let ret = await net.pullBus(unit, maxId, faces);
+				if (!ret) continue;
+
                 let {maxMsgId, maxRows} = ret[0][0];
 				let messages = ret[1];
 				let {length: messagesLen} = messages;

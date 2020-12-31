@@ -8,6 +8,19 @@ export function urlSetCenterHost(url:string):string {
     return url.replace('://centerhost/', '://'+centerHost+'/');
 }
 
+export interface UnitxUrlServer {
+	type: 'tv'|'test'|'prod';
+	url:string;
+	server:number;
+	create: number;		// tick time on create
+}
+
+export interface CenterUnitxUrls {
+	tv: UnitxUrlServer;
+	test: UnitxUrlServer;
+	prod: UnitxUrlServer;
+}
+
 class CenterApi extends Fetch {
     constructor() {
         super(centerUrl);
@@ -25,8 +38,14 @@ class CenterApi extends Fetch {
         });
     }
 
-    async unitx(unit:number, direction: 'push'|'pull'):Promise<any> {
-        return await this.get('open/unitx', {unit, direction});
+    async unitx(unit:number):Promise<CenterUnitxUrls> {
+		let items:UnitxUrlServer[] = await this.get('open/unitx', {unit});
+		let ret:CenterUnitxUrls = {} as any;
+		for (let item of items) {
+			let {type} = item;
+			ret[type] = item;
+		}
+		return ret;
     }
 
     async uqUrl(unit:number, uq:number):Promise<any> {

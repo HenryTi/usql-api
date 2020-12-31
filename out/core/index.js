@@ -10,7 +10,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Fetch = exports.packArr = exports.packReturns = exports.unpack = exports.packParam = exports.packBus = exports.packReturn = exports.centerApi = exports.setUqBuildSecret = exports.authUpBuild = exports.authUnitx = exports.authDebug = exports.authCheck = exports.Auth = void 0;
+exports.Fetch = exports.packArr = exports.packReturns = exports.unpack = exports.packParam = exports.packBus = exports.packReturn = exports.setUqBuildSecret = exports.authUpBuild = exports.authUnitx = exports.authDebug = exports.authCheck = exports.Auth = void 0;
 var auth_1 = require("./auth");
 Object.defineProperty(exports, "Auth", { enumerable: true, get: function () { return auth_1.default; } });
 Object.defineProperty(exports, "authCheck", { enumerable: true, get: function () { return auth_1.authCheck; } });
@@ -18,8 +18,7 @@ Object.defineProperty(exports, "authDebug", { enumerable: true, get: function ()
 Object.defineProperty(exports, "authUnitx", { enumerable: true, get: function () { return auth_1.authUnitx; } });
 Object.defineProperty(exports, "authUpBuild", { enumerable: true, get: function () { return auth_1.authUpBuild; } });
 Object.defineProperty(exports, "setUqBuildSecret", { enumerable: true, get: function () { return auth_1.setUqBuildSecret; } });
-var centerApi_1 = require("./centerApi");
-Object.defineProperty(exports, "centerApi", { enumerable: true, get: function () { return centerApi_1.centerApi; } });
+__exportStar(require("./centerApi"), exports);
 var packReturn_1 = require("./packReturn");
 Object.defineProperty(exports, "packReturn", { enumerable: true, get: function () { return packReturn_1.packReturnsFromSchema; } });
 Object.defineProperty(exports, "packBus", { enumerable: true, get: function () { return packReturn_1.packBus; } });
@@ -37,4 +36,5 @@ __exportStar(require("./routerBuilder"), exports);
 __exportStar(require("./db"), exports);
 __exportStar(require("./model"), exports);
 __exportStar(require("./net"), exports);
+__exportStar(require("./getUrlDebug"), exports);
 //# sourceMappingURL=index.js.map
