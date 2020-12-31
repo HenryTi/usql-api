@@ -38,8 +38,8 @@ class CenterApi extends Fetch {
         });
     }
 
-    async unitx(unit:number):Promise<CenterUnitxUrls> {
-		let items:UnitxUrlServer[] = await this.get('open/unitx', {unit});
+    async unitUnitx(unit:number):Promise<CenterUnitxUrls> {
+		let items:UnitxUrlServer[] = await this.get('open/unit-unitx', {unit});
 		let ret:CenterUnitxUrls = {} as any;
 		for (let item of items) {
 			let {type} = item;

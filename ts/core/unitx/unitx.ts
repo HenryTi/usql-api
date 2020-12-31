@@ -56,7 +56,7 @@ export abstract class Unitx {
 	}
 
 	private async buildUnitxApiBox(unit:number): Promise<UnitxApiBox> {
-		let unitxUrls = await centerApi.unitx(unit);
+		let unitxUrls = await centerApi.unitUnitx(unit);
 		let {prev, current} = this.boxFromUrls(unitxUrls);
 		return {
 			prev: await this.buildUnitxApi(prev),

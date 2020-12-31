@@ -57,7 +57,7 @@ class Unitx {
     }
     buildUnitxApiBox(unit) {
         return __awaiter(this, void 0, void 0, function* () {
-            let unitxUrls = yield centerApi_1.centerApi.unitx(unit);
+            let unitxUrls = yield centerApi_1.centerApi.unitUnitx(unit);
             let { prev, current } = this.boxFromUrls(unitxUrls);
             return {
                 prev: yield this.buildUnitxApi(prev),
