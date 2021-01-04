@@ -398,7 +398,7 @@ export class EntityRunner {
         let sheetRun = this.sheetRuns[sheet];
         if (sheetRun === undefined) return;
         let {verify} = sheetRun;
-        if (verify === undefined) return;
+		if (verify === undefined) return;
         //let actionName = sheet + '$verify';
         let inBusAction = this.getSheetVerifyParametersBus(sheet);
         let inBusResult =  await inBusAction.buildData(unit, user, data);
@@ -406,11 +406,12 @@ export class EntityRunner {
 		let ret = await this.unitUserCall('tv_' + sheet + '$verify', unit, user, inBusActionData);	
         let {returns} = verify;
 		let {length} = returns;
-		if (length === 0) {
+		if (length === 0) return;
+		/*{
 			let error = 'returns.length cannot be 0 in SheetVerify';
 			console.error(error);
 			throw new Error(error);
-		}
+		}*/
 
 		if (length === 1) {
 			if (this.isVerifyItemOk(ret) === true) return;
