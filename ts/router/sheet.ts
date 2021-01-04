@@ -58,7 +58,7 @@ export function buildSheetRouter(router:Router, rb:RouterBuilder) {
         try {
             let verify = await runner.sheetVerify(name, unit, user, data);
             if (verify!==undefined) {
-                return {error: verify};
+                return {verify};
             }
             let result = await runner.sheetSave(name, unit, user, app, discription, data);
             let sheetRet = result[0];

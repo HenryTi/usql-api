@@ -104,6 +104,7 @@ export abstract class Unitx {
 			console.error(`unitxApi.fetchBus  url=${unitxApi.url} unit=${unit}`);
 			return;
 		}
+		return ret;
 	}
 	/*
     private async getUnitxUrl(unitxUrls: CenterUnitxUrls):Promise<string> {

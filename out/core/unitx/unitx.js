@@ -110,6 +110,7 @@ class Unitx {
                 console.error(`unitxApi.fetchBus  url=${unitxApi.url} unit=${unit}`);
                 return;
             }
+            return ret;
         });
     }
 }

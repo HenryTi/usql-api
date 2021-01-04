@@ -439,6 +439,14 @@ class EntityRunner {
         }
         return inBusAction;
     }
+    isVerifyItemOk(arr) { return arr.length === 0; }
+    isVerifyArrOk(arr) {
+        for (let item of arr) {
+            if (this.isVerifyItemOk(item) === false)
+                return false;
+        }
+        return true;
+    }
     sheetVerify(sheet, unit, user, data) {
         return __awaiter(this, void 0, void 0, function* () {
             let sheetRun = this.sheetRuns[sheet];
@@ -455,19 +463,18 @@ class EntityRunner {
             let { returns } = verify;
             let { length } = returns;
             if (length === 0) {
-                if (ret === undefined || ret.length === 0)
-                    return 'fail';
+                let error = 'returns.length cannot be 0 in SheetVerify';
+                console.error(error);
+                throw new Error(error);
+            }
+            if (length === 1) {
+                if (this.isVerifyItemOk(ret) === true)
+                    return;
+            }
+            if (this.isVerifyArrOk(ret) === true)
                 return;
-            }
-            if (length === 1)
-                ret = [ret];
-            for (let i = 0; i < length; i++) {
-                let t = ret[i];
-                if (t.length > 0) {
-                    return packReturn_1.packReturns(returns, ret);
-                }
-            }
-            return;
+            let failed = packReturn_1.packReturns(returns, ret);
+            return failed;
         });
     }
     sheetSave(sheet, unit, user, app, discription, data) {

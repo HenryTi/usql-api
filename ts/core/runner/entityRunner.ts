@@ -386,7 +386,14 @@ export class EntityRunner {
 			}
         }
         return inBusAction;
-    }
+	}
+	private isVerifyItemOk(arr: any[]): boolean {return arr.length === 0}
+	private isVerifyArrOk(arr: any[]): boolean {
+		for (let item of arr) {
+			if (this.isVerifyItemOk(item) === false) return false;
+		}
+		return true;
+	}
     async sheetVerify(sheet:string, unit:number, user:number, data:string):Promise<string> {
         let sheetRun = this.sheetRuns[sheet];
         if (sheetRun === undefined) return;
@@ -396,21 +403,22 @@ export class EntityRunner {
         let inBusAction = this.getSheetVerifyParametersBus(sheet);
         let inBusResult =  await inBusAction.buildData(unit, user, data);
         let inBusActionData = data + inBusResult;
-        let ret = await this.unitUserCall('tv_' + sheet + '$verify', unit, user, inBusActionData);
+		let ret = await this.unitUserCall('tv_' + sheet + '$verify', unit, user, inBusActionData);	
         let {returns} = verify;
-        let {length} = returns;
-        if (length === 0) {
-            if (ret === undefined || ret.length === 0) return 'fail';
-            return;
-        }
-        if (length === 1) ret = [ret];
-        for (let i=0; i<length; i++) {
-            let t = ret[i];
-            if (t.length > 0) {
-                return packReturns(returns, ret);
-            }
-        }
-        return;
+		let {length} = returns;
+		if (length === 0) {
+			let error = 'returns.length cannot be 0 in SheetVerify';
+			console.error(error);
+			throw new Error(error);
+		}
+
+		if (length === 1) {
+			if (this.isVerifyItemOk(ret) === true) return;
+		}
+		if (this.isVerifyArrOk(ret) === true) return;
+
+		let failed = packReturns(returns, ret);
+		return failed;
     }
     async sheetSave(sheet:string, unit:number, user:number, app:number, discription:string, data:string): Promise<{}> {
         return await this.unitUserCall('tv_$sheet_save', unit, user, sheet, app, discription, data);
