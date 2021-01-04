@@ -22,6 +22,7 @@ export class UnitxApi extends Fetch {
 		}
 		catch (err) {
 			console.error('fetchBus error: url=%s, unit=%s', this.baseUrl, unit);
+			console.error('fetchBus error: ', err);
 			return undefined;
 		}
     }
