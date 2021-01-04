@@ -430,7 +430,7 @@ __proc_exit: BEGIN
 	IF _procOld IS NULL THEN
 	INSERT INTO tv_$proc (name, proc, changed) 
 		VALUES (_name, _proc, 1);
-	ELSEIF _proc=_procOld THEN
+	ELSEIF binary _proc=_procOld THEN
 		SET _changed=0;
 	ELSE
 	UPDATE tv_$proc SET proc=_proc, changed=1 
