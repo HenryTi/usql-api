@@ -110,7 +110,11 @@ export class EntityRunner {
         if (version === Number(rolesVersion) && roles === Number(rolesBin)) return;
         return ret;
     }
-
+	async getUserRoles(unit:number, user:number):Promise<string> {
+		let tbl = await this.tableFromProc('$user_roles', [unit, user]);
+		if (tbl.length === 0) return;
+		return tbl[0].roles;
+	}
     checkUqVersion(uqVersion:number) {
         //if (this.uqVersion === undefined) return;
         //if (uqVersion !== this.uqVersion) 
@@ -861,7 +865,7 @@ export class EntityRunner {
         let result = await this.db.tablesFromProc('tv_$get_access', [unit]);
         let ret = _.union(result[0].map(v => v.entity), result[1].map(v => v.entity));
         return ret;
-    }
+	}
     async getAccesses(unit:number, user:number, acc:string[]):Promise<any> {
         await this.init();
         let access = {} as any;
@@ -952,4 +956,3 @@ export class EntityRunner {
         this.actionConvertSchemas[name] = value;
     }
 }
-

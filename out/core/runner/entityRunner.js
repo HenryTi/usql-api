@@ -68,6 +68,14 @@ class EntityRunner {
             return ret;
         });
     }
+    getUserRoles(unit, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let tbl = yield this.tableFromProc('$user_roles', [unit, user]);
+            if (tbl.length === 0)
+                return;
+            return tbl[0].roles;
+        });
+    }
     checkUqVersion(uqVersion) {
         //if (this.uqVersion === undefined) return;
         //if (uqVersion !== this.uqVersion) 

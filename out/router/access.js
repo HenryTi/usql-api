@@ -38,6 +38,10 @@ function buildAccessRouter(router, rb) {
         let entities = yield runner.getAllSchemas();
         return entities;
     }));
+    rb.entityGet(router, 'roles', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let roles = yield runner.getUserRoles(unit, user);
+        return roles;
+    }));
 }
 exports.buildAccessRouter = buildAccessRouter;
 //# sourceMappingURL=access.js.map

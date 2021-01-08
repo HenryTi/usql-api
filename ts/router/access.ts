@@ -33,5 +33,11 @@ export function buildAccessRouter(router:Router, rb:RouterBuilder) {
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let entities = await runner.getAllSchemas();
         return entities;
-    });
+	});
+	
+	rb.entityGet(router, 'roles', '',
+	async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let roles = await runner.getUserRoles(unit, user);
+        return roles;
+    })
 }
