@@ -70,10 +70,17 @@ class EntityRunner {
     }
     getUserRoles(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (!this.roleNames)
+                return;
             let tbl = yield this.tableFromProc('$user_roles', [unit, user]);
             if (tbl.length === 0)
                 return;
-            return tbl[0].roles;
+            let { roles, admin } = tbl[0];
+            switch (admin) {
+                default: return roles;
+                case 1: return '$|' + this.roleNames;
+                case 2: return '$' + roles;
+            }
         });
     }
     checkUqVersion(uqVersion) {
@@ -676,7 +683,7 @@ class EntityRunner {
         });
     }
     initInternal() {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             let rows = yield this.loadSchemas(0);
             let schemaTable = rows[0];
@@ -735,6 +742,7 @@ class EntityRunner {
                 switch (type) {
                     case '$role':
                         this.role = schemaObj;
+                        this.roleNames = (_a = schemaObj === null || schemaObj === void 0 ? void 0 : schemaObj.names) === null || _a === void 0 ? void 0 : _a.join('|');
                         break;
                     case 'access':
                         this.accessSchemaArr.push(schemaObj);
@@ -780,7 +788,7 @@ class EntityRunner {
                     case 'sheet':
                         this.hasSheet = true;
                         this.sheetRuns[name] = {
-                            onsave: ((_a = runObj === null || runObj === void 0 ? void 0 : runObj.run['$']) === null || _a === void 0 ? void 0 : _a['$onsave']) !== undefined,
+                            onsave: ((_b = runObj === null || runObj === void 0 ? void 0 : runObj.run['$']) === null || _b === void 0 ? void 0 : _b['$onsave']) !== undefined,
                             verify: schemaObj.verify,
                         };
                         break;

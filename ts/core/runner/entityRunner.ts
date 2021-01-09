@@ -41,7 +41,8 @@ export class EntityRunner {
     private access:any;
     private schemas: {[entity:string]: {type:string; from:string; call:any; run:any;}};
     private accessSchemaArr: any[];
-    private role: any;
+	private role: any;
+	private roleNames: string;
     private tuids: {[name:string]: any};
     private busArr: any[];
     //private setting: {[name:string]: any};
@@ -111,9 +112,16 @@ export class EntityRunner {
         return ret;
     }
 	async getUserRoles(unit:number, user:number):Promise<string> {
+		if (!this.roleNames) return;
 		let tbl = await this.tableFromProc('$user_roles', [unit, user]);
 		if (tbl.length === 0) return;
-		return tbl[0].roles;
+		let {roles, admin} = tbl[0];
+		
+		switch (admin) {
+			default: return roles;
+			case 1: return '$|' + this.roleNames;
+			case 2: return '$' + roles;
+		}
 	}
     checkUqVersion(uqVersion:number) {
         //if (this.uqVersion === undefined) return;
@@ -635,7 +643,8 @@ export class EntityRunner {
             }
             switch (type) {
                 case '$role':
-                    this.role = schemaObj;
+					this.role = schemaObj;
+					this.roleNames = schemaObj?.names?.join('|');
                     break;
                 case 'access':
                     this.accessSchemaArr.push(schemaObj); 
