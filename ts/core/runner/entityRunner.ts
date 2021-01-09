@@ -111,9 +111,9 @@ export class EntityRunner {
         if (version === Number(rolesVersion) && roles === Number(rolesBin)) return;
         return ret;
     }
-	async getUserRoles(unit:number, user:number):Promise<string> {
+	async getUserRoles(unit:number, user:number, theUser:number):Promise<string> {
 		if (!this.roleNames) return;
-		let tbl = await this.tableFromProc('$user_roles', [unit, user]);
+		let tbl = await this.tableFromProc('$get_user_roles', [unit, user, theUser]);
 		if (tbl.length === 0) return;
 		let {roles, admin} = tbl[0];
 		
@@ -122,6 +122,13 @@ export class EntityRunner {
 			case 1: return '$|' + this.roleNames;
 			case 2: return '$' + roles;
 		}
+	}
+	async getAllRoleUsers(unit:number, user:number):Promise<any[]> {
+		let tbl = await this.tableFromProc('$get_all_role_users', [unit, user]);
+		return tbl;
+	}
+	async setUserRoles(unit:number, user:number, theUser:number, admin:number, roles:string):Promise<any> {
+		await this.unitUserCall('$set_user_roles', unit, user, theUser, admin, roles);
 	}
     checkUqVersion(uqVersion:number) {
         //if (this.uqVersion === undefined) return;

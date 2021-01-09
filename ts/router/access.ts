@@ -35,9 +35,22 @@ export function buildAccessRouter(router:Router, rb:RouterBuilder) {
         return entities;
 	});
 	
-	rb.entityGet(router, 'roles', '',
+	rb.entityGet(router, 'get-user-roles', '',
 	async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
-        let roles = await runner.getUserRoles(unit, user);
+		let {theUser} = body;
+        let roles = await runner.getUserRoles(unit, user, theUser);
         return roles;
+    })
+	
+	rb.entityGet(router, 'get-all-role-users', '',
+	async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let roles = await runner.getAllRoleUsers(unit, user);
+        return roles;
+    })
+	
+	rb.entityPost(router, 'set-user-roles', '',
+	async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+		let {theUser, admin, roles} = body;
+        await runner.setUserRoles(unit, user, theUser, admin, roles);
     })
 }

@@ -68,11 +68,11 @@ class EntityRunner {
             return ret;
         });
     }
-    getUserRoles(unit, user) {
+    getUserRoles(unit, user, theUser) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.roleNames)
                 return;
-            let tbl = yield this.tableFromProc('$user_roles', [unit, user]);
+            let tbl = yield this.tableFromProc('$get_user_roles', [unit, user, theUser]);
             if (tbl.length === 0)
                 return;
             let { roles, admin } = tbl[0];
@@ -81,6 +81,17 @@ class EntityRunner {
                 case 1: return '$|' + this.roleNames;
                 case 2: return '$' + roles;
             }
+        });
+    }
+    getAllRoleUsers(unit, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let tbl = yield this.tableFromProc('$get_all_role_users', [unit, user]);
+            return tbl;
+        });
+    }
+    setUserRoles(unit, user, theUser, admin, roles) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.unitUserCall('$set_user_roles', unit, user, theUser, admin, roles);
         });
     }
     checkUqVersion(uqVersion) {
