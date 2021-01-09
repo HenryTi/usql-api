@@ -68,11 +68,11 @@ class EntityRunner {
             return ret;
         });
     }
-    getUserRoles(unit, user, theUser) {
+    getMyRoles(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.roleNames)
                 return;
-            let tbl = yield this.tableFromProc('$get_user_roles', [unit, user, theUser]);
+            let tbl = yield this.tableFromProc('$get_my_roles', [unit, user]);
             if (tbl.length === 0)
                 return;
             let { roles, admin } = tbl[0];

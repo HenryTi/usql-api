@@ -38,9 +38,8 @@ function buildAccessRouter(router, rb) {
         let entities = yield runner.getAllSchemas();
         return entities;
     }));
-    rb.entityGet(router, 'get-user-roles', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { theUser } = body;
-        let roles = yield runner.getUserRoles(unit, user, theUser);
+    rb.entityGet(router, 'get-roles', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let roles = yield runner.getMyRoles(unit, user);
         return roles;
     }));
     rb.entityGet(router, 'get-all-role-users', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {

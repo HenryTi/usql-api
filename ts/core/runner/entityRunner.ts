@@ -111,9 +111,9 @@ export class EntityRunner {
         if (version === Number(rolesVersion) && roles === Number(rolesBin)) return;
         return ret;
     }
-	async getUserRoles(unit:number, user:number, theUser:number):Promise<string> {
+	async getMyRoles(unit:number, user:number):Promise<string> {
 		if (!this.roleNames) return;
-		let tbl = await this.tableFromProc('$get_user_roles', [unit, user, theUser]);
+		let tbl = await this.tableFromProc('$get_my_roles', [unit, user]);
 		if (tbl.length === 0) return;
 		let {roles, admin} = tbl[0];
 		

@@ -35,10 +35,9 @@ export function buildAccessRouter(router:Router, rb:RouterBuilder) {
         return entities;
 	});
 	
-	rb.entityGet(router, 'get-user-roles', '',
+	rb.entityGet(router, 'get-roles', '',
 	async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
-		let {theUser} = body;
-        let roles = await runner.getUserRoles(unit, user, theUser);
+        let roles = await runner.getMyRoles(unit, user);
         return roles;
     })
 	
