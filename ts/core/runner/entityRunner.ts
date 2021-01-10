@@ -128,7 +128,10 @@ export class EntityRunner {
 		return tbl;
 	}
 	async setUserRoles(unit:number, user:number, theUser:number, admin:number, roles:string):Promise<any> {
-		await this.unitUserCall('$set_user_roles', unit, user, theUser, admin, roles);
+		await this.call('$set_user_roles', [unit, user, theUser, admin, roles]);
+	}
+	async deleteUserRoles(unit:number, user:number, theUser:number):Promise<any> {
+		await this.call('$delete_user_roles', [unit, user, theUser]);
 	}
     checkUqVersion(uqVersion:number) {
         //if (this.uqVersion === undefined) return;

@@ -46,9 +46,15 @@ function buildAccessRouter(router, rb) {
         let roles = yield runner.getAllRoleUsers(unit, user);
         return roles;
     }));
+    rb.entityGet(router, 'delete-user-roles', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let { theUser } = body;
+        yield runner.deleteUserRoles(unit, user, theUser);
+        return;
+    }));
     rb.entityPost(router, 'set-user-roles', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let { theUser, admin, roles } = body;
         yield runner.setUserRoles(unit, user, theUser, admin, roles);
+        return;
     }));
 }
 exports.buildAccessRouter = buildAccessRouter;

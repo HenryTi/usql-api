@@ -46,10 +46,18 @@ export function buildAccessRouter(router:Router, rb:RouterBuilder) {
         let roles = await runner.getAllRoleUsers(unit, user);
         return roles;
     })
+
+	rb.entityGet(router, 'delete-user-roles', '',
+	async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+		let {theUser} = body;
+		await runner.deleteUserRoles(unit, user, theUser);
+		return;
+    })
 	
 	rb.entityPost(router, 'set-user-roles', '',
 	async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
 		let {theUser, admin, roles} = body;
-        await runner.setUserRoles(unit, user, theUser, admin, roles);
+		await runner.setUserRoles(unit, user, theUser, admin, roles);
+		return;
     })
 }

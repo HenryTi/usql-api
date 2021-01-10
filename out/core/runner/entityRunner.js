@@ -91,7 +91,12 @@ class EntityRunner {
     }
     setUserRoles(unit, user, theUser, admin, roles) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.unitUserCall('$set_user_roles', unit, user, theUser, admin, roles);
+            yield this.call('$set_user_roles', [unit, user, theUser, admin, roles]);
+        });
+    }
+    deleteUserRoles(unit, user, theUser) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.call('$delete_user_roles', [unit, user, theUser]);
         });
     }
     checkUqVersion(uqVersion) {
