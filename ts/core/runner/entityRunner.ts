@@ -117,11 +117,17 @@ export class EntityRunner {
 		if (tbl.length === 0) return;
 		let {roles, admin} = tbl[0];
 		
+		if (admin > 0) {
+			return '$|' + this.roleNames;
+		}
+		return roles;
+		/*
 		switch (admin) {
 			default: return roles;
 			case 1: return '$|' + this.roleNames;
 			case 2: return '$' + roles;
 		}
+		*/
 	}
 	async getAllRoleUsers(unit:number, user:number):Promise<any[]> {
 		let tbl = await this.tableFromProc('$get_all_role_users', [unit, user]);
