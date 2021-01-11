@@ -52,8 +52,8 @@ function buildAccessRouter(router, rb) {
         return;
     }));
     rb.entityPost(router, 'set-user-roles', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let { theUser, admin, roles } = body;
-        yield runner.setUserRoles(unit, user, theUser, admin, roles);
+        let { theUser, roles } = body;
+        yield runner.setUserRoles(unit, user, theUser, roles);
         return;
     }));
 }

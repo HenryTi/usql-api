@@ -133,8 +133,8 @@ export class EntityRunner {
 		let tbl = await this.tableFromProc('$get_all_role_users', [unit, user]);
 		return tbl;
 	}
-	async setUserRoles(unit:number, user:number, theUser:number, admin:number, roles:string):Promise<any> {
-		await this.call('$set_user_roles', [unit, user, theUser, admin, roles]);
+	async setUserRoles(unit:number, user:number, theUser:number, roles:string):Promise<any> {
+		await this.call('$set_user_roles', [unit, user, theUser, roles]);
 	}
 	async deleteUserRoles(unit:number, user:number, theUser:number):Promise<any> {
 		await this.call('$delete_user_roles', [unit, user, theUser]);

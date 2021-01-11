@@ -56,8 +56,8 @@ export function buildAccessRouter(router:Router, rb:RouterBuilder) {
 	
 	rb.entityPost(router, 'set-user-roles', '',
 	async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
-		let {theUser, admin, roles} = body;
-		await runner.setUserRoles(unit, user, theUser, admin, roles);
+		let {theUser, roles} = body;
+		await runner.setUserRoles(unit, user, theUser, roles);
 		return;
     })
 }
