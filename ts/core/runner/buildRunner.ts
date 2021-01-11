@@ -34,9 +34,14 @@ export class BuildRunner {
         return v;
 	}
 	async setUnitAdmin(unitAdmin:{unit:number, admin:number}[]) {
-		for (let ua of unitAdmin) {
-			let {unit, admin} = ua;
-			await this.db.call('tv_$set_unit_admin', [unit, admin]);
+		try {
+			for (let ua of unitAdmin) {
+				let {unit, admin} = ua;
+				await this.db.call('tv_$set_unit_admin', [unit, admin]);
+			}
+		}
+		catch (err) {
+			console.error('set unit admin', err);
 		}
 	}
 
