@@ -189,10 +189,16 @@ function buildBuildRouter(router, rb) {
             let runner = new core_2.BuildRunner(db);
             let promises = [];
             let { body } = req;
+            let service;
             for (let i in body) {
-                promises.push(runner.setSetting(0, i, body[i]));
+                let v = body[i];
+                if (i === 'service')
+                    service = v;
+                promises.push(runner.setSetting(0, i, v));
             }
             yield Promise.all(promises);
+            let units = yield core_1.centerApi.serviceUnit(service);
+            yield runner.setUnitAdmin(units);
             res.json({
                 ok: true,
             });

@@ -45,6 +45,14 @@ class BuildRunner {
             return v;
         });
     }
+    setUnitAdmin(unitAdmin) {
+        return __awaiter(this, void 0, void 0, function* () {
+            for (let ua of unitAdmin) {
+                let { unit, admin } = ua;
+                yield this.db.call('tv_$set_unit_admin', [unit, admin]);
+            }
+        });
+    }
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
             try {

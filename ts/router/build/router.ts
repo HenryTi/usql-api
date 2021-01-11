@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { EntityRunner, RouterBuilder, setUqBuildSecret, Db, prodNet, testNet } from '../../core';
+import { EntityRunner, RouterBuilder, setUqBuildSecret, Db, prodNet, testNet, centerApi } from '../../core';
 import { BuildRunner } from '../../core';
 
 export function buildBuildRouter(router:Router, rb: RouterBuilder) {
@@ -184,10 +184,17 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
 			let runner = new BuildRunner(db);
 			let promises:Promise<any>[] = [];
 			let {body} = req;
+			let service:any;
 			for (let i in body) {
-				promises.push(runner.setSetting(0, i, body[i]));
+				let v = body[i];
+				if (i === 'service') service = v;
+				promises.push(runner.setSetting(0, i, v));
 			}
 			await Promise.all(promises);
+
+			let units = await centerApi.serviceUnit(service);
+			await runner.setUnitAdmin(units);
+
             res.json({
                 ok: true,
             });

@@ -50,7 +50,11 @@ class CenterApi extends Fetch {
 
     async uqUrl(unit:number, uq:number):Promise<any> {
         return await this.get('open/uq-url', {unit:unit, uq:uq});
-    }
+	}
+	
+	async serviceUnit(service:number):Promise<any[]> {
+		return await this.get('dev/service-unit', {service});
+	}
 
     async urlFromUq(unit:number, uqFullName:string):Promise<{db:string, url:string, urlTest:string}> {
         return await this.post('open/url-from-uq', {unit:unit, uq:uqFullName});

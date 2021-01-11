@@ -32,7 +32,13 @@ export class BuildRunner {
             v = this.setting[name] = isNaN(n)===true? v : n;
         }
         return v;
-    }
+	}
+	async setUnitAdmin(unitAdmin:{unit:number, admin:number}[]) {
+		for (let ua of unitAdmin) {
+			let {unit, admin} = ua;
+			await this.db.call('tv_$set_unit_admin', [unit, admin]);
+		}
+	}
 
     async sql(sql:string, params:any[]): Promise<any> {
         try {

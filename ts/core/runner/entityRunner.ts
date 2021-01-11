@@ -260,30 +260,6 @@ export class EntityRunner {
     async create$UqDb(): Promise<void> {
         await this.db.create$UqDb();
 	}
-/*	
-    async initSetting():Promise<void> {
-        await this.db.call('tv_$init_setting', []);
-    }
-    async setSetting(unit:number, name: string, value: string): Promise<void> {
-        name = name.toLowerCase();
-        await this.unitCall('tv_$set_setting', unit, name, value);
-        if (unit === 0) {
-            let n = Number(value);
-            this.setting[name] = n === NaN? value : n;
-        }
-    }
-    async getSetting(unit:number, name: string):Promise<any> {
-        name = name.toLowerCase();
-        let ret = await this.unitTableFromProc('tv_$get_setting', unit, name);
-        if (ret.length===0) return undefined;
-        let v = ret[0].value;
-        if (unit === 0) {
-            let n = Number(v);
-            v = this.setting[name] = isNaN(n)===true? v : n;
-        }
-        return v;
-    }
-*/
     async loadSchemas(hasSource:number): Promise<any[][]> {
         return await this.db.tablesFromProc('tv_$entitys', [hasSource]);
     }
