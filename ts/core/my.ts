@@ -183,8 +183,9 @@ export class MyDbServer extends DbServer {
 		let result = await this.exec(sql, params);
 		return result;
 	}
-	async sqlDropProc(db:string, procName:string): Promise<any> {
-		let sql = `DROP PROCEDURE IF EXISTS  \`${db}\`.\`${procName}\``;
+	async sqlDropProc(db:string, procName:string, isFunc:boolean): Promise<any> {
+		let type = isFunc === true? 'FUNCTION' : 'PROCEDURE';
+		let sql = `DROP ${type} IF EXISTS  \`${db}\`.\`${procName}\``;
 		await this.exec(sql, []);
 	}
 
@@ -215,8 +216,9 @@ export class MyDbServer extends DbServer {
 		this.procColl[procName.toLowerCase()] = isOk;
 	}
 
-	async buildProc(db:string, procName:string, procSql:string):Promise<any> {
-		let drop = `USE \`${db}\`; DROP PROCEDURE IF EXISTS \`${db}\`.\`${procName}\`;`;
+	async buildProc(db:string, procName:string, procSql:string, isFunc:boolean=false):Promise<any> {
+		let type = isFunc === true? 'FUNCTION' : 'PROCEDURE';
+		let drop = `USE \`${db}\`; DROP ${type} IF EXISTS \`${db}\`.\`${procName}\`;`;
 		await this.sql(db, drop + /*collationConnection + */procSql, undefined);
 		// clear changed flag
 		await this.callProcBase(db, 'tv_$proc_save', [db, procName, undefined]);

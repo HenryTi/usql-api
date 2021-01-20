@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BuildRunner = void 0;
+const centerApi_1 = require("../centerApi");
 class BuildRunner {
     constructor(db) {
         this.setting = {};
@@ -45,6 +46,17 @@ class BuildRunner {
             return v;
         });
     }
+    setSettingInt(unit, name, int, big) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.unitCall('tv_$set_setting_int', unit, name, int, big);
+        });
+    }
+    getSettingInt(unit, name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let ret = yield this.unitTableFromProc('tv_$get_setting_int', unit, name);
+            return ret[0];
+        });
+    }
     setUnitAdmin(unitAdmin) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -55,6 +67,29 @@ class BuildRunner {
             }
             catch (err) {
                 console.error('set unit admin', err);
+            }
+        });
+    }
+    // type: 1=prod, 2=test
+    refreshXuid(service) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let tbl = yield this.db.tableFromProc('tv_$xuid_section_get', []);
+            let { section, sectionCount } = tbl[0];
+            if (sectionCount <= 0 || sectionCount > 8) {
+                return;
+            }
+            let type = this.db.isTesting === true ? 2 : 1;
+            let ret = yield centerApi_1.centerApi.xuidApply(service, type, section, sectionCount);
+            if (ret) {
+                let { start, end, section_max, service_max } = ret;
+                if (start) {
+                    yield this.db.call('tv_$xuid_section_set', [start, end - start]);
+                }
+                else {
+                    let err = `xuid unmatch: here_max:${section_max} center_max here: ${service_max}`;
+                    console.error(err);
+                    throw err;
+                }
             }
         });
     }
@@ -80,11 +115,11 @@ class BuildRunner {
             }
         });
     }
-    procCoreSql(procName, procSql) {
+    procCoreSql(procName, procSql, isFunc) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 yield this.db.sqlProc(procName, procSql);
-                yield this.db.buildProc(procName, procSql);
+                yield this.db.buildProc(procName, procSql, isFunc);
             }
             catch (err) {
                 debugger;

@@ -142,9 +142,9 @@ class Db {
             return yield this.dbServer.sql(this.dbName, sql, params);
         });
     }
-    sqlDropProc(procName) {
+    sqlDropProc(procName, isFunc) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.dbServer.sqlDropProc(this.dbName, procName);
+            return yield this.dbServer.sqlDropProc(this.dbName, procName, isFunc);
         });
     }
     sqlProc(procName, procSql) {
@@ -152,9 +152,9 @@ class Db {
             return yield this.dbServer.sqlProc(this.dbName, procName, procSql);
         });
     }
-    buildProc(procName, procSql) {
+    buildProc(procName, procSql, isFunc) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.dbServer.buildProc(this.dbName, procName, procSql);
+            yield this.dbServer.buildProc(this.dbName, procName, procSql, isFunc);
         });
     }
     buildRealProcFrom$ProcTable(proc) {

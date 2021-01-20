@@ -18,7 +18,8 @@ export abstract class Net {
 		this.buildUnitx();
     }
 
-    protected abstract buildUnitx():void;
+	protected abstract buildUnitx():void;
+	protected abstract get isTesting(): boolean;
     abstract getUqFullName(uq:string):string;
 	
     protected async innerRunner(name:string):Promise<EntityRunner> {
@@ -27,7 +28,8 @@ export abstract class Net {
         if (runner === null) return;
         if (runner === undefined) {
             let dbName = this.getDbName(name);
-            let db = Db.db(dbName);
+			let db = Db.db(dbName);
+			db.isTesting = this.isTesting;
             runner = await this.createRunnerFromDb(name, db);
             if (runner === undefined) return;
         }
@@ -318,6 +320,7 @@ export abstract class Net {
 
 class ProdNet extends Net {
 	protected buildUnitx():void {this.unitx = new UnitxProd();}
+	protected get isTesting(): boolean {return false;}
 	getDbName(name:string):string {return name}
     getUqFullName(uq:string):string {return uq}
     protected getUrl(db:string, url:string):string {
@@ -336,6 +339,7 @@ class ProdNet extends Net {
 
 class TestNet extends Net {
 	protected buildUnitx():void {this.unitx = new UnitxTest();}
+	protected get isTesting(): boolean {return false;}
     getDbName(name:string):string {return name + '$test'}
     getUqFullName(uq:string):string {return uq + '$test'}
     protected getUrl(db:string, url:string):string {

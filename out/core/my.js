@@ -184,9 +184,10 @@ class MyDbServer extends dbServer_1.DbServer {
             return result;
         });
     }
-    sqlDropProc(db, procName) {
+    sqlDropProc(db, procName, isFunc) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = `DROP PROCEDURE IF EXISTS  \`${db}\`.\`${procName}\``;
+            let type = isFunc === true ? 'FUNCTION' : 'PROCEDURE';
+            let sql = `DROP ${type} IF EXISTS  \`${db}\`.\`${procName}\``;
             yield this.exec(sql, []);
         });
     }
@@ -220,9 +221,10 @@ class MyDbServer extends dbServer_1.DbServer {
             this.procColl[procName.toLowerCase()] = isOk;
         });
     }
-    buildProc(db, procName, procSql) {
+    buildProc(db, procName, procSql, isFunc = false) {
         return __awaiter(this, void 0, void 0, function* () {
-            let drop = `USE \`${db}\`; DROP PROCEDURE IF EXISTS \`${db}\`.\`${procName}\`;`;
+            let type = isFunc === true ? 'FUNCTION' : 'PROCEDURE';
+            let drop = `USE \`${db}\`; DROP ${type} IF EXISTS \`${db}\`.\`${procName}\`;`;
             yield this.sql(db, drop + /*collationConnection + */ procSql, undefined);
             // clear changed flag
             yield this.callProcBase(db, 'tv_$proc_save', [db, procName, undefined]);

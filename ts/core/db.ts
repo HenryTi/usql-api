@@ -101,6 +101,7 @@ export abstract class Db {
     private isExists: boolean = false;
 	protected dbServer: DbServer;
 	serverId: number;
+	isTesting: boolean;
 
 	constructor(dbName: string) {
 		this.dbName = dbName;
@@ -154,14 +155,14 @@ export abstract class Db {
         //this.devLog('sql', params);
         return await this.dbServer.sql(this.dbName, sql, params);
     }
-    async sqlDropProc(procName:string): Promise<any> {
-        return await this.dbServer.sqlDropProc(this.dbName, procName);
+    async sqlDropProc(procName:string, isFunc:boolean): Promise<any> {
+        return await this.dbServer.sqlDropProc(this.dbName, procName, isFunc);
     }
     async sqlProc(procName:string, procSql:string): Promise<any> {
         return await this.dbServer.sqlProc(this.dbName, procName, procSql);
     }
-    async buildProc(procName:string, procSql:string): Promise<void> {
-        await this.dbServer.buildProc(this.dbName, procName, procSql);
+    async buildProc(procName:string, procSql:string, isFunc:boolean): Promise<void> {
+        await this.dbServer.buildProc(this.dbName, procName, procSql, isFunc);
 	}
 	async buildRealProcFrom$ProcTable(proc:string): Promise<void> {
 		await this.dbServer.buildRealProcFrom$ProcTable(this.dbName, proc);

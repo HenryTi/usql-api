@@ -3,9 +3,9 @@ export abstract class DbServer {
 	abstract reset():void;
 	abstract sql(db:string, sql:string, params:any[]): Promise<any>;
 	abstract sqlProc(db:string, procName:string, procSql:string): Promise<any>;
-    abstract buildProc(db:string, procName:string, procSql:string): Promise<void>;
+    abstract buildProc(db:string, procName:string, procSql:string, isFunc:boolean): Promise<void>;
 	abstract buildRealProcFrom$ProcTable(db:string, proc:string): Promise<void>;
-	abstract sqlDropProc(db:string, procName:string): Promise<any>;
+	abstract sqlDropProc(db:string, procName:string, isFunc:boolean): Promise<any>;
 	abstract call(db:string, proc:string, params:any[]): Promise<any>;
     abstract callEx(db:string, proc:string, params:any[]): Promise<any>;
     abstract buildTuidAutoId(db:string): Promise<void>;

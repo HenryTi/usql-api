@@ -34,6 +34,7 @@ class Net {
             if (runner === undefined) {
                 let dbName = this.getDbName(name);
                 let db = db_1.Db.db(dbName);
+                db.isTesting = this.isTesting;
                 runner = yield this.createRunnerFromDb(name, db);
                 if (runner === undefined)
                     return;
@@ -291,6 +292,7 @@ class Net {
 exports.Net = Net;
 class ProdNet extends Net {
     buildUnitx() { this.unitx = new unitx_1.UnitxProd(); }
+    get isTesting() { return false; }
     getDbName(name) { return name; }
     getUqFullName(uq) { return uq; }
     getUrl(db, url) {
@@ -300,6 +302,7 @@ class ProdNet extends Net {
 }
 class TestNet extends Net {
     buildUnitx() { this.unitx = new unitx_1.UnitxTest(); }
+    get isTesting() { return false; }
     getDbName(name) { return name + '$test'; }
     getUqFullName(uq) { return uq + '$test'; }
     getUrl(db, url) {

@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { centerApi } from '../centerApi';
 import { Db } from '../db';
 
 export class BuildRunner {
@@ -33,6 +34,14 @@ export class BuildRunner {
         }
         return v;
 	}
+    async setSettingInt(unit:number, name: string, int: number, big: number): Promise<void> {
+        await this.unitCall('tv_$set_setting_int', unit, name, int, big);
+    }
+    async getSettingInt(unit:number, name: string):Promise<{int:number; big:number}> {
+		let ret = await this.unitTableFromProc('tv_$get_setting_int', unit, name);
+		return ret[0];
+	}
+
 	async setUnitAdmin(unitAdmin:{unit:number, admin:number}[]) {
 		try {
 			for (let ua of unitAdmin) {
@@ -42,6 +51,28 @@ export class BuildRunner {
 		}
 		catch (err) {
 			console.error('set unit admin', err);
+		}
+	}
+
+	// type: 1=prod, 2=test
+	async refreshXuid(service: number) {
+		let tbl = await this.db.tableFromProc('tv_$xuid_section_get', []);
+		let {section, sectionCount} = tbl[0];
+		if (sectionCount <= 0 || sectionCount > 8) {
+			return;
+		}
+		let type:1|2 = this.db.isTesting === true? 2:1;
+		let ret = await centerApi.xuidApply(service, type, section, sectionCount);
+		if (ret) {
+			let {start, end, section_max, service_max} = ret;
+			if (start) {
+				await this.db.call('tv_$xuid_section_set', [start, end-start]);
+			}
+			else {
+				let err = `xuid unmatch: here_max:${section_max} center_max here: ${service_max}`;
+				console.error(err);
+				throw err;
+			}
 		}
 	}
 
@@ -63,10 +94,10 @@ export class BuildRunner {
             throw err;
         }
     }
-    async procCoreSql(procName:string, procSql:string): Promise<any> {
+    async procCoreSql(procName:string, procSql:string, isFunc:boolean): Promise<any> {
         try {
 			await this.db.sqlProc(procName, procSql);
-			await this.db.buildProc(procName, procSql);
+			await this.db.buildProc(procName, procSql, isFunc);
         }
         catch (err) {
             debugger;

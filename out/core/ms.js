@@ -11,9 +11,9 @@ class MsDbServer extends dbServer_1.DbServer {
     ;
     sql(db, sql, params) { return; }
     sqlProc(db, procName, procSql) { return; }
-    buildProc(db, procName, procSql) { return; }
+    buildProc(db, procName, procSql, isFunc) { return; }
     buildRealProcFrom$ProcTable(db, proc) { return; }
-    sqlDropProc(db, procName) { return; }
+    sqlDropProc(db, procName, isFunc) { return; }
     call(db, proc, params) { return; }
     callEx(db, proc, params) { return; }
     buildTuidAutoId(db) { return; }

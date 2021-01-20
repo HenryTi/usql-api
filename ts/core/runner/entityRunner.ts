@@ -601,8 +601,8 @@ export class EntityRunner {
         this.version = setting['version'] as string;        // source verion in uq code
         this.uqVersion = setting['uqversion'] as number;    // compile changed
         if (this.uqVersion === undefined) this.uqVersion = 1;
-        this.hasUnit = !(setting['hasunit'] as number === 0);
-
+		this.hasUnit = !(setting['hasunit'] as number === 0);
+		
         let uu = setting['uniqueunit'];
         this.uniqueUnit = uu? uu as number: 0;
         

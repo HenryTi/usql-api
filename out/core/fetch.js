@@ -27,6 +27,8 @@ class Fetch {
                         let v = params[k];
                         if (v === undefined)
                             continue;
+                        if (v === null)
+                            continue;
                         url += c + k + '=' + encodeURIComponent(params[k]);
                         c = '&';
                     }

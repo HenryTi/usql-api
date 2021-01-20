@@ -8,9 +8,9 @@ export class MsDbServer extends DbServer {
 	reset():void {};
     sql(db:string, sql:string, params:any[]): Promise<any> {return}
 	sqlProc(db:string, procName:string, procSql:string): Promise<any> {return}
-    buildProc(db:string, procName:string, procSql:string): Promise<void> {return}
+    buildProc(db:string, procName:string, procSql:string, isFunc:boolean): Promise<void> {return}
 	buildRealProcFrom$ProcTable(db:string, proc:string): Promise<void> {return}
-	sqlDropProc(db:string, procName:string): Promise<any> {return}
+	sqlDropProc(db:string, procName:string, isFunc:boolean): Promise<any> {return}
     call(db:string, proc:string, params:any[]): Promise<any> {return}
     callEx(db:string, proc:string, params:any[]): Promise<any> {return}
     buildTuidAutoId(db:string): Promise<void> {return}

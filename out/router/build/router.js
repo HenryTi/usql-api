@@ -103,7 +103,7 @@ function buildBuildRouter(router, rb) {
             let dbName = req.params.db;
             let db = core_1.Db.db(rb.getDbName(dbName));
             let runner = new core_2.BuildRunner(db);
-            let { name, proc } = req.body;
+            let { name, proc, isFunc } = req.body;
             let result = yield runner.procSql(name, proc);
             res.json({
                 ok: true,
@@ -127,8 +127,8 @@ function buildBuildRouter(router, rb) {
             let dbName = req.params.db;
             let db = core_1.Db.db(rb.getDbName(dbName));
             let runner = new core_2.BuildRunner(db);
-            let { name, proc } = req.body;
-            let result = yield runner.procCoreSql(name, proc);
+            let { name, proc, isFunc } = req.body;
+            let result = yield runner.procCoreSql(name, proc, isFunc);
             res.json({
                 ok: true,
                 res: result
@@ -197,8 +197,11 @@ function buildBuildRouter(router, rb) {
                 promises.push(runner.setSetting(0, i, v));
             }
             yield Promise.all(promises);
+            // 取units，还有xuid的start和end
             let units = yield core_1.centerApi.serviceUnit(service);
             yield runner.setUnitAdmin(units);
+            // sectionCount 从已经保存的当前xuid，和xuid-section-end 来计算
+            yield runner.refreshXuid(service);
             res.json({
                 ok: true,
             });
