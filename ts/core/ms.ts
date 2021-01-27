@@ -1,4 +1,4 @@
-import {DbServer} from './dbServer';
+import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDLog, ParamKeyID, ParamKeyID2} from './dbServer';
 
 export class MsDbServer extends DbServer {
 	constructor(dbName:string, dbConfig: any) {
@@ -23,4 +23,11 @@ export class MsDbServer extends DbServer {
     uqDbs():Promise<any[]> {return}
     createResDb(resDbName:string):Promise<void> {return}
     create$UqDb():Promise<void> {return}
+	
+	IDActs(paramIDActs:ParamIDActs): Promise<any[]> {return}
+	ID(paramID: ParamID): Promise<any[]> {return}
+	KeyID(paramID: ParamKeyID): Promise<any[]> {return}
+	ID2(paramID2: ParamID2): Promise<any[]> {return}
+	KeyID2(paramKeyID2: ParamKeyID2): Promise<any[]> {return}
+	IDLog(paramIDLog: ParamIDLog): Promise<any[]> {return}
 }

@@ -71,22 +71,22 @@ class BuildRunner {
         });
     }
     // type: 1=prod, 2=test
-    refreshXuid(service) {
+    refreshIDSection(service) {
         return __awaiter(this, void 0, void 0, function* () {
-            let tbl = yield this.db.tableFromProc('tv_$xuid_section_get', []);
+            let tbl = yield this.db.tableFromProc('tv_$id_section_get', []);
             let { section, sectionCount } = tbl[0];
             if (sectionCount <= 0 || sectionCount > 8) {
                 return;
             }
             let type = this.db.isTesting === true ? 2 : 1;
-            let ret = yield centerApi_1.centerApi.xuidApply(service, type, section, sectionCount);
+            let ret = yield centerApi_1.centerApi.IDSectionApply(service, type, section, sectionCount);
             if (ret) {
                 let { start, end, section_max, service_max } = ret;
                 if (start) {
-                    yield this.db.call('tv_$xuid_section_set', [start, end - start]);
+                    yield this.db.call('tv_$id_section_set', [start, end - start]);
                 }
                 else {
-                    let err = `xuid unmatch: here_max:${section_max} center_max here: ${service_max}`;
+                    let err = `ID Section unmatch: here_max:${section_max} center_max here: ${service_max}`;
                     console.error(err);
                     throw err;
                 }

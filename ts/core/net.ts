@@ -339,7 +339,7 @@ class ProdNet extends Net {
 
 class TestNet extends Net {
 	protected buildUnitx():void {this.unitx = new UnitxTest();}
-	protected get isTesting(): boolean {return false;}
+	protected get isTesting(): boolean {return true;}
     getDbName(name:string):string {return name + '$test'}
     getUqFullName(uq:string):string {return uq + '$test'}
     protected getUrl(db:string, url:string):string {

@@ -26,6 +26,12 @@ class MsDbServer extends dbServer_1.DbServer {
     uqDbs() { return; }
     createResDb(resDbName) { return; }
     create$UqDb() { return; }
+    IDActs(paramIDActs) { return; }
+    ID(paramID) { return; }
+    KeyID(paramID) { return; }
+    ID2(paramID2) { return; }
+    KeyID2(paramKeyID2) { return; }
+    IDLog(paramIDLog) { return; }
 }
 exports.MsDbServer = MsDbServer;
 //# sourceMappingURL=ms.js.map

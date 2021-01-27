@@ -26,6 +26,7 @@ const sheet_1 = require("./sheet");
 const import_1 = require("./import");
 const map_1 = require("./map");
 const tag_1 = require("./tag");
+const ID_1 = require("./ID");
 function buildEntityRouter(router, rb) {
     access_1.buildAccessRouter(router, rb);
     action_1.buildActionRouter(router, rb);
@@ -38,6 +39,7 @@ function buildEntityRouter(router, rb) {
     import_1.buildImportRouter(router, rb);
     map_1.buildMapRouter(router, rb);
     tag_1.buildTagRouter(router, rb);
+    ID_1.buildIDRouter(router, rb);
 }
 exports.buildEntityRouter = buildEntityRouter;
 //# sourceMappingURL=index.js.map

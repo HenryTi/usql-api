@@ -196,7 +196,7 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
 			let units = await centerApi.serviceUnit(service);
 			await runner.setUnitAdmin(units);			
 			// sectionCount 从已经保存的当前xuid，和xuid-section-end 来计算
-			await runner.refreshXuid(service);
+			await runner.refreshIDSection(service);
 
             res.json({
                 ok: true,

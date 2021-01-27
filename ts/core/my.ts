@@ -1,6 +1,6 @@
-import {createPool, Pool, MysqlError, TypeCast, FieldInfo, QueryOptions, queryCallback, Connection} from 'mysql';
+import {createPool, Pool, MysqlError, TypeCast} from 'mysql';
 import * as _ from 'lodash';
-import {DbServer} from './dbServer';
+import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDLog, ParamKeyID, ParamKeyID2} from './dbServer';
 import { dbLogger, SpanLog, env } from './db';
 import { consts } from './consts';
 
@@ -655,6 +655,56 @@ END
         `;
         await this.exec(proc, undefined);
     }
+	
+	async IDActs(paramIDActs:ParamIDActs): Promise<any[]> {
+		return
+	}
+
+	async ID(paramID: ParamID): Promise<any[]> {
+		let {IDX, id} = paramID;
+		let {db, name, fields} = IDX[0];
+		let tables = `\`${db}\`.\`tv_${name}\` as t0`;
+		let cols = 't0.id';
+		for (let f of fields) {
+			let fn = f.name;
+			if (fn === 'id') continue;
+			cols += `,t0.\`${fn}\``;
+		}
+		let len = IDX.length;
+		for (let i=1; i<len; i++) {
+			let {name, fields} = IDX[i];
+			tables += ` left join \`${db}\`.\`tv_${name}\` as t${i} on t0.id=t${i}.id`;
+			for (let f of fields) {
+				let fn = f.name;
+				if (fn === 'id') continue;
+				cols += `,t${i}.\`${fn}\``;
+			}
+		}
+		let where = typeof id === 'number'? 
+			'=' + id
+			:
+			` in (${(id.join(','))})`;
+		let sql = `SELECT ${cols} FROM ${tables} WHERE t0.id${where}`;
+
+		let ret = await this.exec(sql, undefined);
+		return ret;
+	}
+
+	async KeyID(paramKeyID: ParamKeyID): Promise<any[]> {
+		return
+	}
+
+	async ID2(paramID2: ParamID2): Promise<any[]> {
+		return
+	}
+	
+	async KeyID2(paramKeyID2: ParamKeyID2): Promise<any[]> {
+		return
+	}
+	
+	async IDLog(paramIDLog: ParamIDLog): Promise<any[]> {
+		return
+	}
 }
 
 const castField:TypeCast = (field:any, next) =>{

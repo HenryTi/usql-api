@@ -201,7 +201,7 @@ function buildBuildRouter(router, rb) {
             let units = yield core_1.centerApi.serviceUnit(service);
             yield runner.setUnitAdmin(units);
             // sectionCount 从已经保存的当前xuid，和xuid-section-end 来计算
-            yield runner.refreshXuid(service);
+            yield runner.refreshIDSection(service);
             res.json({
                 ok: true,
             });

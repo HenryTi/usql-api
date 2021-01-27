@@ -57,9 +57,9 @@ class CenterApi extends fetch_1.Fetch {
             return yield this.get('open/service-unit', { service });
         });
     }
-    xuidApply(service, type, sectionMax, sectionCount) {
+    IDSectionApply(service, type, sectionMax, sectionCount) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield this.get('open/xuid-apply', { service, type, sectionMax, sectionCount });
+            return yield this.get('open/id-section-apply', { service, type, sectionMax, sectionCount });
         });
     }
     urlFromUq(unit, uqFullName) {

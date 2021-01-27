@@ -693,6 +693,63 @@ END
             yield this.exec(proc, undefined);
         });
     }
+    IDActs(paramIDActs) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return;
+        });
+    }
+    ID(paramID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let { IDX, id } = paramID;
+            let { db, name, fields } = IDX[0];
+            let tables = `\`${db}\`.\`tv_${name}\` as t0`;
+            let cols = 't0.id';
+            for (let f of fields) {
+                let fn = f.name;
+                if (fn === 'id')
+                    continue;
+                cols += `,t0.\`${fn}\``;
+            }
+            let len = IDX.length;
+            for (let i = 1; i < len; i++) {
+                let { name, fields } = IDX[i];
+                tables += ` left join \`${db}\`.\`tv_${name}\` as t${i} on t0.id=t${i}.id`;
+                for (let f of fields) {
+                    let fn = f.name;
+                    if (fn === 'id')
+                        continue;
+                    cols += `,t${i}.\`${fn}\``;
+                }
+            }
+            let where = typeof id === 'number' ?
+                '=' + id
+                :
+                    ` in (${(id.join(','))})`;
+            let sql = `SELECT ${cols} FROM ${tables} WHERE t0.id${where}`;
+            let ret = yield this.exec(sql, undefined);
+            return ret;
+        });
+    }
+    KeyID(paramKeyID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return;
+        });
+    }
+    ID2(paramID2) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return;
+        });
+    }
+    KeyID2(paramKeyID2) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return;
+        });
+    }
+    IDLog(paramIDLog) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return;
+        });
+    }
 }
 exports.MyDbServer = MyDbServer;
 const castField = (field, next) => {

@@ -27,8 +27,8 @@ class EntityRunner {
         this.name = name;
         this.db = db;
         this.net = net;
-        //this.setting = {};
         this.modifyMaxes = {};
+        this.dbServer = db.dbServer;
     }
     getDb() { return this.db.getDbName(); }
     reset() {
@@ -1088,6 +1088,78 @@ class EntityRunner {
     }
     setActionConvertSchema(name, value) {
         this.actionConvertSchemas[name] = value;
+    }
+    throwErr(err) {
+        console.error(err);
+        throw new Error(err);
+    }
+    getTableSchema(name, types) {
+        let ts = this.schemas[name.toLowerCase()].call;
+        if (ts === undefined) {
+            this.throwErr(`${name} is not a valid Entity`);
+        }
+        let { type, name: tName, fields } = ts;
+        if (types.indexOf(type) < 0) {
+            this.throwErr(`IDActs only support ${types.map(v => v.toUpperCase()).join(', ')}`);
+        }
+        let db = this.db.getDbName();
+        return { db, type, name: tName, fields, values: undefined };
+    }
+    getTableSchemas(names, types) {
+        return names.map(v => this.getTableSchema(v, types));
+    }
+    getTableSchemaArray(names, types) {
+        return Array.isArray(names) === true ?
+            this.getTableSchemas(names, types)
+            :
+                [this.getTableSchema(names, types)];
+    }
+    IDActs(paramIDActs) {
+        for (let i in paramIDActs) {
+            let ts = this.getTableSchema(i, ['id', 'idx', 'id2']);
+            let values = paramIDActs[i];
+            if (values) {
+                ts.values = values;
+                paramIDActs[i] = ts;
+            }
+        }
+        return this.dbServer.IDActs(paramIDActs);
+    }
+    ID(paramID) {
+        let { IDX } = paramID;
+        let types = ['id', 'idx'];
+        paramID.IDX = this.getTableSchemaArray(IDX, types);
+        return this.dbServer.ID(paramID);
+    }
+    KeyID(paramKeyID) {
+        let { IDX } = paramKeyID;
+        let types = ['id', 'idx'];
+        paramKeyID.IDX = this.getTableSchemaArray(IDX, types);
+        return this.dbServer.KeyID(paramKeyID);
+    }
+    ID2(paramID2) {
+        let { ID2, IDX } = paramID2;
+        paramID2.ID2 = this.getTableSchema(ID2, ['id2']);
+        let types = ['id', 'idx'];
+        paramID2.IDX = this.getTableSchemaArray(IDX, types);
+        return this.dbServer.ID2(paramID2);
+    }
+    KeyID2(paramKeyID2) {
+        let { ID, ID2, IDX } = paramKeyID2;
+        paramKeyID2.ID = this.getTableSchema(ID, ['id']);
+        paramKeyID2.ID2 = this.getTableSchema(ID2, ['id2']);
+        paramKeyID2.IDX = this.getTableSchemaArray(IDX, ['id', 'idx']);
+        return this.dbServer.KeyID2(paramKeyID2);
+    }
+    IDLog(paramIDLog) {
+        let { IDX, field } = paramIDLog;
+        let ts = this.getTableSchema(IDX, ['idx']);
+        paramIDLog.IDX = ts;
+        let fLower = field.toLowerCase();
+        if (ts.fields.findIndex(v => v.name === fLower) < 0) {
+            this.throwErr(`ID ${IDX} has no Field ${field}`);
+        }
+        return this.dbServer.IDLog(paramIDLog);
     }
 }
 exports.EntityRunner = EntityRunner;

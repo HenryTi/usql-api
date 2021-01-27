@@ -99,7 +99,7 @@ export abstract class Db {
 
     private dbName: string;
     private isExists: boolean = false;
-	protected dbServer: DbServer;
+	readonly dbServer: DbServer;
 	serverId: number;
 	isTesting: boolean;
 

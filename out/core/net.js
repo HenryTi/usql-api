@@ -302,7 +302,7 @@ class ProdNet extends Net {
 }
 class TestNet extends Net {
     buildUnitx() { this.unitx = new unitx_1.UnitxTest(); }
-    get isTesting() { return false; }
+    get isTesting() { return true; }
     getDbName(name) { return name + '$test'; }
     getUqFullName(uq) { return uq + '$test'; }
     getUrl(db, url) {

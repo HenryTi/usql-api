@@ -55,21 +55,21 @@ export class BuildRunner {
 	}
 
 	// type: 1=prod, 2=test
-	async refreshXuid(service: number) {
-		let tbl = await this.db.tableFromProc('tv_$xuid_section_get', []);
+	async refreshIDSection(service: number) {
+		let tbl = await this.db.tableFromProc('tv_$id_section_get', []);
 		let {section, sectionCount} = tbl[0];
 		if (sectionCount <= 0 || sectionCount > 8) {
 			return;
 		}
 		let type:1|2 = this.db.isTesting === true? 2:1;
-		let ret = await centerApi.xuidApply(service, type, section, sectionCount);
+		let ret = await centerApi.IDSectionApply(service, type, section, sectionCount);
 		if (ret) {
 			let {start, end, section_max, service_max} = ret;
 			if (start) {
-				await this.db.call('tv_$xuid_section_set', [start, end-start]);
+				await this.db.call('tv_$id_section_set', [start, end-start]);
 			}
 			else {
-				let err = `xuid unmatch: here_max:${section_max} center_max here: ${service_max}`;
+				let err = `ID Section unmatch: here_max:${section_max} center_max here: ${service_max}`;
 				console.error(err);
 				throw err;
 			}

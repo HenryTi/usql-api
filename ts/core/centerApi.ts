@@ -56,10 +56,10 @@ class CenterApi extends Fetch {
 		return await this.get('open/service-unit', {service});
 	}
 
-	async xuidApply(service:number, type:1|2, sectionMax:number, sectionCount:number)
+	async IDSectionApply(service:number, type:1|2, sectionMax:number, sectionCount:number)
 		: Promise<{start:number; end:number; section_max:number; service_max:number}>
 	{
-		return await this.get('open/xuid-apply', {service, type, sectionMax, sectionCount});
+		return await this.get('open/id-section-apply', {service, type, sectionMax, sectionCount});
 	}
 
     async urlFromUq(unit:number, uqFullName:string):Promise<{db:string, url:string, urlTest:string}> {
