@@ -15,6 +15,7 @@ const _ = require("lodash");
 const dbServer_1 = require("./dbServer");
 const db_1 = require("./db");
 const consts_1 = require("./consts");
+const builder_1 = require("./builder");
 const retries = 5;
 const minMillis = 1;
 const maxMillis = 100;
@@ -72,6 +73,7 @@ class MyDbServer extends dbServer_1.DbServer {
         this.dbConfig = dbConfig;
         this.resetProcColl();
     }
+    createBuilder() { return new builder_1.MyBuilder(); }
     resetProcColl() {
         this.procColl = _.merge({}, sysProcColl);
     }
@@ -178,7 +180,7 @@ class MyDbServer extends dbServer_1.DbServer {
             });
         });
     }
-    sql(db, sql, params) {
+    sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
             let result = yield this.exec(sql, params);
             return result;
@@ -225,7 +227,7 @@ class MyDbServer extends dbServer_1.DbServer {
         return __awaiter(this, void 0, void 0, function* () {
             let type = isFunc === true ? 'FUNCTION' : 'PROCEDURE';
             let drop = `USE \`${db}\`; DROP ${type} IF EXISTS \`${db}\`.\`${procName}\`;`;
-            yield this.sql(db, drop + /*collationConnection + */ procSql, undefined);
+            yield this.sql(drop + /*collationConnection + */ procSql, undefined);
             // clear changed flag
             yield this.callProcBase(db, 'tv_$proc_save', [db, procName, undefined]);
         });
@@ -241,7 +243,7 @@ class MyDbServer extends dbServer_1.DbServer {
             let r0 = ret[0];
             let procSql = r0['proc'];
             let drop = `USE \`${db}\`; DROP PROCEDURE IF EXISTS \`${db}\`.\`${proc}\`;`;
-            yield this.sql(db, drop + procSql, undefined);
+            yield this.sql(drop + procSql, undefined);
             yield this.callProcBase(db, 'tv_$proc_save', [db, proc, undefined]);
         });
     }
@@ -527,7 +529,7 @@ create procedure $uq.performance(_tick bigint, _log text, _ms int) begin
     end while;
 end;
 `;
-            let versionResults = yield this.sql('information_schema', 'use information_schema; select version() as v', []);
+            let versionResults = yield this.sql('use information_schema; select version() as v', []);
             let versionRows = versionResults[1];
             let version = versionRows[0]['v'];
             if (version >= '8.0') {
@@ -691,63 +693,6 @@ END
             END;
         `;
             yield this.exec(proc, undefined);
-        });
-    }
-    IDActs(paramIDActs) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return;
-        });
-    }
-    ID(paramID) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let { IDX, id } = paramID;
-            let { db, name, fields } = IDX[0];
-            let tables = `\`${db}\`.\`tv_${name}\` as t0`;
-            let cols = 't0.id';
-            for (let f of fields) {
-                let fn = f.name;
-                if (fn === 'id')
-                    continue;
-                cols += `,t0.\`${fn}\``;
-            }
-            let len = IDX.length;
-            for (let i = 1; i < len; i++) {
-                let { name, fields } = IDX[i];
-                tables += ` left join \`${db}\`.\`tv_${name}\` as t${i} on t0.id=t${i}.id`;
-                for (let f of fields) {
-                    let fn = f.name;
-                    if (fn === 'id')
-                        continue;
-                    cols += `,t${i}.\`${fn}\``;
-                }
-            }
-            let where = typeof id === 'number' ?
-                '=' + id
-                :
-                    ` in (${(id.join(','))})`;
-            let sql = `SELECT ${cols} FROM ${tables} WHERE t0.id${where}`;
-            let ret = yield this.exec(sql, undefined);
-            return ret;
-        });
-    }
-    KeyID(paramKeyID) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return;
-        });
-    }
-    ID2(paramID2) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return;
-        });
-    }
-    KeyID2(paramKeyID2) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return;
-        });
-    }
-    IDLog(paramIDLog) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return;
         });
     }
 }

@@ -10,30 +10,33 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildIDRouter = void 0;
-const IDType = 'id';
 function buildIDRouter(router, rb) {
-    rb.entityPost(router, IDType, '/id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, 'id', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.ID(body);
         return result;
     }));
-    rb.entityPost(router, IDType, '/key-id', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, 'key-id', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.KeyID(body);
         return result;
     }));
-    rb.entityPost(router, IDType, '/id2', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, 'id2', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.ID2(body);
         return result;
     }));
-    rb.entityPost(router, IDType, '/key-id2', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, 'key-id2', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.KeyID2(body);
         return result;
     }));
-    rb.entityPost(router, IDType, '/id-log', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, 'id-log', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.IDLog(body);
         return result;
     }));
-    rb.entityPost(router, IDType, '/id-acts', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+    rb.entityPost(router, 'id-acts', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.IDActs(body);
+        return result;
+    }));
+    rb.entityPost(router, 'id-detail', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.IDDetail(unit, user, body);
         return result;
     }));
 }

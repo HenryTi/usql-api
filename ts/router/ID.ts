@@ -1,43 +1,47 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import * as _ from 'lodash';
-import { EntityRunner, RouterBuilder, packArr, User } from '../core';
-
-const IDType = 'id';
+import { EntityRunner, RouterBuilder } from '../core';
 
 export function buildIDRouter(router: Router, rb: RouterBuilder) {
-    rb.entityPost(router, IDType, '/id', 
+    rb.entityPost(router, 'id', '', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.ID(body);
         return result;
     });
 
-    rb.entityPost(router, IDType, '/key-id', 
+    rb.entityPost(router, 'key-id', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.KeyID(body);
         return result;
     });
 
-    rb.entityPost(router, IDType, '/id2', 
+    rb.entityPost(router, 'id2', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.ID2(body);
         return result;
     });
 
-    rb.entityPost(router, IDType, '/key-id2', 
+    rb.entityPost(router, 'key-id2', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.KeyID2(body);
         return result;
     });
 
-    rb.entityPost(router, IDType, '/id-log', 
+    rb.entityPost(router, 'id-log', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.IDLog(body);
         return result;
     });
 
-    rb.entityPost(router, IDType, '/id-acts', 
+    rb.entityPost(router, 'id-acts', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.IDActs(body);
+        return result;
+    });
+
+    rb.entityPost(router, 'id-detail', '',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let result = await runner.IDDetail(unit, user, body);
         return result;
     });
 }

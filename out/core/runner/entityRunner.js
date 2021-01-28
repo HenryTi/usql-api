@@ -1094,16 +1094,18 @@ class EntityRunner {
         throw new Error(err);
     }
     getTableSchema(name, types) {
+        if (name === undefined)
+            return undefined;
         let ts = this.schemas[name.toLowerCase()].call;
         if (ts === undefined) {
             this.throwErr(`${name} is not a valid Entity`);
         }
-        let { type, name: tName, fields } = ts;
+        let { type, name: tName, fields, keys } = ts;
         if (types.indexOf(type) < 0) {
             this.throwErr(`IDActs only support ${types.map(v => v.toUpperCase()).join(', ')}`);
         }
         let db = this.db.getDbName();
-        return { db, type, name: tName, fields, values: undefined };
+        return { db, type, name: tName, fields, keys, values: undefined };
     }
     getTableSchemas(names, types) {
         return names.map(v => this.getTableSchema(v, types));
@@ -1114,52 +1116,61 @@ class EntityRunner {
             :
                 [this.getTableSchema(names, types)];
     }
-    IDActs(paramIDActs) {
-        for (let i in paramIDActs) {
+    IDActs(param) {
+        for (let i in param) {
             let ts = this.getTableSchema(i, ['id', 'idx', 'id2']);
-            let values = paramIDActs[i];
+            let values = param[i];
             if (values) {
                 ts.values = values;
-                paramIDActs[i] = ts;
+                param[i] = ts;
             }
         }
-        return this.dbServer.IDActs(paramIDActs);
+        return this.dbServer.IDActs(param);
     }
-    ID(paramID) {
-        let { IDX } = paramID;
+    IDDetail(unit, user, param) {
+        let { ID, IDDetail, IDDetail2, IDDetail3 } = param;
+        let types = ['id'];
+        param.ID = this.getTableSchema(ID, types);
+        param.IDDetail = this.getTableSchema(IDDetail, types);
+        param.IDDetail2 = this.getTableSchema(IDDetail2, types);
+        param.IDDetail3 = this.getTableSchema(IDDetail3, types);
+        return this.dbServer.IDDetail(unit, user, param);
+    }
+    ID(param) {
+        let { IDX } = param;
         let types = ['id', 'idx'];
-        paramID.IDX = this.getTableSchemaArray(IDX, types);
-        return this.dbServer.ID(paramID);
+        param.IDX = this.getTableSchemaArray(IDX, types);
+        return this.dbServer.ID(param);
     }
-    KeyID(paramKeyID) {
-        let { IDX } = paramKeyID;
+    KeyID(param) {
+        let { IDX } = param;
         let types = ['id', 'idx'];
-        paramKeyID.IDX = this.getTableSchemaArray(IDX, types);
-        return this.dbServer.KeyID(paramKeyID);
+        param.IDX = this.getTableSchemaArray(IDX, types);
+        return this.dbServer.KeyID(param);
     }
-    ID2(paramID2) {
-        let { ID2, IDX } = paramID2;
-        paramID2.ID2 = this.getTableSchema(ID2, ['id2']);
+    ID2(param) {
+        let { ID2, IDX } = param;
+        param.ID2 = this.getTableSchema(ID2, ['id2']);
         let types = ['id', 'idx'];
-        paramID2.IDX = this.getTableSchemaArray(IDX, types);
-        return this.dbServer.ID2(paramID2);
+        param.IDX = this.getTableSchemaArray(IDX, types);
+        return this.dbServer.ID2(param);
     }
-    KeyID2(paramKeyID2) {
-        let { ID, ID2, IDX } = paramKeyID2;
-        paramKeyID2.ID = this.getTableSchema(ID, ['id']);
-        paramKeyID2.ID2 = this.getTableSchema(ID2, ['id2']);
-        paramKeyID2.IDX = this.getTableSchemaArray(IDX, ['id', 'idx']);
-        return this.dbServer.KeyID2(paramKeyID2);
+    KeyID2(param) {
+        let { ID, ID2, IDX } = param;
+        param.ID = this.getTableSchema(ID, ['id']);
+        param.ID2 = this.getTableSchema(ID2, ['id2']);
+        param.IDX = this.getTableSchemaArray(IDX, ['id', 'idx']);
+        return this.dbServer.KeyID2(param);
     }
-    IDLog(paramIDLog) {
-        let { IDX, field } = paramIDLog;
+    IDLog(param) {
+        let { IDX, field } = param;
         let ts = this.getTableSchema(IDX, ['idx']);
-        paramIDLog.IDX = ts;
+        param.IDX = ts;
         let fLower = field.toLowerCase();
         if (ts.fields.findIndex(v => v.name === fLower) < 0) {
             this.throwErr(`ID ${IDX} has no Field ${field}`);
         }
-        return this.dbServer.IDLog(paramIDLog);
+        return this.dbServer.IDLog(param);
     }
 }
 exports.EntityRunner = EntityRunner;

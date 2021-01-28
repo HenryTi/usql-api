@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Db, env } from '../db';
-import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDLog, ParamKeyID, ParamKeyID2, TableSchema} from '../dbServer';
+import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDDetail, ParamIDLog, ParamKeyID, ParamKeyID2, TableSchema} from '../dbServer';
 import { packReturns } from '../packReturn';
 import { ImportData } from '../importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from '../inBusAction';
@@ -967,16 +967,17 @@ export class EntityRunner {
 	}
 
 	private getTableSchema(name:string, types:string[]):TableSchema {
+		if (name === undefined) return undefined;
 		let ts: TableSchema = this.schemas[name.toLowerCase()].call as TableSchema;
 		if (ts === undefined) {
 			this.throwErr(`${name} is not a valid Entity`);
 		}
-		let {type, name:tName, fields} = ts;
+		let {type, name:tName, fields, keys} = ts;
 		if (types.indexOf(type) < 0) {
 			this.throwErr(`IDActs only support ${types.map(v => v.toUpperCase()).join(', ')}`);
 		}
 		let db = this.db.getDbName();
-		return {db, type, name:tName, fields, values:undefined};
+		return {db, type, name:tName, fields, keys, values:undefined};
 	}
 	private getTableSchemas(names:string[], types:string[]):TableSchema[] {
 		return names.map(v => this.getTableSchema(v, types));
@@ -989,56 +990,66 @@ export class EntityRunner {
 			[this.getTableSchema(names as string, types)];
 	}
 
-	IDActs(paramIDActs:ParamIDActs): Promise<any[]> {
-		for (let i in paramIDActs) {
+	IDActs(param:ParamIDActs): Promise<any[]> {
+		for (let i in param) {
 			let ts = this.getTableSchema(i, ['id', 'idx', 'id2']);
-			let values = (paramIDActs[i] as unknown) as any[];
+			let values = (param[i] as unknown) as any[];
 			if (values) {
 				ts.values = values;
-				paramIDActs[i] = ts;
+				param[i] = ts;
 			}
 		}
-		return this.dbServer.IDActs(paramIDActs);
+		return this.dbServer.IDActs(param);
 	}
 
-	ID(paramID: ParamID): Promise<any[]> {
-		let {IDX} = paramID;
-		let types = ['id', 'idx'];
-		paramID.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
-		return this.dbServer.ID(paramID);
+	IDDetail(unit:number, user:number, param:ParamIDDetail): Promise<any[]> {
+		let {ID, IDDetail, IDDetail2, IDDetail3} = param;
+		let types = ['id'];
+		param.ID = this.getTableSchema(ID as unknown as string, types);
+		param.IDDetail = this.getTableSchema(IDDetail as unknown as string, types);
+		param.IDDetail2 = this.getTableSchema(IDDetail2 as unknown as string, types);
+		param.IDDetail3 = this.getTableSchema(IDDetail3 as unknown as string, types);
+		return this.dbServer.IDDetail(unit, user, param);
 	}
 
-	KeyID(paramKeyID: ParamKeyID): Promise<any[]> {
-		let {IDX} = paramKeyID;
+	ID(param: ParamID): Promise<any[]> {
+		let {IDX} = param;
 		let types = ['id', 'idx'];
-		paramKeyID.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
-		return this.dbServer.KeyID(paramKeyID);
+		param.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
+		return this.dbServer.ID(param);
 	}
 
-	ID2(paramID2: ParamID2): Promise<any[]> {
-		let {ID2, IDX} = paramID2;
-		paramID2.ID2 = this.getTableSchema((ID2 as unknown) as string, ['id2']) as TableSchema;
+	KeyID(param: ParamKeyID): Promise<any[]> {
+		let {IDX} = param;
 		let types = ['id', 'idx'];
-		paramID2.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
-		return this.dbServer.ID2(paramID2);
+		param.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
+		return this.dbServer.KeyID(param);
+	}
+
+	ID2(param: ParamID2): Promise<any[]> {
+		let {ID2, IDX} = param;
+		param.ID2 = this.getTableSchema((ID2 as unknown) as string, ['id2']) as TableSchema;
+		let types = ['id', 'idx'];
+		param.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
+		return this.dbServer.ID2(param);
 	}
 	
-	KeyID2(paramKeyID2: ParamKeyID2): Promise<any[]> {
-		let {ID, ID2, IDX} = paramKeyID2;
-		paramKeyID2.ID = this.getTableSchema((ID as unknown) as string, ['id']);
-		paramKeyID2.ID2 = this.getTableSchema((ID2 as unknown) as string, ['id2']);
-		paramKeyID2.IDX = this.getTableSchemaArray(IDX as unknown as any, ['id', 'idx']);
-		return this.dbServer.KeyID2(paramKeyID2);
+	KeyID2(param: ParamKeyID2): Promise<any[]> {
+		let {ID, ID2, IDX} = param;
+		param.ID = this.getTableSchema((ID as unknown) as string, ['id']);
+		param.ID2 = this.getTableSchema((ID2 as unknown) as string, ['id2']);
+		param.IDX = this.getTableSchemaArray(IDX as unknown as any, ['id', 'idx']);
+		return this.dbServer.KeyID2(param);
 	}
 	
-	IDLog(paramIDLog: ParamIDLog): Promise<any[]> {
-		let {IDX, field} = paramIDLog;
+	IDLog(param: ParamIDLog): Promise<any[]> {
+		let {IDX, field} = param;
 		let ts = this.getTableSchema((IDX as unknown) as string, ['idx']);
-		paramIDLog.IDX = ts;
+		param.IDX = ts;
 		let fLower = field.toLowerCase();
 		if (ts.fields.findIndex(v => v.name === fLower) < 0) {
 			this.throwErr(`ID ${IDX} has no Field ${field}`);
 		}
-		return this.dbServer.IDLog(paramIDLog);
+		return this.dbServer.IDLog(param);
 	}
 }

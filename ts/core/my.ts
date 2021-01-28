@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDLog, ParamKeyID, ParamKeyID2} from './dbServer';
 import { dbLogger, SpanLog, env } from './db';
 import { consts } from './consts';
+import { MyBuilder } from './builder';
 
 const retries = 5;
 const minMillis = 1;
@@ -76,6 +77,8 @@ export class MyDbServer extends DbServer {
 		this.dbConfig = dbConfig;
 		this.resetProcColl();
 	}
+
+	protected createBuilder() { return new MyBuilder(); }
 
 	private resetProcColl() {
 		this.procColl = _.merge({}, sysProcColl);
@@ -179,7 +182,7 @@ export class MyDbServer extends DbServer {
 			*/
         });
     }
-    async sql(db:string, sql:string, params:any[]): Promise<any> {
+    async sql(sql:string, params:any[]): Promise<any> {
 		let result = await this.exec(sql, params);
 		return result;
 	}
@@ -219,7 +222,7 @@ export class MyDbServer extends DbServer {
 	async buildProc(db:string, procName:string, procSql:string, isFunc:boolean=false):Promise<any> {
 		let type = isFunc === true? 'FUNCTION' : 'PROCEDURE';
 		let drop = `USE \`${db}\`; DROP ${type} IF EXISTS \`${db}\`.\`${procName}\`;`;
-		await this.sql(db, drop + /*collationConnection + */procSql, undefined);
+		await this.sql(drop + /*collationConnection + */procSql, undefined);
 		// clear changed flag
 		await this.callProcBase(db, 'tv_$proc_save', [db, procName, undefined]);
 	}
@@ -234,7 +237,7 @@ export class MyDbServer extends DbServer {
 		let r0 = ret[0];
 		let procSql = r0['proc'];
 		let drop = `USE \`${db}\`; DROP PROCEDURE IF EXISTS \`${db}\`.\`${proc}\`;`;
-		await this.sql(db, drop + procSql, undefined);
+		await this.sql(drop + procSql, undefined);
 		await this.callProcBase(db, 'tv_$proc_save', [db, proc, undefined]);
 	}
 
@@ -496,7 +499,7 @@ create procedure $uq.performance(_tick bigint, _log text, _ms int) begin
     end while;
 end;
 `;
-		let versionResults = await this.sql('information_schema', 'use information_schema; select version() as v', []);
+		let versionResults = await this.sql('use information_schema; select version() as v', []);
 		let versionRows = versionResults[1];
 		let version = versionRows[0]['v'];
 		if (version >= '8.0') {
@@ -655,56 +658,6 @@ END
         `;
         await this.exec(proc, undefined);
     }
-	
-	async IDActs(paramIDActs:ParamIDActs): Promise<any[]> {
-		return
-	}
-
-	async ID(paramID: ParamID): Promise<any[]> {
-		let {IDX, id} = paramID;
-		let {db, name, fields} = IDX[0];
-		let tables = `\`${db}\`.\`tv_${name}\` as t0`;
-		let cols = 't0.id';
-		for (let f of fields) {
-			let fn = f.name;
-			if (fn === 'id') continue;
-			cols += `,t0.\`${fn}\``;
-		}
-		let len = IDX.length;
-		for (let i=1; i<len; i++) {
-			let {name, fields} = IDX[i];
-			tables += ` left join \`${db}\`.\`tv_${name}\` as t${i} on t0.id=t${i}.id`;
-			for (let f of fields) {
-				let fn = f.name;
-				if (fn === 'id') continue;
-				cols += `,t${i}.\`${fn}\``;
-			}
-		}
-		let where = typeof id === 'number'? 
-			'=' + id
-			:
-			` in (${(id.join(','))})`;
-		let sql = `SELECT ${cols} FROM ${tables} WHERE t0.id${where}`;
-
-		let ret = await this.exec(sql, undefined);
-		return ret;
-	}
-
-	async KeyID(paramKeyID: ParamKeyID): Promise<any[]> {
-		return
-	}
-
-	async ID2(paramID2: ParamID2): Promise<any[]> {
-		return
-	}
-	
-	async KeyID2(paramKeyID2: ParamKeyID2): Promise<any[]> {
-		return
-	}
-	
-	async IDLog(paramIDLog: ParamIDLog): Promise<any[]> {
-		return
-	}
 }
 
 const castField:TypeCast = (field:any, next) =>{

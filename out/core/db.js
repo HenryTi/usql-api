@@ -139,7 +139,7 @@ class Db {
     sql(sql, params) {
         return __awaiter(this, void 0, void 0, function* () {
             //this.devLog('sql', params);
-            return yield this.dbServer.sql(this.dbName, sql, params);
+            return yield this.dbServer.sql(sql, params);
         });
     }
     sqlDropProc(procName, isFunc) {

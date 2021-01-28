@@ -153,7 +153,7 @@ export abstract class Db {
 	}
     async sql(sql:string, params:any[]): Promise<any> {
         //this.devLog('sql', params);
-        return await this.dbServer.sql(this.dbName, sql, params);
+        return await this.dbServer.sql(sql, params);
     }
     async sqlDropProc(procName:string, isFunc:boolean): Promise<any> {
         return await this.dbServer.sqlDropProc(this.dbName, procName, isFunc);

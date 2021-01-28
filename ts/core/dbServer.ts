@@ -1,3 +1,5 @@
+import { Builder } from "./builder";
+
 export interface ParamPage {
 	start:number;
 	size:number;
@@ -7,6 +9,7 @@ export interface TableSchema {
 	db: string;
 	name: string;
 	type: string;
+	keys: {name:string}[];
 	fields: {name:string}[];
 	values: any[];
 }
@@ -15,12 +18,20 @@ export interface ParamIDActs {
 	[ID:string]: TableSchema;
 }
 
+export interface ParamIDDetail {
+	ID: TableSchema;
+	IDDetail: TableSchema;
+	IDDetail2?: TableSchema;
+	IDDetail3?: TableSchema;
+}
+
 export interface ParamID {
 	IDX: TableSchema[];
 	id: number | number[];
 }
 
 export interface ParamKeyID {
+	ID: TableSchema;
 	IDX: TableSchema[];
 	key: number[];
 	page?: ParamPage;
@@ -51,9 +62,17 @@ export interface ParamIDLog {
 }
 
 export abstract class DbServer {
+	protected readonly builder: Builder;
+
+	constructor() {
+		this.builder = this.createBuilder();
+	}
+
+	protected abstract createBuilder(): Builder;
+
 	abstract createProcObjs(db:string): Promise<void>;
 	abstract reset():void;
-	abstract sql(db:string, sql:string, params:any[]): Promise<any>;
+	abstract sql(sql:string, params:any[]): Promise<any>;
 	abstract sqlProc(db:string, procName:string, procSql:string): Promise<any>;
     abstract buildProc(db:string, procName:string, procSql:string, isFunc:boolean): Promise<void>;
 	abstract buildRealProcFrom$ProcTable(db:string, proc:string): Promise<void>;
@@ -71,10 +90,46 @@ export abstract class DbServer {
     abstract createResDb(resDbName:string):Promise<void>;
 	abstract create$UqDb():Promise<void>;
 	
-	abstract IDActs(paramIDActs:ParamIDActs): Promise<any[]>;
-	abstract ID(paramID: ParamID): Promise<any[]>;
-	abstract KeyID(paramID: ParamKeyID): Promise<any[]>;
-	abstract ID2(paramID2: ParamID2): Promise<any[]>;
-	abstract KeyID2(paramKeyID2: ParamKeyID2): Promise<any[]>;
-	abstract IDLog(paramIDLog: ParamIDLog): Promise<any[]>;
+	async IDActs(param:ParamIDActs): Promise<any[]> {
+		let sql = this.builder.IDActs(param);
+		let ret = await this.sql(sql, undefined);
+		return ret;
+	}
+
+	async IDDetail(unit:number, user:number, param:ParamIDDetail): Promise<any[]> {
+		let {db} = param.ID;
+		let sql = this.builder.IDDetail(param);
+		let ret = await this.call(db, 'tv_$exec_sql_trans', [unit, user, sql]);
+		return ret;
+	}
+
+	async ID(param: ParamID): Promise<any[]> {
+		let sql = this.builder.ID(param);
+		let ret = await this.sql(sql, undefined);
+		return ret;
+	}
+
+	async KeyID(param: ParamKeyID): Promise<any[]> {
+		let sql = this.builder.KeyID(param);
+		let ret = await this.sql(sql, undefined);
+		return ret;
+	}
+
+	async ID2(param: ParamID2): Promise<any[]> {
+		let sql = this.builder.ID2(param);
+		let ret = await this.sql(sql, undefined);
+		return ret;
+	}
+	
+	async KeyID2(param: ParamKeyID2): Promise<any[]> {
+		let sql = this.builder.KeyID2(param);
+		let ret = await this.sql(sql, undefined);
+		return ret;
+	}
+	
+	async IDLog(param: ParamIDLog): Promise<any[]> {
+		let sql = this.builder.IDLog(param);
+		let ret = await this.sql(sql, undefined);
+		return ret;
+	}
 }

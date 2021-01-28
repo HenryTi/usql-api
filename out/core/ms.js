@@ -1,15 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MsDbServer = void 0;
+const builder_1 = require("./builder");
 const dbServer_1 = require("./dbServer");
 class MsDbServer extends dbServer_1.DbServer {
     constructor(dbName, dbConfig) {
         super();
     }
+    createBuilder() { return new builder_1.MsBuilder(); }
     createProcObjs(db) { return; }
     reset() { }
     ;
-    sql(db, sql, params) { return; }
+    sql(sql, params) { return; }
     sqlProc(db, procName, procSql) { return; }
     buildProc(db, procName, procSql, isFunc) { return; }
     buildRealProcFrom$ProcTable(db, proc) { return; }
@@ -26,12 +28,6 @@ class MsDbServer extends dbServer_1.DbServer {
     uqDbs() { return; }
     createResDb(resDbName) { return; }
     create$UqDb() { return; }
-    IDActs(paramIDActs) { return; }
-    ID(paramID) { return; }
-    KeyID(paramID) { return; }
-    ID2(paramID2) { return; }
-    KeyID2(paramKeyID2) { return; }
-    IDLog(paramIDLog) { return; }
 }
 exports.MsDbServer = MsDbServer;
 //# sourceMappingURL=ms.js.map
