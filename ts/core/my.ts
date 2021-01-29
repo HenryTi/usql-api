@@ -68,17 +68,15 @@ const sysProcColl = {
 };
 
 export class MyDbServer extends DbServer {
-	//private dbName: string;
 	private dbConfig: any;
     private pool: Pool;
     constructor(dbName:string, dbConfig:any) {
-		super();
-		//this.dbName = dbName;
+		super(dbName);
 		this.dbConfig = dbConfig;
 		this.resetProcColl();
 	}
 
-	protected createBuilder() { return new MyBuilder(); }
+	protected createBuilder() { return new MyBuilder(this.dbName, this.hasUnit); }
 
 	private resetProcColl() {
 		this.procColl = _.merge({}, sysProcColl);

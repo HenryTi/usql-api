@@ -1,13 +1,11 @@
 import * as _ from 'lodash';
 import { Db, env } from '../db';
-import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDDetail, ParamIDLog, ParamKeyID, ParamKeyID2, TableSchema} from '../dbServer';
+import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDLog, ParamKeyID, ParamKeyID2, TableSchema} from '../dbServer';
 import { packReturns } from '../packReturn';
 import { ImportData } from '../importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from '../inBusAction';
 import { Net } from '../net';
 import { centerApi } from '../centerApi';
-import { types } from 'util';
-import { stringify } from 'querystring';
 
 interface EntityAccess {
     name: string;
@@ -606,6 +604,7 @@ export class EntityRunner {
         this.uqVersion = setting['uqversion'] as number;    // compile changed
         if (this.uqVersion === undefined) this.uqVersion = 1;
 		this.hasUnit = !(setting['hasunit'] as number === 0);
+		this.dbServer.hasUnit = this.hasUnit;
 		
         let uu = setting['uniqueunit'];
         this.uniqueUnit = uu? uu as number: 0;
@@ -966,18 +965,19 @@ export class EntityRunner {
 		throw new Error(err);
 	}
 
-	private getTableSchema(name:string, types:string[]):TableSchema {
+	private getTableSchema(name:string, types:string[], values?:any[]):TableSchema {
 		if (name === undefined) return undefined;
-		let ts: TableSchema = this.schemas[name.toLowerCase()].call as TableSchema;
+		let lowerName = name.toLowerCase();
+		let ts = this.schemas[lowerName]?.call;
 		if (ts === undefined) {
 			this.throwErr(`${name} is not a valid Entity`);
 		}
-		let {type, name:tName, fields, keys} = ts;
+		let {type} = ts;
 		if (types.indexOf(type) < 0) {
-			this.throwErr(`IDActs only support ${types.map(v => v.toUpperCase()).join(', ')}`);
+			this.throwErr(`TableSchema only support ${types.map(v => v.toUpperCase()).join(', ')}`);
 		}
 		let db = this.db.getDbName();
-		return {db, type, name:tName, fields, keys, values:undefined};
+		return {name:lowerName, schema:ts, values};
 	}
 	private getTableSchemas(names:string[], types:string[]):TableSchema[] {
 		return names.map(v => this.getTableSchema(v, types));
@@ -990,8 +990,9 @@ export class EntityRunner {
 			[this.getTableSchema(names as string, types)];
 	}
 
-	IDActs(param:ParamIDActs): Promise<any[]> {
+	IDActs(unit:number, user:number, param:ParamIDActs): Promise<any[]> {
 		for (let i in param) {
+			if (i === '$') continue;
 			let ts = this.getTableSchema(i, ['id', 'idx', 'id2']);
 			let values = (param[i] as unknown) as any[];
 			if (values) {
@@ -999,57 +1000,75 @@ export class EntityRunner {
 				param[i] = ts;
 			}
 		}
-		return this.dbServer.IDActs(param);
+		return this.dbServer.IDActs(unit, user, param);
 	}
 
 	IDDetail(unit:number, user:number, param:ParamIDDetail): Promise<any[]> {
-		let {ID, IDDetail, IDDetail2, IDDetail3} = param;
+		let {master, detail, detail2, detail3} = param;
 		let types = ['id'];
-		param.ID = this.getTableSchema(ID as unknown as string, types);
-		param.IDDetail = this.getTableSchema(IDDetail as unknown as string, types);
-		param.IDDetail2 = this.getTableSchema(IDDetail2 as unknown as string, types);
-		param.IDDetail3 = this.getTableSchema(IDDetail3 as unknown as string, types);
+		param.master = this.getTableSchema(master.name as unknown as string, types, [(master as any).value as any]);
+		param.detail = this.getTableSchema(detail.name as unknown as string, types, detail.values);
+		if (detail2) {
+			param.detail2 = this.getTableSchema(detail2.name as unknown as string, types, detail2.values);
+		}
+		if (detail3) {
+			param.detail3 = this.getTableSchema(detail3.name as unknown as string, types, detail3.values);
+		}
 		return this.dbServer.IDDetail(unit, user, param);
 	}
 
-	ID(param: ParamID): Promise<any[]> {
+	IDDetailGet(unit:number, user:number, param:ParamIDDetailGet): Promise<any[]> {
+		let {master, detail, detail2, detail3} = param;
+		let types = ['id'];
+		param.master = this.getTableSchema(master as unknown as string, types);
+		param.detail = this.getTableSchema(detail as unknown as string, types);
+		if (detail2) {
+			param.detail2 = this.getTableSchema(detail2 as unknown as string, types);
+		}
+		if (detail3) {
+			param.detail3 = this.getTableSchema(detail3 as unknown as string, types);
+		}
+		return this.dbServer.IDDetailGet(unit, user, param);
+	}
+
+	ID(unit:number, user:number, param: ParamID): Promise<any[]> {
 		let {IDX} = param;
 		let types = ['id', 'idx'];
 		param.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
-		return this.dbServer.ID(param);
+		return this.dbServer.ID(unit, user, param);
 	}
 
-	KeyID(param: ParamKeyID): Promise<any[]> {
+	KeyID(unit:number, user:number, param: ParamKeyID): Promise<any[]> {
 		let {IDX} = param;
 		let types = ['id', 'idx'];
 		param.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
-		return this.dbServer.KeyID(param);
+		return this.dbServer.KeyID(unit, user, param);
 	}
 
-	ID2(param: ParamID2): Promise<any[]> {
+	ID2(unit:number, user:number, param: ParamID2): Promise<any[]> {
 		let {ID2, IDX} = param;
 		param.ID2 = this.getTableSchema((ID2 as unknown) as string, ['id2']) as TableSchema;
 		let types = ['id', 'idx'];
 		param.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
-		return this.dbServer.ID2(param);
+		return this.dbServer.ID2(unit, user, param);
 	}
 	
-	KeyID2(param: ParamKeyID2): Promise<any[]> {
+	KeyID2(unit:number, user:number, param: ParamKeyID2): Promise<any[]> {
 		let {ID, ID2, IDX} = param;
 		param.ID = this.getTableSchema((ID as unknown) as string, ['id']);
 		param.ID2 = this.getTableSchema((ID2 as unknown) as string, ['id2']);
 		param.IDX = this.getTableSchemaArray(IDX as unknown as any, ['id', 'idx']);
-		return this.dbServer.KeyID2(param);
+		return this.dbServer.KeyID2(unit, user, param);
 	}
 	
-	IDLog(param: ParamIDLog): Promise<any[]> {
+	IDLog(unit:number, user:number, param: ParamIDLog): Promise<any[]> {
 		let {IDX, field} = param;
 		let ts = this.getTableSchema((IDX as unknown) as string, ['idx']);
 		param.IDX = ts;
 		let fLower = field.toLowerCase();
-		if (ts.fields.findIndex(v => v.name === fLower) < 0) {
+		if (ts.schema.fields.findIndex(v => v.name === fLower) < 0) {
 			this.throwErr(`ID ${IDX} has no Field ${field}`);
 		}
-		return this.dbServer.IDLog(param);
+		return this.dbServer.IDLog(unit, user, param);
 	}
 }

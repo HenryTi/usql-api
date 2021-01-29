@@ -2,10 +2,17 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Builder = void 0;
 class Builder {
+    constructor(dbName, hasUnit) {
+        this.dbName = dbName;
+        this.hasUnit = hasUnit;
+    }
     IDActs(param) {
         return;
     }
-    IDDetail(paramIDDetail) {
+    IDDetail(param) {
+        return;
+    }
+    IDDetailGet(param) {
         return;
     }
     ID(param) {

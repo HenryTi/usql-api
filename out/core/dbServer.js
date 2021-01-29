@@ -11,56 +11,63 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DbServer = void 0;
 class DbServer {
-    constructor() {
+    constructor(dbName) {
+        this.dbName = dbName;
         this.builder = this.createBuilder();
     }
-    IDActs(param) {
+    IDActs(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.IDActs(param);
-            let ret = yield this.sql(sql, undefined);
+            let ret = yield this.call(this.dbName, 'tv_$exec_sql_trans', [unit, user, sql]);
             return ret;
         });
     }
     IDDetail(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let { db } = param.ID;
             let sql = this.builder.IDDetail(param);
-            let ret = yield this.call(db, 'tv_$exec_sql_trans', [unit, user, sql]);
+            let ret = yield this.call(this.dbName, 'tv_$exec_sql_trans', [unit, user, sql]);
             return ret;
         });
     }
-    ID(param) {
+    IDDetailGet(unit, user, param) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = this.builder.IDDetailGet(param);
+            let ret = yield this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
+            return ret;
+        });
+    }
+    ID(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.ID(param);
-            let ret = yield this.sql(sql, undefined);
+            let ret = yield this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
             return ret;
         });
     }
-    KeyID(param) {
+    KeyID(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.KeyID(param);
-            let ret = yield this.sql(sql, undefined);
+            let ret = yield this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
             return ret;
         });
     }
-    ID2(param) {
+    ID2(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.ID2(param);
-            let ret = yield this.sql(sql, undefined);
+            let ret = yield this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
             return ret;
         });
     }
-    KeyID2(param) {
+    KeyID2(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.KeyID2(param);
-            let ret = yield this.sql(sql, undefined);
+            let ret = yield this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
             return ret;
         });
     }
-    IDLog(param) {
+    IDLog(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.IDLog(param);
-            let ret = yield this.sql(sql, undefined);
+            let ret = yield this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
             return ret;
         });
     }

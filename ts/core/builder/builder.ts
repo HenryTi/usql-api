@@ -1,11 +1,22 @@
 import { ParamID, ParamID2, ParamIDActs, ParamIDDetail, ParamIDLog, ParamKeyID, ParamKeyID2 } from "../dbServer";
 
 export abstract class Builder {
+	protected dbName:string;
+	protected hasUnit:boolean;
+	constructor(dbName:string, hasUnit:boolean) {
+		this.dbName = dbName;
+		this.hasUnit = hasUnit;
+	}
+
 	IDActs(param:ParamIDActs): string {
 		return
 	}
 
-	IDDetail(paramIDDetail:ParamIDDetail): string {
+	IDDetail(param:ParamIDDetail): string {
+		return
+	}
+
+	IDDetailGet(param:ParamIDDetail): string {
 		return
 	}
 

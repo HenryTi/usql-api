@@ -12,31 +12,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildIDRouter = void 0;
 function buildIDRouter(router, rb) {
     rb.entityPost(router, 'id', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let result = yield runner.ID(body);
+        let result = yield runner.ID(unit, user, body);
         return result;
     }));
     rb.entityPost(router, 'key-id', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let result = yield runner.KeyID(body);
+        let result = yield runner.KeyID(unit, user, body);
         return result;
     }));
     rb.entityPost(router, 'id2', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let result = yield runner.ID2(body);
+        let result = yield runner.ID2(unit, user, body);
         return result;
     }));
     rb.entityPost(router, 'key-id2', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let result = yield runner.KeyID2(body);
+        let result = yield runner.KeyID2(unit, user, body);
         return result;
     }));
     rb.entityPost(router, 'id-log', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let result = yield runner.IDLog(body);
+        let result = yield runner.IDLog(unit, user, body);
         return result;
     }));
     rb.entityPost(router, 'id-acts', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let result = yield runner.IDActs(body);
+        let result = yield runner.IDActs(unit, user, body);
         return result;
     }));
     rb.entityPost(router, 'id-detail', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.IDDetail(unit, user, body);
+        return result;
+    }));
+    rb.entityPost(router, 'id-detail-get', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.IDDetailGet(unit, user, body);
         return result;
     }));
 }

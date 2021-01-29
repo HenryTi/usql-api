@@ -6,11 +6,8 @@ export interface ParamPage {
 }
 
 export interface TableSchema {
-	db: string;
 	name: string;
-	type: string;
-	keys: {name:string}[];
-	fields: {name:string}[];
+	schema: {type:string, keys:{name:string;type:string}[], fields:{name:string;type:string}[], owner:boolean};
 	values: any[];
 }
 
@@ -19,10 +16,14 @@ export interface ParamIDActs {
 }
 
 export interface ParamIDDetail {
-	ID: TableSchema;
-	IDDetail: TableSchema;
-	IDDetail2?: TableSchema;
-	IDDetail3?: TableSchema;
+	master: TableSchema;
+	detail: TableSchema;
+	detail2?: TableSchema;
+	detail3?: TableSchema;
+}
+
+export interface ParamIDDetailGet extends ParamIDDetail {
+	id: number;
 }
 
 export interface ParamID {
@@ -62,9 +63,12 @@ export interface ParamIDLog {
 }
 
 export abstract class DbServer {
+	protected dbName: string;
+	hasUnit: boolean;
 	protected readonly builder: Builder;
 
-	constructor() {
+	constructor(dbName:string) {
+		this.dbName = dbName;
 		this.builder = this.createBuilder();
 	}
 
@@ -90,46 +94,51 @@ export abstract class DbServer {
     abstract createResDb(resDbName:string):Promise<void>;
 	abstract create$UqDb():Promise<void>;
 	
-	async IDActs(param:ParamIDActs): Promise<any[]> {
+	async IDActs(unit:number, user:number, param:ParamIDActs): Promise<any[]> {
 		let sql = this.builder.IDActs(param);
-		let ret = await this.sql(sql, undefined);
+		let ret = await this.call(this.dbName, 'tv_$exec_sql_trans', [unit, user, sql]);
 		return ret;
 	}
 
 	async IDDetail(unit:number, user:number, param:ParamIDDetail): Promise<any[]> {
-		let {db} = param.ID;
 		let sql = this.builder.IDDetail(param);
-		let ret = await this.call(db, 'tv_$exec_sql_trans', [unit, user, sql]);
+		let ret = await this.call(this.dbName, 'tv_$exec_sql_trans', [unit, user, sql]);
 		return ret;
 	}
 
-	async ID(param: ParamID): Promise<any[]> {
+	async IDDetailGet(unit:number, user:number, param:ParamIDDetail): Promise<any[]> {
+		let sql = this.builder.IDDetailGet(param);
+		let ret = await this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
+		return ret;
+	}
+
+	async ID(unit:number, user:number, param: ParamID): Promise<any[]> {
 		let sql = this.builder.ID(param);
-		let ret = await this.sql(sql, undefined);
+		let ret = await this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
 		return ret;
 	}
 
-	async KeyID(param: ParamKeyID): Promise<any[]> {
+	async KeyID(unit:number, user:number, param: ParamKeyID): Promise<any[]> {
 		let sql = this.builder.KeyID(param);
-		let ret = await this.sql(sql, undefined);
+		let ret = await this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
 		return ret;
 	}
 
-	async ID2(param: ParamID2): Promise<any[]> {
+	async ID2(unit:number, user:number, param: ParamID2): Promise<any[]> {
 		let sql = this.builder.ID2(param);
-		let ret = await this.sql(sql, undefined);
+		let ret = await this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
 		return ret;
 	}
 	
-	async KeyID2(param: ParamKeyID2): Promise<any[]> {
+	async KeyID2(unit:number, user:number, param: ParamKeyID2): Promise<any[]> {
 		let sql = this.builder.KeyID2(param);
-		let ret = await this.sql(sql, undefined);
+		let ret = await this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
 		return ret;
 	}
 	
-	async IDLog(param: ParamIDLog): Promise<any[]> {
+	async IDLog(unit:number, user:number, param: ParamIDLog): Promise<any[]> {
 		let sql = this.builder.IDLog(param);
-		let ret = await this.sql(sql, undefined);
+		let ret = await this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
 		return ret;
 	}
 }

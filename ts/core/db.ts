@@ -97,7 +97,8 @@ export abstract class Db {
 		return Db.dbs[name] = db;
 	}
 
-    private dbName: string;
+	private dbName: string;
+	private hasUnit: boolean;
     private isExists: boolean = false;
 	readonly dbServer: DbServer;
 	serverId: number;

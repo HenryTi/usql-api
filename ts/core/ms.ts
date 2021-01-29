@@ -1,12 +1,12 @@
 import { MsBuilder } from './builder';
-import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDLog, ParamKeyID, ParamKeyID2} from './dbServer';
+import {DbServer} from './dbServer';
 
 export class MsDbServer extends DbServer {
 	constructor(dbName:string, dbConfig: any) {
-		super();
+		super(dbName);
 	}
 
-	protected createBuilder() { return new MsBuilder(); }
+	protected createBuilder() { return new MsBuilder(this.dbName, this.hasUnit); }
 
 	createProcObjs(db:string): Promise<void> {return}
 	reset():void {};

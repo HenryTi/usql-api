@@ -5,9 +5,9 @@ const builder_1 = require("./builder");
 const dbServer_1 = require("./dbServer");
 class MsDbServer extends dbServer_1.DbServer {
     constructor(dbName, dbConfig) {
-        super();
+        super(dbName);
     }
-    createBuilder() { return new builder_1.MsBuilder(); }
+    createBuilder() { return new builder_1.MsBuilder(this.dbName, this.hasUnit); }
     createProcObjs(db) { return; }
     reset() { }
     ;
