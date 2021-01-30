@@ -1,11 +1,14 @@
 import { ParamID, ParamID2, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDLog, ParamKeyID, ParamKeyID2, TableSchema } from "../dbServer";
 import { Builder } from "./builder";
 
+const retLn = `set @ret=CONCAT(@ret, '\\n');\n`;
+const retTab = `set @ret=CONCAT(@ret, @id, '\\t');\n`;
+
 export class MyBuilder extends Builder {
 	IDActs(param:ParamIDActs): string {
 		let {$} = param;
 		let arr = $ as unknown as string[];
-		let sql = 'SET @ret=\'\';\n';
+		let sql = 'set @ret=\'\';\n';
 		for (let i=0; i<arr.length; i++) {
 			let p = param[arr[i]];
 			switch (p.schema.type) {
@@ -59,27 +62,124 @@ export class MyBuilder extends Builder {
 	}
 
 	KeyID(param: ParamKeyID): string {
-		let {ID, IDX, key, page} = param;
-		let {cols, tables} = this.buildIDX(IDX);
+		let {ID, key, IDX, page} = param;
+		let arr = [ID];
+		if (IDX) arr.push(...IDX);
+		let {cols, tables} = this.buildIDX(arr);
+		let {schema} = ID;
+		let {keys} = schema;
 		let where = '';
-		let sql = `SELECT ${cols} FROM ${tables} WHERE t0.id${where}`;
+		if (this.hasUnit === true) {
+			where += 't0.$unit=@unit'
+		}
+		for (let k of keys) {
+			let v = key[k.name];
+			if (v === undefined) break;
+			where += ' AND t0.`' + k.name + '`=\'' + v + '\'';
+		}
+		if (page) {
+			let {start, size} = page;
+			if (!start) start = 0;
+			where += ' AND t0.id>' + start;
+		}
+
+		let sql = `SELECT ${cols} FROM ${tables} WHERE 1=1${where}`;
+		sql += ' ORDER BY t0.id ASC';
+		if (page) sql += ' LIMIT ' + page.size;
+		sql += ';\n';
 		return sql;
 	}
 
 	ID2(param: ParamID2): string {
-		return
+		let {ID2, id, IDX, page} = param;
+		let arr = [ID2];
+		if (IDX) arr.push(...IDX);
+		let {cols, tables} = this.buildIDX(arr);
+		let where = ' AND t0.id' + (Array.isArray(id)?
+			' in (' + id.join(',') + ')'
+			:
+			'=' + id);
+		if (page) {
+			let {start} = page;
+			if (!start) start = 0;
+			where += ' AND t0.id2>' + start;
+		}
+		let sql = `SELECT ${cols} FROM ${tables} WHERE 1=1${where}`;
+		sql += ' ORDER BY t0.id2 ASC';
+		if (page) sql += ' LIMIT ' + page.size;
+		sql += ';\n';
+		return sql;
 	}
 	
 	KeyID2(param: ParamKeyID2): string {
-		return
+		let {ID, ID2, key, IDX, page} = param;
+		let arr = [ID2];
+		if (IDX) arr.push(...IDX);
+		let {cols, tables} = this.buildIDX(arr);
+
+		let {name, schema} = ID;
+		let {keys} = schema;
+		let joinID = ' JOIN `tv_' + name + '` as t ON t.id=t0.id';
+		let where = '';
+		if (this.hasUnit === true) {
+			where += 't.$unit=@unit'
+		}
+		for (let k of keys) {
+			let v = key[k.name];
+			if (v === undefined) break;
+			where += ' AND t.`' + k.name + '`=\'' + v + '\'';
+		}
+		if (page) {
+			let {start} = page;
+			if (!start) start = 0;
+			where += ' AND t0.id2>' + start;
+		}
+		let sql = `SELECT ${cols} FROM ${tables}${joinID} WHERE 1=1${where}`;
+		sql += ' ORDER BY t0.id2 ASC';
+		if (page) sql += ' LIMIT ' + page.size;
+		sql += ';\n';
+		return sql;
 	}
 	
 	IDLog(param: ParamIDLog): string {
-		return
+		let {IDX, field, id, log, timeZone, page} = param;
+		field = field.toLowerCase();
+		let {start, size} = page;
+		if (!start) start = 0x7FFFFFFF;
+		let {name, schema} = IDX;
+		let {exFields} = schema;
+		let exField = exFields?.find(v => v.field === field);
+		let table = '`tv_' + name + '$' + field + '`';
+		let cols = 'unix_timestamp(t) as t, v, u';
+		if (exField) {
+			let {log, track, memo, sum} = exField;
+			if (log !== true) {
+				return `select 'IDX ${name} ${field}' is not loged`;
+			}
+			if (sum !== undefined) cols += ',s';
+			if (track === true) cols += ',k';
+			if (memo === true) cols += ',m';
+		}
+		switch (log) {
+			default:
+				return `select 'IDX ${name} ${field}' log ${log} unknown`;
+			case 'each':
+				return `SELECT ${cols} FROM ${table} WHERE id=${id} AND t<FROM_UNIXTIME(${start}) ORDER BY t DESC LIMIT ${size}`;
+			case 'day':
+				return `select 'IDX ${name} ${field}' log by day is under implementing`;
+			case 'week':
+				return `select 'IDX ${name} ${field}' log by week is under implementing`;
+			case 'month':
+				return `select 'IDX ${name} ${field}' log by month is under implementing`;
+			case 'year':
+				return `select 'IDX ${name} ${field}' log by year is under implementing`;
+			}
 	}
 
 	private buildIDX(IDX: TableSchema[]): {cols: string; tables: string} {
 		let {name, schema} = IDX[0];
+		let {type} = schema;
+		let idJoin = type === 'id2'? 'id2' : 'id';
 		let tables = `\`${this.dbName}\`.\`tv_${name}\` as t0`;
 		let cols = 't0.id';
 		for (let f of schema.fields) {
@@ -90,7 +190,7 @@ export class MyBuilder extends Builder {
 		let len = IDX.length;
 		for (let i=1; i<len; i++) {
 			let {name, schema} = IDX[i];
-			tables += ` left join \`${this.dbName}\`.\`tv_${name}\` as t${i} on t0.id=t${i}.id`;
+			tables += ` left join \`${this.dbName}\`.\`tv_${name}\` as t${i} on t0.${idJoin}=t${i}.id`;
 			for (let f of schema.fields) {
 				let fn = f.name;
 				if (fn === 'id') continue;
@@ -160,9 +260,9 @@ export class MyBuilder extends Builder {
 				vals += ',@user';
 			}
 			sql += `(${vals});\n`;
-			sql += `SET @ret=CONCAT(@ret, @id, '\\t');\n`;
+			sql += retTab;
 		}
-		sql += `SET @ret=CONCAT(@ret, '\\n');\n`;
+		sql += retLn;
 		return sql;
 	}
 
@@ -203,7 +303,7 @@ export class MyBuilder extends Builder {
 				}
 			}
 			else {
-				sql += `SET @id:=\`tv_${name}$id\`(@unit,@user,1`;				
+				sql += `set @id=\`tv_${name}$id\`(@unit,@user,1`;
 				let updateOverride = {id: '@id'};
 				for (let k of keys) {
 					let {name, type} = k;
@@ -218,10 +318,10 @@ export class MyBuilder extends Builder {
 				if (fields.length > keys.length + 1) {
 					sql += this.buildUpdate(ts, value, updateOverride);
 				}
-				sql += `SET @ret=concat(@ret, @id, '\\t');\n`;
+				sql += retTab;
 			}
 		}
-		sql += `SET @ret=concat(@ret, '\\n');\n`;
+		sql += retLn;
 		return sql;
 	}
 
@@ -236,7 +336,9 @@ export class MyBuilder extends Builder {
 			else {
 				sql += this.buildUpsert(ts, value);
 			}
+
 		}
+		sql += retLn;
 		return sql;
 	}
 
@@ -252,23 +354,33 @@ export class MyBuilder extends Builder {
 				sql += this.buildUpsert(ts, value);
 			}
 		}
+		sql += retLn;
 		return sql;
 	}
 
 	private buildUpsert(ts:TableSchema, value:any): string {
-		let {schema} = ts;
-		let {fields} = schema;
+		let {name:tableName, schema} = ts;
+		let {fields, exFields} = schema;
 		let cols = '', vals = '', dup = '';
+		let sqlWriteEx:string[] = [];
 		let first = true;
 		for (let f of fields) {
 			let {name, type} = f;
+			switch (name) {
+				default:
+					if (dup.length > 0) dup += ',';
+					dup += '`' + name + '`=values(`' + name + '`)';
+					break;
+				case 'id':
+				case 'id2':
+					break;
+			}
 			if (first === true) {
 				first = false;
 			}
 			else {
 				cols += ',';
 				vals += ',';
-				dup += ',';
 			}
 			cols += '\`' + name + '\`';
 			let v = value[name];
@@ -279,14 +391,36 @@ export class MyBuilder extends Builder {
 				v = (type==='textid'? `tv_$textid('${v}')`: `'${v}'`);
 			}
 			vals += v;
-			switch (name) {
-				default: dup += '`' + name + '`=VALUE(`' + name + '`)'; break;
-				case 'id':
-				case 'id2': continue;
-			}			
+			if (!exFields) continue;
+			let exField = exFields.find(v => v.field === name);
+			if (exField !== undefined) {
+				let {field, track, memo} = exField;
+				let valueId = value['id'];
+				let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId}`;
+				sqlEx += ',' + v;
+				if (track === true) {
+					let vTrack = value['$track'];
+					sqlEx += ',';
+					sqlEx += vTrack? vTrack : 'null';
+				}
+				if (memo === true) {
+					let vMemo = value['$memo'];
+					sqlEx += ',';
+					sqlEx += vMemo? `'${vMemo}'` : 'null';
+				}
+				sqlEx += `);\n`;
+				sqlWriteEx.push(sqlEx);
+			}
 		}
-		let sql = `insert into (${cols})\nvalues (${vals})\non duplicate key set ${dup};`;
-		return sql;
+		let ignore = '', onDup = '';
+		if (dup.length > 0) {
+			onDup = `\non duplicate key update ${dup}`;
+		}
+		else {
+			ignore = ' ignore';
+		}
+		let sql = `insert${ignore} into \`tv_${tableName}\` (${cols})\nvalues (${vals})${onDup};\n`;
+		return sql + sqlWriteEx.join('');
 	}
 
 	private buildUpdate(ts:TableSchema, value:any, override:any = {}): string {
@@ -337,8 +471,10 @@ export class MyBuilder extends Builder {
 		let {name} = ts;
 		let sql = 'delete from `tv_' + name + '` where id=-' + id;
 		if (id2) {
-			sql += 'id2=-' + id2;
+			sql += 'id2=';
+			if (id2 < 0) sql += '-';
+			sql += id2;
 		}
-		return sql;
+		return sql + ';\n';
 	}
 }

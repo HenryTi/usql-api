@@ -5,9 +5,23 @@ export interface ParamPage {
 	size:number;
 }
 
+interface Field {
+	name:string;
+	type:string;
+	track: boolean;
+}
+
+interface ExField {
+	field: string;
+	sum: string;
+	log: boolean;
+	track: boolean;
+	memo: boolean;
+}
+
 export interface TableSchema {
 	name: string;
-	schema: {type:string, keys:{name:string;type:string}[], fields:{name:string;type:string}[], owner:boolean};
+	schema: {type:string; keys:Field[]; fields:Field[]; owner:boolean; exFields:ExField[]};
 	values: any[];
 }
 
@@ -34,22 +48,22 @@ export interface ParamID {
 export interface ParamKeyID {
 	ID: TableSchema;
 	IDX: TableSchema[];
-	key: number[];
+	key: {[key:string]:number|string};
 	page?: ParamPage;
 }
 
 export interface ParamID2 {
 	ID2: TableSchema;
 	id: number | number[];
-	IDX: TableSchema[];
+	IDX?: TableSchema[];
 	page?: ParamPage;
 }
 
 export interface ParamKeyID2 {
 	ID: TableSchema;
-	key: number[];
+	key: {[key:string]:number|string};
 	ID2: TableSchema;
-	IDX: TableSchema[];
+	IDX?: TableSchema[];
 	page?: ParamPage;
 }
 
@@ -57,7 +71,7 @@ export interface ParamIDLog {
 	IDX: TableSchema;
 	field: string;
 	id: number;
-	log: 'each' | 'day' | 'month' | 'year';
+	log: 'each' | 'day' | 'week' | 'month' | 'year';
 	timeZone?: number;
 	page: ParamPage;
 }

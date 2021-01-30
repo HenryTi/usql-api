@@ -984,6 +984,7 @@ export class EntityRunner {
 	}
 
 	private getTableSchemaArray(names:string|string[], types:string[]):TableSchema[] {
+		if (names === undefined) return;
 		return Array.isArray(names) === true? 
 			this.getTableSchemas(names as string[], types)
 			:
@@ -1039,8 +1040,9 @@ export class EntityRunner {
 	}
 
 	KeyID(unit:number, user:number, param: ParamKeyID): Promise<any[]> {
-		let {IDX} = param;
+		let {ID, IDX} = param;
 		let types = ['id', 'idx'];
+		param.ID = this.getTableSchema(ID as unknown as string, ['id']);
 		param.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
 		return this.dbServer.KeyID(unit, user, param);
 	}

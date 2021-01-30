@@ -1114,6 +1114,8 @@ class EntityRunner {
         return names.map(v => this.getTableSchema(v, types));
     }
     getTableSchemaArray(names, types) {
+        if (names === undefined)
+            return;
         return Array.isArray(names) === true ?
             this.getTableSchemas(names, types)
             :
@@ -1165,8 +1167,9 @@ class EntityRunner {
         return this.dbServer.ID(unit, user, param);
     }
     KeyID(unit, user, param) {
-        let { IDX } = param;
+        let { ID, IDX } = param;
         let types = ['id', 'idx'];
+        param.ID = this.getTableSchema(ID, ['id']);
         param.IDX = this.getTableSchemaArray(IDX, types);
         return this.dbServer.KeyID(unit, user, param);
     }
