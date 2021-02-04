@@ -28,19 +28,25 @@ class MyBuilder extends builder_1.Builder {
     IDDetail(param) {
         let { master, detail, detail2, detail3 } = param;
         let masterOverride = {
-            id: '(@master:=@id:=tv_$id())',
+            id: `(@master:=@id:=tv_$id(${master.schema.typeId}))`,
             no: `tv_$no(@unit, '${master.name}')`,
         };
         let sql = 'SET @ret=\'\';\n';
         sql += this.buildInsert(master, masterOverride);
         let detailOverride = {
-            id: '(@id:=tv_$id())',
+            id: `(@id:=tv_$id(${detail.schema.typeId}))`,
             master: '@master',
             row: '(@row:=@row+1)',
         };
         sql += this.buildInsert(detail, detailOverride);
-        sql += this.buildInsert(detail2, detailOverride);
-        sql += this.buildInsert(detail3, detailOverride);
+        if (detail2) {
+            let detailOverride2 = Object.assign(Object.assign({}, detailOverride), { id: `(@id:=tv_$id(${detail2.schema.typeId}))` });
+            sql += this.buildInsert(detail2, detailOverride2);
+        }
+        if (detail3) {
+            let detailOverride3 = Object.assign(Object.assign({}, detailOverride), { id: `(@id:=tv_$id(${detail3.schema.typeId}))` });
+            sql += this.buildInsert(detail3, detailOverride3);
+        }
         sql += 'SELECT @ret as ret;\n';
         return sql;
     }
@@ -159,7 +165,7 @@ class MyBuilder extends builder_1.Builder {
         let { exFields } = schema;
         let exField = exFields === null || exFields === void 0 ? void 0 : exFields.find(v => v.field === field);
         let table = '`tv_' + name + '$' + field + '`';
-        let cols = 'unix_timestamp(t) as t, v, u';
+        let cols = 't, v, u';
         if (exField) {
             let { log, track, memo, sum } = exField;
             if (log !== true) {
@@ -176,7 +182,7 @@ class MyBuilder extends builder_1.Builder {
             default:
                 return `select 'IDX ${name} ${field}' log ${log} unknown`;
             case 'each':
-                return `SELECT ${cols} FROM ${table} WHERE id=${id} AND t<FROM_UNIXTIME(${start}) ORDER BY t DESC LIMIT ${size}`;
+                return `SELECT ${cols} FROM ${table} WHERE id=${id} AND t<${start} ORDER BY t DESC LIMIT ${size}`;
             case 'day':
                 return `select 'IDX ${name} ${field}' log by day is under implementing`;
             case 'week':
@@ -194,20 +200,26 @@ class MyBuilder extends builder_1.Builder {
         let tables = `\`${this.dbName}\`.\`tv_${name}\` as t0`;
         let cols = 't0.id';
         for (let f of schema.fields) {
-            let fn = f.name;
+            let { name: fn, type: ft } = f;
             if (fn === 'id')
                 continue;
-            cols += `,t0.\`${fn}\``;
+            let fv = `t0.\`${fn}\``;
+            cols += ',';
+            cols += ft === 'textid' ? `tv_$idtext(${fv})` : fv;
+            cols += ' as `' + fn + '`';
         }
         let len = IDX.length;
         for (let i = 1; i < len; i++) {
             let { name, schema } = IDX[i];
             tables += ` left join \`${this.dbName}\`.\`tv_${name}\` as t${i} on t0.${idJoin}=t${i}.id`;
             for (let f of schema.fields) {
-                let fn = f.name;
+                let { name: fn, type: ft } = f;
                 if (fn === 'id')
                     continue;
-                cols += `,t${i}.\`${fn}\``;
+                let fv = `t${i}.\`${fn}\``;
+                cols += ',';
+                cols += ft === 'textid' ? `tv_$idtext(${fv})` : fv;
+                cols += ' as `' + fn + '`';
             }
         }
         return { cols, tables };
@@ -293,7 +305,11 @@ class MyBuilder extends builder_1.Builder {
             else {
                 sql += ',';
             }
-            sql += `\`${f.name}\``;
+            let { name, type } = f;
+            sql += (type === 'textid') ?
+                `tv_$idtext(\`${name}\`)`
+                :
+                    `\`${name}\``;
         }
         sql += ' FROM `tv_' + ts.name + '` WHERE 1=1';
         if (this.hasUnit === true) {
@@ -310,7 +326,7 @@ class MyBuilder extends builder_1.Builder {
             let { id } = value;
             if (id) {
                 if (id < 0) {
-                    sql += this.buildDelete(ts, id);
+                    sql += this.buildDelete(ts, -id);
                 }
                 else {
                     sql += this.buildUpdate(ts, value);
@@ -344,7 +360,7 @@ class MyBuilder extends builder_1.Builder {
         for (let value of values) {
             let { id } = value;
             if (id < 0) {
-                sql += this.buildDelete(ts, id);
+                sql += this.buildDelete(ts, -id);
             }
             else {
                 sql += this.buildUpsert(ts, value);
@@ -359,7 +375,7 @@ class MyBuilder extends builder_1.Builder {
         for (let value of values) {
             let { id, id2 } = value;
             if (id < 0) {
-                sql += this.buildDelete(ts, id, id2);
+                sql += this.buildDelete(ts, -id, id2);
             }
             else {
                 sql += this.buildUpsert(ts, value);
@@ -408,7 +424,7 @@ class MyBuilder extends builder_1.Builder {
             if (exField !== undefined) {
                 let { field, track, memo } = exField;
                 let valueId = value['id'];
-                let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId}`;
+                let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId},0`;
                 sqlEx += ',' + v;
                 if (track === true) {
                     let vTrack = value['$track'];
@@ -479,15 +495,32 @@ class MyBuilder extends builder_1.Builder {
         return sql + where + ';\n';
     }
     buildDelete(ts, id, id2) {
-        let { name } = ts;
-        let sql = 'delete from `tv_' + name + '` where id=-' + id;
+        let { name, schema } = ts;
+        let { type, exFields } = schema;
+        let sql = '';
+        if (type === 'idx' && exFields) {
+            for (let exField of exFields) {
+                let { field, track, memo } = exField;
+                let sqlEx = `set @dxValue=\`tv_${name}$${field}\`(@unit,@user,${id},-1,null`;
+                if (track === true) {
+                    sqlEx += ',null';
+                }
+                if (memo === true) {
+                    sqlEx += ',null';
+                }
+                sqlEx += `);\n`;
+                sql += sqlEx;
+            }
+        }
+        sql += 'delete from `tv_' + name + '` where id=' + id;
         if (id2) {
             sql += 'id2=';
             if (id2 < 0)
-                sql += '-';
+                id2 = -id2;
             sql += id2;
         }
-        return sql + ';\n';
+        sql += ';\n';
+        return sql;
     }
 }
 exports.MyBuilder = MyBuilder;

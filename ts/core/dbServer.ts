@@ -21,7 +21,14 @@ interface ExField {
 
 export interface TableSchema {
 	name: string;
-	schema: {type:string; keys:Field[]; fields:Field[]; owner:boolean; exFields:ExField[]};
+	schema: {
+		typeId:number;
+		type:string; 
+		keys:Field[]; 
+		fields:Field[]; 
+		owner:boolean; 
+		exFields:ExField[];
+	};
 	values: any[];
 }
 
