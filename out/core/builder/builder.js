@@ -30,6 +30,9 @@ class Builder {
     IDLog(param) {
         return;
     }
+    IDSum(param) {
+        return;
+    }
 }
 exports.Builder = Builder;
 //# sourceMappingURL=builder.js.map

@@ -158,9 +158,9 @@ class MyBuilder extends builder_1.Builder {
     IDLog(param) {
         let { IDX, field, id, log, timeZone, page } = param;
         field = field.toLowerCase();
-        let { start, size } = page;
+        let { start, size, end } = page;
         if (!start)
-            start = 0x7FFFFFFF;
+            start = Number.MAX_SAFE_INTEGER;
         let { name, schema } = IDX;
         let { exFields } = schema;
         let exField = exFields === null || exFields === void 0 ? void 0 : exFields.find(v => v.field === field);
@@ -178,20 +178,55 @@ class MyBuilder extends builder_1.Builder {
             if (memo === true)
                 cols += ',m';
         }
+        let group;
+        let time = `from_unixtime(a.t/1000+${timeZone}*3600)`;
         switch (log) {
             default:
                 return `select 'IDX ${name} ${field}' log ${log} unknown`;
             case 'each':
                 return `SELECT ${cols} FROM ${table} WHERE id=${id} AND t<${start} ORDER BY t DESC LIMIT ${size}`;
             case 'day':
-                return `select 'IDX ${name} ${field}' log by day is under implementing`;
+                group = `DATE_FORMAT(${time}, '%Y-%m-%d')`;
+                ;
+                break;
             case 'week':
-                return `select 'IDX ${name} ${field}' log by week is under implementing`;
+                group = `YEARWEEK(${time}, 2)`;
+                break;
             case 'month':
-                return `select 'IDX ${name} ${field}' log by month is under implementing`;
+                group = `DATE_FORMAT(${time}, '%Y-%m-01')`;
+                break;
             case 'year':
-                return `select 'IDX ${name} ${field}' log by year is under implementing`;
+                group = `DATE_FORMAT(${time}, '%Y-01-01')`;
+                break;
         }
+        let sql = `select ${group} as t, sum(a.v) as v from ${table} as a where a.t>=${end} and a.t<${start} and a.id=${id} group by ${group} limit ${size}`;
+        return sql;
+    }
+    IDSum(param) {
+        let { IDX, field, id, far, near } = param;
+        field = field.toLowerCase();
+        if (!far)
+            far = 0;
+        if (!near)
+            near = Number.MAX_SAFE_INTEGER;
+        let { name, schema } = IDX;
+        let { exFields } = schema;
+        let exField = exFields === null || exFields === void 0 ? void 0 : exFields.find(v => v.field === field);
+        let sql;
+        if (!exField) {
+            sql = `select '${field} is not logged' as error`;
+        }
+        else {
+            let table = '`tv_' + name + '$' + field + '`';
+            sql = `select a.id, sum(a.v) as v from ${table} as a where a.t>=${far} and a.t<${near} and a.id`;
+            if (Array.isArray(id) === true) {
+                sql += ' in (' + id.join() + ')';
+            }
+            else {
+                sql += `=${id}`;
+            }
+        }
+        return sql;
     }
     buildIDX(IDX) {
         let { name, schema } = IDX[0];
@@ -392,15 +427,47 @@ class MyBuilder extends builder_1.Builder {
         let first = true;
         for (let f of fields) {
             let { name, type } = f;
-            switch (name) {
-                default:
-                    if (dup.length > 0)
-                        dup += ',';
-                    dup += '`' + name + '`=values(`' + name + '`)';
-                    break;
-                case 'id':
-                case 'id2':
-                    break;
+            let v = value[name];
+            let val;
+            if (v === undefined || v === null) {
+                val = 'null';
+            }
+            else {
+                let time;
+                if (typeof v === 'object') {
+                    time = v.time;
+                    v = v.value;
+                }
+                val = (type === 'textid' ? `tv_$textid('${v}')` : `'${v}'`);
+                switch (name) {
+                    default:
+                        if (dup.length > 0)
+                            dup += ',';
+                        dup += '`' + name + '`=values(`' + name + '`)';
+                        break;
+                    case 'id':
+                    case 'id2':
+                        break;
+                }
+                if (exFields) {
+                    let exField = exFields.find(v => v.field === name);
+                    if (exField !== undefined) {
+                        let { field, track, memo, sum } = exField;
+                        let valueId = value['id'];
+                        let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId},0,${v},`;
+                        sqlEx += time !== undefined ? time : 'null';
+                        if (track === true) {
+                            let vTrack = value['$track'];
+                            sqlEx += ',' + (vTrack ? vTrack : 'null');
+                        }
+                        if (memo === true) {
+                            let vMemo = value['$memo'];
+                            sqlEx += ',' + (vMemo ? `'${vMemo}'` : 'null');
+                        }
+                        sqlEx += `);\n`;
+                        sqlWriteEx.push(sqlEx);
+                    }
+                }
             }
             if (first === true) {
                 first = false;
@@ -410,35 +477,7 @@ class MyBuilder extends builder_1.Builder {
                 vals += ',';
             }
             cols += '\`' + name + '\`';
-            let v = value[name];
-            if (v === undefined) {
-                v = 'null';
-            }
-            else {
-                v = (type === 'textid' ? `tv_$textid('${v}')` : `'${v}'`);
-            }
-            vals += v;
-            if (!exFields)
-                continue;
-            let exField = exFields.find(v => v.field === name);
-            if (exField !== undefined) {
-                let { field, track, memo } = exField;
-                let valueId = value['id'];
-                let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId},0`;
-                sqlEx += ',' + v;
-                if (track === true) {
-                    let vTrack = value['$track'];
-                    sqlEx += ',';
-                    sqlEx += vTrack ? vTrack : 'null';
-                }
-                if (memo === true) {
-                    let vMemo = value['$memo'];
-                    sqlEx += ',';
-                    sqlEx += vMemo ? `'${vMemo}'` : 'null';
-                }
-                sqlEx += `);\n`;
-                sqlWriteEx.push(sqlEx);
-            }
+            vals += val;
         }
         let ignore = '', onDup = '';
         if (dup.length > 0) {

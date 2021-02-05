@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Db, env } from '../db';
-import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDLog, ParamKeyID, ParamKeyID2, TableSchema} from '../dbServer';
+import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyID2, TableSchema} from '../dbServer';
 import { packReturns } from '../packReturn';
 import { ImportData } from '../importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from '../inBusAction';
@@ -1072,5 +1072,16 @@ export class EntityRunner {
 			this.throwErr(`ID ${IDX} has no Field ${field}`);
 		}
 		return this.dbServer.IDLog(unit, user, param);
+	}
+	
+	IDSum(unit:number, user:number, param: ParamIDSum): Promise<any[]> {
+		let {IDX, field} = param;
+		let ts = this.getTableSchema((IDX as unknown) as string, ['idx']);
+		param.IDX = ts;
+		let fLower = field.toLowerCase();
+		if (ts.schema.fields.findIndex(v => v.name === fLower) < 0) {
+			this.throwErr(`ID ${IDX} has no Field ${field}`);
+		}
+		return this.dbServer.IDSum(unit, user, param);
 	}
 }

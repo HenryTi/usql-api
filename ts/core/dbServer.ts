@@ -1,8 +1,9 @@
 import { Builder } from "./builder";
 
 export interface ParamPage {
-	start:number;
-	size:number;
+	start: number;
+	end: number;
+	size: number;
 }
 
 interface Field {
@@ -13,7 +14,7 @@ interface Field {
 
 interface ExField {
 	field: string;
-	sum: string;
+	sum: string[];
 	log: boolean;
 	track: boolean;
 	memo: boolean;
@@ -81,6 +82,17 @@ export interface ParamIDLog {
 	log: 'each' | 'day' | 'week' | 'month' | 'year';
 	timeZone?: number;
 	page: ParamPage;
+}
+
+export interface ParamSum {
+	IDX: TableSchema;
+	field: string;
+	far: number;		// 开始时间tick >= far
+	near: number;		// 结束时间tick < near
+}
+
+export interface ParamIDSum extends ParamSum {
+	id: number|number[];
 }
 
 export abstract class DbServer {
@@ -159,6 +171,12 @@ export abstract class DbServer {
 	
 	async IDLog(unit:number, user:number, param: ParamIDLog): Promise<any[]> {
 		let sql = this.builder.IDLog(param);
+		let ret = await this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
+		return ret;
+	}
+	
+	async IDSum(unit:number, user:number, param: ParamIDSum): Promise<any[]> {
+		let sql = this.builder.IDSum(param);
 		let ret = await this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
 		return ret;
 	}

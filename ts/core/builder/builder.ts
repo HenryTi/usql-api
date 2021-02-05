@@ -1,4 +1,4 @@
-import { ParamID, ParamID2, ParamIDActs, ParamIDDetail, ParamIDLog, ParamKeyID, ParamKeyID2 } from "../dbServer";
+import { ParamID, ParamID2, ParamIDActs, ParamIDDetail, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyID2 } from "../dbServer";
 
 export abstract class Builder {
 	protected dbName:string;
@@ -37,6 +37,10 @@ export abstract class Builder {
 	}
 	
 	IDLog(param: ParamIDLog): string {
+		return
+	}
+	
+	IDSum(param: ParamIDSum): string {
 		return
 	}
 }

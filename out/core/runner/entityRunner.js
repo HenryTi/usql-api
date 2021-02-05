@@ -1197,6 +1197,16 @@ class EntityRunner {
         }
         return this.dbServer.IDLog(unit, user, param);
     }
+    IDSum(unit, user, param) {
+        let { IDX, field } = param;
+        let ts = this.getTableSchema(IDX, ['idx']);
+        param.IDX = ts;
+        let fLower = field.toLowerCase();
+        if (ts.schema.fields.findIndex(v => v.name === fLower) < 0) {
+            this.throwErr(`ID ${IDX} has no Field ${field}`);
+        }
+        return this.dbServer.IDSum(unit, user, param);
+    }
 }
 exports.EntityRunner = EntityRunner;
 //# sourceMappingURL=entityRunner.js.map

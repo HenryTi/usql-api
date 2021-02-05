@@ -71,6 +71,13 @@ class DbServer {
             return ret;
         });
     }
+    IDSum(unit, user, param) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = this.builder.IDSum(param);
+            let ret = yield this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);
+            return ret;
+        });
+    }
 }
 exports.DbServer = DbServer;
 //# sourceMappingURL=dbServer.js.map

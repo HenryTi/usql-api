@@ -31,6 +31,10 @@ function buildIDRouter(router, rb) {
         let result = yield runner.IDLog(unit, user, body);
         return result;
     }));
+    rb.entityPost(router, 'id-sum', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.IDSum(unit, user, body);
+        return result;
+    }));
     rb.entityPost(router, 'id-acts', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.IDActs(unit, user, body);
         return result;
