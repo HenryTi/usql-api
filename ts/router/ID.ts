@@ -15,15 +15,15 @@ export function buildIDRouter(router: Router, rb: RouterBuilder) {
         return result;
     });
 
-    rb.entityPost(router, 'id2', '',
+    rb.entityPost(router, 'ix', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
-        let result = await runner.ID2(unit, user, body);
+        let result = await runner.IX(unit, user, body);
         return result;
     });
 
-    rb.entityPost(router, 'key-id2', '',
+    rb.entityPost(router, 'key-ix', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
-        let result = await runner.KeyID2(unit, user, body);
+        let result = await runner.KeyIX(unit, user, body);
         return result;
     });
 
@@ -54,6 +54,12 @@ export function buildIDRouter(router: Router, rb: RouterBuilder) {
     rb.entityPost(router, 'id-detail-get', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.IDDetailGet(unit, user, body);
+        return result;
+    });
+
+	rb.entityPost(router, 'id-in-ix', '',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let result = await runner.IDinIX(unit, user, body);
         return result;
     });
 }

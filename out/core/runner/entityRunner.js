@@ -19,6 +19,7 @@ const centerApi_1 = require("../centerApi");
 class EntityRunner {
     constructor(name, db, net = undefined) {
         this.roleVersions = {};
+        this.id2UserArr = [];
         this.hasPullEntities = false;
         this.hasSheet = false;
         this.isCompiling = false;
@@ -91,7 +92,9 @@ class EntityRunner {
     }
     getAllRoleUsers(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
+            // row 0 返回 id2OfUsers
             let tbl = yield this.tableFromProc('$get_all_role_users', [unit, user]);
+            tbl.unshift({ user: 0, roles: this.id2OfUsers });
             return tbl;
         });
     }
@@ -791,6 +794,12 @@ class EntityRunner {
                             verify: schemaObj.verify,
                         };
                         break;
+                    case 'id2':
+                        if (schemaObj.idIsUser === true) {
+                            this.id2UserArr.push(schemaObj);
+                        }
+                        ;
+                        break;
                 }
                 this.entityColl[id] = {
                     name: sName,
@@ -803,6 +812,7 @@ class EntityRunner {
                         }
                 };
             }
+            this.id2OfUsers = this.id2UserArr.map(v => v.name).join('|');
             for (let i in this.froms) {
                 let from = this.froms[i];
                 for (let t in from) {
@@ -1197,15 +1207,38 @@ class EntityRunner {
         }
         return this.dbServer.IDLog(unit, user, param);
     }
-    IDSum(unit, user, param) {
+    checkIDXSumField(param) {
         let { IDX, field } = param;
         let ts = this.getTableSchema(IDX, ['idx']);
         param.IDX = ts;
-        let fLower = field.toLowerCase();
-        if (ts.schema.fields.findIndex(v => v.name === fLower) < 0) {
-            this.throwErr(`ID ${IDX} has no Field ${field}`);
+        for (let f of field) {
+            let fLower = f.toLowerCase();
+            if (ts.schema.fields.findIndex(v => v.name === fLower) < 0) {
+                this.throwErr(`ID ${IDX} has no Field ${f}`);
+            }
         }
+    }
+    IDSum(unit, user, param) {
+        this.checkIDXSumField(param);
         return this.dbServer.IDSum(unit, user, param);
+    }
+    KeyIDSum(unit, user, param) {
+        this.checkIDXSumField(param);
+        return this.dbServer.KeyIDSum(unit, user, param);
+    }
+    ID2Sum(unit, user, param) {
+        this.checkIDXSumField(param);
+        return this.dbServer.ID2Sum(unit, user, param);
+    }
+    KeyID2Sum(unit, user, param) {
+        this.checkIDXSumField(param);
+        return this.dbServer.KeyID2Sum(unit, user, param);
+    }
+    IDinID2(unit, user, param) {
+        let { ID2, ID } = param;
+        param.ID2 = this.getTableSchema(ID2, ['id2']);
+        param.ID = this.getTableSchema(ID, ['id']);
+        return this.dbServer.IDinID2(unit, user, param);
     }
 }
 exports.EntityRunner = EntityRunner;

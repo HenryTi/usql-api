@@ -43,6 +43,7 @@ function buildAccessRouter(router, rb) {
         return roles;
     }));
     rb.entityGet(router, 'get-all-role-users', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        // row 0 返回 id2OfUsers
         let roles = yield runner.getAllRoleUsers(unit, user);
         return roles;
     }));

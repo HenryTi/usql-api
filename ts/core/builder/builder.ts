@@ -1,4 +1,4 @@
-import { ParamID, ParamID2, ParamIDActs, ParamIDDetail, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyID2 } from "../dbServer";
+import { ParamID, ParamIX, ParamIXSum, ParamIDActs, ParamIDDetail, ParamIDinIX as ParamIDinIX, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyIX, ParamKeyIXSum, ParamKeyIDSum } from "../dbServer";
 
 export abstract class Builder {
 	protected dbName:string;
@@ -28,11 +28,11 @@ export abstract class Builder {
 		return
 	}
 
-	ID2(param: ParamID2): string {
+	IX(param: ParamIX): string {
 		return
 	}
 	
-	KeyID2(param: ParamKeyID2): string {
+	KeyIX(param: ParamKeyIX): string {
 		return
 	}
 	
@@ -42,5 +42,21 @@ export abstract class Builder {
 	
 	IDSum(param: ParamIDSum): string {
 		return
+	}
+	
+	KeyIDSum(param: ParamKeyIDSum): string {
+		return
+	}
+	
+	IXSum(param: ParamIXSum): string {
+		return
+	}
+	
+	KeyIXSum(param: ParamKeyIXSum): string {
+		return
+	}
+
+	IDinIX(param: ParamIDinIX): string {
+		return;
 	}
 }

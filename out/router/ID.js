@@ -47,6 +47,10 @@ function buildIDRouter(router, rb) {
         let result = yield runner.IDDetailGet(unit, user, body);
         return result;
     }));
+    rb.entityPost(router, 'id-in-id2', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.IDinID2(unit, user, body);
+        return result;
+    }));
 }
 exports.buildIDRouter = buildIDRouter;
 //# sourceMappingURL=ID.js.map

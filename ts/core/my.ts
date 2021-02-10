@@ -1,6 +1,6 @@
 import {createPool, Pool, MysqlError, TypeCast} from 'mysql';
 import * as _ from 'lodash';
-import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDLog, ParamKeyID, ParamKeyID2} from './dbServer';
+import {DbServer, ParamID, ParamIX, ParamIDActs, ParamIDLog, ParamKeyID, ParamKeyIX} from './dbServer';
 import { dbLogger, SpanLog, env } from './db';
 import { consts } from './consts';
 import { MyBuilder } from './builder';

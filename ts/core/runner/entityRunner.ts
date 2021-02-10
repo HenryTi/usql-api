@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Db, env } from '../db';
-import {DbServer, ParamID, ParamID2, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyID2, TableSchema} from '../dbServer';
+import {DbServer, ParamID, ParamIX, ParamIXSum, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDinIX, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyIX, ParamKeyIXSum, ParamKeyIDSum, ParamSum, TableSchema} from '../dbServer';
 import { packReturns } from '../packReturn';
 import { ImportData } from '../importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from '../inBusAction';
@@ -47,11 +47,12 @@ export class EntityRunner {
 	private roleNames: string;
     private tuids: {[name:string]: any};
     private busArr: any[];
-    //private setting: {[name:string]: any};
     private entityColl: {[id:number]: EntityAccess};
     private sheetRuns: {[sheet:string]: SheetRun};
     private readonly modifyMaxes: {[unit:number]: number};
     private readonly roleVersions: {[unit:number]: {[app:number]: {version:number, tick:number}}} = {};
+	private readonly ixUserArr: any[] = [];
+	private ixOfUsers: string;
 
     name: string;
     uqOwner: string;
@@ -132,7 +133,9 @@ export class EntityRunner {
 		*/
 	}
 	async getAllRoleUsers(unit:number, user:number):Promise<any[]> {
+		// row 0 返回 ixOfUsers
 		let tbl = await this.tableFromProc('$get_all_role_users', [unit, user]);
+		tbl.unshift({user:0, roles: this.ixOfUsers});
 		return tbl;
 	}
 	async setUserRoles(unit:number, user:number, theUser:number, roles:string):Promise<any> {
@@ -682,6 +685,11 @@ export class EntityRunner {
                         verify: schemaObj.verify,
                     };
 					break;
+				case 'ix':
+					if (schemaObj.idIsUser === true) {
+						this.ixUserArr.push(schemaObj);
+					};
+					break;
             }
             this.entityColl[id] = {
                 name: sName,
@@ -694,6 +702,7 @@ export class EntityRunner {
                     }
             };
         }
+		this.ixOfUsers = this.ixUserArr.map(v => v.name).join('|');
         for (let i in this.froms) {
             let from = this.froms[i];
             for (let t in from) {
@@ -994,7 +1003,7 @@ export class EntityRunner {
 	IDActs(unit:number, user:number, param:ParamIDActs): Promise<any[]> {
 		for (let i in param) {
 			if (i === '$') continue;
-			let ts = this.getTableSchema(i, ['id', 'idx', 'id2']);
+			let ts = this.getTableSchema(i, ['id', 'idx', 'ix']);
 			let values = (param[i] as unknown) as any[];
 			if (values) {
 				ts.values = values;
@@ -1047,20 +1056,20 @@ export class EntityRunner {
 		return this.dbServer.KeyID(unit, user, param);
 	}
 
-	ID2(unit:number, user:number, param: ParamID2): Promise<any[]> {
-		let {ID2, IDX} = param;
-		param.ID2 = this.getTableSchema((ID2 as unknown) as string, ['id2']) as TableSchema;
+	IX(unit:number, user:number, param: ParamIX): Promise<any[]> {
+		let {IX, IDX} = param;
+		param.IX = this.getTableSchema((IX as unknown) as string, ['ix']) as TableSchema;
 		let types = ['id', 'idx'];
 		param.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
-		return this.dbServer.ID2(unit, user, param);
+		return this.dbServer.IX(unit, user, param);
 	}
 	
-	KeyID2(unit:number, user:number, param: ParamKeyID2): Promise<any[]> {
-		let {ID, ID2, IDX} = param;
+	KeyIX(unit:number, user:number, param: ParamKeyIX): Promise<any[]> {
+		let {ID, IX, IDX} = param;
 		param.ID = this.getTableSchema((ID as unknown) as string, ['id']);
-		param.ID2 = this.getTableSchema((ID2 as unknown) as string, ['id2']);
+		param.IX = this.getTableSchema((IX as unknown) as string, ['ix']);
 		param.IDX = this.getTableSchemaArray(IDX as unknown as any, ['id', 'idx']);
-		return this.dbServer.KeyID2(unit, user, param);
+		return this.dbServer.KeyIX(unit, user, param);
 	}
 	
 	IDLog(unit:number, user:number, param: ParamIDLog): Promise<any[]> {
@@ -1073,15 +1082,43 @@ export class EntityRunner {
 		}
 		return this.dbServer.IDLog(unit, user, param);
 	}
-	
-	IDSum(unit:number, user:number, param: ParamIDSum): Promise<any[]> {
+
+	private checkIDXSumField(param: ParamSum) {
 		let {IDX, field} = param;
 		let ts = this.getTableSchema((IDX as unknown) as string, ['idx']);
 		param.IDX = ts;
-		let fLower = field.toLowerCase();
-		if (ts.schema.fields.findIndex(v => v.name === fLower) < 0) {
-			this.throwErr(`ID ${IDX} has no Field ${field}`);
+		for (let f of field) {
+			let fLower = f.toLowerCase();
+			if (ts.schema.fields.findIndex(v => v.name === fLower) < 0) {
+				this.throwErr(`ID ${IDX} has no Field ${f}`);
+			}
 		}
+	}
+
+	IDSum(unit:number, user:number, param: ParamIDSum): Promise<any[]> {
+		this.checkIDXSumField(param);
 		return this.dbServer.IDSum(unit, user, param);
+	}
+	
+	KeyIDSum(unit:number, user:number, param: ParamKeyIDSum): Promise<any[]> {
+		this.checkIDXSumField(param);
+		return this.dbServer.KeyIDSum(unit, user, param);
+	}
+	
+	IXSum(unit:number, user:number, param: ParamIXSum): Promise<any[]> {
+		this.checkIDXSumField(param);
+		return this.dbServer.IXSum(unit, user, param);
+	}
+	
+	KeyIXSum(unit:number, user:number, param: ParamKeyIXSum): Promise<any[]> {
+		this.checkIDXSumField(param);
+		return this.dbServer.KeyIXSum(unit, user, param);
+	}
+
+	IDinIX(unit:number, user:number, param: ParamIDinIX): Promise<any[]> {
+		let {IX, ID} = param;
+		param.IX = this.getTableSchema((IX as unknown) as string, ['ix']);
+		param.ID = this.getTableSchema((ID as unknown) as string, ['id']);
+		return this.dbServer.IDinIX(unit, user, param);
 	}
 }

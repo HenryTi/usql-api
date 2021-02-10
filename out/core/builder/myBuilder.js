@@ -60,13 +60,27 @@ class MyBuilder extends builder_1.Builder {
         return sql;
     }
     ID(param) {
-        let { IDX, id } = param;
+        let { IDX, id, page } = param;
         let { cols, tables } = this.buildIDX(IDX);
-        let where = typeof id === 'number' ?
-            '=' + id
-            :
-                ` in (${(id.join(','))})`;
-        let sql = `SELECT ${cols} FROM ${tables} WHERE t0.id${where}`;
+        let where = '';
+        let limit = '';
+        if (id !== undefined) {
+            where = 't0.id' + (typeof id === 'number' ?
+                '=' + id
+                :
+                    ` in (${(id.join(','))})`);
+        }
+        else {
+            where = '1=1';
+        }
+        if (page !== undefined) {
+            let { start, size } = page;
+            if (!start)
+                start = 0;
+            where += ` AND t0.id>${start}`;
+            limit = `limit ${size}`;
+        }
+        let sql = `SELECT ${cols} FROM ${tables} WHERE ${where} ${limit}`;
         return sql;
     }
     KeyID(param) {
@@ -156,27 +170,32 @@ class MyBuilder extends builder_1.Builder {
         return sql;
     }
     IDLog(param) {
-        let { IDX, field, id, log, timeZone, page } = param;
+        let { IDX, field, id, log, timeZone, page, far, near } = param;
         field = field.toLowerCase();
-        let { start, size, end } = page;
+        let { start, size } = page;
         if (!start)
             start = Number.MAX_SAFE_INTEGER;
         let { name, schema } = IDX;
         let { exFields } = schema;
         let exField = exFields === null || exFields === void 0 ? void 0 : exFields.find(v => v.field === field);
+        let span = '';
+        if (far)
+            span += ` AND a.t>=${far}`;
+        if (near)
+            span += ` AND a.t<${near}`;
         let table = '`tv_' + name + '$' + field + '`';
-        let cols = 't, v, u';
+        let cols = 'a.t, a.v, a.u';
         if (exField) {
             let { log, track, memo, sum } = exField;
             if (log !== true) {
                 return `select 'IDX ${name} ${field}' is not loged`;
             }
-            if (sum !== undefined)
-                cols += ',s';
+            if (sum === true)
+                cols += ',a.s';
             if (track === true)
-                cols += ',k';
+                cols += ',a.k';
             if (memo === true)
-                cols += ',m';
+                cols += ',a.m';
         }
         let group;
         let time = `from_unixtime(a.t/1000+${timeZone}*3600)`;
@@ -184,7 +203,7 @@ class MyBuilder extends builder_1.Builder {
             default:
                 return `select 'IDX ${name} ${field}' log ${log} unknown`;
             case 'each':
-                return `SELECT ${cols} FROM ${table} WHERE id=${id} AND t<${start} ORDER BY t DESC LIMIT ${size}`;
+                return `SELECT ${cols} FROM ${table} as a WHERE a.id=${id} AND a.t<${start} ${span} ORDER BY a.t DESC LIMIT ${size}`;
             case 'day':
                 group = `DATE_FORMAT(${time}, '%Y-%m-%d')`;
                 ;
@@ -199,26 +218,14 @@ class MyBuilder extends builder_1.Builder {
                 group = `DATE_FORMAT(${time}, '%Y-01-01')`;
                 break;
         }
-        let sql = `select ${group} as t, sum(a.v) as v from ${table} as a where a.t>=${end} and a.t<${start} and a.id=${id} group by ${group} limit ${size}`;
+        let sql = `select ${group} as t, sum(a.v) as v from ${table} as a where a.t<${start} and a.id=${id} ${span} group by ${group} limit ${size}`;
         return sql;
     }
     IDSum(param) {
-        let { IDX, field, id, far, near } = param;
-        field = field.toLowerCase();
-        if (!far)
-            far = 0;
-        if (!near)
-            near = Number.MAX_SAFE_INTEGER;
-        let { name, schema } = IDX;
-        let { exFields } = schema;
-        let exField = exFields === null || exFields === void 0 ? void 0 : exFields.find(v => v.field === field);
-        let sql;
-        if (!exField) {
-            sql = `select '${field} is not logged' as error`;
-        }
-        else {
-            let table = '`tv_' + name + '$' + field + '`';
-            sql = `select a.id, sum(a.v) as v from ${table} as a where a.t>=${far} and a.t<${near} and a.id`;
+        let { id } = param;
+        let sql = this.buildSumSelect(param);
+        if (id !== undefined) {
+            sql += ' where t.id';
             if (Array.isArray(id) === true) {
                 sql += ' in (' + id.join() + ')';
             }
@@ -228,35 +235,162 @@ class MyBuilder extends builder_1.Builder {
         }
         return sql;
     }
+    KeyIDSum(param) {
+        let { ID, key, page } = param;
+        let sql = this.buildSumSelect(param);
+        let { schema } = ID;
+        let { keys } = schema;
+        sql += ` RIGHT JOIN \`tv_${ID.name}\` as t0 ON t0.id=t.id WHERE 1=1`;
+        if (this.hasUnit === true) {
+            sql += ' AND t0.$unit=@unit';
+        }
+        for (let k of keys) {
+            let v = key[k.name];
+            if (v === undefined)
+                break;
+            sql += ' AND t0.`' + k.name + '`=\'' + v + '\'';
+        }
+        if (page) {
+            let { start } = page;
+            if (!start)
+                start = 0;
+            sql += ' AND t0.id>' + start;
+        }
+        sql += ' ORDER BY t0.id ASC';
+        if (page)
+            sql += ' LIMIT ' + page.size;
+        sql += ';\n';
+        return sql;
+    }
+    ID2Sum(param) {
+        let { ID2, id, page } = param;
+        let sql = this.buildSumSelect(param);
+        sql += ` RIGHT JOIN \`tv_${ID2.name}\` as t0 ON t0.id=t.id WHERE 1=1`;
+        if (this.hasUnit === true) {
+            sql += ' AND t0.$unit=@unit';
+        }
+        sql = ' AND t0.id' + (Array.isArray(id) ?
+            ' in (' + id.join(',') + ')'
+            :
+                '=' + id);
+        if (page) {
+            let { start } = page;
+            if (!start)
+                start = 0;
+            sql += ' AND t0.id2>' + start;
+        }
+        sql += ' ORDER BY t0.id2 ASC';
+        if (page)
+            sql += ' LIMIT ' + page.size;
+        sql += ';\n';
+        return sql;
+    }
+    KeyID2Sum(param) {
+        let { ID, ID2, key, IDX, page } = param;
+        let sql = this.buildSumSelect(param);
+        let { schema } = ID;
+        let { keys } = schema;
+        sql += ` RIGHT JOIN \`tv_${ID.name}\` as t0 ON t0.id=t.id`;
+        sql += ` RIGHT JOIN \`tv_${ID2.name}\` as t1 ON t0.id=t1.id`;
+        if (this.hasUnit === true) {
+            sql += ' AND t0.$unit=t1.$unit';
+        }
+        sql += ` WHERE 1=1`;
+        if (this.hasUnit === true) {
+            sql += ' AND t0.$unit=@unit';
+        }
+        for (let k of keys) {
+            let v = key[k.name];
+            if (v === undefined)
+                break;
+            sql += ' AND t0.`' + k.name + '`=\'' + v + '\'';
+        }
+        if (page) {
+            let { start } = page;
+            if (!start)
+                start = 0;
+            sql += ' AND t0.id>' + start;
+        }
+        sql += ' ORDER BY t0.id ASC';
+        if (page)
+            sql += ' LIMIT ' + page.size;
+        sql += ';\n';
+        return sql;
+    }
+    IDinID2(param) {
+        let { ID2, ID, id, page } = param;
+        let { cols, tables } = this.buildIDX([ID]);
+        let where = '';
+        let limit = '';
+        where = '1=1';
+        //where = 't0.id=' + id;
+        if (page !== undefined) {
+            let { start, size } = page;
+            if (!start)
+                start = 0;
+            where += ` AND t0.id>${start}`;
+            limit = `limit ${size}`;
+        }
+        cols += `,case when exists(select id2 from \`tv_${ID2.name}\` where id=${id} and id2=t0.id) then 1 else 0 end as $in`;
+        let sql = `SELECT ${cols} FROM ${tables} WHERE ${where} ${limit}`;
+        return sql;
+    }
+    buildSumSelect(param) {
+        let { IDX, far, near, field } = param;
+        let { name, schema } = IDX;
+        if (!far)
+            far = 0;
+        if (!near)
+            near = Number.MAX_SAFE_INTEGER;
+        let sql = 'select t.id';
+        for (let f of field) {
+            let { exFields } = schema;
+            let exField = exFields === null || exFields === void 0 ? void 0 : exFields.find(v => v.field === f);
+            if (exField === undefined) {
+                return `select '${f} is not logged' as error`;
+            }
+            f = f.toLowerCase();
+            sql += `,\`tv_${name}$${f}$sum\`(t.id,${far},${near}) as ${f}`;
+        }
+        sql += ` from \`tv_${name}\` as t`;
+        return sql;
+    }
     buildIDX(IDX) {
         let { name, schema } = IDX[0];
         let { type } = schema;
         let idJoin = type === 'id2' ? 'id2' : 'id';
         let tables = `\`${this.dbName}\`.\`tv_${name}\` as t0`;
-        let cols = 't0.id';
-        for (let f of schema.fields) {
-            let { name: fn, type: ft } = f;
-            if (fn === 'id')
-                continue;
-            let fv = `t0.\`${fn}\``;
-            cols += ',';
-            cols += ft === 'textid' ? `tv_$idtext(${fv})` : fv;
-            cols += ' as `' + fn + '`';
-        }
-        let len = IDX.length;
-        for (let i = 1; i < len; i++) {
-            let { name, schema } = IDX[i];
-            tables += ` left join \`${this.dbName}\`.\`tv_${name}\` as t${i} on t0.${idJoin}=t${i}.id`;
-            for (let f of schema.fields) {
+        let ti = `t0`;
+        let cols = ti + '.id';
+        function buildCols(schema) {
+            let { fields, exFields } = schema;
+            for (let f of fields) {
                 let { name: fn, type: ft } = f;
                 if (fn === 'id')
                     continue;
-                let fv = `t${i}.\`${fn}\``;
+                let fv = `${ti}.\`${fn}\``;
                 cols += ',';
                 cols += ft === 'textid' ? `tv_$idtext(${fv})` : fv;
                 cols += ' as `' + fn + '`';
             }
         }
+        buildCols(schema);
+        let len = IDX.length;
+        let $timeField;
+        for (let i = 1; i < len; i++) {
+            let { name, schema } = IDX[i];
+            tables += ` left join \`${this.dbName}\`.\`tv_${name}\` as t${i} on t0.${idJoin}=t${i}.id`;
+            let { type } = schema;
+            ti = `t${i}`;
+            buildCols(schema);
+            if (type === 'idx' && $timeField === undefined) {
+                $timeField = `,${ti}.\`$time\` as \`$time\``;
+                $timeField += `,tv_$idtext(${ti}.\`$field\`) as \`$field\``;
+                $timeField += `,${ti}.\`$value\` as \`$value\``;
+            }
+        }
+        if ($timeField !== undefined)
+            cols += $timeField;
         return { cols, tables };
     }
     buildInsert(ts, override, valueItem) {
@@ -435,7 +569,7 @@ class MyBuilder extends builder_1.Builder {
             else {
                 let time;
                 if (typeof v === 'object') {
-                    time = v.time;
+                    time = v.$time;
                     v = v.value;
                 }
                 val = (type === 'textid' ? `tv_$textid('${v}')` : `'${v}'`);
@@ -452,10 +586,12 @@ class MyBuilder extends builder_1.Builder {
                 if (exFields) {
                     let exField = exFields.find(v => v.field === name);
                     if (exField !== undefined) {
-                        let { field, track, memo, sum } = exField;
+                        let { field, track, memo, sum, time: timeCanSet } = exField;
                         let valueId = value['id'];
                         let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId},0,${v},`;
-                        sqlEx += time !== undefined ? time : 'null';
+                        if (timeCanSet === true) {
+                            sqlEx += time !== undefined ? time : 'null';
+                        }
                         if (track === true) {
                             let vTrack = value['$track'];
                             sqlEx += ',' + (vTrack ? vTrack : 'null');
@@ -553,7 +689,7 @@ class MyBuilder extends builder_1.Builder {
         }
         sql += 'delete from `tv_' + name + '` where id=' + id;
         if (id2) {
-            sql += 'id2=';
+            sql += ' AND id2=';
             if (id2 < 0)
                 id2 = -id2;
             sql += id2;

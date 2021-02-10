@@ -43,7 +43,8 @@ export function buildAccessRouter(router:Router, rb:RouterBuilder) {
 	
 	rb.entityGet(router, 'get-all-role-users', '',
 	async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
-        let roles = await runner.getAllRoleUsers(unit, user);
+		// row 0 返回 ixOfUsers
+        let roles = await runner.getAllRoleUsers(unit, user);		
         return roles;
     })
 

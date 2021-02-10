@@ -33,6 +33,18 @@ class Builder {
     IDSum(param) {
         return;
     }
+    KeyIDSum(param) {
+        return;
+    }
+    ID2Sum(param) {
+        return;
+    }
+    KeyID2Sum(param) {
+        return;
+    }
+    IDinID2(param) {
+        return;
+    }
 }
 exports.Builder = Builder;
 //# sourceMappingURL=builder.js.map
