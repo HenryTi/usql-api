@@ -21,10 +21,10 @@ class Builder {
     KeyID(param) {
         return;
     }
-    ID2(param) {
+    IX(param) {
         return;
     }
-    KeyID2(param) {
+    KeyIX(param) {
         return;
     }
     IDLog(param) {
@@ -36,13 +36,19 @@ class Builder {
     KeyIDSum(param) {
         return;
     }
-    ID2Sum(param) {
+    IXSum(param) {
         return;
     }
-    KeyID2Sum(param) {
+    KeyIXSum(param) {
         return;
     }
-    IDinID2(param) {
+    IDinIX(param) {
+        return;
+    }
+    IDxID(param) {
+        return;
+    }
+    IDTree(param) {
         return;
     }
 }

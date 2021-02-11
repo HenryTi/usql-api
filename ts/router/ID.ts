@@ -62,4 +62,16 @@ export function buildIDRouter(router: Router, rb: RouterBuilder) {
         let result = await runner.IDinIX(unit, user, body);
         return result;
     });
+
+	rb.entityPost(router, 'id-x-id', '',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let result = await runner.IDxID(unit, user, body);
+        return result;
+    });
+
+	rb.entityPost(router, 'id-tree', '',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let result = await runner.IDTree(unit, user, body);
+        return result;
+    });
 }

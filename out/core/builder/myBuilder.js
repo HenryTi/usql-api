@@ -18,8 +18,8 @@ class MyBuilder extends builder_1.Builder {
                 case 'idx':
                     sql += this.buildSaveIDX(p);
                     break;
-                case 'id2':
-                    sql += this.buildSaveID2(p);
+                case 'ix':
+                    sql += this.buildSaveIX(p);
                     break;
             }
         }
@@ -114,9 +114,9 @@ class MyBuilder extends builder_1.Builder {
         sql += ';\n';
         return sql;
     }
-    ID2(param) {
-        let { ID2, id, IDX, page } = param;
-        let arr = [ID2];
+    IX(param) {
+        let { IX, id, IDX, page } = param;
+        let arr = [IX];
         if (IDX)
             arr.push(...IDX);
         let { cols, tables } = this.buildIDX(arr);
@@ -137,9 +137,9 @@ class MyBuilder extends builder_1.Builder {
         sql += ';\n';
         return sql;
     }
-    KeyID2(param) {
-        let { ID, ID2, key, IDX, page } = param;
-        let arr = [ID2];
+    KeyIX(param) {
+        let { ID, IX, key, IDX, page } = param;
+        let arr = [IX];
         if (IDX)
             arr.push(...IDX);
         let { cols, tables } = this.buildIDX(arr);
@@ -262,10 +262,10 @@ class MyBuilder extends builder_1.Builder {
         sql += ';\n';
         return sql;
     }
-    ID2Sum(param) {
-        let { ID2, id, page } = param;
+    IXSum(param) {
+        let { IX, id, page } = param;
         let sql = this.buildSumSelect(param);
-        sql += ` RIGHT JOIN \`tv_${ID2.name}\` as t0 ON t0.id=t.id WHERE 1=1`;
+        sql += ` RIGHT JOIN \`tv_${IX.name}\` as t0 ON t0.id=t.id WHERE 1=1`;
         if (this.hasUnit === true) {
             sql += ' AND t0.$unit=@unit';
         }
@@ -285,13 +285,13 @@ class MyBuilder extends builder_1.Builder {
         sql += ';\n';
         return sql;
     }
-    KeyID2Sum(param) {
-        let { ID, ID2, key, IDX, page } = param;
+    KeyIXSum(param) {
+        let { ID, IX, key, IDX, page } = param;
         let sql = this.buildSumSelect(param);
         let { schema } = ID;
         let { keys } = schema;
         sql += ` RIGHT JOIN \`tv_${ID.name}\` as t0 ON t0.id=t.id`;
-        sql += ` RIGHT JOIN \`tv_${ID2.name}\` as t1 ON t0.id=t1.id`;
+        sql += ` RIGHT JOIN \`tv_${IX.name}\` as t1 ON t0.id=t1.id`;
         if (this.hasUnit === true) {
             sql += ' AND t0.$unit=t1.$unit';
         }
@@ -317,8 +317,8 @@ class MyBuilder extends builder_1.Builder {
         sql += ';\n';
         return sql;
     }
-    IDinID2(param) {
-        let { ID2, ID, id, page } = param;
+    IDinIX(param) {
+        let { IX, ID, id, page } = param;
         let { cols, tables } = this.buildIDX([ID]);
         let where = '';
         let limit = '';
@@ -331,8 +331,67 @@ class MyBuilder extends builder_1.Builder {
             where += ` AND t0.id>${start}`;
             limit = `limit ${size}`;
         }
-        cols += `,case when exists(select id2 from \`tv_${ID2.name}\` where id=${id} and id2=t0.id) then 1 else 0 end as $in`;
+        cols += `,case when exists(select id2 from \`tv_${IX.name}\` where id=${id} and id2=t0.id) then 1 else 0 end as $in`;
         let sql = `SELECT ${cols} FROM ${tables} WHERE ${where} ${limit}`;
+        return sql;
+    }
+    IDxID(param) {
+        let { ID, IX, ID2, page } = param;
+        page = page !== null && page !== void 0 ? page : { start: 0, size: 100 };
+        let { cols, tables } = this.buildIDX([ID]);
+        let where = '';
+        let limit = '';
+        where = '1=1';
+        let { start, size } = page;
+        if (!start)
+            start = 0;
+        where += ` AND t0.id>${start}`;
+        limit = `limit ${size}`;
+        let { cols: cols2, tables: tables2 } = this.buildIDX([ID2]);
+        let sql = '';
+        sql += `DROP TEMPORARY TABLE IF EXISTS ids;`;
+        sql += '\nCREATE TEMPORARY TABLE ids (id BIGINT, primary key (id));';
+        sql += `\nINSERT INTO ids (id) SELECT t0.id FROM ${tables} WHERE ${where} ${limit};`;
+        sql += `\nSELECT ${cols} FROM ${tables} JOIN ids as z ON t0.id=z.id;`;
+        sql += `\nSELECT ${cols2} FROM ${tables2} JOIN ids as z ON t0.id=z.id;`;
+        return sql;
+    }
+    IDTree(param) {
+        let { ID, parent, key, level, page } = param;
+        if (!level)
+            level = 1;
+        let keyField = ID.schema.keys[1];
+        let { name: keyName, type } = keyField;
+        let table = `\`tv_${ID.name}\``;
+        let eq, as;
+        if (type === 'textid') {
+            eq = `tv_$textid('${key}')`;
+            as = `tv_$idtext(a.\`${keyName}\`) as \`${keyName}\``;
+        }
+        else {
+            eq = `'${key}'`;
+            as = `a.\`${keyName}\` as \`${keyName}\``;
+        }
+        function select(n) {
+            let s = `select t${n}.id from ${table} as t1`;
+            for (let i = 2; i <= n; i++)
+                s += ` join ${table} as t${i} on t${i - 1}.id=t${i}.parent`;
+            s += ` where t1.parent=${parent}`;
+            if (key)
+                s += ` and t1.${keyName}=${eq}`;
+            return s;
+        }
+        let sql = `select a.id, a.parent, ${as} from ${table} as a join (`;
+        sql += select(1);
+        for (let i = 2; i <= level; i++)
+            sql += ` union (${select(i)})`;
+        sql += ') as t on a.id=t.id where 1=1';
+        if (page !== undefined) {
+            let { start, size } = page;
+            if (!start)
+                start = 0;
+            sql += ` AND a.id>${start} limit ${size}`;
+        }
         return sql;
     }
     buildSumSelect(param) {
@@ -358,7 +417,7 @@ class MyBuilder extends builder_1.Builder {
     buildIDX(IDX) {
         let { name, schema } = IDX[0];
         let { type } = schema;
-        let idJoin = type === 'id2' ? 'id2' : 'id';
+        let idJoin = type === 'ix' ? 'id2' : 'id';
         let tables = `\`${this.dbName}\`.\`tv_${name}\` as t0`;
         let ti = `t0`;
         let cols = ti + '.id';
@@ -538,7 +597,7 @@ class MyBuilder extends builder_1.Builder {
         sql += retLn;
         return sql;
     }
-    buildSaveID2(ts) {
+    buildSaveIX(ts) {
         let sql = '';
         let { values } = ts;
         for (let value of values) {

@@ -19,7 +19,7 @@ const centerApi_1 = require("../centerApi");
 class EntityRunner {
     constructor(name, db, net = undefined) {
         this.roleVersions = {};
-        this.id2UserArr = [];
+        this.ixUserArr = [];
         this.hasPullEntities = false;
         this.hasSheet = false;
         this.isCompiling = false;
@@ -92,9 +92,9 @@ class EntityRunner {
     }
     getAllRoleUsers(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            // row 0 返回 id2OfUsers
+            // row 0 返回 ixOfUsers
             let tbl = yield this.tableFromProc('$get_all_role_users', [unit, user]);
-            tbl.unshift({ user: 0, roles: this.id2OfUsers });
+            tbl.unshift({ user: 0, roles: this.ixOfUsers });
             return tbl;
         });
     }
@@ -794,9 +794,9 @@ class EntityRunner {
                             verify: schemaObj.verify,
                         };
                         break;
-                    case 'id2':
+                    case 'ix':
                         if (schemaObj.idIsUser === true) {
-                            this.id2UserArr.push(schemaObj);
+                            this.ixUserArr.push(schemaObj);
                         }
                         ;
                         break;
@@ -812,7 +812,7 @@ class EntityRunner {
                         }
                 };
             }
-            this.id2OfUsers = this.id2UserArr.map(v => v.name).join('|');
+            this.ixOfUsers = this.ixUserArr.map(v => v.name).join('|');
             for (let i in this.froms) {
                 let from = this.froms[i];
                 for (let t in from) {
@@ -1135,7 +1135,7 @@ class EntityRunner {
         for (let i in param) {
             if (i === '$')
                 continue;
-            let ts = this.getTableSchema(i, ['id', 'idx', 'id2']);
+            let ts = this.getTableSchema(i, ['id', 'idx', 'ix']);
             let values = param[i];
             if (values) {
                 ts.values = values;
@@ -1183,19 +1183,19 @@ class EntityRunner {
         param.IDX = this.getTableSchemaArray(IDX, types);
         return this.dbServer.KeyID(unit, user, param);
     }
-    ID2(unit, user, param) {
-        let { ID2, IDX } = param;
-        param.ID2 = this.getTableSchema(ID2, ['id2']);
+    IX(unit, user, param) {
+        let { IX, IDX } = param;
+        param.IX = this.getTableSchema(IX, ['ix']);
         let types = ['id', 'idx'];
         param.IDX = this.getTableSchemaArray(IDX, types);
-        return this.dbServer.ID2(unit, user, param);
+        return this.dbServer.IX(unit, user, param);
     }
-    KeyID2(unit, user, param) {
-        let { ID, ID2, IDX } = param;
+    KeyIX(unit, user, param) {
+        let { ID, IX, IDX } = param;
         param.ID = this.getTableSchema(ID, ['id']);
-        param.ID2 = this.getTableSchema(ID2, ['id2']);
+        param.IX = this.getTableSchema(IX, ['ix']);
         param.IDX = this.getTableSchemaArray(IDX, ['id', 'idx']);
-        return this.dbServer.KeyID2(unit, user, param);
+        return this.dbServer.KeyIX(unit, user, param);
     }
     IDLog(unit, user, param) {
         let { IDX, field } = param;
@@ -1226,19 +1226,31 @@ class EntityRunner {
         this.checkIDXSumField(param);
         return this.dbServer.KeyIDSum(unit, user, param);
     }
-    ID2Sum(unit, user, param) {
+    IXSum(unit, user, param) {
         this.checkIDXSumField(param);
-        return this.dbServer.ID2Sum(unit, user, param);
+        return this.dbServer.IXSum(unit, user, param);
     }
-    KeyID2Sum(unit, user, param) {
+    KeyIXSum(unit, user, param) {
         this.checkIDXSumField(param);
-        return this.dbServer.KeyID2Sum(unit, user, param);
+        return this.dbServer.KeyIXSum(unit, user, param);
     }
-    IDinID2(unit, user, param) {
-        let { ID2, ID } = param;
-        param.ID2 = this.getTableSchema(ID2, ['id2']);
+    IDinIX(unit, user, param) {
+        let { IX, ID } = param;
+        param.IX = this.getTableSchema(IX, ['ix']);
         param.ID = this.getTableSchema(ID, ['id']);
-        return this.dbServer.IDinID2(unit, user, param);
+        return this.dbServer.IDinIX(unit, user, param);
+    }
+    IDxID(unit, user, param) {
+        let { ID, IX, ID2 } = param;
+        param.ID = this.getTableSchema(ID, ['id']);
+        param.IX = this.getTableSchema(IX, ['ix']);
+        param.ID2 = this.getTableSchema(ID2, ['id']);
+        return this.dbServer.IDxID(unit, user, param);
+    }
+    IDTree(unit, user, param) {
+        let { ID } = param;
+        param.ID = this.getTableSchema(ID, ['id']);
+        return this.dbServer.IDTree(unit, user, param);
     }
 }
 exports.EntityRunner = EntityRunner;

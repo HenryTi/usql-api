@@ -19,12 +19,12 @@ function buildIDRouter(router, rb) {
         let result = yield runner.KeyID(unit, user, body);
         return result;
     }));
-    rb.entityPost(router, 'id2', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let result = yield runner.ID2(unit, user, body);
+    rb.entityPost(router, 'ix', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.IX(unit, user, body);
         return result;
     }));
-    rb.entityPost(router, 'key-id2', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let result = yield runner.KeyID2(unit, user, body);
+    rb.entityPost(router, 'key-ix', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.KeyIX(unit, user, body);
         return result;
     }));
     rb.entityPost(router, 'id-log', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
@@ -47,8 +47,16 @@ function buildIDRouter(router, rb) {
         let result = yield runner.IDDetailGet(unit, user, body);
         return result;
     }));
-    rb.entityPost(router, 'id-in-id2', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let result = yield runner.IDinID2(unit, user, body);
+    rb.entityPost(router, 'id-in-ix', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.IDinIX(unit, user, body);
+        return result;
+    }));
+    rb.entityPost(router, 'id-x-id', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.IDxID(unit, user, body);
+        return result;
+    }));
+    rb.entityPost(router, 'id-tree', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.IDTree(unit, user, body);
         return result;
     }));
 }

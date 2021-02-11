@@ -1,8 +1,8 @@
 import { ParamID, ParamIX, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDLog, 
-	ParamKeyID, ParamKeyIX, 
+	ParamKeyID, ParamKeyIX, ParamIDxID,
 	ParamIDSum, ParamKeyIDSum, ParamIXSum, ParamKeyIXSum,
 	TableSchema, 
-	ParamSum, EntitySchema, ParamIDinIX} from "../dbServer";
+	ParamSum, EntitySchema, ParamIDinIX, ParamIDTree} from "../dbServer";
 import { Builder } from "./builder";
 
 const retLn = `set @ret=CONCAT(@ret, '\\n');\n`;
@@ -316,6 +316,65 @@ export class MyBuilder extends Builder {
 		cols += `,case when exists(select id2 from \`tv_${IX.name}\` where id=${id} and id2=t0.id) then 1 else 0 end as $in`;
 		
 		let sql = `SELECT ${cols} FROM ${tables} WHERE ${where} ${limit}`;
+		return sql;
+	}
+
+	IDxID(param: ParamIDxID): string {
+		let {ID, IX, ID2, page} = param;
+		page = page ?? {start:0, size: 100};
+		let {cols, tables} = this.buildIDX([ID]);
+		let where:string = '';
+		let limit:string = '';
+		where = '1=1';
+		let {start, size} = page;
+		if (!start) start = 0;
+		where += ` AND t0.id>${start}`;
+		limit = `limit ${size}`;
+
+		let {cols:cols2, tables:tables2} = this.buildIDX([ID2]);
+
+		let sql = '';
+		sql += `DROP TEMPORARY TABLE IF EXISTS ids;`
+		sql += '\nCREATE TEMPORARY TABLE ids (id BIGINT, primary key (id));';
+		sql += `\nINSERT INTO ids (id) SELECT t0.id FROM ${tables} WHERE ${where} ${limit};`;
+		sql += `\nSELECT ${cols} FROM ${tables} JOIN ids as z ON t0.id=z.id;`;
+		sql += `\nSELECT ${cols2} FROM ${tables2} JOIN ids as z ON t0.id=z.id;`;
+		return sql;
+	}
+	
+	IDTree(param: ParamIDTree): string {
+		let {ID, parent, key, level, page} = param;
+		if (!level) level = 1;
+		let keyField = ID.schema.keys[1];
+		let {name:keyName, type} = keyField;
+		let table = `\`tv_${ID.name}\``;
+		let eq:string, as:string;
+		if (type === 'textid') {
+			eq = `tv_$textid('${key}')`;
+			as = `tv_$idtext(a.\`${keyName}\`) as \`${keyName}\``;
+		}
+		else {
+			eq = `'${key}'`;
+			as = `a.\`${keyName}\` as \`${keyName}\``;
+		}
+		function select(n:number):string {
+			let s = `select t${n}.id from ${table} as t1`;
+			for (let i=2; i<=n; i++) s += ` join ${table} as t${i} on t${i-1}.id=t${i}.parent`;
+			s += ` where t1.parent=${parent}`;
+			if (key) s += ` and t1.${keyName}=${eq}`;
+			return s;
+		}
+
+
+		let sql = `select a.id, a.parent, ${as} from ${table} as a join (`;
+		sql += select(1);
+		for (let i=2; i<=level; i++) sql += ` union (${select(i)})`;
+		sql += ') as t on a.id=t.id where 1=1';
+		if (page !== undefined) {
+			let {start, size} = page;
+			if (!start) start = 0;
+			sql += ` AND a.id>${start} limit ${size}`;
+		}
 		return sql;
 	}
 

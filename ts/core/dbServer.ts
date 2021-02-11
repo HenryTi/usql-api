@@ -127,6 +127,21 @@ export interface ParamIDinIX {
 	page: ParamPage;
 }
 
+export interface ParamIDxID {
+	ID: TableSchema;
+	IX: TableSchema;
+	ID2: TableSchema;
+	page?: ParamPage;
+}
+
+export interface ParamIDTree {
+	ID: TableSchema;
+	parent: number;
+	key: string|number;
+	level: number;				// 无值，默认1一级
+	page: ParamPage;
+}
+
 export abstract class DbServer {
 	protected dbName: string;
 	hasUnit: boolean;
@@ -231,6 +246,16 @@ export abstract class DbServer {
 	
 	async IDinIX(unit:number, user:number, param: ParamIDinIX): Promise<any[]> {
 		let sql = this.builder.IDinIX(param);
+		return await this.execSql(unit, user, sql);
+	}
+	
+	async IDxID(unit:number, user:number, param: ParamIDxID): Promise<any[]> {
+		let sql = this.builder.IDxID(param);
+		return await this.execSql(unit, user, sql);
+	}
+	
+	async IDTree(unit:number, user:number, param: ParamIDTree): Promise<any[]> {
+		let sql = this.builder.IDTree(param);
 		return await this.execSql(unit, user, sql);
 	}
 }

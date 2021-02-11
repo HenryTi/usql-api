@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Db, env } from '../db';
-import {DbServer, ParamID, ParamIX, ParamIXSum, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDinIX, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyIX, ParamKeyIXSum, ParamKeyIDSum, ParamSum, TableSchema} from '../dbServer';
+import {DbServer, ParamID, ParamIX, ParamIXSum, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDinIX, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyIX, ParamKeyIXSum, ParamKeyIDSum, ParamSum, TableSchema, ParamIDxID, ParamIDTree} from '../dbServer';
 import { packReturns } from '../packReturn';
 import { ImportData } from '../importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from '../inBusAction';
@@ -1120,5 +1120,19 @@ export class EntityRunner {
 		param.IX = this.getTableSchema((IX as unknown) as string, ['ix']);
 		param.ID = this.getTableSchema((ID as unknown) as string, ['id']);
 		return this.dbServer.IDinIX(unit, user, param);
+	}
+
+	IDxID(unit:number, user:number, param: ParamIDxID): Promise<any[]> {
+		let {ID, IX, ID2} = param;
+		param.ID = this.getTableSchema((ID as unknown) as string, ['id']);
+		param.IX = this.getTableSchema((IX as unknown) as string, ['ix']);
+		param.ID2 = this.getTableSchema((ID2 as unknown) as string, ['id']);
+		return this.dbServer.IDxID(unit, user, param);
+	}
+
+	IDTree(unit:number, user:number, param: ParamIDTree): Promise<any[]> {
+		let {ID} = param;
+		param.ID = this.getTableSchema((ID as unknown) as string, ['id']);
+		return this.dbServer.IDTree(unit, user, param);
 	}
 }

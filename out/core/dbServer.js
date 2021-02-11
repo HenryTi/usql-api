@@ -57,15 +57,15 @@ class DbServer {
             return yield this.execSql(unit, user, sql);
         });
     }
-    ID2(unit, user, param) {
+    IX(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.ID2(param);
+            let sql = this.builder.IX(param);
             return yield this.execSql(unit, user, sql);
         });
     }
-    KeyID2(unit, user, param) {
+    KeyIX(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.KeyID2(param);
+            let sql = this.builder.KeyIX(param);
             return yield this.execSql(unit, user, sql);
         });
     }
@@ -87,21 +87,33 @@ class DbServer {
             return yield this.execSql(unit, user, sql);
         });
     }
-    ID2Sum(unit, user, param) {
+    IXSum(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.ID2Sum(param);
+            let sql = this.builder.IXSum(param);
             return yield this.execSql(unit, user, sql);
         });
     }
-    KeyID2Sum(unit, user, param) {
+    KeyIXSum(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.KeyID2Sum(param);
+            let sql = this.builder.KeyIXSum(param);
             return yield this.execSql(unit, user, sql);
         });
     }
-    IDinID2(unit, user, param) {
+    IDinIX(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IDinID2(param);
+            let sql = this.builder.IDinIX(param);
+            return yield this.execSql(unit, user, sql);
+        });
+    }
+    IDxID(unit, user, param) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = this.builder.IDxID(param);
+            return yield this.execSql(unit, user, sql);
+        });
+    }
+    IDTree(unit, user, param) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = this.builder.IDTree(param);
             return yield this.execSql(unit, user, sql);
         });
     }
