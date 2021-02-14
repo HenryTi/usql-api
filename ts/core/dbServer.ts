@@ -214,6 +214,11 @@ export abstract class DbServer {
 		return await this.execSql(unit, user, sql);
 	}
 	
+	async IXr(unit:number, user:number, param: ParamIX): Promise<any[]> {
+		let sql = this.builder.IXr(param);
+		return await this.execSql(unit, user, sql);
+	}
+	
 	async KeyIX(unit:number, user:number, param: ParamKeyIX): Promise<any[]> {
 		let sql = this.builder.KeyIX(param);
 		return await this.execSql(unit, user, sql);

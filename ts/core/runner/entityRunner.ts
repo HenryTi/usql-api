@@ -1064,6 +1064,14 @@ export class EntityRunner {
 		return this.dbServer.IX(unit, user, param);
 	}
 	
+	IXr(unit:number, user:number, param: ParamIX): Promise<any[]> {
+		let {IX, IDX} = param;
+		param.IX = this.getTableSchema((IX as unknown) as string, ['ix']) as TableSchema;
+		let types = ['id', 'idx'];
+		param.IDX = this.getTableSchemaArray(IDX as unknown as any, types);
+		return this.dbServer.IXr(unit, user, param);
+	}
+	
 	KeyIX(unit:number, user:number, param: ParamKeyIX): Promise<any[]> {
 		let {ID, IX, IDX} = param;
 		param.ID = this.getTableSchema((ID as unknown) as string, ['id']);

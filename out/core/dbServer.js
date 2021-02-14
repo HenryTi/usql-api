@@ -63,6 +63,12 @@ class DbServer {
             return yield this.execSql(unit, user, sql);
         });
     }
+    IXr(unit, user, param) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = this.builder.IXr(param);
+            return yield this.execSql(unit, user, sql);
+        });
+    }
     KeyIX(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.KeyIX(param);

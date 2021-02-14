@@ -124,10 +124,17 @@ export class MyBuilder extends Builder {
 		let arr = [IX];
 		if (IDX) arr.push(...IDX);
 		let {cols, tables} = this.buildIDX(arr);
-		let where = ' AND t0.id' + (Array.isArray(id)?
-			' in (' + id.join(',') + ')'
-			:
-			'=' + id);
+		let where = '';
+		if (id) {
+			if (Array.isArray(id) === true) {
+				if ((id as []).length > 0) {
+					where = ' AND t0.id in (' + (id as []).join(',') + ')'
+				}
+			}
+			else {
+				where = ' AND t0.id=' + id;
+			}
+		}
 		if (page) {
 			let {start} = page;
 			if (!start) start = 0;
@@ -135,6 +142,34 @@ export class MyBuilder extends Builder {
 		}
 		let sql = `SELECT ${cols} FROM ${tables} WHERE 1=1${where}`;
 		sql += ' ORDER BY t0.id2 ASC';
+		if (page) sql += ' LIMIT ' + page.size;
+		sql += ';\n';
+		return sql;
+	}
+	
+	IXr(param: ParamIX): string {
+		let {IX, id, IDX, page} = param;
+		let arr = [IX];
+		if (IDX) arr.push(...IDX);
+		let {cols, tables} = this.buildIDX(arr, true);
+		let where = '';
+		if (id) {
+			if (Array.isArray(id) === true) {
+				if ((id as []).length > 0) {
+					where = ' AND t0.id2 in (' + (id as []).join(',') + ')'
+				}
+			}
+			else {
+				where = ' AND t0.id2=' + id;
+			}
+		}
+		if (page) {
+			let {start} = page;
+			if (!start) start = 0;
+			where += ' AND t0.id>' + start;
+		}
+		let sql = `SELECT distinct ${cols} FROM ${tables} WHERE 1=1${where}`;
+		sql += ' ORDER BY t0.id ASC';
 		if (page) sql += ' LIMIT ' + page.size;
 		sql += ';\n';
 		return sql;
@@ -338,7 +373,7 @@ export class MyBuilder extends Builder {
 		sql += '\nCREATE TEMPORARY TABLE ids (id BIGINT, primary key (id));';
 		sql += `\nINSERT INTO ids (id) SELECT t0.id FROM ${tables} WHERE ${where} ${limit};`;
 		sql += `\nSELECT ${cols} FROM ${tables} JOIN ids as z ON t0.id=z.id;`;
-		sql += `\nSELECT ${cols2} FROM ${tables2} JOIN ids as z ON t0.id=z.id;`;
+		sql += `\nSELECT x.id as \`$xid\`, ${cols2} FROM ${tables2} JOIN \`tv_${IX.name}\` as x ON t0.id=x.id2 JOIN ids as z ON x.id=z.id;`;
 		return sql;
 	}
 	
@@ -397,18 +432,19 @@ export class MyBuilder extends Builder {
 		return sql;
 	}
 
-	private buildIDX(IDX: TableSchema[]): {cols: string; tables: string} {
+	private buildIDX(IDX: TableSchema[], isIXr:boolean = false): {cols: string; tables: string} {
 		let {name, schema} = IDX[0];
 		let {type} = schema;
-		let idJoin = type === 'ix'? 'id2' : 'id';
+		let idJoin = type === 'ix' && isIXr === false? 'id2' : 'id';
 		let tables = `\`${this.dbName}\`.\`tv_${name}\` as t0`;
 		let ti = `t0`;
 		let cols = ti + '.id';
 		function buildCols(schema:EntitySchema) {
-			let {fields, exFields} = schema;
+			let {fields, type:schemaType} = schema;
 			for (let f of fields) {
 				let {name:fn, type:ft} = f;
 				if (fn === 'id') continue;
+				if (isIXr === true && schemaType === 'ix' && fn === 'id2') continue;
 				let fv = `${ti}.\`${fn}\``;
 				cols += ',';
 				cols += ft === 'textid'? `tv_$idtext(${fv})` : fv;

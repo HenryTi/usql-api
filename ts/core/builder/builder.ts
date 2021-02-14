@@ -32,6 +32,10 @@ export abstract class Builder {
 		return
 	}
 	
+	IXr(param: ParamIX): string {
+		return
+	}
+	
 	KeyIX(param: ParamKeyIX): string {
 		return
 	}

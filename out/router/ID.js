@@ -23,6 +23,10 @@ function buildIDRouter(router, rb) {
         let result = yield runner.IX(unit, user, body);
         return result;
     }));
+    rb.entityPost(router, 'ixr', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.IXr(unit, user, body);
+        return result;
+    }));
     rb.entityPost(router, 'key-ix', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.KeyIX(unit, user, body);
         return result;

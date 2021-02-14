@@ -24,6 +24,9 @@ class Builder {
     IX(param) {
         return;
     }
+    IXr(param) {
+        return;
+    }
     KeyIX(param) {
         return;
     }
