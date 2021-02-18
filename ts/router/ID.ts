@@ -57,6 +57,12 @@ export function buildIDRouter(router: Router, rb: RouterBuilder) {
         return result;
     });
 
+    rb.entityPost(router, 'id-no', '',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let result = await runner.IDNO(unit, user, body);
+        return result;
+    });
+
     rb.entityPost(router, 'id-detail-get', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.IDDetailGet(unit, user, body);

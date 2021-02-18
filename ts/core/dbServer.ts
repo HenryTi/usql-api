@@ -47,6 +47,10 @@ export interface ParamIDDetail {
 	detail3?: TableSchema;
 }
 
+export interface ParamIDNO {
+	ID: TableSchema;
+}
+
 export interface ParamIDDetailGet extends ParamIDDetail {
 	id: number;
 }
@@ -192,6 +196,12 @@ export abstract class DbServer {
 	async IDDetail(unit:number, user:number, param:ParamIDDetail): Promise<any[]> {
 		let sql = this.builder.IDDetail(param);
 		return await this.execSqlTrans(unit, user, sql);
+	}
+
+	async IDNO(unit:number, user:number, param:ParamIDNO): Promise<string> {
+		let sql = this.builder.IDNO(param);
+		let ret = await this.execSql(unit, user, sql);
+		return ret[0]['no'];
 	}
 
 	async IDDetailGet(unit:number, user:number, param:ParamIDDetail): Promise<any[]> {

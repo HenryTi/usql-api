@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 import { Db, env } from '../db';
-import {DbServer, ParamID, ParamIX, ParamIXSum, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDinIX, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyIX, ParamKeyIXSum, ParamKeyIDSum, ParamSum, TableSchema, ParamIDxID, ParamIDTree} from '../dbServer';
+import {DbServer, ParamID, ParamIX, ParamIXSum, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDinIX, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyIX, ParamKeyIXSum, ParamKeyIDSum, ParamSum, TableSchema, ParamIDxID, ParamIDTree, ParamIDNO} from '../dbServer';
 import { packReturns } from '../packReturn';
 import { ImportData } from '../importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from '../inBusAction';
@@ -1025,6 +1025,13 @@ export class EntityRunner {
 			param.detail3 = this.getTableSchema(detail3.name as unknown as string, types, detail3.values);
 		}
 		return this.dbServer.IDDetail(unit, user, param);
+	}
+
+	IDNO(unit:number, user:number, param:ParamIDNO): Promise<string> {
+		let {ID} = param;
+		let types = ['id'];
+		param.ID = this.getTableSchema(ID as unknown as string, types);
+		return this.dbServer.IDNO(unit, user, param);
 	}
 
 	IDDetailGet(unit:number, user:number, param:ParamIDDetailGet): Promise<any[]> {

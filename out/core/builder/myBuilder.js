@@ -27,6 +27,7 @@ class MyBuilder extends builder_1.Builder {
     }
     IDDetail(param) {
         let { master, detail, detail2, detail3 } = param;
+        let { values } = master;
         let masterOverride = {
             id: `(@master:=@id:=tv_$id(${master.schema.typeId}))`,
             no: `tv_$no(@unit, '${master.name}')`,
@@ -48,6 +49,11 @@ class MyBuilder extends builder_1.Builder {
             sql += this.buildInsert(detail3, detailOverride3);
         }
         sql += 'SELECT @ret as ret;\n';
+        return sql;
+    }
+    IDNO(param) {
+        let { ID } = param;
+        let sql = `SELECT tv_$no(@unit, '${ID.name}') as no;`;
         return sql;
     }
     IDDetailGet(param) {
@@ -541,14 +547,19 @@ class MyBuilder extends builder_1.Builder {
                     vals += ',';
                 }
                 ;
-                let v = override[name];
+                let v = value[name];
+                let ov = override[name];
                 if (v !== undefined) {
                     vals += v;
                 }
+                if (v !== undefined) {
+                    vals += (type === 'textid' ? `tv_$textid('${v}')` : `'${v}'`);
+                }
+                else if (ov !== undefined) {
+                    vals += ov;
+                }
                 else {
-                    v = value[name];
-                    vals += v === undefined ? 'null' :
-                        (type === 'textid' ? `tv_$textid('${v}')` : `'${v}'`);
+                    vals += 'null';
                 }
             }
             if (owner === true) {

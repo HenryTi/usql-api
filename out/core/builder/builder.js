@@ -12,6 +12,9 @@ class Builder {
     IDDetail(param) {
         return;
     }
+    IDNO(param) {
+        return;
+    }
     IDDetailGet(param) {
         return;
     }

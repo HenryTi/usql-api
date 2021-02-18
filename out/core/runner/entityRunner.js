@@ -1157,6 +1157,12 @@ class EntityRunner {
         }
         return this.dbServer.IDDetail(unit, user, param);
     }
+    IDNO(unit, user, param) {
+        let { ID } = param;
+        let types = ['id'];
+        param.ID = this.getTableSchema(ID, types);
+        return this.dbServer.IDNO(unit, user, param);
+    }
     IDDetailGet(unit, user, param) {
         let { master, detail, detail2, detail3 } = param;
         let types = ['id'];
