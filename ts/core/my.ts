@@ -4,6 +4,7 @@ import {DbServer, ParamID, ParamIX, ParamIDActs, ParamIDLog, ParamKeyID, ParamKe
 import { dbLogger, SpanLog, env } from './db';
 import { consts } from './consts';
 import { MyBuilder } from './builder';
+import { locals } from './locals';
 
 const retries = 5;
 const minMillis = 1;
@@ -465,6 +466,9 @@ END
         await this.exec(createSetting, undefined);
         let createPerformance = 'CREATE TABLE IF NOT EXISTS $uq.performance (`time` timestamp(6) not null, ms int, log text, primary key(`time`))';
         await this.exec(createPerformance, undefined);
+        let createLocal = 'CREATE TABLE IF NOT EXISTS $uq.local (id smallint not null auto_increment, `name` varchar(50), discription varchar(100), primary key(`id`), unique key unique_name (`name`))';
+        await this.exec(createLocal, undefined);
+		await this.initBuildLocal();
 
         let writeLog = `
 create procedure $uq.log(_unit int, _uq varchar(50), _subject varchar(100), _content text) begin
@@ -594,6 +598,25 @@ END
 		if (retAddUqUidColumnExists.length === 0) {
 			await this.exec(addUqUidColumn, undefined);
 		}
+	}
+
+	private async initBuildLocal() {
+		let selectLocal = `select * from $uq.local limit 1;`;
+		let ret = await this.exec(selectLocal, undefined);
+		if (ret.length > 0) return;
+		let sql = 'insert into $uq.local (id, name, discription) values ';
+		let first = true;
+		for (let item of locals) {
+			if (first === true) {
+				first = false;
+			}
+			else {
+				sql += ',';
+			}
+			let [id, name, discription] = item;
+			sql += `(${id}, '${name}', '${discription}')`;
+		}
+		await this.exec(sql, undefined);
 	}
 
     private async insertInto$Uq(db:string): Promise<void> {

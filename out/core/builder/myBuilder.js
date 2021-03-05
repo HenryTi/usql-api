@@ -528,9 +528,11 @@ class MyBuilder extends builder_1.Builder {
             ;
             cols += `\`${name}\``;
         }
+        /*
         if (owner === true) {
             cols += ',`$owner`';
         }
+        */
         if (valueItem !== undefined) {
             values = [valueItem];
         }
@@ -547,11 +549,12 @@ class MyBuilder extends builder_1.Builder {
                     vals += ',';
                 }
                 ;
+                if (name === '$owner' && owner === true) {
+                    vals += '@user';
+                    continue;
+                }
                 let v = value[name];
                 let ov = override[name];
-                if (v !== undefined) {
-                    vals += v;
-                }
                 if (v !== undefined) {
                     vals += (type === 'textid' ? `tv_$textid('${v}')` : `'${v}'`);
                 }
@@ -562,9 +565,11 @@ class MyBuilder extends builder_1.Builder {
                     vals += 'null';
                 }
             }
+            /*
             if (owner === true) {
                 vals += ',@user';
             }
+            */
             sql += `(${vals});\n`;
             sql += retTab;
         }
@@ -697,17 +702,20 @@ class MyBuilder extends builder_1.Builder {
                     if (exField !== undefined) {
                         let { field, track, memo, sum, time: timeCanSet } = exField;
                         let valueId = value['id'];
-                        let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId},0,${v},`;
+                        let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId},0,'${v}'`;
                         if (timeCanSet === true) {
+                            sqlEx += ',';
                             sqlEx += time !== undefined ? time : 'null';
                         }
                         if (track === true) {
                             let vTrack = value['$track'];
-                            sqlEx += ',' + (vTrack ? vTrack : 'null');
+                            sqlEx += ',';
+                            sqlEx += (vTrack ? vTrack : 'null');
                         }
                         if (memo === true) {
                             let vMemo = value['$memo'];
-                            sqlEx += ',' + (vMemo ? `'${vMemo}'` : 'null');
+                            sqlEx += ',';
+                            sqlEx += (vMemo ? `'${vMemo}'` : 'null');
                         }
                         sqlEx += `);\n`;
                         sqlWriteEx.push(sqlEx);
