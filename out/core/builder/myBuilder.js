@@ -261,7 +261,7 @@ class MyBuilder extends builder_1.Builder {
                 group = `DATE_FORMAT(${time}, '%Y-01-01')`;
                 break;
         }
-        let sql = `select ${group} as t, sum(a.v) as v from ${table} as a where a.t<${start} and a.id=${id} ${span} group by ${group} limit ${size}`;
+        let sql = `select ${group} as t, sum(a.v) as v from ${table} as a where a.t<${start} and a.id=${id} ${span} group by ${group} order by t limit ${size}`;
         return sql;
     }
     IDSum(param) {

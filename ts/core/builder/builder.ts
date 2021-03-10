@@ -1,4 +1,7 @@
-import { ParamID, ParamIX, ParamIXSum, ParamIDActs, ParamIDDetail, ParamIDinIX as ParamIDinIX, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyIX, ParamKeyIXSum, ParamKeyIDSum, ParamIDxID, ParamIDTree, ParamIDNO } from "../dbServer";
+import { ParamID, ParamIX, ParamIXSum, ParamIDActs
+	, ParamIDDetail, ParamIDinIX, ParamIDLog, ParamIDSum
+	, ParamKeyID, ParamKeyIX, ParamKeyIXSum
+	, ParamKeyIDSum, ParamIDxID, ParamIDTree, ParamIDNO } from "../dbServer";
 
 export abstract class Builder {
 	protected dbName:string;

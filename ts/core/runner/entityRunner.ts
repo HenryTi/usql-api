@@ -1,9 +1,14 @@
 import * as _ from 'lodash';
 import { Db, env } from '../db';
-import {DbServer, ParamID, ParamIX, ParamIXSum, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDinIX, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyIX, ParamKeyIXSum, ParamKeyIDSum, ParamSum, TableSchema, ParamIDxID, ParamIDTree, ParamIDNO} from '../dbServer';
+import {DbServer, ParamID, ParamIX, ParamIXSum
+	, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDinIX
+	, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyIX
+	, ParamKeyIXSum, ParamKeyIDSum, ParamSum, TableSchema
+	, ParamIDxID, ParamIDTree, ParamIDNO} from '../dbServer';
 import { packReturns } from '../packReturn';
 import { ImportData } from '../importData';
-import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus, SheetActionParametersBus, AcceptParametersBus } from '../inBusAction';
+import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus
+	, SheetActionParametersBus, AcceptParametersBus } from '../inBusAction';
 import { Net } from '../net';
 import { centerApi } from '../centerApi';
 
@@ -1091,7 +1096,7 @@ export class EntityRunner {
 		let {IDX, field} = param;
 		let ts = this.getTableSchema((IDX as unknown) as string, ['idx']);
 		param.IDX = ts;
-		let fLower = field.toLowerCase();
+		let fLower = field; //.toLowerCase();
 		if (ts.schema.fields.findIndex(v => v.name === fLower) < 0) {
 			this.throwErr(`ID ${IDX} has no Field ${field}`);
 		}

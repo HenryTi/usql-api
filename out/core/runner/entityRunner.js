@@ -1214,7 +1214,7 @@ class EntityRunner {
         let { IDX, field } = param;
         let ts = this.getTableSchema(IDX, ['idx']);
         param.IDX = ts;
-        let fLower = field.toLowerCase();
+        let fLower = field; //.toLowerCase();
         if (ts.schema.fields.findIndex(v => v.name === fLower) < 0) {
             this.throwErr(`ID ${IDX} has no Field ${field}`);
         }

@@ -1,8 +1,8 @@
-import { ParamID, ParamIX, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDLog, 
-	ParamKeyID, ParamKeyIX, ParamIDxID,
-	ParamIDSum, ParamKeyIDSum, ParamIXSum, ParamKeyIXSum,
-	TableSchema, 
-	ParamSum, EntitySchema, ParamIDinIX, ParamIDTree, ParamIDNO} from "../dbServer";
+import { ParamID, ParamIX, ParamIDActs, ParamIDDetail
+	, ParamIDDetailGet, ParamIDLog, ParamKeyID, ParamKeyIX
+	, ParamIDxID, ParamIDSum, ParamKeyIDSum, ParamIXSum
+	, ParamKeyIXSum, TableSchema, ParamSum, EntitySchema
+	, ParamIDinIX, ParamIDTree, ParamIDNO} from "../dbServer";
 import { Builder } from "./builder";
 
 const retLn = `set @ret=CONCAT(@ret, '\\n');\n`;
@@ -246,7 +246,7 @@ export class MyBuilder extends Builder {
 			case 'month': group = `DATE_FORMAT(${time}, '%Y-%m-01')`; break;
 			case 'year': group = `DATE_FORMAT(${time}, '%Y-01-01')`; break;
 		}
-		let sql = `select ${group} as t, sum(a.v) as v from ${table} as a where a.t<${start} and a.id=${id} ${span} group by ${group} limit ${size}`;
+		let sql = `select ${group} as t, sum(a.v) as v from ${table} as a where a.t<${start} and a.id=${id} ${span} group by ${group} order by t limit ${size}`;
 		return sql;
 	}
 
