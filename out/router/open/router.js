@@ -90,6 +90,13 @@ function buildOpenRouter(router, rb) {
         let { name } = params;
         return yield runner.buildProc(name);
     }));
+    rb.post(router, '/action/:action', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
+        let { action } = params;
+        if (runner.isActionOpen(action) === false)
+            return;
+        let { unit, id, data } = body;
+        return yield runner.actionDirect(action, unit, id, data);
+    }));
 }
 exports.buildOpenRouter = buildOpenRouter;
 ;

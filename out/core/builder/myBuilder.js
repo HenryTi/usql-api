@@ -5,7 +5,7 @@ const builder_1 = require("./builder");
 const retLn = `set @ret=CONCAT(@ret, '\\n');\n`;
 const retTab = `set @ret=CONCAT(@ret, @id, '\\t');\n`;
 class MyBuilder extends builder_1.Builder {
-    IDActs(param) {
+    Acts(param) {
         let { $ } = param;
         let arr = $;
         let sql = 'set @ret=\'\';\n';
@@ -25,7 +25,11 @@ class MyBuilder extends builder_1.Builder {
         }
         return sql + 'select @ret as ret;\n';
     }
-    IDDetail(param) {
+    ActIX(param) {
+        let sql = 'set @ret=\'\';\n';
+        return sql + 'select @ret as ret;\n';
+    }
+    ActDetail(param) {
         let { master, detail, detail2, detail3 } = param;
         let { values } = master;
         let masterOverride = {
@@ -136,6 +140,9 @@ class MyBuilder extends builder_1.Builder {
             else {
                 where = ' AND t0.id=' + id;
             }
+        }
+        else {
+            where = ' AND t0.id=@user';
         }
         if (page) {
             let { start } = page;
@@ -366,7 +373,6 @@ class MyBuilder extends builder_1.Builder {
         let where = '';
         let limit = '';
         where = '1=1';
-        //where = 't0.id=' + id;
         if (page !== undefined) {
             let { start, size } = page;
             if (!start)
@@ -374,7 +380,7 @@ class MyBuilder extends builder_1.Builder {
             where += ` AND t0.id>${start}`;
             limit = `limit ${size}`;
         }
-        cols += `,case when exists(select id2 from \`tv_${IX.name}\` where id=${id} and id2=t0.id) then 1 else 0 end as $in`;
+        cols += `,case when exists(select id2 from \`tv_${IX.name}\` where id=${id !== null && id !== void 0 ? id : '@user'} and id2=t0.id) then 1 else 0 end as $in`;
         let sql = `SELECT ${cols} FROM ${tables} WHERE ${where} ${limit}`;
         return sql;
     }
@@ -619,13 +625,19 @@ class MyBuilder extends builder_1.Builder {
                 sql += `set @id=\`tv_${name}$id\`(@unit,@user,1`;
                 let updateOverride = { id: '@id' };
                 for (let k of keys) {
-                    let { name, type } = k;
+                    let { name: kn, type } = k;
+                    let v = value[kn];
                     sql += ',';
-                    if (type === 'textid')
-                        sql += `tv_$textid('${value[name]}')`;
-                    else
-                        sql += `'${value[name]}'`;
-                    updateOverride[name] = null;
+                    if (type === 'textid') {
+                        sql += `tv_$textid('${v}')`;
+                    }
+                    else if (kn === 'no') {
+                        sql += v ? `'${v}'` : `tv_$no(@unit, '${name}')`;
+                    }
+                    else {
+                        sql += `'${v}'`;
+                    }
+                    updateOverride[kn] = null;
                 }
                 sql += ');\n';
                 if (fields.length > keys.length + 1) {

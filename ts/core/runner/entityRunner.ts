@@ -1,10 +1,10 @@
 import * as _ from 'lodash';
 import { Db, env } from '../db';
 import {DbServer, ParamID, ParamIX, ParamIXSum
-	, ParamIDActs, ParamIDDetail, ParamIDDetailGet, ParamIDinIX
+	, ParamActs, ParamActDetail, ParamIDDetailGet, ParamIDinIX
 	, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyIX
 	, ParamKeyIXSum, ParamKeyIDSum, ParamSum, TableSchema
-	, ParamIDxID, ParamIDTree, ParamIDNO} from '../dbServer';
+	, ParamIDxID, ParamIDTree, ParamIDNO, ParamActIX} from '../dbServer';
 import { packReturns } from '../packReturn';
 import { ImportData } from '../importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus
@@ -311,6 +311,15 @@ export class EntityRunner {
         let t = this.tuids[tuid];
         if (t === undefined) return false;
         if (t.isOpen === true) return true;
+        return false;
+    }
+    isActionOpen(action:string) {
+        action = action.toLowerCase();
+        let t = this.schemas[action];
+        if (t === undefined) return false;
+		let {call} = t;
+		if (call === undefined) return false;
+        if (call.isOpen === true) return true;
         return false;
     }
     getTuid(tuid:string) {
@@ -1005,7 +1014,7 @@ export class EntityRunner {
 			[this.getTableSchema(names as string, types)];
 	}
 
-	IDActs(unit:number, user:number, param:ParamIDActs): Promise<any[]> {
+	Acts(unit:number, user:number, param:ParamActs): Promise<any[]> {
 		for (let i in param) {
 			if (i === '$') continue;
 			let ts = this.getTableSchema(i, ['id', 'idx', 'ix']);
@@ -1015,10 +1024,17 @@ export class EntityRunner {
 				param[i] = ts;
 			}
 		}
-		return this.dbServer.IDActs(unit, user, param);
+		return this.dbServer.Acts(unit, user, param);
 	}
 
-	IDDetail(unit:number, user:number, param:ParamIDDetail): Promise<any[]> {
+	ActIX(unit:number, user:number, param:ParamActIX): Promise<any[]> {
+		let {IX, ID} = param;
+		param.IX = this.getTableSchema(IX as unknown as string, ['ix']);
+		param.ID = this.getTableSchema(ID as unknown as string, ['id']);
+		return this.dbServer.ActIX(unit, user, param);
+	}
+
+	ActDetail(unit:number, user:number, param:ParamActDetail): Promise<any[]> {
 		let {master, detail, detail2, detail3} = param;
 		let types = ['id'];
 		param.master = this.getTableSchema(master.name as unknown as string, types, [(master as any).value as any]);
@@ -1029,7 +1045,7 @@ export class EntityRunner {
 		if (detail3) {
 			param.detail3 = this.getTableSchema(detail3.name as unknown as string, types, detail3.values);
 		}
-		return this.dbServer.IDDetail(unit, user, param);
+		return this.dbServer.ActDetail(unit, user, param);
 	}
 
 	IDNO(unit:number, user:number, param:ParamIDNO): Promise<string> {

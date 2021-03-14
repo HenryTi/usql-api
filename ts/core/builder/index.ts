@@ -1,3 +1,3 @@
-export { Builder } from "./builder";
+export { Builders as Builder } from "./builders";
 export { MsBuilder } from "./msBuilder";
-export { MyBuilder } from "./myBuilder";
+export { MyBuilders as MyBuilder } from "./my";

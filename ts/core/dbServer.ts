@@ -36,11 +36,17 @@ export interface TableSchema {
 	values: any[];
 }
 
-export interface ParamIDActs {
+export interface ParamActs {
 	[ID:string]: TableSchema;
 }
 
-export interface ParamIDDetail {
+export interface ParamActIX {
+	IX: TableSchema;
+	ID: TableSchema;
+	values: any[];
+}
+
+export interface ParamActDetail {
 	master: TableSchema;
 	detail: TableSchema;
 	detail2?: TableSchema;
@@ -51,7 +57,7 @@ export interface ParamIDNO {
 	ID: TableSchema;
 }
 
-export interface ParamIDDetailGet extends ParamIDDetail {
+export interface ParamIDDetailGet extends ParamActDetail {
 	id: number;
 }
 
@@ -188,89 +194,94 @@ export abstract class DbServer {
 		return ret;
 	}
 
-	async IDActs(unit:number, user:number, param:ParamIDActs): Promise<any[]> {
-		let sql = this.builder.IDActs(param);
+	async Acts(unit:number, user:number, param:ParamActs): Promise<any[]> {
+		let sql = this.builder.Acts(param).build();
 		return await this.execSqlTrans(unit, user, sql);
 	}
 
-	async IDDetail(unit:number, user:number, param:ParamIDDetail): Promise<any[]> {
-		let sql = this.builder.IDDetail(param);
+	async ActIX(unit:number, user:number, param:ParamActIX): Promise<any[]> {
+		let sql = this.builder.ActIX(param).build();
+		return await this.execSqlTrans(unit, user, sql);
+	}
+
+	async ActDetail(unit:number, user:number, param:ParamActDetail): Promise<any[]> {
+		let sql = this.builder.ActDetail(param).build();
 		return await this.execSqlTrans(unit, user, sql);
 	}
 
 	async IDNO(unit:number, user:number, param:ParamIDNO): Promise<string> {
-		let sql = this.builder.IDNO(param);
+		let sql = this.builder.IDNO(param).build();
 		let ret = await this.execSql(unit, user, sql);
 		return ret[0]['no'];
 	}
 
-	async IDDetailGet(unit:number, user:number, param:ParamIDDetail): Promise<any[]> {
-		let sql = this.builder.IDDetailGet(param);
+	async IDDetailGet(unit:number, user:number, param:ParamActDetail): Promise<any[]> {
+		let sql = this.builder.IDDetailGet(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 
 	async ID(unit:number, user:number, param: ParamID): Promise<any[]> {
-		let sql = this.builder.ID(param);
+		let sql = this.builder.ID(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 
 	async KeyID(unit:number, user:number, param: ParamKeyID): Promise<any[]> {
-		let sql = this.builder.KeyID(param);
+		let sql = this.builder.KeyID(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 
 	async IX(unit:number, user:number, param: ParamIX): Promise<any[]> {
-		let sql = this.builder.IX(param);
+		let sql = this.builder.IX(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 	
 	async IXr(unit:number, user:number, param: ParamIX): Promise<any[]> {
-		let sql = this.builder.IXr(param);
+		let sql = this.builder.IXr(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 	
 	async KeyIX(unit:number, user:number, param: ParamKeyIX): Promise<any[]> {
-		let sql = this.builder.KeyIX(param);
+		let sql = this.builder.KeyIX(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 	
 	async IDLog(unit:number, user:number, param: ParamIDLog): Promise<any[]> {
-		let sql = this.builder.IDLog(param);
+		let sql = this.builder.IDLog(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 	
 	async IDSum(unit:number, user:number, param: ParamIDSum): Promise<any[]> {
-		let sql = this.builder.IDSum(param);
+		let sql = this.builder.IDSum(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 	
 	async KeyIDSum(unit:number, user:number, param: ParamKeyIDSum): Promise<any[]> {
-		let sql = this.builder.KeyIDSum(param);
+		let sql = this.builder.KeyIDSum(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 	
 	async IXSum(unit:number, user:number, param: ParamIXSum): Promise<any[]> {
-		let sql = this.builder.IXSum(param);
+		let sql = this.builder.IXSum(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 	
 	async KeyIXSum(unit:number, user:number, param: ParamKeyIXSum): Promise<any[]> {
-		let sql = this.builder.KeyIXSum(param);
+		let sql = this.builder.KeyIXSum(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 	
 	async IDinIX(unit:number, user:number, param: ParamIDinIX): Promise<any[]> {
-		let sql = this.builder.IDinIX(param);
+		let sql = this.builder.IDinIX(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 	
 	async IDxID(unit:number, user:number, param: ParamIDxID): Promise<any[]> {
-		let sql = this.builder.IDxID(param);
+		let sql = this.builder.IDxID(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 	
 	async IDTree(unit:number, user:number, param: ParamIDTree): Promise<any[]> {
-		let sql = this.builder.IDTree(param);
+		let sql = this.builder.IDTree(param).build();
 		return await this.execSql(unit, user, sql);
 	}
 }

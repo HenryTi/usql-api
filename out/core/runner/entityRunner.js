@@ -329,6 +329,18 @@ class EntityRunner {
             return true;
         return false;
     }
+    isActionOpen(action) {
+        action = action.toLowerCase();
+        let t = this.schemas[action];
+        if (t === undefined)
+            return false;
+        let { call } = t;
+        if (call === undefined)
+            return false;
+        if (call.isOpen === true)
+            return true;
+        return false;
+    }
     getTuid(tuid) {
         tuid = tuid.toLowerCase();
         let ret = this.tuids[tuid];
@@ -1131,7 +1143,7 @@ class EntityRunner {
             :
                 [this.getTableSchema(names, types)];
     }
-    IDActs(unit, user, param) {
+    Acts(unit, user, param) {
         for (let i in param) {
             if (i === '$')
                 continue;
@@ -1142,9 +1154,15 @@ class EntityRunner {
                 param[i] = ts;
             }
         }
-        return this.dbServer.IDActs(unit, user, param);
+        return this.dbServer.Acts(unit, user, param);
     }
-    IDDetail(unit, user, param) {
+    ActIX(unit, user, param) {
+        let { IX, ID } = param;
+        param.IX = this.getTableSchema(IX, ['ix']);
+        param.ID = this.getTableSchema(ID, ['id']);
+        return this.dbServer.ActIX(unit, user, param);
+    }
+    ActDetail(unit, user, param) {
         let { master, detail, detail2, detail3 } = param;
         let types = ['id'];
         param.master = this.getTableSchema(master.name, types, [master.value]);
@@ -1155,7 +1173,7 @@ class EntityRunner {
         if (detail3) {
             param.detail3 = this.getTableSchema(detail3.name, types, detail3.values);
         }
-        return this.dbServer.IDDetail(unit, user, param);
+        return this.dbServer.ActDetail(unit, user, param);
     }
     IDNO(unit, user, param) {
         let { ID } = param;

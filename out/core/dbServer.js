@@ -27,106 +27,112 @@ class DbServer {
             return ret;
         });
     }
-    IDActs(unit, user, param) {
+    Acts(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IDActs(param);
+            let sql = this.builder.Acts(param).build();
             return yield this.execSqlTrans(unit, user, sql);
         });
     }
-    IDDetail(unit, user, param) {
+    ActIX(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IDDetail(param);
+            let sql = this.builder.ActIX(param).build();
+            return yield this.execSqlTrans(unit, user, sql);
+        });
+    }
+    ActDetail(unit, user, param) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = this.builder.ActDetail(param).build();
             return yield this.execSqlTrans(unit, user, sql);
         });
     }
     IDNO(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IDNO(param);
+            let sql = this.builder.IDNO(param).build();
             let ret = yield this.execSql(unit, user, sql);
             return ret[0]['no'];
         });
     }
     IDDetailGet(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IDDetailGet(param);
+            let sql = this.builder.IDDetailGet(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     ID(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.ID(param);
+            let sql = this.builder.ID(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     KeyID(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.KeyID(param);
+            let sql = this.builder.KeyID(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     IX(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IX(param);
+            let sql = this.builder.IX(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     IXr(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IXr(param);
+            let sql = this.builder.IXr(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     KeyIX(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.KeyIX(param);
+            let sql = this.builder.KeyIX(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     IDLog(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IDLog(param);
+            let sql = this.builder.IDLog(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     IDSum(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IDSum(param);
+            let sql = this.builder.IDSum(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     KeyIDSum(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.KeyIDSum(param);
+            let sql = this.builder.KeyIDSum(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     IXSum(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IXSum(param);
+            let sql = this.builder.IXSum(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     KeyIXSum(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.KeyIXSum(param);
+            let sql = this.builder.KeyIXSum(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     IDinIX(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IDinIX(param);
+            let sql = this.builder.IDinIX(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     IDxID(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IDxID(param);
+            let sql = this.builder.IDxID(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }
     IDTree(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            let sql = this.builder.IDTree(param);
+            let sql = this.builder.IDTree(param).build();
             return yield this.execSql(unit, user, sql);
         });
     }

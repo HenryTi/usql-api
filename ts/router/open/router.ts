@@ -95,4 +95,12 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
         let {name} = params;
         return await runner.buildProc(name);
     });
+
+	rb.post(router, '/action/:action', 
+    async (runner:EntityRunner, body:any, params:any):Promise<any> => {
+        let {action} = params;
+		if (runner.isActionOpen(action) === false) return;
+        let {unit, id, data} = body;
+        return await runner.actionDirect(action, unit, id, data);
+    });
 };

@@ -6,10 +6,13 @@ class Builder {
         this.dbName = dbName;
         this.hasUnit = hasUnit;
     }
-    IDActs(param) {
+    Acts(param) {
         return;
     }
-    IDDetail(param) {
+    ActIX(param) {
+        return;
+    }
+    ActDetail(param) {
         return;
     }
     IDNO(param) {

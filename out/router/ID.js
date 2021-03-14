@@ -11,6 +11,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildIDRouter = void 0;
 function buildIDRouter(router, rb) {
+    rb.entityPost(router, 'acts', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.Acts(unit, user, body);
+        return result;
+    }));
+    rb.entityPost(router, 'act-ix', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.ActIX(unit, user, body);
+        return result;
+    }));
+    rb.entityPost(router, 'act-detail', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.ActDetail(unit, user, body);
+        return result;
+    }));
     rb.entityPost(router, 'id', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.ID(unit, user, body);
         return result;
@@ -37,14 +49,6 @@ function buildIDRouter(router, rb) {
     }));
     rb.entityPost(router, 'id-sum', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.IDSum(unit, user, body);
-        return result;
-    }));
-    rb.entityPost(router, 'id-acts', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let result = yield runner.IDActs(unit, user, body);
-        return result;
-    }));
-    rb.entityPost(router, 'id-detail', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
-        let result = yield runner.IDDetail(unit, user, body);
         return result;
     }));
     rb.entityPost(router, 'id-no', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {

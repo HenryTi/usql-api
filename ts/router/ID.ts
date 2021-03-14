@@ -3,6 +3,24 @@ import * as _ from 'lodash';
 import { EntityRunner, RouterBuilder } from '../core';
 
 export function buildIDRouter(router: Router, rb: RouterBuilder) {
+    rb.entityPost(router, 'acts', '',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let result = await runner.Acts(unit, user, body);
+        return result;
+    });
+
+	rb.entityPost(router, 'act-ix', '',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let result = await runner.ActIX(unit, user, body);
+        return result;
+    });
+
+	rb.entityPost(router, 'act-detail', '',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let result = await runner.ActDetail(unit, user, body);
+        return result;
+    });
+
     rb.entityPost(router, 'id', '', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.ID(unit, user, body);
@@ -42,18 +60,6 @@ export function buildIDRouter(router: Router, rb: RouterBuilder) {
     rb.entityPost(router, 'id-sum', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.IDSum(unit, user, body);
-        return result;
-    });
-
-    rb.entityPost(router, 'id-acts', '',
-    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
-        let result = await runner.IDActs(unit, user, body);
-        return result;
-    });
-
-    rb.entityPost(router, 'id-detail', '',
-    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
-        let result = await runner.IDDetail(unit, user, body);
         return result;
     });
 
