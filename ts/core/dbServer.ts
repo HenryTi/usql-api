@@ -75,6 +75,7 @@ export interface ParamKeyID {
 
 export interface ParamIX {
 	IX: TableSchema;
+	IX1: TableSchema;
 	ix: number | number[];
 	IDX?: TableSchema[];
 	page?: ParamPage;

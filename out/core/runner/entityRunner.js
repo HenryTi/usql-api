@@ -1208,15 +1208,17 @@ class EntityRunner {
         return this.dbServer.KeyID(unit, user, param);
     }
     IX(unit, user, param) {
-        let { IX, IDX } = param;
+        let { IX, IX1, IDX } = param;
         param.IX = this.getTableSchema(IX, ['ix']);
+        param.IX1 = this.getTableSchema(IX1, ['ix']);
         let types = ['id', 'idx'];
         param.IDX = this.getTableSchemaArray(IDX, types);
         return this.dbServer.IX(unit, user, param);
     }
     IXr(unit, user, param) {
-        let { IX, IDX } = param;
+        let { IX, IX1, IDX } = param;
         param.IX = this.getTableSchema(IX, ['ix']);
+        param.IX1 = this.getTableSchema(IX1, ['ix']);
         let types = ['id', 'idx'];
         param.IDX = this.getTableSchemaArray(IDX, types);
         return this.dbServer.IXr(unit, user, param);

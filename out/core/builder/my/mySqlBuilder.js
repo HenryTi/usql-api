@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MySqlBuilder = exports.retTab = exports.retLn = void 0;
+const tablesBuilder_1 = require("./tablesBuilder");
 exports.retLn = `set @ret=CONCAT(@ret, '\\n');\n`;
 exports.retTab = `set @ret=CONCAT(@ret, @id, '\\t');\n`;
 class MySqlBuilder {
@@ -29,34 +30,53 @@ class MySqlBuilder {
         sql += ` from \`tv_${name}\` as t`;
         return sql;
     }
-    buildIDX(IDX, isIXr = false) {
-        let { name, schema } = IDX[0];
-        let { type } = schema;
-        let idJoin = type === 'ix' && isIXr === false ? 'id' : 'ix';
-        let tables = `\`${this.dbName}\`.\`tv_${name}\` as t0`;
+    buildIXrIDX(IX, IDX) {
+        let b = new tablesBuilder_1.IXrTablesBuilder(this.dbName, IX, IDX);
+        b.build();
+        return b;
+    }
+    buildIXrIXIDX(IX, IX1, IDX) {
+        let b = new tablesBuilder_1.IXrIXTablesBuilder(this.dbName, IX, IX1, IDX);
+        b.build();
+        return b;
+    }
+    buildIXIDX(IX, IDX) {
+        let b = new tablesBuilder_1.IXTablesBuilder(this.dbName, IX, IDX);
+        b.build();
+        return b;
+    }
+    buildIXIXIDX(IX, IX1, IDX) {
+        let b = new tablesBuilder_1.IXIXTablesBuilder(this.dbName, IX, IX1, IDX);
+        b.build();
+        return b;
+    }
+    buildIDX(IDX) {
+        let b = new tablesBuilder_1.TablesBuilder(this.dbName, IDX);
+        b.build();
+        return b;
+        /*
+        let {name, schema} = IDX[0];
+        let idJoin = 'id';
         let ti = `t0`;
-        let cols = ti + '.id';
-        function buildCols(schema) {
-            let { fields, type: schemaType } = schema;
+        let tables = `\`${this.dbName}\`.\`tv_${name}\` as ${ti}`;
+        let cols = '';
+        function buildCols(schema:EntitySchema) {
+            let {fields} = schema;
             for (let f of fields) {
-                let { name: fn, type: ft } = f;
-                if (fn === 'ix')
-                    continue;
-                if (isIXr === true && schemaType === 'ix' && fn === 'id')
-                    continue;
+                let {name:fn, type:ft} = f;
                 let fv = `${ti}.\`${fn}\``;
-                cols += ',';
-                cols += ft === 'textid' ? `tv_$idtext(${fv})` : fv;
+                if (cols.length > 0) cols += ',';
+                cols += ft === 'textid'? `tv_$idtext(${fv})` : fv;
                 cols += ' as `' + fn + '`';
             }
         }
         buildCols(schema);
         let len = IDX.length;
-        let $timeField;
-        for (let i = 1; i < len; i++) {
-            let { name, schema } = IDX[i];
+        let $timeField:string;
+        for (let i=1; i<len; i++) {
+            let {name, schema} = IDX[i];
             tables += ` left join \`${this.dbName}\`.\`tv_${name}\` as t${i} on t0.${idJoin}=t${i}.id`;
-            let { type } = schema;
+            let {type} = schema;
             ti = `t${i}`;
             buildCols(schema);
             if (type === 'idx' && $timeField === undefined) {
@@ -65,9 +85,9 @@ class MySqlBuilder {
                 $timeField += `,${ti}.\`$value\` as \`$value\``;
             }
         }
-        if ($timeField !== undefined)
-            cols += $timeField;
-        return { cols, tables };
+        if ($timeField !== undefined) cols += $timeField;
+        return {cols, tables};
+        */
     }
     buildInsert(ts, override, valueItem) {
         if (!ts)

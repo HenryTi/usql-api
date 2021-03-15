@@ -11,10 +11,8 @@ export class SqlIX extends MySqlBuilder {
 	}
 
 	build():string {
-		let {IX, ix, IDX, page} = this.param;
-		let arr = [IX];
-		if (IDX) arr.push(...IDX);
-		let {cols, tables} = this.buildIDX(arr);
+		let {IX, IX1, ix, IDX, page} = this.param;
+		let {cols, tables} = IX1? this.buildIXIXIDX(IX, IX1, IDX) : this.buildIXIDX(IX, IDX);
 		let where = '';
 		if (ix) {
 			if (Array.isArray(ix) === true) {
@@ -27,7 +25,7 @@ export class SqlIX extends MySqlBuilder {
 			}
 		}
 		else {
-			where = ' AND t0.id=@user';
+			where = ` AND t0.ix=@user`;
 		}
 		if (page) {
 			let {start} = page;

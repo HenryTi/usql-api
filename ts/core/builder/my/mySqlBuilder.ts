@@ -1,5 +1,6 @@
 import { EntitySchema, ParamSum, TableSchema } from "../../dbServer";
 import { Builders, ISqlBuilder } from "../builders";
+import { IXIXTablesBuilder, IXrIXTablesBuilder, IXrTablesBuilder, IXTablesBuilder, TablesBuilder } from "./tablesBuilder";
 
 export const retLn = `set @ret=CONCAT(@ret, '\\n');\n`;
 export const retTab = `set @ret=CONCAT(@ret, @id, '\\t');\n`;
@@ -36,21 +37,46 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		return sql;
 	}
 
-	protected buildIDX(IDX: TableSchema[], isIXr:boolean = false): {cols: string; tables: string} {
+	protected buildIXrIDX(IX: TableSchema, IDX: TableSchema[]): {cols: string; tables: string;} {
+		let b = new IXrTablesBuilder(this.dbName, IX, IDX);
+		b.build();
+		return b;
+	}
+
+	protected buildIXrIXIDX(IX: TableSchema, IX1: TableSchema, IDX: TableSchema[]): {cols: string; tables: string;} {
+		let b = new IXrIXTablesBuilder(this.dbName, IX, IX1, IDX);
+		b.build();
+		return b;
+	}
+
+	protected buildIXIDX(IX: TableSchema, IDX: TableSchema[]): {cols: string; tables: string;} {
+		let b = new IXTablesBuilder(this.dbName, IX, IDX);
+		b.build();
+		return b;
+	}
+
+	protected buildIXIXIDX(IX: TableSchema, IX1: TableSchema, IDX: TableSchema[]): {cols: string; tables: string;} {
+		let b = new IXIXTablesBuilder(this.dbName, IX, IX1, IDX);
+		b.build();
+		return b;
+	}
+
+	protected buildIDX(IDX: TableSchema[]): {cols: string; tables: string;} {
+		let b = new TablesBuilder(this.dbName, IDX);
+		b.build();
+		return b;
+		/*
 		let {name, schema} = IDX[0];
-		let {type} = schema;
-		let idJoin = type === 'ix' && isIXr === false? 'id' : 'ix';
-		let tables = `\`${this.dbName}\`.\`tv_${name}\` as t0`;
+		let idJoin = 'id';
 		let ti = `t0`;
-		let cols = ti + '.id';
+		let tables = `\`${this.dbName}\`.\`tv_${name}\` as ${ti}`;
+		let cols = '';
 		function buildCols(schema:EntitySchema) {
-			let {fields, type:schemaType} = schema;
+			let {fields} = schema;
 			for (let f of fields) {
 				let {name:fn, type:ft} = f;
-				if (fn === 'ix') continue;
-				if (isIXr === true && schemaType === 'ix' && fn === 'id') continue;
 				let fv = `${ti}.\`${fn}\``;
-				cols += ',';
+				if (cols.length > 0) cols += ',';
 				cols += ft === 'textid'? `tv_$idtext(${fv})` : fv;
 				cols += ' as `' + fn + '`';
 			}
@@ -72,6 +98,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		}
 		if ($timeField !== undefined) cols += $timeField;
 		return {cols, tables};
+		*/
 	}
 
 	protected buildInsert(ts:TableSchema, override: any, valueItem?: any): string {
