@@ -11,16 +11,16 @@ class SqlActIX extends mySqlBuilder_1.MySqlBuilder {
         let { IX, ID, values } = this.param;
         let sql = 'set @ret=\'\';\n';
         for (let value of values) {
-            let { id, id2 } = value;
-            if (!id2)
+            let { ix, id } = value;
+            if (!id)
                 continue;
-            if (typeof id2 === 'object') {
-                sql += this.buildSaveID(ID, id2);
+            if (typeof id === 'object') {
+                sql += this.buildSaveID(ID, id);
             }
             else {
-                sql += `set @id=${id2}\n`;
+                sql += `set @id=${id}\n`;
             }
-            sql += this.buildSaveIX(IX, { id: id !== null && id !== void 0 ? id : { value: '@user' }, id2: { value: '@id' } });
+            sql += this.buildSaveIX(IX, { ix: ix !== null && ix !== void 0 ? ix : { value: '@user' }, id: { value: '@id' } });
         }
         return sql + 'select @ret as ret;\n';
     }

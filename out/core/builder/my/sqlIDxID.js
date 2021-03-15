@@ -25,7 +25,7 @@ class SqlIDxID extends mySqlBuilder_1.MySqlBuilder {
         sql += '\nCREATE TEMPORARY TABLE ids (id BIGINT, primary key (id));';
         sql += `\nINSERT INTO ids (id) SELECT t0.id FROM ${tables} WHERE ${where} ${limit};`;
         sql += `\nSELECT ${cols} FROM ${tables} JOIN ids as z ON t0.id=z.id;`;
-        sql += `\nSELECT x.id as \`$xid\`, ${cols2} FROM ${tables2} JOIN \`tv_${IX.name}\` as x ON t0.id=x.id2 JOIN ids as z ON x.id=z.id;`;
+        sql += `\nSELECT x.id as \`$xid\`, ${cols2} FROM ${tables2} JOIN \`tv_${IX.name}\` as x ON t0.id=x.id JOIN ids as z ON x.id=z.id;`;
         return sql;
     }
 }

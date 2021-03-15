@@ -5,13 +5,11 @@ export const retLn = `set @ret=CONCAT(@ret, '\\n');\n`;
 export const retTab = `set @ret=CONCAT(@ret, @id, '\\t');\n`;
 
 export abstract class MySqlBuilder implements ISqlBuilder {
-	//private readonly sqlContext: SqlContext;
 	protected readonly dbName:string;
 	protected readonly hasUnit:boolean;
 
 
 	constructor(builder: Builders) {
-		//this.sqlContext = sqlContext;
 		let {dbName, hasUnit} = builder;
 		this.dbName = dbName;
 		this.hasUnit = hasUnit;
@@ -41,7 +39,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 	protected buildIDX(IDX: TableSchema[], isIXr:boolean = false): {cols: string; tables: string} {
 		let {name, schema} = IDX[0];
 		let {type} = schema;
-		let idJoin = type === 'ix' && isIXr === false? 'id2' : 'id';
+		let idJoin = type === 'ix' && isIXr === false? 'id' : 'ix';
 		let tables = `\`${this.dbName}\`.\`tv_${name}\` as t0`;
 		let ti = `t0`;
 		let cols = ti + '.id';
@@ -49,8 +47,8 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 			let {fields, type:schemaType} = schema;
 			for (let f of fields) {
 				let {name:fn, type:ft} = f;
-				if (fn === 'id') continue;
-				if (isIXr === true && schemaType === 'ix' && fn === 'id2') continue;
+				if (fn === 'ix') continue;
+				if (isIXr === true && schemaType === 'ix' && fn === 'id') continue;
 				let fv = `${ti}.\`${fn}\``;
 				cols += ',';
 				cols += ft === 'textid'? `tv_$idtext(${fv})` : fv;
@@ -189,7 +187,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 			let {id} = value;
 			if (id) {
 				if (id<0) {
-					sql += this.buildDelete(ts, -id);
+					sql += this.buildIDDelete(ts, -id);
 				}
 				else {
 					sql += this.buildUpdate(ts, value);
@@ -230,7 +228,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		for (let value of values) {
 			let {id} = value;
 			if (id < 0) {
-				sql += this.buildDelete(ts, -id);
+				sql += this.buildIDDelete(ts, -id);
 			}
 			else {
 				sql += this.buildUpsert(ts, value);
@@ -248,9 +246,9 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 			values = [ixValue];
 		}
 		for (let value of values) {
-			let {id, id2} = value;
-			if (id < 0) {
-				sql += this.buildDelete(ts, -id, id2);
+			let {ix, id} = value;
+			if (ix < 0) {
+				sql += this.buildIXDelete(ts, -ix, id);
 			}
 			else {
 				sql += this.buildUpsert(ts, value);
@@ -297,8 +295,8 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 						if (dup.length > 0) dup += ',';
 						dup += '`' + name + '`=values(`' + name + '`)';
 						break;
+					case 'ix':
 					case 'id':
-					case 'id2':
 						break;
 				}
 				if (exFields) {
@@ -380,25 +378,25 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 					}
 					sql += v;
 					break;
+				case 'ix':
+					where += ' and ix=' + (ov ?? v);
+					break;
 				case 'id':
 					where += ' and id=' + (ov ?? v);
-					break;
-				case 'id2':
-					where += ' and id2=' + (ov ?? v);
 					break;
 			}
 		}
 		return sql + where + ';\n';
 	}
 
-	protected buildDelete(ts:TableSchema, id:number, id2?:number):string {
+	protected buildIXDelete(ts:TableSchema, ix:number, id:number):string {
 		let {name, schema} = ts;
 		let {type, exFields} = schema;
 		let sql = '';
-		if (type === 'idx' && exFields) {
+		if (exFields) {
 			for (let exField of exFields) {
 				let {field, track, memo} = exField;
-				let sqlEx = `set @dxValue=\`tv_${name}$${field}\`(@unit,@user,${id},-1,null`;
+				let sqlEx = `set @dxValue=\`tv_${name}$${field}\`(@unit,@user,${ix},-1,null`;
 				if (track === true) {
 					sqlEx += ',null';
 				}
@@ -409,11 +407,26 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 				sql += sqlEx;
 			}
 		}
-		sql += 'delete from `tv_' + name + '` where id=' + id;
-		if (id2) {
-			sql += ' AND id2=';
-			if (id2 < 0) id2 = -id2;
-			sql += id2;
+		sql += 'delete from `tv_' + name + '` where ix=' + ix;
+		if (id) {
+			sql += ' AND id=';
+			if (id < 0) id = -id;
+			sql += id;
+		}
+		sql += ';\n';
+		return sql;
+	}
+
+	protected buildIDDelete(ts:TableSchema, id:number):string {
+		let {name, schema} = ts;
+		let sql = '';
+		if (id) {
+			if (id < 0) id = -id;
+			sql += 'delete from `tv_' + name + '` where id=' + id;
+			if (id) {
+				sql += ' AND id=';
+				sql += id;
+			}
 		}
 		sql += ';\n';
 		return sql;

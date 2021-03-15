@@ -8,20 +8,20 @@ class SqlIX extends mySqlBuilder_1.MySqlBuilder {
         this.param = param;
     }
     build() {
-        let { IX, id, IDX, page } = this.param;
+        let { IX, ix, IDX, page } = this.param;
         let arr = [IX];
         if (IDX)
             arr.push(...IDX);
         let { cols, tables } = this.buildIDX(arr);
         let where = '';
-        if (id) {
-            if (Array.isArray(id) === true) {
-                if (id.length > 0) {
-                    where = ' AND t0.id in (' + id.join(',') + ')';
+        if (ix) {
+            if (Array.isArray(ix) === true) {
+                if (ix.length > 0) {
+                    where = ' AND t0.ix in (' + ix.join(',') + ')';
                 }
             }
             else {
-                where = ' AND t0.id=' + id;
+                where = ' AND t0.ix=' + ix;
             }
         }
         else {
@@ -31,10 +31,10 @@ class SqlIX extends mySqlBuilder_1.MySqlBuilder {
             let { start } = page;
             if (!start)
                 start = 0;
-            where += ' AND t0.id2>' + start;
+            where += ' AND t0.id>' + start;
         }
         let sql = `SELECT ${cols} FROM ${tables} WHERE 1=1${where}`;
-        sql += ' ORDER BY t0.id2 ASC';
+        sql += ' ORDER BY t0.id ASC';
         if (page)
             sql += ' LIMIT ' + page.size;
         sql += ';\n';

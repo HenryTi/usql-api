@@ -8,30 +8,30 @@ class SqlIXr extends mySqlBuilder_1.MySqlBuilder {
         this.param = param;
     }
     build() {
-        let { IX, id, IDX, page } = this.param;
+        let { IX, ix, IDX, page } = this.param;
         let arr = [IX];
         if (IDX)
             arr.push(...IDX);
         let { cols, tables } = this.buildIDX(arr, true);
         let where = '';
-        if (id) {
-            if (Array.isArray(id) === true) {
-                if (id.length > 0) {
-                    where = ' AND t0.id2 in (' + id.join(',') + ')';
+        if (ix) {
+            if (Array.isArray(ix) === true) {
+                if (ix.length > 0) {
+                    where = ' AND t0.id in (' + ix.join(',') + ')';
                 }
             }
             else {
-                where = ' AND t0.id2=' + id;
+                where = ' AND t0.id=' + ix;
             }
         }
         if (page) {
             let { start } = page;
             if (!start)
                 start = 0;
-            where += ' AND t0.id>' + start;
+            where += ' AND t0.ix>' + start;
         }
         let sql = `SELECT distinct ${cols} FROM ${tables} WHERE 1=1${where}`;
-        sql += ' ORDER BY t0.id ASC';
+        sql += ' ORDER BY t0.ix ASC';
         if (page)
             sql += ' LIMIT ' + page.size;
         sql += ';\n';

@@ -8,7 +8,7 @@ class SqlIDinIX extends mySqlBuilder_1.MySqlBuilder {
         this.param = param;
     }
     build() {
-        let { IX, ID, id, page } = this.param;
+        let { IX, ID, ix, page } = this.param;
         let { cols, tables } = this.buildIDX([ID]);
         let where = '';
         let limit = '';
@@ -20,7 +20,7 @@ class SqlIDinIX extends mySqlBuilder_1.MySqlBuilder {
             where += ` AND t0.id>${start}`;
             limit = `limit ${size}`;
         }
-        cols += `,case when exists(select id2 from \`tv_${IX.name}\` where id=${id !== null && id !== void 0 ? id : '@user'} and id2=t0.id) then 1 else 0 end as $in`;
+        cols += `,case when exists(select id from \`tv_${IX.name}\` where ix=${ix !== null && ix !== void 0 ? ix : '@user'} and id=t0.id) then 1 else 0 end as $in`;
         let sql = `SELECT ${cols} FROM ${tables} WHERE ${where} ${limit}`;
         return sql;
     }

@@ -1,5 +1,4 @@
 import { Builder } from "./builder";
-import { EntityRunner } from "./runner";
 
 export interface ParamPage {
 	start: number;
@@ -76,7 +75,7 @@ export interface ParamKeyID {
 
 export interface ParamIX {
 	IX: TableSchema;
-	id: number | number[];
+	ix: number | number[];
 	IDX?: TableSchema[];
 	page?: ParamPage;
 }
@@ -119,7 +118,7 @@ export interface ParamKeyIDSum extends ParamSum {
 
 export interface ParamIXSum extends ParamSum {
 	IX: TableSchema;
-	id: number|number[];
+	ix: number|number[];
 	page?: ParamPage;
 }
 
@@ -132,7 +131,7 @@ export interface ParamKeyIXSum extends ParamSum {
 
 export interface ParamIDinIX {
 	ID: TableSchema;
-	id: number;
+	ix: number;
 	IX: TableSchema;
 	page: ParamPage;
 }

@@ -30,10 +30,10 @@ class SqlKeyIX extends mySqlBuilder_1.MySqlBuilder {
             let { start } = page;
             if (!start)
                 start = 0;
-            where += ' AND t0.id2>' + start;
+            where += ' AND t0.id>' + start;
         }
         let sql = `SELECT ${cols} FROM ${tables}${joinID} WHERE 1=1${where}`;
-        sql += ' ORDER BY t0.id2 ASC';
+        sql += ' ORDER BY t0.id ASC';
         if (page)
             sql += ' LIMIT ' + page.size;
         sql += ';\n';

@@ -5,7 +5,6 @@ exports.retLn = `set @ret=CONCAT(@ret, '\\n');\n`;
 exports.retTab = `set @ret=CONCAT(@ret, @id, '\\t');\n`;
 class MySqlBuilder {
     constructor(builder) {
-        //this.sqlContext = sqlContext;
         let { dbName, hasUnit } = builder;
         this.dbName = dbName;
         this.hasUnit = hasUnit;
@@ -33,7 +32,7 @@ class MySqlBuilder {
     buildIDX(IDX, isIXr = false) {
         let { name, schema } = IDX[0];
         let { type } = schema;
-        let idJoin = type === 'ix' && isIXr === false ? 'id2' : 'id';
+        let idJoin = type === 'ix' && isIXr === false ? 'id' : 'ix';
         let tables = `\`${this.dbName}\`.\`tv_${name}\` as t0`;
         let ti = `t0`;
         let cols = ti + '.id';
@@ -41,9 +40,9 @@ class MySqlBuilder {
             let { fields, type: schemaType } = schema;
             for (let f of fields) {
                 let { name: fn, type: ft } = f;
-                if (fn === 'id')
+                if (fn === 'ix')
                     continue;
-                if (isIXr === true && schemaType === 'ix' && fn === 'id2')
+                if (isIXr === true && schemaType === 'ix' && fn === 'id')
                     continue;
                 let fv = `${ti}.\`${fn}\``;
                 cols += ',';
@@ -185,7 +184,7 @@ class MySqlBuilder {
             let { id } = value;
             if (id) {
                 if (id < 0) {
-                    sql += this.buildDelete(ts, -id);
+                    sql += this.buildIDDelete(ts, -id);
                 }
                 else {
                     sql += this.buildUpdate(ts, value);
@@ -225,7 +224,7 @@ class MySqlBuilder {
         for (let value of values) {
             let { id } = value;
             if (id < 0) {
-                sql += this.buildDelete(ts, -id);
+                sql += this.buildIDDelete(ts, -id);
             }
             else {
                 sql += this.buildUpsert(ts, value);
@@ -241,9 +240,9 @@ class MySqlBuilder {
             values = [ixValue];
         }
         for (let value of values) {
-            let { id, id2 } = value;
-            if (id < 0) {
-                sql += this.buildDelete(ts, -id, id2);
+            let { ix, id } = value;
+            if (ix < 0) {
+                sql += this.buildIXDelete(ts, -ix, id);
             }
             else {
                 sql += this.buildUpsert(ts, value);
@@ -290,8 +289,8 @@ class MySqlBuilder {
                             dup += ',';
                         dup += '`' + name + '`=values(`' + name + '`)';
                         break;
+                    case 'ix':
                     case 'id':
-                    case 'id2':
                         break;
                 }
                 if (exFields) {
@@ -373,24 +372,24 @@ class MySqlBuilder {
                     }
                     sql += v;
                     break;
+                case 'ix':
+                    where += ' and ix=' + (ov !== null && ov !== void 0 ? ov : v);
+                    break;
                 case 'id':
                     where += ' and id=' + (ov !== null && ov !== void 0 ? ov : v);
-                    break;
-                case 'id2':
-                    where += ' and id2=' + (ov !== null && ov !== void 0 ? ov : v);
                     break;
             }
         }
         return sql + where + ';\n';
     }
-    buildDelete(ts, id, id2) {
+    buildIXDelete(ts, ix, id) {
         let { name, schema } = ts;
         let { type, exFields } = schema;
         let sql = '';
-        if (type === 'idx' && exFields) {
+        if (exFields) {
             for (let exField of exFields) {
                 let { field, track, memo } = exField;
-                let sqlEx = `set @dxValue=\`tv_${name}$${field}\`(@unit,@user,${id},-1,null`;
+                let sqlEx = `set @dxValue=\`tv_${name}$${field}\`(@unit,@user,${ix},-1,null`;
                 if (track === true) {
                     sqlEx += ',null';
                 }
@@ -401,12 +400,27 @@ class MySqlBuilder {
                 sql += sqlEx;
             }
         }
-        sql += 'delete from `tv_' + name + '` where id=' + id;
-        if (id2) {
-            sql += ' AND id2=';
-            if (id2 < 0)
-                id2 = -id2;
-            sql += id2;
+        sql += 'delete from `tv_' + name + '` where ix=' + ix;
+        if (id) {
+            sql += ' AND id=';
+            if (id < 0)
+                id = -id;
+            sql += id;
+        }
+        sql += ';\n';
+        return sql;
+    }
+    buildIDDelete(ts, id) {
+        let { name, schema } = ts;
+        let sql = '';
+        if (id) {
+            if (id < 0)
+                id = -id;
+            sql += 'delete from `tv_' + name + '` where id=' + id;
+            if (id) {
+                sql += ' AND id=';
+                sql += id;
+            }
         }
         sql += ';\n';
         return sql;

@@ -11,19 +11,19 @@ export class SqlIX extends MySqlBuilder {
 	}
 
 	build():string {
-		let {IX, id, IDX, page} = this.param;
+		let {IX, ix, IDX, page} = this.param;
 		let arr = [IX];
 		if (IDX) arr.push(...IDX);
 		let {cols, tables} = this.buildIDX(arr);
 		let where = '';
-		if (id) {
-			if (Array.isArray(id) === true) {
-				if ((id as []).length > 0) {
-					where = ' AND t0.id in (' + (id as []).join(',') + ')'
+		if (ix) {
+			if (Array.isArray(ix) === true) {
+				if ((ix as []).length > 0) {
+					where = ' AND t0.ix in (' + (ix as []).join(',') + ')'
 				}
 			}
 			else {
-				where = ' AND t0.id=' + id;
+				where = ' AND t0.ix=' + ix;
 			}
 		}
 		else {
@@ -32,10 +32,10 @@ export class SqlIX extends MySqlBuilder {
 		if (page) {
 			let {start} = page;
 			if (!start) start = 0;
-			where += ' AND t0.id2>' + start;
+			where += ' AND t0.id>' + start;
 		}
 		let sql = `SELECT ${cols} FROM ${tables} WHERE 1=1${where}`;
-		sql += ' ORDER BY t0.id2 ASC';
+		sql += ' ORDER BY t0.id ASC';
 		if (page) sql += ' LIMIT ' + page.size;
 		sql += ';\n';
 		return sql;
