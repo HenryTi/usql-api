@@ -223,6 +223,16 @@ class MySqlBuilder {
                     else if (kn === 'no') {
                         sql += v ? `'${v}'` : `tv_$no(@unit, '${name}')`;
                     }
+                    else if (v === undefined) {
+                        switch (type) {
+                            default:
+                                sql += `null`;
+                                break;
+                            case 'timestamp':
+                                sql += `CURRENT_TIMESTAMP()`;
+                                break;
+                        }
+                    }
                     else {
                         sql += `'${v}'`;
                     }
@@ -261,8 +271,8 @@ class MySqlBuilder {
         }
         for (let value of values) {
             let { ix, id } = value;
-            if (ix < 0) {
-                sql += this.buildIXDelete(ts, -ix, id);
+            if (id < 0) {
+                sql += this.buildIXDelete(ts, ix, -id);
             }
             else {
                 sql += this.buildUpsert(ts, value);
@@ -286,6 +296,7 @@ class MySqlBuilder {
             }
             else {
                 let time;
+                let dupAdd = '';
                 if (type === 'textid') {
                     if (typeof v === 'object') {
                         time = v.$time;
@@ -295,8 +306,17 @@ class MySqlBuilder {
                 }
                 else {
                     if (typeof v === 'object') {
+                        let act = v.act;
                         time = v.$time;
                         v = v.value;
+                        switch (act) {
+                            case '+':
+                                dupAdd = '+`' + name + '`';
+                                break;
+                            case '-':
+                                dupAdd = '';
+                                break;
+                        }
                         val = time === undefined ? `${v}` : `'${v}'`;
                     }
                     else {
@@ -307,7 +327,7 @@ class MySqlBuilder {
                     default:
                         if (dup.length > 0)
                             dup += ',';
-                        dup += '`' + name + '`=values(`' + name + '`)';
+                        dup += '`' + name + '`=values(`' + name + '`)' + dupAdd;
                         break;
                     case 'ix':
                     case 'id':
@@ -420,11 +440,9 @@ class MySqlBuilder {
                 sql += sqlEx;
             }
         }
-        sql += 'delete from `tv_' + name + '` where ix=' + ix;
+        sql += 'delete from `tv_' + name + '` where ix=' + (ix !== null && ix !== void 0 ? ix : '@user');
         if (id) {
             sql += ' AND id=';
-            if (id < 0)
-                id = -id;
             sql += id;
         }
         sql += ';\n';

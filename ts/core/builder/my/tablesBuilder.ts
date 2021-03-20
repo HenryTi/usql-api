@@ -20,12 +20,14 @@ export class TablesBuilder {
 		this.i = 0;
 		this.idJoin = 'id';
 		this.buildIDX();
+		this.buildIdCol();
 	}
 
 	protected buildCols(schema:EntitySchema): void {
 		let {fields, type, exFields} = schema;
 		for (let f of fields) {
 			let {name:fn, type:ft} = f;
+			if (fn === 'id') continue;
 			let fv = `t${this.i}.\`${fn}\``;
 			if (this.cols.length > 0) this.cols += ',';
 			this.cols += ft === 'textid'? `tv_$idtext(${fv})` : fv;
@@ -70,6 +72,10 @@ export class TablesBuilder {
 			++this.i;
 		}
 	}
+
+	protected buildIdCol(): void {
+		this.cols += `, t${this.i-1}.id`;
+	}
 }
 
 export class IXTablesBuilder extends TablesBuilder {
@@ -85,6 +91,7 @@ export class IXTablesBuilder extends TablesBuilder {
 		this.idJoin = 'id';
 		this.buildIX();
 		this.buildIDX();
+		this.buildIdCol();
 	}
 
 	protected buildIX() {
@@ -109,12 +116,12 @@ export class IXIXTablesBuilder extends IXTablesBuilder {
 		this.buildIX();
 		this.buildIX1();
 		this.buildIDX();
+		this.buildIdCol();
 	}
 
 	protected buildIX() {
 		let {name} = this.IX;
 		this.tables += `\`${this.dbName}\`.\`tv_${name}\` as t${this.i}`;
-		//this.buildCols(schema);
 		++this.i;
 	}
 	protected buildIX1() {
@@ -138,6 +145,7 @@ export class IXrTablesBuilder extends TablesBuilder {
 		this.idJoin = 'ix';
 		this.buildIXr();
 		this.buildIDX();
+		this.buildIdCol();
 	}
 
 	protected buildIXr() {
@@ -162,6 +170,7 @@ export class IXrIXTablesBuilder extends IXrTablesBuilder {
 		this.buildIXr();
 		this.buildIX1();
 		this.buildIDX();
+		this.buildIdCol();
 	}
 
 	protected buildIXr() {
