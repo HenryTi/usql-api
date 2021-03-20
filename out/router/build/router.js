@@ -103,7 +103,7 @@ function buildBuildRouter(router, rb) {
             let dbName = req.params.db;
             let db = core_1.Db.db(rb.getDbName(dbName));
             let runner = new core_2.BuildRunner(db);
-            let { name, proc, isFunc } = req.body;
+            let { name, proc } = req.body;
             let result = yield runner.procSql(name, proc);
             res.json({
                 ok: true,

@@ -97,7 +97,7 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
 			let dbName:string = req.params.db;
 			let db = Db.db(rb.getDbName(dbName));
 			let runner = new BuildRunner(db);
-			let {name, proc, isFunc} = req.body;
+			let {name, proc} = req.body;
 			let result = await runner.procSql(name, proc);
             res.json({
                 ok: true,
