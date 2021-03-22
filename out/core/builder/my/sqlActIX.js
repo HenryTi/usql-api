@@ -14,13 +14,15 @@ class SqlActIX extends mySqlBuilder_1.MySqlBuilder {
             let { ix, id } = value;
             if (!id)
                 continue;
+            let ixValue = { ix: ix !== null && ix !== void 0 ? ix : { value: '@user' }, id: undefined };
             if (typeof id === 'object') {
                 sql += this.buildSaveID(ID, id);
+                ixValue.id = { value: '@id' };
             }
             else {
-                sql += `set @id=${id}\n`;
+                ixValue.id = id;
             }
-            sql += this.buildSaveIX(IX, { ix: ix !== null && ix !== void 0 ? ix : { value: '@user' }, id: { value: '@id' } });
+            sql += this.buildSaveIX(IX, ixValue);
         }
         return sql + 'select @ret as ret;\n';
     }

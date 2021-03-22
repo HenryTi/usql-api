@@ -2,8 +2,8 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MySqlBuilder = exports.retTab = exports.retLn = void 0;
 const tablesBuilder_1 = require("./tablesBuilder");
-exports.retLn = `set @ret=CONCAT(@ret, '\\n');\n`;
-exports.retTab = `set @ret=CONCAT(@ret, @id, '\\t');\n`;
+exports.retLn = "set @ret=CONCAT(@ret, '\\n');\n";
+exports.retTab = "set @ret=CONCAT(@ret, @id, '\\t');\n";
 class MySqlBuilder {
     constructor(builder) {
         let { dbName, hasUnit } = builder;
@@ -296,47 +296,18 @@ class MySqlBuilder {
             }
             else {
                 let time;
-                let dupAdd = '';
-                if (type === 'textid') {
-                    if (typeof v === 'object') {
-                        time = v.$time;
-                        v = v.value;
-                    }
-                    val = `tv_$textid('${v}')`;
+                let act;
+                if (typeof v === 'object') {
+                    time = v.$time;
+                    v = v.value;
+                    act = v.act;
                 }
-                else {
-                    if (typeof v === 'object') {
-                        let act = v.act;
-                        time = v.$time;
-                        v = v.value;
-                        switch (act) {
-                            case '+':
-                                dupAdd = '+`' + name + '`';
-                                break;
-                            case '-':
-                                dupAdd = '';
-                                break;
-                        }
-                        val = time === undefined ? `${v}` : `'${v}'`;
-                    }
-                    else {
-                        val = `'${v}'`;
-                    }
-                }
-                switch (name) {
-                    default:
-                        if (dup.length > 0)
-                            dup += ',';
-                        dup += '`' + name + '`=values(`' + name + '`)' + dupAdd;
-                        break;
-                    case 'ix':
-                    case 'id':
-                        break;
-                }
+                let sum;
                 if (exFields) {
                     let exField = exFields.find(v => v.field === name);
-                    if (exField !== undefined) {
-                        let { field, track, memo, sum, time: timeCanSet } = exField;
+                    if (exField) {
+                        let { field, track, memo, time: timeCanSet } = exField;
+                        sum = exField.sum;
                         let valueId = value['id'];
                         let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId},0,'${v}'`;
                         if (timeCanSet === true) {
@@ -356,6 +327,64 @@ class MySqlBuilder {
                         sqlEx += `);\n`;
                         sqlWriteEx.push(sqlEx);
                     }
+                }
+                //let time:number;
+                let dupAdd = '';
+                if (type === 'textid') {
+                    /*
+                    if (typeof v === 'object') {
+                        time = v.$time;
+                        v = v.value;
+                    }
+                    */
+                    val = `tv_$textid('${v}')`;
+                }
+                else {
+                    switch (act) {
+                        default:
+                            if (sum === true)
+                                dupAdd = '+`' + name + '`';
+                            break;
+                        case '+':
+                            dupAdd = '+`' + name + '`';
+                            break;
+                        case '=':
+                            dupAdd = '';
+                            break;
+                    }
+                    if (time === undefined) {
+                        val = `${v}`;
+                    }
+                    else {
+                        val = `'${v}'`;
+                    }
+                    //val = time === undefined? `${v}` : `'${v}'`;
+                    /*
+                    if (typeof v === 'object') {
+                        let act = v.act;
+                        time = v.$time;
+                        v = v.value;
+                        switch (act) {
+                            case '+': dupAdd = '+`' + name + '`'; break;
+                            case '-': dupAdd = ''; break;
+                        }
+                        val = time === undefined? `${v}` : `'${v}'`;
+                    }
+                    else {
+                        val = `'${v}'`;
+                        if (sum === true) dupAdd = '+`' + name + '`';
+                    }
+                    */
+                }
+                switch (name) {
+                    default:
+                        if (dup.length > 0)
+                            dup += ',';
+                        dup += '`' + name + '`=values(`' + name + '`)' + dupAdd;
+                        break;
+                    case 'ix':
+                    case 'id':
+                        break;
                 }
             }
             if (first === true) {
@@ -440,7 +469,16 @@ class MySqlBuilder {
                 sql += sqlEx;
             }
         }
-        sql += 'delete from `tv_' + name + '` where ix=' + (ix !== null && ix !== void 0 ? ix : '@user');
+        sql += 'delete from `tv_' + name + '` where ix=';
+        if (typeof ix === 'object') {
+            sql += ix.value;
+        }
+        else if (ix) {
+            sql += '@user';
+        }
+        else {
+            sql += ix;
+        }
         if (id) {
             sql += ' AND id=';
             sql += id;

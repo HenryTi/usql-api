@@ -66,6 +66,7 @@ export async function startJobsLoop(): Promise<void> {
 				// if (dbName !== 'bi') continue;
 
                 if (env.isDevelopment === true) {
+					return;
 					// if (dbName === 'pointshop') debugger;
 					await $uqDb.setDebugJobs();
 					console.info('========= set debugging jobs =========');

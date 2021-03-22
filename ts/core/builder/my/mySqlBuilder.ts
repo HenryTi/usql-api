@@ -1,9 +1,9 @@
-import { EntitySchema, ParamSum, TableSchema } from "../../dbServer";
+import { ParamSum, TableSchema } from "../../dbServer";
 import { Builders, ISqlBuilder } from "../builders";
 import { IXIXTablesBuilder, IXrIXTablesBuilder, IXrTablesBuilder, IXTablesBuilder, TablesBuilder } from "./tablesBuilder";
 
-export const retLn = `set @ret=CONCAT(@ret, '\\n');\n`;
-export const retTab = `set @ret=CONCAT(@ret, @id, '\\t');\n`;
+export const retLn = "set @ret=CONCAT(@ret, '\\n');\n";
+export const retTab = "set @ret=CONCAT(@ret, @id, '\\t');\n";
 
 export abstract class MySqlBuilder implements ISqlBuilder {
 	protected readonly dbName:string;
@@ -306,42 +306,19 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 			}
 			else {
 				let time:number;
-				let dupAdd = '';
-				if (type === 'textid') {
-					if (typeof v === 'object') {
-						time = v.$time;
-						v = v.value;
-					}
-					val = `tv_$textid('${v}')`;
+				let act: string;
+				if (typeof v === 'object') {
+					time = v.$time;
+					v = v.value;
+					act = v.act;
 				}
-				else {
-					if (typeof v === 'object') {
-						let act = v.act;
-						time = v.$time;
-						v = v.value;
-						switch (act) {
-							case '+': dupAdd = '+`' + name + '`'; break;
-							case '-': dupAdd = ''; break;
-						}
-						val = time === undefined? `${v}` : `'${v}'`;
-					}
-					else {
-						val = `'${v}'`;
-					}
-				}
-				switch (name) {
-					default:
-						if (dup.length > 0) dup += ',';
-						dup += '`' + name + '`=values(`' + name + '`)' + dupAdd;
-						break;
-					case 'ix':
-					case 'id':
-						break;
-				}
+
+				let sum:boolean;
 				if (exFields) {
 					let exField = exFields.find(v => v.field === name);
-					if (exField !== undefined) {
-						let {field, track, memo, sum, time:timeCanSet} = exField;
+					if (exField) {
+						let {field, track, memo, time:timeCanSet} = exField;
+						sum = exField.sum;
 						let valueId = value['id'];
 						let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId},0,'${v}'`;
 						if (timeCanSet === true) {
@@ -361,6 +338,58 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 						sqlEx += `);\n`;
 						sqlWriteEx.push(sqlEx);
 					}
+				}
+				//let time:number;
+				let dupAdd = '';
+				if (type === 'textid') {
+					/*
+					if (typeof v === 'object') {
+						time = v.$time;
+						v = v.value;
+					}
+					*/
+					val = `tv_$textid('${v}')`;
+				}
+				else {
+					switch (act) {
+						default:
+							if (sum === true) dupAdd = '+`' + name + '`';
+							break;
+						case '+': dupAdd = '+`' + name + '`'; break;
+						case '=': dupAdd = ''; break;
+					}
+					if (time === undefined) {
+						val = `${v}`;
+					}
+					else {
+						val = `'${v}'`;
+					}
+					//val = time === undefined? `${v}` : `'${v}'`;
+					/*
+					if (typeof v === 'object') {
+						let act = v.act;
+						time = v.$time;
+						v = v.value;
+						switch (act) {
+							case '+': dupAdd = '+`' + name + '`'; break;
+							case '-': dupAdd = ''; break;
+						}
+						val = time === undefined? `${v}` : `'${v}'`;
+					}
+					else {
+						val = `'${v}'`;
+						if (sum === true) dupAdd = '+`' + name + '`';
+					}
+					*/
+				}
+				switch (name) {
+					default:
+						if (dup.length > 0) dup += ',';
+						dup += '`' + name + '`=values(`' + name + '`)' + dupAdd;
+						break;
+					case 'ix':
+					case 'id':
+						break;
 				}
 			}
 			if (first === true) {
@@ -446,7 +475,16 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 				sql += sqlEx;
 			}
 		}
-		sql += 'delete from `tv_' + name + '` where ix=' + (ix ?? '@user');
+		sql += 'delete from `tv_' + name + '` where ix=';
+		if (typeof ix === 'object') {
+			sql += (ix as any).value;
+		}
+		else if (ix) {
+			sql += '@user';
+		}
+		else {
+			sql += ix;
+		}
 		if (id) {
 			sql += ' AND id=';
 			sql += id;

@@ -90,8 +90,8 @@ export class IXTablesBuilder extends TablesBuilder {
 		this.i = 0;
 		this.idJoin = 'id';
 		this.buildIX();
-		this.buildIDX();
 		this.buildIdCol();
+		this.buildIDX();
 	}
 
 	protected buildIX() {
@@ -115,8 +115,8 @@ export class IXIXTablesBuilder extends IXTablesBuilder {
 		this.idJoin = 'id';
 		this.buildIX();
 		this.buildIX1();
-		this.buildIDX();
 		this.buildIdCol();
+		this.buildIDX();
 	}
 
 	protected buildIX() {

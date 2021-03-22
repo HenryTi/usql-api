@@ -81,8 +81,8 @@ class IXTablesBuilder extends TablesBuilder {
         this.i = 0;
         this.idJoin = 'id';
         this.buildIX();
-        this.buildIDX();
         this.buildIdCol();
+        this.buildIDX();
     }
     buildIX() {
         let { name, schema } = this.IX;
@@ -102,8 +102,8 @@ class IXIXTablesBuilder extends IXTablesBuilder {
         this.idJoin = 'id';
         this.buildIX();
         this.buildIX1();
-        this.buildIDX();
         this.buildIdCol();
+        this.buildIDX();
     }
     buildIX() {
         let { name } = this.IX;
