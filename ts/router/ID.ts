@@ -15,6 +15,12 @@ export function buildIDRouter(router: Router, rb: RouterBuilder) {
         return result;
     });
 
+	rb.entityPost(router, 'act-ix-sort', '',
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let result = await runner.ActIXSort(unit, user, body);
+        return result;
+    });
+
 	rb.entityPost(router, 'act-detail', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.ActDetail(unit, user, body);

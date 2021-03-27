@@ -45,6 +45,13 @@ export interface ParamActIX {
 	values: any[];
 }
 
+export interface ParamActIXSort {
+	IX: TableSchema;
+	ix: number;
+	id: number;					// id to be moved
+	after: number;				// insert after id. if before first, then 0
+}
+
 export interface ParamActDetail {
 	master: TableSchema;
 	detail: TableSchema;
@@ -201,6 +208,11 @@ export abstract class DbServer {
 
 	async ActIX(unit:number, user:number, param:ParamActIX): Promise<any[]> {
 		let sql = this.builder.ActIX(param).build();
+		return await this.execSqlTrans(unit, user, sql);
+	}
+
+	async ActIXSort(unit:number, user:number, param:ParamActIXSort): Promise<any[]> {
+		let sql = this.builder.ActIXSort(param).build();
 		return await this.execSqlTrans(unit, user, sql);
 	}
 

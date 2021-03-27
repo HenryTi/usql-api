@@ -328,25 +328,18 @@ class MySqlBuilder {
                         sqlWriteEx.push(sqlEx);
                     }
                 }
-                //let time:number;
                 let dupAdd = '';
                 if (type === 'textid') {
-                    /*
-                    if (typeof v === 'object') {
-                        time = v.$time;
-                        v = v.value;
-                    }
-                    */
                     val = `tv_$textid('${v}')`;
                 }
                 else {
                     switch (act) {
                         default:
                             if (sum === true)
-                                dupAdd = '+`' + name + '`';
+                                dupAdd = '+ifnull(`' + name + '`, 0)';
                             break;
                         case '+':
-                            dupAdd = '+`' + name + '`';
+                            dupAdd = '+ifnull(`' + name + '`, 0)';
                             break;
                         case '=':
                             dupAdd = '';
@@ -358,23 +351,6 @@ class MySqlBuilder {
                     else {
                         val = `'${v}'`;
                     }
-                    //val = time === undefined? `${v}` : `'${v}'`;
-                    /*
-                    if (typeof v === 'object') {
-                        let act = v.act;
-                        time = v.$time;
-                        v = v.value;
-                        switch (act) {
-                            case '+': dupAdd = '+`' + name + '`'; break;
-                            case '-': dupAdd = ''; break;
-                        }
-                        val = time === undefined? `${v}` : `'${v}'`;
-                    }
-                    else {
-                        val = `'${v}'`;
-                        if (sum === true) dupAdd = '+`' + name + '`';
-                    }
-                    */
                 }
                 switch (name) {
                     default:

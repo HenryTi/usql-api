@@ -4,7 +4,7 @@ import {DbServer, ParamID, ParamIX, ParamIXSum
 	, ParamActs, ParamActDetail, ParamIDDetailGet, ParamIDinIX
 	, ParamIDLog, ParamIDSum, ParamKeyID, ParamKeyIX
 	, ParamKeyIXSum, ParamKeyIDSum, ParamSum, TableSchema
-	, ParamIDxID, ParamIDTree, ParamIDNO, ParamActIX} from '../dbServer';
+	, ParamIDxID, ParamIDTree, ParamIDNO, ParamActIX, ParamActIXSort} from '../dbServer';
 import { packReturns } from '../packReturn';
 import { ImportData } from '../importData';
 import { ParametersBus, ActionParametersBus, SheetVerifyParametersBus
@@ -1032,6 +1032,12 @@ export class EntityRunner {
 		param.IX = this.getTableSchema(IX as unknown as string, ['ix']);
 		param.ID = this.getTableSchema(ID as unknown as string, ['id']);
 		return this.dbServer.ActIX(unit, user, param);
+	}
+
+	ActIXSort(unit:number, user:number, param:ParamActIXSort): Promise<any[]> {
+		let {IX} = param;
+		param.IX = this.getTableSchema(IX as unknown as string, ['ix']);
+		return this.dbServer.ActIXSort(unit, user, param);
 	}
 
 	ActDetail(unit:number, user:number, param:ParamActDetail): Promise<any[]> {

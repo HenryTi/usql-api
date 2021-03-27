@@ -1162,6 +1162,11 @@ class EntityRunner {
         param.ID = this.getTableSchema(ID, ['id']);
         return this.dbServer.ActIX(unit, user, param);
     }
+    ActIXSort(unit, user, param) {
+        let { IX } = param;
+        param.IX = this.getTableSchema(IX, ['ix']);
+        return this.dbServer.ActIXSort(unit, user, param);
+    }
     ActDetail(unit, user, param) {
         let { master, detail, detail2, detail3 } = param;
         let types = ['id'];

@@ -39,6 +39,12 @@ class DbServer {
             return yield this.execSqlTrans(unit, user, sql);
         });
     }
+    ActIXSort(unit, user, param) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = this.builder.ActIXSort(param).build();
+            return yield this.execSqlTrans(unit, user, sql);
+        });
+    }
     ActDetail(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.ActDetail(param).build();
