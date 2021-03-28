@@ -17,7 +17,7 @@ export class SqlActs extends MySqlBuilder {
 		for (let i=0; i<arr.length; i++) {
 			let p = this.param[arr[i]];
 			switch (p.schema.type) {
-				case 'id': sql += this.buildSaveID(p); break;
+				case 'id': sql += this.buildSaveIDWithRet(p); break;
 				case 'idx': sql += this.buildSaveIDX(p); break;
 				case 'ix': sql += this.buildSaveIX(p); break;
 			}

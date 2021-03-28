@@ -27,16 +27,27 @@ class DbServer {
             return ret;
         });
     }
+    checkUserGroupId0(unit, user) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let d = yield this.execSql(unit, user, 'select * from yumi.tv_usergroup where id=0');
+            if (d.length > 0)
+                debugger;
+        });
+    }
     Acts(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.Acts(param).build();
-            return yield this.execSqlTrans(unit, user, sql);
+            let ret = yield this.execSqlTrans(unit, user, sql);
+            yield this.checkUserGroupId0(unit, user);
+            return ret;
         });
     }
     ActIX(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.ActIX(param).build();
-            return yield this.execSqlTrans(unit, user, sql);
+            let ret = yield this.execSqlTrans(unit, user, sql);
+            yield this.checkUserGroupId0(unit, user);
+            return ret;
         });
     }
     ActIXSort(unit, user, param) {

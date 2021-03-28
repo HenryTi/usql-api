@@ -203,6 +203,7 @@ class MySqlBuilder {
         for (let value of values) {
             let { id } = value;
             if (id) {
+                sql += `set @id=${id};`;
                 if (id < 0) {
                     sql += this.buildIDDelete(ts, -id);
                 }
@@ -246,6 +247,15 @@ class MySqlBuilder {
             }
         }
         sql += exports.retLn;
+        return sql;
+    }
+    buildSaveIDWithRet(ts, idValue) {
+        let sql = this.buildSaveID(ts, idValue);
+        sql += exports.retLn;
+        return sql;
+    }
+    buildSaveIDWithoutRet(ts, idValue) {
+        let sql = this.buildSaveID(ts, idValue);
         return sql;
     }
     buildSaveIDX(ts) {

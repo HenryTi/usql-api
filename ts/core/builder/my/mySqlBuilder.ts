@@ -202,8 +202,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		return sql + ';\n';
 	}
 
-
-	protected buildSaveID(ts:TableSchema, idValue?:any): string {
+	private buildSaveID(ts:TableSchema, idValue?:any): string {
 		let sql = '';
 		let {values, name, schema} = ts;
 		if (idValue !== undefined) {
@@ -213,6 +212,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		for (let value of values) {
 			let {id} = value;
 			if (id) {
+				sql += `set @id=${id};`;
 				if (id<0) {
 					sql += this.buildIDDelete(ts, -id);
 				}
@@ -252,6 +252,17 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 			}
 		}
 		sql += retLn;
+		return sql;
+	}
+
+	protected buildSaveIDWithRet(ts:TableSchema, idValue?:any): string {
+		let sql = this.buildSaveID(ts, idValue);
+		sql += retLn;
+		return sql;
+	}
+
+	protected buildSaveIDWithoutRet(ts:TableSchema, idValue?:any): string {
+		let sql = this.buildSaveID(ts, idValue);
 		return sql;
 	}
 
