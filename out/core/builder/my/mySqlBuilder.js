@@ -308,9 +308,9 @@ class MySqlBuilder {
                 let time;
                 let act;
                 if (typeof v === 'object') {
+                    act = v.act;
                     time = v.$time;
                     v = v.value;
-                    act = v.act;
                 }
                 let sum;
                 if (exFields) {

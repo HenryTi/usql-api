@@ -319,9 +319,9 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 				let time:number;
 				let act: string;
 				if (typeof v === 'object') {
+					act = v.act;
 					time = v.$time;
 					v = v.value;
-					act = v.act;
 				}
 
 				let sum:boolean;
