@@ -227,7 +227,7 @@ class MySqlBuilder {
                     else if (v === undefined) {
                         switch (type) {
                             default:
-                                sql += `null`;
+                                sql += `@user`;
                                 break;
                             case 'timestamp':
                                 sql += `CURRENT_TIMESTAMP()`;
@@ -293,8 +293,9 @@ class MySqlBuilder {
     }
     buildUpsert(ts, value) {
         let { name: tableName, schema } = ts;
-        let { fields, exFields } = schema;
+        let { keys, fields, exFields } = schema;
         let cols = '', vals = '', dup = '';
+        let sqlBefore = '';
         let sqlWriteEx = [];
         let first = true;
         for (let f of fields) {
@@ -306,9 +307,9 @@ class MySqlBuilder {
             }
             else {
                 let time;
-                let act;
+                let setAdd;
                 if (typeof v === 'object') {
-                    act = v.act;
+                    setAdd = v.setAdd;
                     time = v.$time;
                     v = v.value;
                 }
@@ -343,7 +344,7 @@ class MySqlBuilder {
                     val = `tv_$textid('${v}')`;
                 }
                 else {
-                    switch (act) {
+                    switch (setAdd) {
                         default:
                             if (sum === true)
                                 dupAdd = '+ifnull(`' + name + '`, 0)';
@@ -390,7 +391,8 @@ class MySqlBuilder {
         else {
             ignore = ' ignore';
         }
-        let sql = `insert${ignore} into \`tv_${tableName}\` (${cols})\nvalues (${vals})${onDup};\n`;
+        let sql = sqlBefore +
+            `insert${ignore} into \`tv_${tableName}\` (${cols})\nvalues (${vals})${onDup};\n`;
         return sql + sqlWriteEx.join('');
     }
     buildUpdate(ts, value, override = {}) {

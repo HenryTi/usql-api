@@ -1157,9 +1157,15 @@ class EntityRunner {
         return this.dbServer.Acts(unit, user, param);
     }
     ActIX(unit, user, param) {
-        let { IX, ID } = param;
+        let { IX, ID, IXs } = param;
         param.IX = this.getTableSchema(IX, ['ix']);
         param.ID = this.getTableSchema(ID, ['id']);
+        if (IXs) {
+            param.IXs = IXs.map(v => {
+                let { IX, ix } = v;
+                return { IX: this.getTableSchema(IX, ['ix']), ix };
+            });
+        }
         return this.dbServer.ActIX(unit, user, param);
     }
     ActIXSort(unit, user, param) {

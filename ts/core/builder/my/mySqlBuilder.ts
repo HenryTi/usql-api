@@ -235,7 +235,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 					}
 					else if (v === undefined) {
 						switch (type) {
-							default: sql += `null`; break;
+							default: sql += `@user`; break;
 							case 'timestamp': sql += `CURRENT_TIMESTAMP()`; break;
 						}
 					}
@@ -304,8 +304,9 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 
 	protected buildUpsert(ts:TableSchema, value:any): string {
 		let {name:tableName, schema} = ts;
-		let {fields, exFields} = schema;
+		let {keys, fields, exFields} = schema;
 		let cols = '', vals = '', dup = '';
+		let sqlBefore:string = '';
 		let sqlWriteEx:string[] = [];
 		let first = true;
 		for (let f of fields) {
@@ -317,9 +318,9 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 			}
 			else {
 				let time:number;
-				let act: string;
+				let setAdd: string;
 				if (typeof v === 'object') {
-					act = v.act;
+					setAdd = v.setAdd;
 					time = v.$time;
 					v = v.value;
 				}
@@ -355,7 +356,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 					val = `tv_$textid('${v}')`;
 				}
 				else {
-					switch (act) {
+					switch (setAdd) {
 						default:
 							if (sum === true) dupAdd = '+ifnull(`' + name + '`, 0)';
 							break;
@@ -396,7 +397,8 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		else {
 			ignore = ' ignore';
 		}
-		let sql = `insert${ignore} into \`tv_${tableName}\` (${cols})\nvalues (${vals})${onDup};\n`;
+		let sql = sqlBefore +
+			`insert${ignore} into \`tv_${tableName}\` (${cols})\nvalues (${vals})${onDup};\n`;
 		return sql + sqlWriteEx.join('');
 	}
 

@@ -42,6 +42,7 @@ export interface ParamActs {
 export interface ParamActIX {
 	IX: TableSchema;
 	ID: TableSchema;
+	IXs?: {IX:TableSchema, ix:number}[];
 	values: any[];
 }
 
@@ -201,22 +202,15 @@ export abstract class DbServer {
 		return ret;
 	}
 
-	private async checkUserGroupId0(unit:number, user:number) {
-		let d = await this.execSql(unit, user, 'select * from yumi.tv_usergroup where id=0');
-		if (d.length > 0) debugger;
-	}
-
 	async Acts(unit:number, user:number, param:ParamActs): Promise<any[]> {
 		let sql = this.builder.Acts(param).build();
 		let ret = await this.execSqlTrans(unit, user, sql);
-		await this.checkUserGroupId0(unit, user);
 		return ret;
 	}
 
 	async ActIX(unit:number, user:number, param:ParamActIX): Promise<any[]> {
 		let sql = this.builder.ActIX(param).build();
 		let ret = await this.execSqlTrans(unit, user, sql);
-		await this.checkUserGroupId0(unit, user);
 		return ret;
 	}
 
