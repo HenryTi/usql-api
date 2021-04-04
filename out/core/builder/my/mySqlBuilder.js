@@ -308,9 +308,13 @@ class MySqlBuilder {
             else {
                 let time;
                 let setAdd;
+                let act = 0;
                 if (typeof v === 'object') {
                     setAdd = v.setAdd;
                     time = v.$time;
+                    act = v.$act;
+                    if (act === undefined || act === null)
+                        act = 0;
                     v = v.value;
                 }
                 let sum;
@@ -320,7 +324,7 @@ class MySqlBuilder {
                         let { field, track, memo, time: timeCanSet } = exField;
                         sum = exField.sum;
                         let valueId = value['id'];
-                        let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId},0,'${v}'`;
+                        let sqlEx = `set @dxValue=\`tv_${tableName}$${field}\`(@unit,@user,${valueId},${act},'${v}'`;
                         if (timeCanSet === true) {
                             sqlEx += ',';
                             sqlEx += time !== undefined ? time : 'null';
