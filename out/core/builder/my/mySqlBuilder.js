@@ -301,20 +301,20 @@ class MySqlBuilder {
         for (let f of fields) {
             let { name, type } = f;
             let v = value[name];
+            let act = 0;
             let val;
+            act = value.$act;
+            if (act === undefined || act === null)
+                act = 0;
             if (v === undefined || v === null) {
                 val = 'null';
             }
             else {
                 let time;
                 let setAdd;
-                let act = 0;
                 if (typeof v === 'object') {
                     setAdd = v.setAdd;
                     time = v.$time;
-                    act = v.$act;
-                    if (act === undefined || act === null)
-                        act = 0;
                     v = v.value;
                 }
                 let sum;

@@ -12,8 +12,6 @@ export class SqlIXr extends MySqlBuilder {
 
 	build():string {
 		let {IX, ix, IDX, page} = this.param;
-		//let arr = [IX];
-		//if (IDX) arr.push(...IDX);
 		let {cols, tables} = this.buildIXrIDX(IX, IDX);
 		let where = '';
 		if (ix) {

@@ -8,7 +8,7 @@ class SqlActIXSort extends mySqlBuilder_1.MySqlBuilder {
         this.param = param;
     }
     build() {
-        let { IX, ix, id, after } = this.param;
+        let { IX, ix, xi: id, after } = this.param;
         let { name, schema } = IX;
         let { hasSort } = schema;
         if (hasSort === true) {

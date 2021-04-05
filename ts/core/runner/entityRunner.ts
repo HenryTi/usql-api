@@ -1028,9 +1028,9 @@ export class EntityRunner {
 	}
 
 	ActIX(unit:number, user:number, param:ParamActIX): Promise<any[]> {
-		let {IX, ID, IXs} = param;
+		let {IX, XI: ID, IXs} = param;
 		param.IX = this.getTableSchema(IX as unknown as string, ['ix']);
-		param.ID = this.getTableSchema(ID as unknown as string, ['id']);
+		param.XI = this.getTableSchema(ID as unknown as string, ['id']);
 		if (IXs) {
 			param.IXs = IXs.map(v => {
 				let {IX, ix} = v;

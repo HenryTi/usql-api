@@ -1157,9 +1157,9 @@ class EntityRunner {
         return this.dbServer.Acts(unit, user, param);
     }
     ActIX(unit, user, param) {
-        let { IX, ID, IXs } = param;
+        let { IX, XI: ID, IXs } = param;
         param.IX = this.getTableSchema(IX, ['ix']);
-        param.ID = this.getTableSchema(ID, ['id']);
+        param.XI = this.getTableSchema(ID, ['id']);
         if (IXs) {
             param.IXs = IXs.map(v => {
                 let { IX, ix } = v;

@@ -41,7 +41,7 @@ export interface ParamActs {
 
 export interface ParamActIX {
 	IX: TableSchema;
-	ID: TableSchema;
+	XI: TableSchema;
 	IXs?: {IX:TableSchema, ix:number}[];
 	values: any[];
 }
@@ -49,7 +49,7 @@ export interface ParamActIX {
 export interface ParamActIXSort {
 	IX: TableSchema;
 	ix: number;
-	id: number;					// id to be moved
+	xi: number;					// id to be moved
 	after: number;				// insert after id. if before first, then 0
 }
 

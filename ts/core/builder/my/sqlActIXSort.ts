@@ -11,7 +11,7 @@ export class SqlActIXSort extends MySqlBuilder {
 	}
 
 	build():string {
-		let {IX, ix, id, after} = this.param;
+		let {IX, ix, xi: id, after} = this.param;
 		let {name, schema} = IX;
 		let {hasSort} = schema as any;
 		if (hasSort === true) {
