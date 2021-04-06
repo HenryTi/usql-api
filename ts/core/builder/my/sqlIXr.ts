@@ -17,11 +17,11 @@ export class SqlIXr extends MySqlBuilder {
 		if (ix) {
 			if (Array.isArray(ix) === true) {
 				if ((ix as []).length > 0) {
-					where = ' AND t0.id in (' + (ix as []).join(',') + ')'
+					where = ' AND t0.xi in (' + (ix as []).join(',') + ')'
 				}
 			}
 			else {
-				where = ' AND t0.id=' + ix;
+				where = ' AND t0.xi=' + ix;
 			}
 		}
 		if (page) {

@@ -14,11 +14,11 @@ class SqlIXr extends mySqlBuilder_1.MySqlBuilder {
         if (ix) {
             if (Array.isArray(ix) === true) {
                 if (ix.length > 0) {
-                    where = ' AND t0.id in (' + ix.join(',') + ')';
+                    where = ' AND t0.xi in (' + ix.join(',') + ')';
                 }
             }
             else {
-                where = ' AND t0.id=' + ix;
+                where = ' AND t0.xi=' + ix;
             }
         }
         if (page) {

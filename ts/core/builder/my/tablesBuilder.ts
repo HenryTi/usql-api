@@ -88,7 +88,7 @@ export class IXTablesBuilder extends TablesBuilder {
 
 	build() {
 		this.i = 0;
-		this.idJoin = 'id';
+		this.idJoin = 'xi';
 		this.buildIX();
 		this.buildIdCol();
 		this.buildIDX();
@@ -99,6 +99,10 @@ export class IXTablesBuilder extends TablesBuilder {
 		this.tables += `\`${this.dbName}\`.\`tv_${name}\` as t${this.i}`;
 		this.buildCols(schema);
 		++this.i;
+	}
+
+	protected buildIdCol(): void {
+		this.cols += `, t${this.i-1}.xi`;
 	}
 }
 
@@ -112,7 +116,7 @@ export class IXIXTablesBuilder extends IXTablesBuilder {
 
 	build() {
 		this.i = 0;
-		this.idJoin = 'id';
+		this.idJoin = 'xi';
 		this.buildIX();
 		this.buildIX1();
 		this.buildIdCol();
@@ -126,7 +130,7 @@ export class IXIXTablesBuilder extends IXTablesBuilder {
 	}
 	protected buildIX1() {
 		let {name, schema} = this.IX1;
-		this.tables += ` join \`${this.dbName}\`.\`tv_${name}\` as t${this.i} on t${this.i-1}.id=t${this.i}.ix`;
+		this.tables += ` join \`${this.dbName}\`.\`tv_${name}\` as t${this.i} on t${this.i-1}.xi=t${this.i}.ix`;
 		this.buildCols(schema);
 		++this.i;
 	}
@@ -166,7 +170,7 @@ export class IXrIXTablesBuilder extends IXrTablesBuilder {
 
 	build() {
 		this.i = 0;
-		this.idJoin = 'id';
+		this.idJoin = 'xi';
 		this.buildIXr();
 		this.buildIX1();
 		this.buildIDX();

@@ -30,10 +30,10 @@ export class SqlIX extends MySqlBuilder {
 		if (page) {
 			let {start} = page;
 			if (!start) start = 0;
-			where += ' AND t0.id>' + start;
+			where += ' AND t0.xi>' + start;
 		}
 		let sql = `SELECT ${cols} FROM ${tables} WHERE 1=1${where}`;
-		sql += ' ORDER BY t0.id ASC';
+		sql += ' ORDER BY t0.xi ASC';
 		if (page) sql += ' LIMIT ' + page.size;
 		sql += ';\n';
 		return sql;

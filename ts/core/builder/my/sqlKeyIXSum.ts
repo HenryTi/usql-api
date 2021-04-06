@@ -16,7 +16,7 @@ export class SqlKeyIXSum extends MySqlBuilder {
 		let {schema} = ID;
 		let {keys} = schema;
 		sql += ` RIGHT JOIN \`tv_${ID.name}\` as t0 ON t0.id=t.id`;
-		sql += ` RIGHT JOIN \`tv_${IX.name}\` as t1 ON t0.id=t1.id`;
+		sql += ` RIGHT JOIN \`tv_${IX.name}\` as t1 ON t0.id=t1.xi`;
 		if (this.hasUnit === true) {
 			sql += ' AND t0.$unit=t1.$unit';
 		}
