@@ -280,11 +280,14 @@ class MySqlBuilder {
             values = [ixValue];
         }
         for (let value of values) {
-            let { ix, id } = value;
-            if (id < 0) {
-                sql += this.buildIXDelete(ts, ix, -id);
+            let { ix, xi } = value;
+            if (xi < 0) {
+                sql += this.buildIXDelete(ts, ix, -xi);
             }
             else {
+                let { ix } = value;
+                if (!ix)
+                    value.ix = '@user';
                 sql += this.buildUpsert(ts, value);
             }
         }
@@ -443,7 +446,7 @@ class MySqlBuilder {
         }
         return sql + where + ';\n';
     }
-    buildIXDelete(ts, ix, id) {
+    buildIXDelete(ts, ix, xi) {
         let { name, schema } = ts;
         let { type, exFields } = schema;
         let sql = '';
@@ -471,9 +474,9 @@ class MySqlBuilder {
         else {
             sql += ix;
         }
-        if (id) {
-            sql += ' AND id=';
-            sql += id;
+        if (xi) {
+            sql += ' AND xi=';
+            sql += xi;
         }
         sql += ';\n';
         return sql;

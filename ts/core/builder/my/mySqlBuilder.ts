@@ -290,11 +290,13 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 			values = [ixValue];
 		}
 		for (let value of values) {
-			let {ix, id} = value;
-			if (id < 0) {
-				sql += this.buildIXDelete(ts, ix, -id);
+			let {ix, xi} = value;
+			if (xi < 0) {
+				sql += this.buildIXDelete(ts, ix, -xi);
 			}
 			else {
+				let {ix} = value;
+				if (!ix) value.ix = '@user';
 				sql += this.buildUpsert(ts, value);
 			}
 		}
@@ -325,7 +327,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 				if (typeof v === 'object') {
 					setAdd = v.setAdd;
 					time = v.$time;
-					v = v.value;					
+					v = v.value;
 				}
 
 				let sum:boolean;
@@ -449,7 +451,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		return sql + where + ';\n';
 	}
 
-	protected buildIXDelete(ts:TableSchema, ix:number, id:number):string {
+	protected buildIXDelete(ts:TableSchema, ix:number, xi:number):string {
 		let {name, schema} = ts;
 		let {type, exFields} = schema;
 		let sql = '';
@@ -477,9 +479,9 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		else {
 			sql += ix;
 		}
-		if (id) {
-			sql += ' AND id=';
-			sql += id;
+		if (xi) {
+			sql += ' AND xi=';
+			sql += xi;
 		}
 		sql += ';\n';
 		return sql;
