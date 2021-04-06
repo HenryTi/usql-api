@@ -8,7 +8,7 @@ class SqlActIX extends mySqlBuilder_1.MySqlBuilder {
         this.param = param;
     }
     build() {
-        let { IX, XI, IXs, values } = this.param;
+        let { IX, ID, IXs, values } = this.param;
         let sql = 'set @ret=\'\';\n';
         for (let value of values) {
             let { ix, xi } = value;
@@ -16,7 +16,7 @@ class SqlActIX extends mySqlBuilder_1.MySqlBuilder {
                 continue;
             let ixValue = { ix: ix !== null && ix !== void 0 ? ix : { value: '@user' }, xi: undefined };
             if (typeof xi === 'object') {
-                sql += this.buildSaveIDWithoutRet(XI, xi);
+                sql += this.buildSaveIDWithoutRet(ID, xi);
                 ixValue.xi = { value: '@id' };
             }
             else {

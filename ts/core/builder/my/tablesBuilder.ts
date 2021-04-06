@@ -102,7 +102,9 @@ export class IXTablesBuilder extends TablesBuilder {
 	}
 
 	protected buildIdCol(): void {
-		this.cols += `, t${this.i-1}.xi`;
+		if (!this.IDX) return;
+		if (this.IDX.length === 0) return;
+		this.cols += `, t${this.i}.id`;
 	}
 }
 

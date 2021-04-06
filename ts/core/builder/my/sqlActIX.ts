@@ -11,14 +11,14 @@ export class SqlActIX extends MySqlBuilder {
 	}
 
 	build():string {
-		let {IX, XI, IXs, values} = this.param;
+		let {IX, ID, IXs, values} = this.param;
 		let sql = 'set @ret=\'\';\n';
 		for (let value of values) {
 			let {ix, xi} = value;
 			if (!xi) continue;
 			let ixValue = {ix: ix ?? {value:'@user'}, xi: undefined};
 			if (typeof xi === 'object') {
-				sql += this.buildSaveIDWithoutRet(XI, xi);
+				sql += this.buildSaveIDWithoutRet(ID, xi);
 				ixValue.xi = {value:'@id'};
 			}
 			else {

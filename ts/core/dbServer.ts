@@ -41,7 +41,7 @@ export interface ParamActs {
 
 export interface ParamActIX {
 	IX: TableSchema;
-	XI: TableSchema;
+	ID: TableSchema;
 	IXs?: {IX:TableSchema, ix:number}[];
 	values: any[];
 }
