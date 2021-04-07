@@ -193,7 +193,7 @@ class MySqlBuilder {
         sql += ' AND ' + whereId;
         return sql + ';\n';
     }
-    buildSaveID(ts, idValue) {
+    buildSaveID(ts, withRet, idValue) {
         let sql = '';
         let { values, name, schema } = ts;
         if (idValue !== undefined) {
@@ -243,19 +243,20 @@ class MySqlBuilder {
                 if (fields.length > keys.length + 1) {
                     sql += this.buildUpdate(ts, value, updateOverride);
                 }
-                sql += exports.retTab;
+                if (withRet === true)
+                    sql += exports.retTab;
             }
         }
-        sql += exports.retLn;
+        if (withRet === true)
+            sql += exports.retLn;
         return sql;
     }
     buildSaveIDWithRet(ts, idValue) {
-        let sql = this.buildSaveID(ts, idValue);
-        sql += exports.retLn;
+        let sql = this.buildSaveID(ts, true, idValue);
         return sql;
     }
     buildSaveIDWithoutRet(ts, idValue) {
-        let sql = this.buildSaveID(ts, idValue);
+        let sql = this.buildSaveID(ts, false, idValue);
         return sql;
     }
     buildSaveIDX(ts) {
@@ -275,7 +276,8 @@ class MySqlBuilder {
     }
     buildSaveIX(ts, ixValue) {
         let sql = '';
-        let { values } = ts;
+        let { schema, values } = ts;
+        let { hasId, name } = schema;
         if (ixValue !== undefined) {
             values = [ixValue];
         }
@@ -285,10 +287,21 @@ class MySqlBuilder {
                 sql += this.buildIXDelete(ts, ix, -xi);
             }
             else {
-                let { ix } = value;
-                if (!ix)
-                    value.ix = '@user';
-                sql += this.buildUpsert(ts, value);
+                if (!ix) {
+                    ix = '@user';
+                    value.ix = ix;
+                }
+                let xiValue = xi;
+                if (typeof xi === 'object') {
+                    xiValue = xi.value;
+                }
+                if (hasId === true) {
+                    sql += `SET @ixid = tv_${name}$id(@unit, @user, ${ix}, ${xiValue});\n`;
+                    sql += `SET @ret = CONCAT(@ret, @ixid, '\\t');\n`;
+                }
+                else {
+                    sql += this.buildUpsert(ts, value);
+                }
             }
         }
         sql += exports.retLn;

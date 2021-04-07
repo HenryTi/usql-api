@@ -22,7 +22,7 @@ class SqlIDLog extends mySqlBuilder_1.MySqlBuilder {
         if (near)
             span += ` AND a.t<${near}`;
         let table = '`tv_' + name + '$' + field + '`';
-        let cols = 'a.t, a.v, a.u';
+        let cols = 'a.t, a.v, a.u, a.a';
         if (exField) {
             let { log, track, memo, sum } = exField;
             if (log !== true) {

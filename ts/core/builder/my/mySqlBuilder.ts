@@ -202,7 +202,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		return sql + ';\n';
 	}
 
-	private buildSaveID(ts:TableSchema, idValue?:any): string {
+	private buildSaveID(ts:TableSchema, withRet: boolean, idValue?:any): string {
 		let sql = '';
 		let {values, name, schema} = ts;
 		if (idValue !== undefined) {
@@ -248,21 +248,20 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 				if (fields.length > keys.length + 1) {
 					sql += this.buildUpdate(ts, value, updateOverride);
 				}
-				sql += retTab;
+				if (withRet === true) sql += retTab;
 			}
 		}
-		sql += retLn;
+		if (withRet === true) sql += retLn;
 		return sql;
 	}
 
 	protected buildSaveIDWithRet(ts:TableSchema, idValue?:any): string {
-		let sql = this.buildSaveID(ts, idValue);
-		sql += retLn;
+		let sql = this.buildSaveID(ts, true, idValue);
 		return sql;
 	}
 
 	protected buildSaveIDWithoutRet(ts:TableSchema, idValue?:any): string {
-		let sql = this.buildSaveID(ts, idValue);
+		let sql = this.buildSaveID(ts, false, idValue);
 		return sql;
 	}
 
@@ -285,7 +284,8 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 
 	protected buildSaveIX(ts:TableSchema, ixValue?:any): string {
 		let sql = '';
-		let {values} = ts;
+		let {schema, values} = ts;
+		let {hasId, name} = schema as any;
 		if (ixValue !== undefined) {
 			values = [ixValue];
 		}
@@ -295,9 +295,21 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 				sql += this.buildIXDelete(ts, ix, -xi);
 			}
 			else {
-				let {ix} = value;
-				if (!ix) value.ix = '@user';
-				sql += this.buildUpsert(ts, value);
+				if (!ix) {
+					ix = '@user';
+					value.ix = ix;
+				}
+				let xiValue: any = xi;
+				if (typeof xi === 'object') {
+					xiValue = xi.value;
+				}
+				if (hasId === true) {
+					sql += `SET @ixid = tv_${name}$id(@unit, @user, ${ix}, ${xiValue});\n`;
+					sql += `SET @ret = CONCAT(@ret, @ixid, '\\t');\n`;
+				}
+				else {
+					sql += this.buildUpsert(ts, value);
+				}
 			}
 		}
 		sql += retLn;
