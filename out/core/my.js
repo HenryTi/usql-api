@@ -324,46 +324,14 @@ class MyDbServer extends dbServer_1.DbServer {
     }
     buildTuidAutoId(db) {
         return __awaiter(this, void 0, void 0, function* () {
-            /*
-            let sql1 = `UPDATE \`${db}\`.tv_$entity a
-                    inner JOIN information_schema.tables b ON
-                        a.name=CONVERT(substring(b.table_name, 4) USING utf8) COLLATE utf8_unicode_ci
-                        AND b.TABLE_SCHEMA='${db}'
-                    SET a.tuidVid=b.AUTO_INCREMENT
-                    WHERE b.AUTO_INCREMENT IS NOT null;
-            `;
-            let sql2 = `UPDATE \`${db}\`.tv_$entity a
-                    inner JOIN information_schema.tables b ON
-                        a.name=substring(b.table_name, 4)
-                        AND b.TABLE_SCHEMA='${db}'
-                    SET a.tuidVid=b.AUTO_INCREMENT
-                    WHERE b.AUTO_INCREMENT IS NOT null;
-            `;
-            */
             let sql1 = `UPDATE \`${db}\`.tv_$entity a 
 			SET a.tuidVid=(select b.AUTO_INCREMENT 
 				from information_schema.tables b
 				where b.table_name=concat('tv_', a.name)
 				AND b.TABLE_SCHEMA='${db}'
-			);
+			WHERE a.tuidVid IS NULL);
         `;
-            //where b.table_name=concat('tv_', CONVERT(a.name USING utf8) COLLATE utf8_general_ci)
-            /*
-            let sql2 = `UPDATE \`${db}\`.tv_$entity a
-                SET a.tuidVid=(select b.AUTO_INCREMENT
-                    from information_schema.tables b
-                    where b.table_name=concat('tv_', a.name)
-                    AND b.TABLE_SCHEMA='${db}'
-                );
-            `;
-            */
-            //where b.table_name=concat('tv_', CONVERT(a.name USING utf8) COLLATE utf8_unicode_ci)
-            //try {
             yield this.exec(sql1, []);
-            //}
-            //catch {
-            //await this.exec(sql2, []);
-            //}
         });
     }
     tableFromProc(db, proc, params) {
