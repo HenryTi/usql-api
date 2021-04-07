@@ -325,11 +325,13 @@ class MyDbServer extends dbServer_1.DbServer {
     buildTuidAutoId(db) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql1 = `UPDATE \`${db}\`.tv_$entity a 
-			SET a.tuidVid=(select b.AUTO_INCREMENT 
-				from information_schema.tables b
-				where b.table_name=concat('tv_', a.name)
-				AND b.TABLE_SCHEMA='${db}'
-			WHERE a.tuidVid IS NULL);
+			SET a.tuidVid=(
+				select b.AUTO_INCREMENT 
+					from information_schema.tables b
+					where b.table_name=concat('tv_', a.name)
+						AND b.TABLE_SCHEMA='${db}'
+				)
+			WHERE a.tuidVid IS NULL;
         `;
             yield this.exec(sql1, []);
         });

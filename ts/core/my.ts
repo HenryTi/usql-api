@@ -309,11 +309,13 @@ export class MyDbServer extends DbServer {
 	}
     async buildTuidAutoId(db:string): Promise<void> {
         let sql1 = `UPDATE \`${db}\`.tv_$entity a 
-			SET a.tuidVid=(select b.AUTO_INCREMENT 
-				from information_schema.tables b
-				where b.table_name=concat('tv_', a.name)
-				AND b.TABLE_SCHEMA='${db}'
-			WHERE a.tuidVid IS NULL);
+			SET a.tuidVid=(
+				select b.AUTO_INCREMENT 
+					from information_schema.tables b
+					where b.table_name=concat('tv_', a.name)
+						AND b.TABLE_SCHEMA='${db}'
+				)
+			WHERE a.tuidVid IS NULL;
         `;
         await this.exec(sql1, []);
     }
