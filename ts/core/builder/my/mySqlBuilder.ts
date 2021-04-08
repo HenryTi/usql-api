@@ -65,40 +65,6 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		let b = new TablesBuilder(this.dbName, IDX);
 		b.build();
 		return b;
-		/*
-		let {name, schema} = IDX[0];
-		let idJoin = 'id';
-		let ti = `t0`;
-		let tables = `\`${this.dbName}\`.\`tv_${name}\` as ${ti}`;
-		let cols = '';
-		function buildCols(schema:EntitySchema) {
-			let {fields} = schema;
-			for (let f of fields) {
-				let {name:fn, type:ft} = f;
-				let fv = `${ti}.\`${fn}\``;
-				if (cols.length > 0) cols += ',';
-				cols += ft === 'textid'? `tv_$idtext(${fv})` : fv;
-				cols += ' as `' + fn + '`';
-			}
-		}
-		buildCols(schema);
-		let len = IDX.length;
-		let $timeField:string;
-		for (let i=1; i<len; i++) {
-			let {name, schema} = IDX[i];
-			tables += ` left join \`${this.dbName}\`.\`tv_${name}\` as t${i} on t0.${idJoin}=t${i}.id`;
-			let {type} = schema;
-			ti = `t${i}`;
-			buildCols(schema);
-			if (type === 'idx' && $timeField === undefined) {
-				$timeField = `,${ti}.\`$time\` as \`$time\``;
-				$timeField += `,tv_$idtext(${ti}.\`$field\`) as \`$field\``;
-				$timeField += `,${ti}.\`$value\` as \`$value\``;
-			}
-		}
-		if ($timeField !== undefined) cols += $timeField;
-		return {cols, tables};
-		*/
 	}
 
 	protected buildInsert(ts:TableSchema, override: any, valueItem?: any): string {
@@ -512,5 +478,16 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		}
 		sql += ';\n';
 		return sql;
+	}
+
+	protected buildOrder(order: string): 'asc' | 'desc' {
+		if (!order) order = 'asc';
+		else order = order.toLowerCase() as any;
+		switch (order) {
+			default: order = 'asc'; break;
+			case 'asc': break;
+			case 'desc': break;
+		}
+		return order as any;
 	}
 }

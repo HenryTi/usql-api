@@ -8,7 +8,7 @@ class SqlID extends mySqlBuilder_1.MySqlBuilder {
         this.param = param;
     }
     build() {
-        let { IDX, id, page } = this.param;
+        let { IDX, id, page, order } = this.param;
         let { cols, tables } = this.buildIDX(IDX);
         let where = '';
         let limit = '';
@@ -26,9 +26,12 @@ class SqlID extends mySqlBuilder_1.MySqlBuilder {
             if (!start)
                 start = 0;
             where += ` AND t0.id>${start}`;
-            limit = `limit ${size}`;
+            limit = ` limit ${size}`;
         }
-        let sql = `SELECT ${cols} FROM ${tables} WHERE ${where} ${limit}`;
+        let sql = `SELECT ${cols} FROM ${tables} WHERE ${where} `;
+        if (order)
+            sql += ` ORDER BY t0.id ${this.buildOrder(order)}`;
+        sql += `${limit}`;
         return sql;
     }
 }

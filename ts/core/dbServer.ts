@@ -71,6 +71,7 @@ export interface ParamIDDetailGet extends ParamActDetail {
 export interface ParamID {
 	IDX: TableSchema[];
 	id: number | number[];
+	order?: 'asc' | 'desc',
 	page?: ParamPage;
 }
 
@@ -86,6 +87,7 @@ export interface ParamIX {
 	IX1: TableSchema;
 	ix: number | number[];
 	IDX?: TableSchema[];
+	order?: 'asc' | 'desc';
 	page?: ParamPage;
 }
 

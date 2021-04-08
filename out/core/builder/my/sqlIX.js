@@ -8,7 +8,7 @@ class SqlIX extends mySqlBuilder_1.MySqlBuilder {
         this.param = param;
     }
     build() {
-        let { IX, IX1, ix, IDX, page } = this.param;
+        let { IX, IX1, ix, IDX, page, order } = this.param;
         let { cols, tables } = IX1 ? this.buildIXIXIDX(IX, IX1, IDX) : this.buildIXIDX(IX, IDX);
         let where = '';
         if (ix) {
@@ -31,7 +31,7 @@ class SqlIX extends mySqlBuilder_1.MySqlBuilder {
             where += ' AND t0.xi>' + start;
         }
         let sql = `SELECT ${cols} FROM ${tables} WHERE 1=1${where}`;
-        sql += ' ORDER BY t0.xi ASC';
+        sql += ' ORDER BY t0.xi ' + this.buildOrder(order);
         if (page)
             sql += ' LIMIT ' + page.size;
         sql += ';\n';
