@@ -1,3 +1,0 @@
-启动redis：
-ubunto，之后 redis-server
-
