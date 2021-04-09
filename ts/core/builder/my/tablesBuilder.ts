@@ -1,6 +1,7 @@
 import { EntitySchema, TableSchema } from "../../dbServer";
 
 export class TablesBuilder {
+	private $fieldBuilt = false;
 	protected readonly dbName: string;
 	protected readonly IDX: TableSchema[];
 	protected i: number;
@@ -25,14 +26,34 @@ export class TablesBuilder {
 
 	protected buildCols(schema:EntitySchema): void {
 		let {fields, type, exFields} = schema;
+		let $fieldBuilt = false;
 		for (let f of fields) {
 			let {name:fn, type:ft} = f;
 			if (fn === 'id') continue;
+			if (fn === '$create') {
+				if (this.$fieldBuilt === true) continue;
+				this.cols += `, unix_timestamp(t${this.i}.$create) as $create`;
+				$fieldBuilt = true;
+				continue;
+			}
+			if (fn === '$update') {
+				if (this.$fieldBuilt === true) continue;
+				this.cols += `, unix_timestamp(t${this.i}.$update) as $update`;
+				$fieldBuilt = true;
+				continue;
+			}
+			if (fn === '$owner') {
+				if (this.$fieldBuilt === true) continue;
+				this.cols += `, t${this.i}.$owner`;
+				$fieldBuilt = true;
+				continue;
+			}
 			let fv = `t${this.i}.\`${fn}\``;
 			if (this.cols.length > 0) this.cols += ',';
 			this.cols += ft === 'textid'? `tv_$idtext(${fv})` : fv;
 			this.cols += ' as `' + fn + '`';
 		}
+		this.$fieldBuilt = $fieldBuilt;
 		if (type === 'idx' && this.doneTimeField === false && exFields) {
 			let hasLog = false;
 			for (let exField of exFields) {
@@ -53,7 +74,7 @@ export class TablesBuilder {
 
 	protected buildIDX(): void {
 		if (!this.IDX) return;
-		if (this.IDX.length === 0) return;
+		if (this.IDX.length === 0) return;		
 		let {name, schema} = this.IDX[0];
 		let tbl = `\`${this.dbName}\`.\`tv_${name}\` as t${this.i}`;
 		if (this.i === 0) {
@@ -62,6 +83,7 @@ export class TablesBuilder {
 		else {
 			this.tables += ` left join ${tbl} on t0.${this.idJoin}=t${this.i}.id`;
 		}
+
 		this.buildCols(schema);
 		++this.i;
 		let len = this.IDX.length;

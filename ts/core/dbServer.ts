@@ -25,7 +25,9 @@ export interface EntitySchema {
 	type:string; 
 	keys:Field[]; 
 	fields:Field[]; 
-	owner:boolean; 
+	owner: boolean; 
+	create: boolean;
+	update: boolean;
 	exFields:ExField[];
 }
 
