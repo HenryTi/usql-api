@@ -1,0 +1,38 @@
+{
+    // 使用 IntelliSense 以学习相关的 Node.js 调试属性。
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "1.0.0",
+    "configurations": [
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "启动程序",
+            "protocol": "inspector",
+            "cwd": "${workspaceRoot}",
+            "stopOnEntry": false,        
+            "runtimeExecutable": null,
+            "windows": {
+                "runtimeExecutable": "npm.cmd"
+            },
+            "runtimeArgs": [
+                "run-script", "debug",
+				//"run-script", "devdo",
+				//"run-script", "test_queue_in",
+            ],
+			"restart": true,
+			/*
+            "env": {
+                "NODE_ENV": "stage"
+			},
+			*/
+            //"port": 5857,
+			//"program": "${workspaceRoot}/out/cli/test-queue-in.js",
+			//"program": "${workspaceRoot}/out/index.js",
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceRoot}/out/**/*.js"
+            ]
+        }
+    ]
+}
