@@ -1186,6 +1186,13 @@ class EntityRunner {
         }
         return this.dbServer.ActDetail(unit, user, param);
     }
+    QueryID(unit, user, param) {
+        let { ID, IDX, IX } = param;
+        param.ID = this.getTableSchema(ID, ['id']);
+        param.IDX = this.getTableSchemaArray(IDX, ['id', 'idx']);
+        param.IX = this.getTableSchemaArray(IX, ['ix']);
+        return this.dbServer.QueryID(unit, user, param);
+    }
     IDNO(unit, user, param) {
         let { ID } = param;
         let types = ['id'];

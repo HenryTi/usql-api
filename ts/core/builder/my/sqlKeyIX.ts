@@ -25,7 +25,7 @@ export class SqlKeyIX extends MySqlBuilder {
 		}
 		for (let k of keys) {
 			let v = key[k.name];
-			if (v === undefined) break;
+			if (v === undefined) continue;
 			where += ' AND t.`' + k.name + '`=\'' + v + '\'';
 		}
 		if (page) {

@@ -53,6 +53,13 @@ class DbServer {
             return yield this.execSqlTrans(unit, user, sql);
         });
     }
+    QueryID(unit, user, param) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = this.builder.QueryID(param).build();
+            let ret = yield this.execSql(unit, user, sql);
+            return ret;
+        });
+    }
     IDNO(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.IDNO(param).build();

@@ -27,6 +27,12 @@ export function buildIDRouter(router: Router, rb: RouterBuilder) {
         return result;
     });
 
+	rb.entityPost(router, 'query-id', '', 
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let result = await runner.QueryID(unit, user, body);
+        return result;
+    });
+
     rb.entityPost(router, 'id', '', 
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.ID(unit, user, body);

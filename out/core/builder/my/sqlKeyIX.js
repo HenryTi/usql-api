@@ -23,7 +23,7 @@ class SqlKeyIX extends mySqlBuilder_1.MySqlBuilder {
         for (let k of keys) {
             let v = key[k.name];
             if (v === undefined)
-                break;
+                continue;
             where += ' AND t.`' + k.name + '`=\'' + v + '\'';
         }
         if (page) {

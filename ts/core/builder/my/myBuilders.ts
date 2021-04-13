@@ -2,7 +2,7 @@ import { ParamID, ParamIX, ParamActs, ParamActDetail
 	, ParamIDDetailGet, ParamIDLog, ParamKeyID, ParamKeyIX
 	, ParamIDxID, ParamIDSum, ParamKeyIDSum, ParamIXSum
 	, ParamKeyIXSum
-	, ParamIDinIX, ParamIDTree, ParamIDNO, ParamActIX, ParamActIXSort} from "../../dbServer";
+	, ParamIDinIX, ParamIDTree, ParamIDNO, ParamActIX, ParamActIXSort, ParamQueryID} from "../../dbServer";
 import { Builders, ISqlBuilder } from "../builders";
 import { SqlActDetail } from "./sqlActDetail";
 import { SqlActIX } from "./sqlActIX";
@@ -23,6 +23,7 @@ import { SqlKeyIXSum } from "./sqlKeyIXSum";
 import { SqlIXSum } from "./sqlIXSum";
 import { SqlKeyIDSum } from "./sqlKeyIDSum";
 import { SqlActIXSort } from "./sqlActIXSort";
+import { SqlQueryID } from "./sqlQueryID";
 
 export class MyBuilders extends Builders {
 	Acts(param:ParamActs): ISqlBuilder {
@@ -39,6 +40,10 @@ export class MyBuilders extends Builders {
 
 	ActDetail(param:ParamActDetail): ISqlBuilder {
 		return new SqlActDetail(this, param);
+	}
+
+	QueryID(param: ParamQueryID): ISqlBuilder {
+		return new SqlQueryID(this, param);
 	}
 
 	IDNO(param:ParamIDNO): ISqlBuilder {

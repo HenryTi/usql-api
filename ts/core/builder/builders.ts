@@ -1,7 +1,7 @@
 import { ParamID, ParamIX, ParamIXSum, ParamActs
 	, ParamActDetail, ParamIDinIX, ParamIDLog, ParamIDSum
 	, ParamKeyID, ParamKeyIX, ParamKeyIXSum
-	, ParamKeyIDSum, ParamIDxID, ParamIDTree, ParamIDNO, ParamActIX, ParamActIXSort } from "../dbServer";
+	, ParamKeyIDSum, ParamIDxID, ParamIDTree, ParamIDNO, ParamActIX, ParamActIXSort, ParamQueryID } from "../dbServer";
 
 export interface ISqlBuilder {
 	build(): string;
@@ -29,6 +29,10 @@ export abstract class Builders {
 
 	ActDetail(param:ParamActDetail): ISqlBuilder {
 		return
+	}
+
+	QueryID(param: ParamQueryID): ISqlBuilder {
+		return;
 	}
 
 	IDNO(param:ParamIDNO): ISqlBuilder {

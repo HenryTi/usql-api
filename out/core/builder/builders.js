@@ -18,6 +18,9 @@ class Builders {
     ActDetail(param) {
         return;
     }
+    QueryID(param) {
+        return;
+    }
     IDNO(param) {
         return;
     }

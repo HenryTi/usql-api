@@ -27,6 +27,10 @@ function buildIDRouter(router, rb) {
         let result = yield runner.ActDetail(unit, user, body);
         return result;
     }));
+    rb.entityPost(router, 'query-id', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
+        let result = yield runner.QueryID(unit, user, body);
+        return result;
+    }));
     rb.entityPost(router, 'id', '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
         let result = yield runner.ID(unit, user, body);
         return result;

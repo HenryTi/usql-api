@@ -35,6 +35,7 @@ export interface TableSchema {
 	name: string;
 	schema: EntitySchema;
 	values: any[];
+	isXi?: boolean;					// xi -> ix
 }
 
 export interface ParamActs {
@@ -62,6 +63,31 @@ export interface ParamActDetail {
 	detail3?: TableSchema;
 }
 
+export interface ParamQueryID {
+	ID: TableSchema;
+	IX: TableSchema[];
+	IDX: TableSchema[];
+	key: {[key:string]: string|number};
+	id: number | number[];
+	ix: number;
+	idx: number | number[];
+	keyx: {[key:string]: string|number};
+	page: ParamPage;
+	order: 'asc' | 'desc';
+}
+
+export interface ParamQuerySum {
+
+}
+
+export interface ParamQueryLog {
+
+}
+
+export interface ParamQueryNO {
+
+}
+
 export interface ParamIDNO {
 	ID: TableSchema;
 }
@@ -80,7 +106,9 @@ export interface ParamID {
 export interface ParamKeyID {
 	ID: TableSchema;
 	IDX: TableSchema[];
+	IX?: TableSchema[];
 	key: {[key:string]:number|string};
+	ix?: number;
 	page?: ParamPage;
 }
 
@@ -226,6 +254,12 @@ export abstract class DbServer {
 	async ActDetail(unit:number, user:number, param:ParamActDetail): Promise<any[]> {
 		let sql = this.builder.ActDetail(param).build();
 		return await this.execSqlTrans(unit, user, sql);
+	}
+
+	async QueryID(unit:number, user:number, param:ParamQueryID): Promise<any[]> {
+		let sql = this.builder.QueryID(param).build();
+		let ret = await this.execSql(unit, user, sql);
+		return ret;
 	}
 
 	async IDNO(unit:number, user:number, param:ParamIDNO): Promise<string> {
