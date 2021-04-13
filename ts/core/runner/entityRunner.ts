@@ -1126,8 +1126,8 @@ export class EntityRunner {
 		let {IDX, field} = param;
 		let ts = this.getTableSchema((IDX as unknown) as string, ['idx']);
 		param.IDX = ts;
-		let fLower = field; //.toLowerCase();
-		if (ts.schema.fields.findIndex(v => v.name === fLower) < 0) {
+		let fLower = field.toLowerCase();
+		if (ts.schema.fields.findIndex(v => v.name.toLowerCase() === fLower) < 0) {
 			this.throwErr(`ID ${IDX} has no Field ${field}`);
 		}
 		return this.dbServer.IDLog(unit, user, param);
@@ -1139,7 +1139,7 @@ export class EntityRunner {
 		param.IDX = ts;
 		for (let f of field) {
 			let fLower = f.toLowerCase();
-			if (ts.schema.fields.findIndex(v => v.name === fLower) < 0) {
+			if (ts.schema.fields.findIndex(v => v.name.toLowerCase() === fLower) < 0) {
 				this.throwErr(`ID ${IDX} has no Field ${f}`);
 			}
 		}

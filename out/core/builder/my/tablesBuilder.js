@@ -9,9 +9,11 @@ class TablesBuilder {
         this.IDX = IDX;
         this.cols = '';
         this.tables = '';
+        this.iId = 0;
     }
     build() {
         this.i = 0;
+        this.iId = 0;
         this.idJoin = 'id';
         this.buildIDX();
         this.buildIdCol();
@@ -79,14 +81,14 @@ class TablesBuilder {
             this.tables += tbl;
         }
         else {
-            this.tables += ` left join ${tbl} on t0.${this.idJoin}=t${this.i}.id`;
+            this.tables += ` left join ${tbl} on t${this.iId}.${this.idJoin}=t${this.i}.id`;
         }
         this.buildCols(schema);
         ++this.i;
         let len = this.IDX.length;
         for (let i = 1; i < len; i++) {
             let { name, schema } = this.IDX[i];
-            this.tables += ` left join \`${this.dbName}\`.\`tv_${name}\` as t${this.i} on t0.${this.idJoin}=t${this.i}.id`;
+            this.tables += ` left join \`${this.dbName}\`.\`tv_${name}\` as t${this.i} on t${this.iId}.${this.idJoin}=t${this.i}.id`;
             this.buildCols(schema);
             ++this.i;
         }
@@ -130,6 +132,7 @@ class IXIXTablesBuilder extends IXTablesBuilder {
     }
     build() {
         this.i = 0;
+        this.iId = 1;
         this.idJoin = 'xi';
         this.buildIX();
         this.buildIX1();

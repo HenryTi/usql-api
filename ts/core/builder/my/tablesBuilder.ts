@@ -5,6 +5,7 @@ export class TablesBuilder {
 	protected readonly dbName: string;
 	protected readonly IDX: TableSchema[];
 	protected i: number;
+	protected iId: number;			// 连结ix id的那个table
 	protected doneTimeField = false;
 	protected idJoin: string;
 	cols: string;
@@ -15,10 +16,12 @@ export class TablesBuilder {
 		this.IDX = IDX;
 		this.cols = '';
 		this.tables = '';
+		this.iId = 0;
 	}
 
 	build() {
 		this.i = 0;
+		this.iId = 0;
 		this.idJoin = 'id';
 		this.buildIDX();
 		this.buildIdCol();
@@ -81,7 +84,7 @@ export class TablesBuilder {
 			this.tables += tbl;
 		}
 		else {
-			this.tables += ` left join ${tbl} on t0.${this.idJoin}=t${this.i}.id`;
+			this.tables += ` left join ${tbl} on t${this.iId}.${this.idJoin}=t${this.i}.id`;
 		}
 
 		this.buildCols(schema);
@@ -89,7 +92,7 @@ export class TablesBuilder {
 		let len = this.IDX.length;
 		for (let i=1; i<len; i++) {
 			let {name, schema} = this.IDX[i];
-			this.tables += ` left join \`${this.dbName}\`.\`tv_${name}\` as t${this.i} on t0.${this.idJoin}=t${this.i}.id`;
+			this.tables += ` left join \`${this.dbName}\`.\`tv_${name}\` as t${this.i} on t${this.iId}.${this.idJoin}=t${this.i}.id`;
 			this.buildCols(schema);
 			++this.i;
 		}
@@ -140,6 +143,7 @@ export class IXIXTablesBuilder extends IXTablesBuilder {
 
 	build() {
 		this.i = 0;
+		this.iId = 1;
 		this.idJoin = 'xi';
 		this.buildIX();
 		this.buildIX1();

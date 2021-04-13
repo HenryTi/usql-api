@@ -24,7 +24,7 @@ class MySqlBuilder {
             if (exField === undefined) {
                 return `select '${f} is not logged' as error`;
             }
-            f = f.toLowerCase();
+            //f = f.toLowerCase();
             sql += `,\`tv_${name}$${f}$sum\`(t.id,${far},${near}) as ${f}`;
         }
         sql += ` from \`tv_${name}\` as t`;

@@ -9,29 +9,39 @@ class SqlIX extends mySqlBuilder_1.MySqlBuilder {
     }
     build() {
         let { IX, IX1, ix, IDX, page, order } = this.param;
-        let { cols, tables } = IX1 ? this.buildIXIXIDX(IX, IX1, IDX) : this.buildIXIDX(IX, IDX);
+        let colsTables;
+        let itemTable;
+        if (IX1) {
+            itemTable = 1;
+            colsTables = this.buildIXIXIDX(IX, IX1, IDX);
+        }
+        else {
+            itemTable = 0;
+            colsTables = this.buildIXIDX(IX, IDX);
+        }
+        let { cols, tables } = colsTables;
         let where = '';
-        if (ix) {
+        if (ix === undefined || ix === null) {
+            where = ` AND t0.ix=@user`;
+        }
+        else {
             if (Array.isArray(ix) === true) {
                 if (ix.length > 0) {
-                    where = ' AND t0.ix in (' + ix.join(',') + ')';
+                    where = ` AND t0.ix in (${ix.join(',')})`;
                 }
             }
             else {
-                where = ' AND t0.ix=' + ix;
+                where = ` AND t0.ix=${ix}`;
             }
-        }
-        else {
-            where = ` AND t0.ix=@user`;
         }
         if (page) {
             let { start } = page;
             if (!start)
                 start = 0;
-            where += ' AND t0.xi>' + start;
+            where += ` AND t${itemTable}.xi>${start}`;
         }
         let sql = `SELECT ${cols} FROM ${tables} WHERE 1=1${where}`;
-        sql += ' ORDER BY t0.xi ' + this.buildOrder(order);
+        sql += ` ORDER BY t${itemTable}.xi ${this.buildOrder(order)}`;
         if (page)
             sql += ' LIMIT ' + page.size;
         sql += ';\n';
