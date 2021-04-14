@@ -222,44 +222,9 @@ class Net {
             return openApi;
         });
     }
-    // private unitxApisColl: {[unit:number]:UnitxApis} = {};
-    //async getUnitxApi(unit:number, direction: 'push'|'pull'):Promise<UnitxApi> {
-    //	return await this.unitx.getUnitxApi(unit, direction);
-    /*
-    let unitxApis = this.unitxApisColl[unit];
-    if (unitxApis === undefined) {
-        this.unitxApisColl[unit] = unitxApis = {};
-    }
-    let unitxApi = unitxApis[direction];
-    if (unitxApi === null) return null;
-    if (unitxApi !== undefined) return unitxApi;
-
-    let unitx = await centerApi.unitx(unit, direction);
-    if (unitx === undefined) {
-        return unitxApis[direction] = null;
-    }
-    let url = await this.getUnitxUrl(unitx);
-    return unitxApis[direction] = new UnitxApi(url);
-    */
-    //}
     sendToUnitx(unit, msg) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.unitx.sendToUnitx(unit, msg);
-            /*
-            console.error('sendToUnitx', unit, msg);
-            let unitxApi = await this.getUnitxApi(unit, 'push');
-            if (!unitxApi) {
-                let err = `Center unit ${unit} not binding $unitx service!!!`;
-                //return ret;
-                console.error(err);
-                throw new Error(err);
-            }
-            else {
-                console.error('get unitx push url in sendToUnitx: ',  unitxApi.url);
-            }
-            let toArr:number[] = await unitxApi.send(msg);
-            return toArr;
-            */
         });
     }
     pullBus(unit, maxId, faces) {

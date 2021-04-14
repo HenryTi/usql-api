@@ -106,19 +106,7 @@ export abstract class Unitx {
 		}
 		return ret;
 	}
-	/*
-    private async getUnitxUrl(unitxUrls: CenterUnitxUrls):Promise<string> {
-		let ret = this.boxFromUrls(unitxUrls);
-		let {url, server} = ret;
-        if (env.isDevelopment === true) {
-			if (server === this._db.serverId) {
-				let urlDebug = await getUrlDebug();
-				if (urlDebug !== undefined) url = urlDebug;
-			}
-        }
-        return this.unitxUrl(url);
-	}
-	*/
+
 	protected abstract unitxUrl(url:string):string;
 	protected abstract boxFromUrls(unitxUrls: CenterUnitxUrls):UnitxUrlServerBox;
 }

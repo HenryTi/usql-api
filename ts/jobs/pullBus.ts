@@ -12,56 +12,40 @@ export async function pullBus(runner: EntityRunner) {
             for (let row of unitMaxIds) {
                 let {unit, maxId} = row;
 				if (maxId === null) maxId = 0;
-				
-				/*
-                let unitxApi = await net.getUnitxApi(unit, 'pull');
-                if (!unitxApi) {
-					console.error(`getUnitxApi unit=${unit}, pull return nothing`);
-					continue;
-				}
-				else {
-					console.error('get unitx pull url in pullBus: ',  unitxApi.url);
-				}
-				let ret = await unitxApi.fetchBus(unit, maxId, faces);
-				if (ret === undefined) {
-					console.error('undefined return from await openApi.fetchBus; unit=%s, url=%s, isTest=%s',
-						unit, unitxApi.url, net.isTest);
-					continue;
-				}
-				*/
 				let ret = await net.pullBus(unit, maxId, faces);
 				if (!ret) continue;
 
                 let {maxMsgId, maxRows} = ret[0][0];
 				let messages = ret[1];
 				let {length: messagesLen} = messages;
-				if (messagesLen === 0) continue;
-				// 新版：bus读来，直接写入queue_in。然后在队列里面处理
-				console.log(`total ${messagesLen} arrived from unitx`);
-                for (let row of messages) {
-                    let {to, face:faceUrl, id:msgId, body, version} = row;
-                    let face = coll[(faceUrl as string).toLowerCase()];
-                    if (face === undefined) continue;
-                    let {bus, faceName, version:runnerBusVersion} = face;
-                    try {
-                        if (runnerBusVersion !== version) {
-                            // 也就是说，bus消息的version，跟runner本身的bus version有可能不同
-                            // 不同需要做数据转换
-                            // 但是，现在先不处理
-                            // 2019-07-23
-                        }
-                        await runner.call('$queue_in_add', [unit, to, msgId, bus, faceName, body]);
-                        ++pullBusItemCount;
-                    }
-                    catch (toQueueInErr) {
-                        hasError = buses.hasError = true;
-                        console.error(toQueueInErr);
-                        await runner.log(unit, 'jobs pullBus loop to QueueInErr msgId='+msgId, getErrorString(toQueueInErr));
-                        break;
-                    }
-                    ++msgCount;
-                }
-                if (hasError === true) break;
+				if (messagesLen > 0) {
+					// 新版：bus读来，直接写入queue_in。然后在队列里面处理
+					console.log(`total ${messagesLen} arrived from unitx`);
+					for (let row of messages) {
+						let {to, face:faceUrl, id:msgId, body, version} = row;
+						let face = coll[(faceUrl as string).toLowerCase()];
+						if (face === undefined) continue;
+						let {bus, faceName, version:runnerBusVersion} = face;
+						try {
+							if (runnerBusVersion !== version) {
+								// 也就是说，bus消息的version，跟runner本身的bus version有可能不同
+								// 不同需要做数据转换
+								// 但是，现在先不处理
+								// 2019-07-23
+							}
+							await runner.call('$queue_in_add', [unit, to, msgId, bus, faceName, body]);
+							++pullBusItemCount;
+						}
+						catch (toQueueInErr) {
+							hasError = buses.hasError = true;
+							console.error(toQueueInErr);
+							await runner.log(unit, 'jobs pullBus loop to QueueInErr msgId='+msgId, getErrorString(toQueueInErr));
+							break;
+						}
+						++msgCount;
+					}
+					if (hasError === true) break;
+				}
                 if (messagesLen < maxRows && maxId < maxMsgId) {
                     // 如果unit的所有mssage都处理完成了，则设为unit的最大msg，下次查找可以快些
                     await runner.call('$queue_in_add', [unit, undefined, maxMsgId, undefined, undefined, undefined]);
