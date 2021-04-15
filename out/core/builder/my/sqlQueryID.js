@@ -160,6 +160,7 @@ class SqlQueryID extends mySqlBuilder_1.MySqlBuilder {
                 this.wheres.push(`t${this.t}.\`${k.name}\`='${v}'`);
             }
         }
+        let idCol = `, t${this.t}.id`;
         let len = IDXArr.length;
         for (let i = 0; i < len; i++) {
             let IDX = IDXArr[i];
@@ -174,6 +175,7 @@ class SqlQueryID extends mySqlBuilder_1.MySqlBuilder {
             this.buildCols(schema);
             this.t++;
         }
+        this.cols += idCol;
     }
     sqlPage() {
         let { page } = this.param;
