@@ -98,9 +98,15 @@ export class SqlQueryID extends MySqlBuilder {
 		}
 		if (key && keys) {
 			for (let k of keys) {
-				let v = key[k.name];
-				if (v === undefined) continue;
-				this.wheres.push(`t.${this.t}\`${k.name}\`='${v}'`);
+				let {name, type, tuid} = k as any;
+				let v = key[name];
+				if (v === undefined) {
+					if (type === 'id' && tuid === '$user') {
+						this.wheres.push(`t${t}.\`${k.name}\`=@user`);
+					}
+					continue;
+				}
+				this.wheres.push(`t${t}.\`${k.name}\`='${v}'`);
 			}
 		}
 	}
@@ -169,8 +175,14 @@ export class SqlQueryID extends MySqlBuilder {
 			let {schema} = IDX;
 			let {keys} = schema;
 			for (let k of keys) {
-				let v = keyx[k.name];
-				if (v === undefined) continue;
+				let {name, type, tuid} = k as any;
+				let v = keyx[name];
+				if (v === undefined) {
+					if (type === 'id' && tuid === '$user') {
+						this.wheres.push(`t${this.t}.\`${k.name}\`=@user`);
+					}
+					continue;
+				}
 				this.wheres.push(`t${this.t}.\`${k.name}\`='${v}'`);
 			}
 		}

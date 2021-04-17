@@ -83,10 +83,15 @@ class SqlQueryID extends mySqlBuilder_1.MySqlBuilder {
         }
         if (key && keys) {
             for (let k of keys) {
-                let v = key[k.name];
-                if (v === undefined)
+                let { name, type, tuid } = k;
+                let v = key[name];
+                if (v === undefined) {
+                    if (type === 'id' && tuid === '$user') {
+                        this.wheres.push(`t${t}.\`${k.name}\`=@user`);
+                    }
                     continue;
-                this.wheres.push(`t.${this.t}\`${k.name}\`='${v}'`);
+                }
+                this.wheres.push(`t${t}.\`${k.name}\`='${v}'`);
             }
         }
     }
@@ -154,9 +159,14 @@ class SqlQueryID extends mySqlBuilder_1.MySqlBuilder {
             let { schema } = IDX;
             let { keys } = schema;
             for (let k of keys) {
-                let v = keyx[k.name];
-                if (v === undefined)
+                let { name, type, tuid } = k;
+                let v = keyx[name];
+                if (v === undefined) {
+                    if (type === 'id' && tuid === '$user') {
+                        this.wheres.push(`t${this.t}.\`${k.name}\`=@user`);
+                    }
                     continue;
+                }
                 this.wheres.push(`t${this.t}.\`${k.name}\`='${v}'`);
             }
         }
