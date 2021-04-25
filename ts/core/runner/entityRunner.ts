@@ -56,7 +56,6 @@ export class EntityRunner {
     private sheetRuns: {[sheet:string]: SheetRun};
     private readonly modifyMaxes: {[unit:number]: number};
     private readonly roleVersions: {[unit:number]: {[app:number]: {version:number, tick:number}}} = {};
-	private readonly ixUserArr: any[] = [];
 	private ixOfUsers: string;
 
     name: string;
@@ -622,6 +621,7 @@ export class EntityRunner {
         if (this.uqVersion === undefined) this.uqVersion = 1;
 		this.hasUnit = !(setting['hasunit'] as number === 0);
 		this.dbServer.hasUnit = this.hasUnit;
+		let ixUserArr = [];
 		
         let uu = setting['uniqueunit'];
         this.uniqueUnit = uu? uu as number: 0;
@@ -701,7 +701,7 @@ export class EntityRunner {
 					break;
 				case 'ix':
 					if (schemaObj.idIsUser === true) {
-						this.ixUserArr.push(schemaObj);
+						ixUserArr.push(schemaObj);
 					};
 					break;
             }
@@ -716,7 +716,7 @@ export class EntityRunner {
                     }
             };
         }
-		this.ixOfUsers = this.ixUserArr.map(v => v.name).join('|');
+		this.ixOfUsers = ixUserArr.map(v => v.name).join('|');
         for (let i in this.froms) {
             let from = this.froms[i];
             for (let t in from) {

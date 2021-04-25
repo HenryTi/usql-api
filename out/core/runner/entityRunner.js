@@ -19,7 +19,6 @@ const centerApi_1 = require("../centerApi");
 class EntityRunner {
     constructor(name, db, net = undefined) {
         this.roleVersions = {};
-        this.ixUserArr = [];
         this.hasPullEntities = false;
         this.hasSheet = false;
         this.isCompiling = false;
@@ -723,6 +722,7 @@ class EntityRunner {
                 this.uqVersion = 1;
             this.hasUnit = !(setting['hasunit'] === 0);
             this.dbServer.hasUnit = this.hasUnit;
+            let ixUserArr = [];
             let uu = setting['uniqueunit'];
             this.uniqueUnit = uu ? uu : 0;
             if (db_1.env.isDevelopment)
@@ -808,7 +808,7 @@ class EntityRunner {
                         break;
                     case 'ix':
                         if (schemaObj.idIsUser === true) {
-                            this.ixUserArr.push(schemaObj);
+                            ixUserArr.push(schemaObj);
                         }
                         ;
                         break;
@@ -824,7 +824,7 @@ class EntityRunner {
                         }
                 };
             }
-            this.ixOfUsers = this.ixUserArr.map(v => v.name).join('|');
+            this.ixOfUsers = ixUserArr.map(v => v.name).join('|');
             for (let i in this.froms) {
                 let from = this.froms[i];
                 for (let t in from) {
