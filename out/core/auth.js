@@ -60,6 +60,16 @@ class Auth {
                 }
                 */
             }
+            if (decoded.id === 0) {
+                res.status(401);
+                res.json({
+                    error: {
+                        type: 'unauthorized',
+                        unauthorized: true,
+                        message: 'Unauthorized user=0 unit=' + decoded.unit,
+                    }
+                });
+            }
             if (res !== undefined) {
                 res.status(401);
                 res.json({
@@ -69,7 +79,6 @@ class Auth {
                         message: 'Unauthorized'
                     }
                 });
-                // if (next !== undefined) next();
             }
         });
     }

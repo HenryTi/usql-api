@@ -71,6 +71,17 @@ export default class Auth {
                 }
                 */
             }
+			if ((decoded as any).id === 0 ) {
+                res.status(401);
+                res.json(
+                    {
+                        error: {
+                            type: 'unauthorized',
+                            unauthorized: true,
+                            message: 'Unauthorized user=0 unit=' + (decoded as any).unit,
+                        }
+                    });
+			}
             if (res !== undefined) {
                 res.status(401);
                 res.json(
@@ -81,7 +92,6 @@ export default class Auth {
                             message: 'Unauthorized'
                         }
                     });
-                // if (next !== undefined) next();
             }
         });
     }

@@ -447,7 +447,7 @@ class MySqlBuilder {
         if (typeof ix === 'object') {
             sql += ix.value;
         }
-        else if (ix) {
+        else if (!ix) {
             sql += '@user';
         }
         else {

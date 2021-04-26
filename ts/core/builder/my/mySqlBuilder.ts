@@ -451,7 +451,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		if (typeof ix === 'object') {
 			sql += (ix as any).value;
 		}
-		else if (ix) {
+		else if (!ix) {
 			sql += '@user';
 		}
 		else {

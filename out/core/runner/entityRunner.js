@@ -1120,6 +1120,11 @@ class EntityRunner {
         var _a;
         if (name === undefined)
             return undefined;
+        let isXi;
+        if (name[0] === '!') {
+            isXi = true;
+            name = name.substr(1);
+        }
         let lowerName = name.toLowerCase();
         let ts = (_a = this.schemas[lowerName]) === null || _a === void 0 ? void 0 : _a.call;
         if (ts === undefined) {
@@ -1130,7 +1135,7 @@ class EntityRunner {
             this.throwErr(`TableSchema only support ${types.map(v => v.toUpperCase()).join(', ')}`);
         }
         let db = this.db.getDbName();
-        return { name: lowerName, schema: ts, values };
+        return { name: lowerName, schema: ts, values, isXi };
     }
     getTableSchemas(names, types) {
         return names.map(v => this.getTableSchema(v, types));
