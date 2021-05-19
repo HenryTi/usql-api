@@ -1179,9 +1179,9 @@ class EntityRunner {
         return this.dbServer.ActIXSort(unit, user, param);
     }
     ActDetail(unit, user, param) {
-        let { master, detail, detail2, detail3 } = param;
+        let { main, detail, detail2, detail3 } = param;
         let types = ['id'];
-        param.master = this.getTableSchema(master.name, types, [master.value]);
+        param.main = this.getTableSchema(main.name, types, [main.value]);
         param.detail = this.getTableSchema(detail.name, types, detail.values);
         if (detail2) {
             param.detail2 = this.getTableSchema(detail2.name, types, detail2.values);
@@ -1205,9 +1205,9 @@ class EntityRunner {
         return this.dbServer.IDNO(unit, user, param);
     }
     IDDetailGet(unit, user, param) {
-        let { master, detail, detail2, detail3 } = param;
+        let { main, detail, detail2, detail3 } = param;
         let types = ['id'];
-        param.master = this.getTableSchema(master, types);
+        param.main = this.getTableSchema(main, types);
         param.detail = this.getTableSchema(detail, types);
         if (detail2) {
             param.detail2 = this.getTableSchema(detail2, types);

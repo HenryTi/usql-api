@@ -57,7 +57,7 @@ export interface ParamActIXSort {
 }
 
 export interface ParamActDetail {
-	master: TableSchema;
+	main: TableSchema;
 	detail: TableSchema;
 	detail2?: TableSchema;
 	detail3?: TableSchema;

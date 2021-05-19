@@ -1052,9 +1052,9 @@ export class EntityRunner {
 	}
 
 	ActDetail(unit:number, user:number, param:ParamActDetail): Promise<any[]> {
-		let {master, detail, detail2, detail3} = param;
+		let {main, detail, detail2, detail3} = param;
 		let types = ['id'];
-		param.master = this.getTableSchema(master.name as unknown as string, types, [(master as any).value as any]);
+		param.main = this.getTableSchema(main.name as unknown as string, types, [(main as any).value as any]);
 		param.detail = this.getTableSchema(detail.name as unknown as string, types, detail.values);
 		if (detail2) {
 			param.detail2 = this.getTableSchema(detail2.name as unknown as string, types, detail2.values);
@@ -1081,9 +1081,9 @@ export class EntityRunner {
 	}
 
 	IDDetailGet(unit:number, user:number, param:ParamIDDetailGet): Promise<any[]> {
-		let {master, detail, detail2, detail3} = param;
+		let {main, detail, detail2, detail3} = param;
 		let types = ['id'];
-		param.master = this.getTableSchema(master as unknown as string, types);
+		param.main = this.getTableSchema(main as unknown as string, types);
 		param.detail = this.getTableSchema(detail as unknown as string, types);
 		if (detail2) {
 			param.detail2 = this.getTableSchema(detail2 as unknown as string, types);
