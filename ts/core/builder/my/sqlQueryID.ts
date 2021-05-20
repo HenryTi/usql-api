@@ -39,14 +39,18 @@ export class SqlQueryID extends MySqlBuilder {
 		let sql = 'SELECT ' + this.cols;
 		sql += '\n\tFROM ';
 
-		let tl = this.tables[0];
-		sql += 'tv_' + tl.name + ' as ' + tl.alias;
+		let t0 = this.tables[0];
+		sql += 'tv_' + t0.name + ' as ' + t0.alias;
 		let tLen = this.tables.length;
 		for (let i=1; i<tLen; i++) {
 			let t = this.tables[i];
 			let {name, alias, join, fieldLeft} = t;
-			sql += `\n\t\t${join} JOIN tv_${name} AS ${alias} ON ${tl.alias}.${tl.fieldRight}=${alias}.${fieldLeft}`;
-			tl = t;
+			sql += `\n\t\t${join} JOIN tv_${name} AS ${alias} ON `;
+			if (this.hasUnit === true) {
+				sql += `${t0.alias}.\`$unit\`=${alias}.\`$unit\` AND `;
+			}
+			sql += `${t0.alias}.${t0.fieldRight}=${alias}.${fieldLeft}`;
+			// t0 = t;
 		}
 
 		if (this.wheres.length > 0) {
@@ -209,9 +213,11 @@ export class SqlQueryID extends MySqlBuilder {
 		if (!page) return;
 		let {start, size} = page;
 		if (!start) start = 0;
-		let tbl = this.tables[this.tables.length-1];
-		let {alias, fieldRight} = tbl;
-		this.wheres.push(`${alias}.${fieldRight}>${start}`);
+		//let tbl = this.tables[this.tables.length-1];
+		//let {alias, fieldRight} = tbl;
+		let tbl = this.tables[0];
+		let {alias, fieldLeft} = tbl;
+		this.wheres.push(`${alias}.${fieldLeft}>${start}`);
 		this.limit = `${size}`;
 	}
 	
@@ -224,9 +230,10 @@ export class SqlQueryID extends MySqlBuilder {
 			case 'asc': ord = 'asc'; break;
 			case 'desc': ord = 'desc'; break;
 		}
-		let tbl = this.tables[this.tables.length-1];
-		let {alias, fieldRight} = tbl;
-		this.order = `\n\tORDER BY ${alias}.${fieldRight} ${ord}`;
+		//let tbl = this.tables[this.tables.length-1];
+		let tbl = this.tables[0];
+		let {alias, fieldLeft} = tbl;
+		this.order = `\n\tORDER BY ${alias}.${fieldLeft} ${ord}`;
 	}
 
 	private $fieldBuilt:boolean;

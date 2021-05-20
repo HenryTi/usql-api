@@ -13,8 +13,9 @@ exports.DbServer = void 0;
 class DbServer {
     constructor(dbName) {
         this.dbName = dbName;
-        this.builder = this.createBuilder();
+        //this.builder = this.createBuilder();
     }
+    setBuilder() { this.builder = this.createBuilder(); }
     execSql(unit, user, sql) {
         return __awaiter(this, void 0, void 0, function* () {
             let ret = yield this.call(this.dbName, 'tv_$exec_sql', [unit, user, sql]);

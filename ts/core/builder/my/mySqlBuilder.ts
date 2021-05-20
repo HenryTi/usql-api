@@ -285,18 +285,29 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 	protected buildUpsert(ts:TableSchema, value:any): string {
 		let {name:tableName, schema} = ts;
 		let {keys, fields, exFields} = schema;
-		let cols = '', vals = '', dup = '';
+		let cols:string, vals:string, dup = '';
 		let sqlBefore:string = '';
 		let sqlWriteEx:string[] = [];
-		let first = true;
+		let first:boolean;
+		if (this.hasUnit === true) {
+			first = false;
+			cols = '`$unit`';
+			vals = '@unit';
+		}
+		else {
+			first = true;
+			cols = '';
+			vals = '';
+		}
 		for (let f of fields) {
 			let {name, type} = f;
 			let v = value[name];
+			if (v === undefined) continue;
 			let act = 0;
 			let val:string;
 			act = value.$act;
 			if (act === undefined || act === null) act = 0;
-			if (v === undefined || v === null) {
+			if (v === null) {
 				val = 'null';
 			}
 			else {
@@ -461,6 +472,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 			sql += ' AND xi=';
 			sql += xi;
 		}
+		if (this.hasUnit === true) sql += ' AND `$unit`=@unit';
 		sql += ';\n';
 		return sql;
 	}

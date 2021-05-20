@@ -276,19 +276,31 @@ class MySqlBuilder {
     buildUpsert(ts, value) {
         let { name: tableName, schema } = ts;
         let { keys, fields, exFields } = schema;
-        let cols = '', vals = '', dup = '';
+        let cols, vals, dup = '';
         let sqlBefore = '';
         let sqlWriteEx = [];
-        let first = true;
+        let first;
+        if (this.hasUnit === true) {
+            first = false;
+            cols = '`$unit`';
+            vals = '@unit';
+        }
+        else {
+            first = true;
+            cols = '';
+            vals = '';
+        }
         for (let f of fields) {
             let { name, type } = f;
             let v = value[name];
+            if (v === undefined)
+                continue;
             let act = 0;
             let val;
             act = value.$act;
             if (act === undefined || act === null)
                 act = 0;
-            if (v === undefined || v === null) {
+            if (v === null) {
                 val = 'null';
             }
             else {

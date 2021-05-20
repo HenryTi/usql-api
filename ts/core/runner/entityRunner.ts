@@ -621,6 +621,7 @@ export class EntityRunner {
         if (this.uqVersion === undefined) this.uqVersion = 1;
 		this.hasUnit = !(setting['hasunit'] as number === 0);
 		this.dbServer.hasUnit = this.hasUnit;
+		this.dbServer.setBuilder();
 		let ixUserArr = [];
 		
         let uu = setting['uniqueunit'];

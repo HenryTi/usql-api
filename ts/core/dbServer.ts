@@ -195,14 +195,15 @@ export interface ParamIDTree {
 export abstract class DbServer {
 	protected dbName: string;
 	hasUnit: boolean;
-	protected readonly builder: Builder;
+	protected builder: Builder;
 
 	constructor(dbName:string) {
 		this.dbName = dbName;
-		this.builder = this.createBuilder();
+		//this.builder = this.createBuilder();
 	}
-
+	
 	protected abstract createBuilder(): Builder;
+	setBuilder() {this.builder = this.createBuilder();}
 
 	abstract createProcObjs(db:string): Promise<void>;
 	abstract reset():void;
