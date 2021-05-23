@@ -24,6 +24,7 @@ import { SqlIXSum } from "./sqlIXSum";
 import { SqlKeyIDSum } from "./sqlKeyIDSum";
 import { SqlActIXSort } from "./sqlActIXSort";
 import { SqlQueryID } from "./sqlQueryID";
+import { SqlIDTv } from "./sqlIDTv";
 
 export class MyBuilders extends Builders {
 	Acts(param:ParamActs): ISqlBuilder {
@@ -56,6 +57,10 @@ export class MyBuilders extends Builders {
 
 	ID(param: ParamID): ISqlBuilder {
 		return new SqlID(this, param);
+	}
+
+	IDTv(ids: number[]): ISqlBuilder {
+		return new SqlIDTv(this, ids);
 	}
 
 	KeyID(param: ParamKeyID): ISqlBuilder {

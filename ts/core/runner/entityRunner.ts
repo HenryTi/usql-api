@@ -1102,6 +1102,10 @@ export class EntityRunner {
 		return this.dbServer.ID(unit, user, param);
 	}
 
+	IDTv(unit:number, user:number, ids: number[]): Promise<any[]> {
+		return this.dbServer.IDTv(unit, user, ids);
+	}
+
 	KeyID(unit:number, user:number, param: ParamKeyID): Promise<any[]> {
 		let {ID, IDX} = param;
 		let types = ['id', 'idx'];

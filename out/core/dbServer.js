@@ -80,6 +80,12 @@ class DbServer {
             return yield this.execSql(unit, user, sql);
         });
     }
+    IDTv(unit, user, ids) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let sql = this.builder.IDTv(ids).build();
+            return yield this.execSql(unit, user, sql);
+        });
+    }
     KeyID(unit, user, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = this.builder.KeyID(param).build();

@@ -279,6 +279,11 @@ export abstract class DbServer {
 		return await this.execSql(unit, user, sql);
 	}
 
+	async IDTv(unit:number, user:number, ids: number[]): Promise<any[]> {
+		let sql = this.builder.IDTv(ids).build();
+		return await this.execSql(unit, user, sql);
+	}
+
 	async KeyID(unit:number, user:number, param: ParamKeyID): Promise<any[]> {
 		let sql = this.builder.KeyID(param).build();
 		return await this.execSql(unit, user, sql);

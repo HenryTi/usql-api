@@ -1224,6 +1224,9 @@ class EntityRunner {
         param.IDX = this.getTableSchemaArray(IDX, types);
         return this.dbServer.ID(unit, user, param);
     }
+    IDTv(unit, user, ids) {
+        return this.dbServer.IDTv(unit, user, ids);
+    }
     KeyID(unit, user, param) {
         let { ID, IDX } = param;
         let types = ['id', 'idx'];

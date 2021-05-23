@@ -469,6 +469,8 @@ class MySqlBuilder {
             sql += ' AND xi=';
             sql += xi;
         }
+        if (this.hasUnit === true)
+            sql += ' AND `$unit`=@unit';
         sql += ';\n';
         return sql;
     }

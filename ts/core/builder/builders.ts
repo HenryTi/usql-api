@@ -47,6 +47,10 @@ export abstract class Builders {
 		return;
 	}
 
+	IDTv(ids: number[]): ISqlBuilder {
+		return;
+	}
+
 	KeyID(param: ParamKeyID): ISqlBuilder {
 		return
 	}

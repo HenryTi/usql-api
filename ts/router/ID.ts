@@ -39,6 +39,12 @@ export function buildIDRouter(router: Router, rb: RouterBuilder) {
         return result;
     });
 
+    rb.entityPost(router, 'id-tv', '', 
+    async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
+        let result = await runner.IDTv(unit, user, body);
+        return result;
+    });
+
     rb.entityPost(router, 'key-id', '',
     async (unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any) => {
         let result = await runner.KeyID(unit, user, body);
