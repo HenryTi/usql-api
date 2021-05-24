@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Fetch = void 0;
 const node_fetch_1 = require("node-fetch");
+const tool_1 = require("../tool");
 class Fetch {
     constructor(baseUrl) {
         this.baseUrl = baseUrl;
@@ -44,7 +45,7 @@ class Fetch {
     }
     innerFetch(url, method, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log('innerFetch ' + method + '  ' + this.baseUrl + url);
+            tool_1.logger.log('innerFetch ' + method + '  ' + this.baseUrl + url);
             var headers = new node_fetch_1.Headers();
             headers.append('Accept', 'application/json'); // This one is enough for GET requests
             headers.append('Content-Type', 'application/json'); // This one sends body
@@ -57,13 +58,13 @@ class Fetch {
                 body: JSON.stringify(body),
             });
             if (res.status !== 200) {
-                console.error(this.baseUrl + url, res.statusText, res.status);
+                tool_1.logger.error(this.baseUrl + url, res.statusText, res.status);
                 throw {
                     error: res.statusText,
                     code: res.status,
                 };
-                //console.log('statusCode=', response.statusCode);
-                //console.log('statusMessage=', response.statusMessage);
+                //logger.log('statusCode=', response.statusCode);
+                //logger.log('statusMessage=', response.statusMessage);
             }
             let json = yield res.json();
             if (json.error !== undefined) {

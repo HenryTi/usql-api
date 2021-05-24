@@ -1,4 +1,5 @@
 import { Fetch } from "../fetch";
+import { logger } from '../../tool';
 
 export class UnitxApi extends Fetch {
 	readonly tickCreate: number;
@@ -21,8 +22,8 @@ export class UnitxApi extends Fetch {
 			return ret;
 		}
 		catch (err) {
-			console.error('fetchBus error: url=%s, unit=%s', this.baseUrl, unit);
-			console.error('fetchBus error: ', err);
+			logger.error('fetchBus error: url=%s, unit=%s', this.baseUrl, unit);
+			logger.error('fetchBus error: ', err);
 			return undefined;
 		}
     }

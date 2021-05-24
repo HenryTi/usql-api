@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { logger } from '../../tool';
 import { EntityRunner, RouterBuilder } from '../../core';
 
 export function buildOpenRouter(router:Router, rb: RouterBuilder) {    
@@ -68,7 +69,7 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
     rb.post(router, '/tuid-main/:tuid',
     async (runner:EntityRunner, body:any, params:any):Promise<any> => {
         body.$ = 'open/tuid-main/';
-        console.log(body);
+        logger.log(body);
         let {tuid} = params;
         let {unit, id, all} = body;
         if (runner.isTuidOpen(tuid) === false) return;
@@ -81,7 +82,7 @@ export function buildOpenRouter(router:Router, rb: RouterBuilder) {
     rb.post(router, '/tuid-div/:tuid/:div',
     async (runner:EntityRunner, body:any, params:any):Promise<any> => {
         body.$ = 'open/tuid-div/';
-        console.log(body);
+        logger.log(body);
         let {tuid, div} = params;
         let {unit, id, ownerId, all} = body;
         if (runner.isTuidOpen(tuid) === false) return;

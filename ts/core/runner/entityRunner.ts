@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { logger } from '../../tool';
 import { Db, env } from '../db';
 import {DbServer, ParamID, ParamIX, ParamIXSum
 	, ParamActs, ParamActDetail, ParamIDDetailGet, ParamIDinIX
@@ -176,7 +177,7 @@ export class EntityRunner {
 			return ret;
 	}
         catch (err) {
-            console.error(err);
+            logger.error(err);
             this.modifyMaxes[unit] = null;
         }
     }
@@ -591,7 +592,7 @@ export class EntityRunner {
         }
         catch (err) {
             this.schemas = undefined;
-            console.error(err.message);
+            logger.error(err.message);
             debugger;
         }
     }
@@ -627,7 +628,7 @@ export class EntityRunner {
         let uu = setting['uniqueunit'];
         this.uniqueUnit = uu? uu as number: 0;
         
-        if (env.isDevelopment) console.log('init schemas: ', this.uq, this.author, this.version);
+        if (env.isDevelopment) logger.log('init schemas: ', this.uq, this.author, this.version);
 
         this.schemas = {};
         this.accessSchemaArr = [];
@@ -887,7 +888,7 @@ export class EntityRunner {
 
             }
         }
-        if (env.isDevelopment) console.log('access: ', this.access);
+        if (env.isDevelopment) logger.log('access: ', this.access);
     }
     private async getUserAccess(unit:number, user:number):Promise<number[]> {
         let result = await this.db.tablesFromProc('tv_$get_access', [unit]);
@@ -985,7 +986,7 @@ export class EntityRunner {
     }
 
 	private throwErr(err:string) {
-		console.error(err);
+		logger.error(err);
 		throw new Error(err);
 	}
 

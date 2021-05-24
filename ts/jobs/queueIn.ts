@@ -1,4 +1,5 @@
-import { Net, EntityRunner } from "../core";
+import { logger } from '../tool';
+import { EntityRunner } from "../core";
 import { Finish } from "./finish";
 import { getErrorString } from "../tool";
 
@@ -49,7 +50,7 @@ export async function queueIn(runner: EntityRunner) {
         }
         catch (err) {
             hasError = buses.hasError = true;
-            console.error(err);
+            logger.error(err);
             await runner.log(0, 'jobs queueIn loop at ' + start, getErrorString(err));
             break;
         }

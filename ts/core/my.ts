@@ -1,6 +1,7 @@
 import {createPool, Pool, MysqlError, TypeCast} from 'mysql';
 import * as _ from 'lodash';
-import {DbServer, ParamID, ParamIX, ParamActs, ParamIDLog, ParamKeyID, ParamKeyIX} from './dbServer';
+import { logger } from '../tool';
+import { DbServer } from './dbServer';
 import { dbLogger, SpanLog, env } from './db';
 import { consts } from './consts';
 import { MyBuilder } from './builder';
@@ -129,10 +130,10 @@ export class MyDbServer extends DbServer {
                 case +ER_LOCK_WAIT_TIMEOUT:
                 case +ER_LOCK_TIMEOUT:
                 case +ER_LOCK_DEADLOCK:
-                    if (isDevelopment===true) console.error(`ERROR - ${ err.errno } ${ err.message }`);
+                    if (isDevelopment===true) logger.error(`ERROR - ${ err.errno } ${ err.message }`);
                     ++retryCount;
                     if (retryCount > retries) {    
-                        if (isDevelopment===true) console.error(`Out of retries so just returning the error.`);
+                        if (isDevelopment===true) logger.error(`Out of retries so just returning the error.`);
                         if (log !== undefined) {
                             log.tries = retryCount;
                             log.error = err.sqlMessage;
@@ -143,7 +144,7 @@ export class MyDbServer extends DbServer {
                     }
                     let sleepMillis = Math.floor((Math.random()*maxMillis)+minMillis)
                     if (isDevelopment===true) {
-                        console.error(sql + ': ---- Retrying request with',retries-retryCount,'retries left. Timeout',sleepMillis);
+                        logger.error(sql + ': ---- Retrying request with',retries-retryCount,'retries left. Timeout',sleepMillis);
                     }    
                     return setTimeout(() => {
 						debugger;
@@ -152,8 +153,8 @@ export class MyDbServer extends DbServer {
                 default:
                     if (isDevelopment===true) {
 						debugger;
-                        console.error(err);
-                        console.error(sql);
+                        logger.error(err);
+                        logger.error(sql);
                     }
                     if (log !== undefined) {
                         log.tries = retryCount;
@@ -168,7 +169,7 @@ export class MyDbServer extends DbServer {
 			/*
 			this.pool.getConnection(function(err, connection) {
 				if (err) {
-					console.error(err);
+					logger.error(err);
 					debugger;
 					reject(err);
 					return;

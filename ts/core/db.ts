@@ -1,8 +1,9 @@
 import * as config from 'config';
 import * as _ from 'lodash';
-import {DbServer} from './dbServer';
-import {MsDbServer} from './ms';
-import {MyDbServer} from './my';
+import { logger } from '../tool';
+import { DbServer } from './dbServer';
+import { MsDbServer } from './ms';
+import { MyDbServer } from './my';
 import { EntityRunner } from './runner';
 
 /*
@@ -141,7 +142,7 @@ export abstract class Db {
             await this.dbServer.call('$uq', 'performance', [tick, log, ms]);
         }
         catch (err) {
-            console.error(err);
+            logger.error(err);
             let {message, sqlMessage} = err;
             let msg = '';
             if (message) msg += message;

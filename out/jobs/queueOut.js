@@ -10,9 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.queueOut = void 0;
+const tool_1 = require("../tool");
 const core_1 = require("../core");
 const finish_1 = require("./finish");
-const tool_1 = require("../tool");
+const tool_2 = require("../tool");
 const unitx_1 = require("../core/unitx");
 function queueOut(runner) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -27,7 +28,7 @@ function queueOut(runner) {
                 for (let row of ret) {
                     // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
                     let { $unit, id, to, action, subject, content, tries, update_time, now } = row;
-                    console.log('queueOut 1: ', action, subject, content, update_time);
+                    tool_1.logger.log('queueOut 1: ', action, subject, content, update_time);
                     start = id;
                     if (!$unit)
                         $unit = runner.uniqueUnit;
@@ -78,7 +79,7 @@ function queueOut(runner) {
                             /*
                             let error = typeof(err)==='object'?
                                 err.message : err; */
-                            let error = tool_1.getErrorString(err);
+                            let error = tool_2.getErrorString(err);
                             yield runner.log($unit, errSubject, error);
                         }
                     }
@@ -88,9 +89,9 @@ function queueOut(runner) {
             }
         }
         catch (err) {
-            yield runner.log(0, 'jobs queueOut loop', tool_1.getErrorString(err));
+            yield runner.log(0, 'jobs queueOut loop', tool_2.getErrorString(err));
             if (core_1.env.isDevelopment === true)
-                console.error(err);
+                tool_1.logger.error(err);
         }
     });
 }
@@ -103,7 +104,7 @@ function processItem(runner, unit, id, action, subject, content, update_time) {
             let parts = item.split('\n');
             json[parts[0]] = parts[1];
         }
-        console.log('queue item: ', unit, id, action, subject, json);
+        tool_1.logger.log('queue item: ', unit, id, action, subject, json);
     });
 }
 function jsonValues(content) {
@@ -160,7 +161,7 @@ function bus(runner, unit, id, to, bus, content) {
         let schema = runner.getSchema(busEntityName);
         if (schema === undefined) {
             let err = `schema ${busEntityName} not exists`;
-            console.error(err);
+            tool_1.logger.error(err);
             debugger;
             throw err;
         }

@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EntityRunner = void 0;
 const _ = require("lodash");
+const tool_1 = require("../../tool");
 const db_1 = require("../db");
 const packReturn_1 = require("../packReturn");
 const importData_1 = require("../importData");
@@ -135,7 +136,7 @@ class EntityRunner {
                 return ret;
             }
             catch (err) {
-                console.error(err);
+                tool_1.logger.error(err);
                 this.modifyMaxes[unit] = null;
             }
         });
@@ -689,7 +690,7 @@ class EntityRunner {
             }
             catch (err) {
                 this.schemas = undefined;
-                console.error(err.message);
+                tool_1.logger.error(err.message);
                 debugger;
             }
         });
@@ -727,7 +728,7 @@ class EntityRunner {
             let uu = setting['uniqueunit'];
             this.uniqueUnit = uu ? uu : 0;
             if (db_1.env.isDevelopment)
-                console.log('init schemas: ', this.uq, this.author, this.version);
+                tool_1.logger.log('init schemas: ', this.uq, this.author, this.version);
             this.schemas = {};
             this.accessSchemaArr = [];
             this.tuids = {};
@@ -1007,7 +1008,7 @@ class EntityRunner {
             }
         }
         if (db_1.env.isDevelopment)
-            console.log('access: ', this.access);
+            tool_1.logger.log('access: ', this.access);
     }
     getUserAccess(unit, user) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -1114,7 +1115,7 @@ class EntityRunner {
         this.actionConvertSchemas[name] = value;
     }
     throwErr(err) {
-        console.error(err);
+        tool_1.logger.error(err);
         throw new Error(err);
     }
     getTableSchema(name, types, values) {

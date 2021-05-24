@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UnitxTest = exports.UnitxProd = exports.Unitx = void 0;
+const tool_1 = require("../../tool");
 const centerApi_1 = require("../centerApi");
 const consts_1 = require("../consts");
 const db_1 = require("../db");
@@ -83,16 +84,16 @@ class Unitx {
     }
     sendToUnitx(unit, msg) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.error('sendToUnitx', unit, msg);
+            tool_1.logger.error('sendToUnitx', unit, msg);
             let unitxApi = yield this.getPushUnitxApi(unit);
             if (!unitxApi) {
                 let err = `Center unit ${unit} not binding $unitx service!!!`;
                 //return ret;
-                console.error(err);
+                tool_1.logger.error(err);
                 throw new Error(err);
             }
             else {
-                console.error('get unitx push url in sendToUnitx: ', unitxApi.url);
+                tool_1.logger.error('get unitx push url in sendToUnitx: ', unitxApi.url);
             }
             let toArr = yield unitxApi.send(msg);
             return toArr;
@@ -102,12 +103,12 @@ class Unitx {
         return __awaiter(this, void 0, void 0, function* () {
             let unitxApi = yield this.getPullUnitxApi(unit);
             if (!unitxApi) {
-                console.error(`getUnitxApi unit=${unit}, pull return nothing`);
+                tool_1.logger.error(`getUnitxApi unit=${unit}, pull return nothing`);
                 return;
             }
             let ret = yield unitxApi.fetchBus(unit, maxId, faces);
             if (ret === undefined) {
-                console.error(`unitxApi.fetchBus  url=${unitxApi.url} unit=${unit}`);
+                tool_1.logger.error(`unitxApi.fetchBus  url=${unitxApi.url} unit=${unit}`);
                 return;
             }
             return ret;

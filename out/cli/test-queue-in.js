@@ -9,17 +9,18 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const tool_1 = require("../tool");
 const core_1 = require("../core");
 const queueOut_1 = require("../jobs/queueOut");
 (function () {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log('test-queue-out');
+        tool_1.logger.log('test-queue-out');
         // 停掉其它服务器操作消息队列
         //let db = Db.db(undefined);
         //await db.setDebugJobs();
         let dbName = 'order';
         let node_env = process.env.NODE_ENV;
-        console.log('node_env=' + node_env + ', ' + 'db = ' + dbName);
+        tool_1.logger.log('node_env=' + node_env + ', ' + 'db = ' + dbName);
         //let net = prodNet;
         let net = core_1.testNet;
         let runner = yield net.getRunner(dbName);

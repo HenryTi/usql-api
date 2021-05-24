@@ -1,4 +1,5 @@
-import { EntityRunner, BusMessage /*, consts, busQueuehour, busQueueSeedFromHour, busQueueHourFromSeed*/ } from '../../core';
+import { logger } from '../../tool';
+import { EntityRunner, BusMessage } from '../../core';
 
 //let lastHour: number = 0;
 
@@ -28,6 +29,6 @@ export async function processBusMessage(unitxRunner:EntityRunner, msg:BusMessage
     let faceUrl = busOwner + '/' + bus + '/' + face;
 	let ret = await writeDataToBus(unitxRunner, faceUrl, unit, to, from, queueId, version, body);
 	if (ret < 0) {
-		console.error('writeDataToBus message duplicated!', msg, -ret);
+		logger.error('writeDataToBus message duplicated!', msg, -ret);
 	}
 }

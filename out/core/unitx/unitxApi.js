@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UnitxApi = void 0;
 const fetch_1 = require("../fetch");
+const tool_1 = require("../../tool");
 class UnitxApi extends fetch_1.Fetch {
     constructor(url, tickCreate) {
         super(url);
@@ -33,8 +34,8 @@ class UnitxApi extends fetch_1.Fetch {
                 return ret;
             }
             catch (err) {
-                console.error('fetchBus error: url=%s, unit=%s', this.baseUrl, unit);
-                console.error('fetchBus error: ', err);
+                tool_1.logger.error('fetchBus error: url=%s, unit=%s', this.baseUrl, unit);
+                tool_1.logger.error('fetchBus error: ', err);
                 return undefined;
             }
         });

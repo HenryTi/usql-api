@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { logger } from '../tool';
 import { EntityRunner } from './runner';
 import { consts } from "./consts";
 import { prodNet, testNet, Net, prodCompileNet, testCompileNet } from './net';
@@ -145,7 +146,7 @@ export class RouterBuilder {
             });
         }
         catch (err) {
-            console.error(err);
+            logger.error(err);
             res.json({error: err});
         }
     }

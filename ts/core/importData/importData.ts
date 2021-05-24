@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import { logger } from '../../tool';
 import { Db } from "../db";
 import { EntityRunner } from '../runner';
 import { Field, Header } from './field';
@@ -259,7 +260,7 @@ class ImportTuidDiv extends ImportTuid {
 class ImportMap extends ImportData {
     protected async saveItem(values:any[]): Promise<void> {
         await this.runner.mapSave(this.entity, this.unit, undefined, values);
-        console.log('import map ', values);
+        logger.log('import map ', values);
     }
 }
 

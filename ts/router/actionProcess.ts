@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { logger } from '../tool';
 import { EntityRunner, packParam } from '../core';
 import { buildExpVar, buildExpCalc, buildLicense } from '../convert';
 
@@ -12,10 +13,10 @@ export async function actionProcess(unit:number, user:number, name:string, db:st
 export async function actionReturns(unit:number, user:number, name:string, db:string, urlParams:any, runner:EntityRunner, body:any, schema:any, run:any):Promise<any[][]> {
     let {data} = body;
     if (typeof data === 'object') {
-        console.log('action process data: ', body);
+        logger.log('action process data: ', body);
         data = packParam(schema, data);
     }
-    console.log('action process param: ', data);
+    logger.log('action process param: ', data);
     let result = await runner.action(name, unit, user, data);
     return result;
 }

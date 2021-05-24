@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mysql_1 = require("mysql");
+const tool_1 = require("../tool");
 //process.env.NODE_ENV = 'development';
 //process.env.NODE_ENV = 'devdo';
 (function () {
@@ -32,16 +33,16 @@ const mysql_1 = require("mysql");
         });
         if (node_env)
             process.env.NODE_ENV = node_env;
-        console.log('node_env=' + node_env + ', ' + 'db = ' + db);
+        tool_1.logger.log('node_env=' + node_env + ', ' + 'db = ' + db);
         const config = require('config');
-        console.log('NODE_ENV ' + process.env.NODE_ENV);
+        tool_1.logger.log('NODE_ENV ' + process.env.NODE_ENV);
         if (!process.env.NODE_ENV) {
-            console.error('node out/cli/charset-collate-routines node_env=???');
+            tool_1.logger.error('node out/cli/charset-collate-routines node_env=???');
             process.exit(0);
         }
         const const_connection = 'connection';
         const config_connection = config.get(const_connection);
-        console.log(config_connection);
+        tool_1.logger.log(config_connection);
         const pool = mysql_1.createPool(config_connection);
         function runSql(sql) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -59,11 +60,11 @@ const mysql_1 = require("mysql");
         }
         function charsetCollateRoutine(dbName, routineName, type, sql) {
             return __awaiter(this, void 0, void 0, function* () {
-                console.log('ROUTINE: ' + routineName);
+                tool_1.logger.log('ROUTINE: ' + routineName);
                 let sqlDrop = `DROP ${type} IF EXISTS \`${dbName}\`.\`${routineName}\`;`;
                 yield runSql(sqlDrop);
                 yield runSql(sql);
-                // console.log('-');
+                // logger.log('-');
             });
         }
         function charsetCollateDb(dbName, charset, collate) {
@@ -71,11 +72,11 @@ const mysql_1 = require("mysql");
                 let sqlDbFileNames = `select SCHEMA_NAME from information_schema.SCHEMATA where SCHEMA_NAME=LOWER('${dbName}')`;
                 let dbFileNames = yield runSql(sqlDbFileNames);
                 if (dbFileNames.length === 0) {
-                    console.log(`Database ${dbName} not exists`);
+                    tool_1.logger.log(`Database ${dbName} not exists`);
                     return;
                 }
                 dbName = dbFileNames[0]['SCHEMA_NAME'];
-                console.log('=== charsetCollateDb: ' + dbName + ' ' + charset + ' ' + collate);
+                tool_1.logger.log('=== charsetCollateDb: ' + dbName + ' ' + charset + ' ' + collate);
                 yield runSql(`use \`${dbName}\`;`);
                 let sqlRoutines = `
 		SELECT \`name\`, \`type\`, sql_stmt 
@@ -130,8 +131,8 @@ const mysql_1 = require("mysql");
                     let { name, type, sql_stmt } = routineRow;
                     yield charsetCollateRoutine(dbName, name, type, sql_stmt);
                 }
-                console.log('-');
-                console.log('-');
+                tool_1.logger.log('-');
+                tool_1.logger.log('-');
             });
         }
         function charsetCollateAllUqs(charset, collate, dbIdStart) {
@@ -164,9 +165,9 @@ const mysql_1 = require("mysql");
         }
         try {
             let params = yield dbServerParams();
-            console.log(params);
-            console.log('');
-            console.log('========================================');
+            tool_1.logger.log(params);
+            tool_1.logger.log('');
+            tool_1.logger.log('========================================');
             let charset = params['character_set_connection']; //'utf8mb4';
             let collate = params['collation_connection']; //'utf8mb4_general_ci';
             if (db) {
@@ -180,10 +181,10 @@ const mysql_1 = require("mysql");
                 }
                 yield charsetCollateAllUqs(charset, collate, dbIdStart);
             }
-            console.log('=== Job done!');
+            tool_1.logger.log('=== Job done!');
         }
         catch (err) {
-            console.error(err);
+            tool_1.logger.error(err);
         }
         process.exit(0);
     });

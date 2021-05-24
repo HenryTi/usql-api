@@ -1,7 +1,5 @@
 import { createPool, MysqlError } from "mysql";
-
-//process.env.NODE_ENV = 'development';
-//process.env.NODE_ENV = 'devdo';
+import { logger } from '../tool';
 
 (async function() {
 	let node_env:string;
@@ -25,14 +23,14 @@ import { createPool, MysqlError } from "mysql";
 
 	const config:any = require('config');
 
-	console.log('NODE_ENV ' + process.env.NODE_ENV);
+	logger.log('NODE_ENV ' + process.env.NODE_ENV);
 	if (!process.env.NODE_ENV) {
-		console.error('node out/cli/charset-collate node_env=???');
+		logger.error('node out/cli/charset-collate node_env=???');
 		process.exit(0);
 	}
 	const const_connection = 'connection';
 	const config_connection = config.get(const_connection);
-	console.log(config_connection);
+	logger.log(config_connection);
 	const pool = createPool(config_connection);
 	async function runSql(sql:string):Promise<any> {
 		return new Promise<any>((resolve, reject) => {
@@ -48,14 +46,14 @@ import { createPool, MysqlError } from "mysql";
 	}
 	
 	async function charsetCollateColumn(dbName:string, tableName:string, columnName:string, datatype:string, charset:string, collate:string) {
-		console.log('Column: ' + columnName + ' ' + datatype);
+		logger.log('Column: ' + columnName + ' ' + datatype);
 		let sql = `ALTER TABLE \`${dbName}\`.\`${tableName}\` MODIFY \`${columnName}\` ${datatype} CHARACTER SET ${charset} COLLATE ${collate};`;
 		await runSql(sql);
 	}
 	
 	const stringTypes = ['varchar', 'char', 'tinytext', 'text', 'mediumtext', 'longtext'];
 	async function charsetCollateTable(dbName:string, tableName:string, charset:string, collate:string) {
-		console.log('Table: ' + tableName);
+		logger.log('Table: ' + tableName);
 		let sql = `ALTER TABLE \`${dbName}\`.\`${tableName}\` CONVERT TO CHARACTER SET ${charset} COLLATE ${collate};`;
 		await runSql(sql);
 		let sqlColumns = `select COLUMN_NAME, DATA_TYPE, COLUMN_TYPE from information_schema.COLUMNS where TABLE_SCHEMA='${dbName}' and TABLE_NAME='${tableName}'`;
@@ -66,31 +64,31 @@ import { createPool, MysqlError } from "mysql";
 				await charsetCollateColumn(dbName, tableName, COLUMN_NAME, COLUMN_TYPE, charset, collate);
 			}
 		}
-		console.log('-');
+		logger.log('-');
 	}
 	
 	async function charsetCollateDb(dbName:string, charset:string, collate:string) {
 		let sqlDbFileNames = `select SCHEMA_NAME from information_schema.SCHEMATA where SCHEMA_NAME=LOWER('${dbName}')`;
 		let dbFileNames:any[] = await runSql(sqlDbFileNames);
 		if (dbFileNames.length === 0) {
-			console.log(`Database ${dbName} not exists`);
+			logger.log(`Database ${dbName} not exists`);
 			return;
 		}
 		dbName = dbFileNames[0]['SCHEMA_NAME'];
 
-		console.log('=== charsetCollateDb: ' + dbName + ' ' + charset + ' ' + collate);
+		logger.log('=== charsetCollateDb: ' + dbName + ' ' + charset + ' ' + collate);
 		let sql = `ALTER DATABASE \`${dbName}\` CHARACTER SET ${charset} COLLATE ${collate};`;
-		console.log('runing... ' + sql);
+		logger.log('runing... ' + sql);
 		await runSql(sql);
-		console.log('done! ' + sql);
+		logger.log('done! ' + sql);
 	
 		let sqlTables = `select TABLE_NAME from information_schema.TABLES where TABLE_SCHEMA='${dbName}' AND TABLE_TYPE='BASE TABLE'`;
 		let tables:any[] = await runSql(sqlTables);
 		for (let tblRow of tables) {
 			await charsetCollateTable(dbName, tblRow['TABLE_NAME'], charset, collate);
 		}
-		console.log('-');
-		console.log('-');
+		logger.log('-');
+		logger.log('-');
 	}
 	
 	async function charsetCollateAllUqs(charset:string, collate:string, dbIdStart:number) {
@@ -135,10 +133,10 @@ import { createPool, MysqlError } from "mysql";
 	
 	try {
 		let params = await dbServerParams();
-		console.log(params);
+		logger.log(params);
 		
-		console.log('');
-		console.log('========================================');
+		logger.log('');
+		logger.log('========================================');
 
 		let charset = params['character_set_connection']; //'utf8mb4';
 		let collate = params['collation_connection']; //'utf8mb4_general_ci';
@@ -156,10 +154,10 @@ import { createPool, MysqlError } from "mysql";
 			await charsetCollateAllUqs(charset, collate, dbIdStart);
 		}
 
-		console.log('=== Job done!');
+		logger.log('=== Job done!');
 	}
 	catch (err) {
-		console.error(err);
+		logger.error(err);
 	}
 	process.exit(0);
 })();

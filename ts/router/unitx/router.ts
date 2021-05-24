@@ -1,4 +1,5 @@
 import { Router, Request, Response, NextFunction } from "express";
+import { logger } from '../../tool';
 import { RouterBuilder, EntityRunner, busQueueSeed, SheetMessage, Message } from "../../core";
 import { messageProcesser } from "./messageProcesser";
 import { writeDataToBus } from "./processBusMessage";
@@ -28,7 +29,7 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
         }
         catch (e) {
             let err = JSON.stringify(e);
-            console.error('unitx-error: ', err);
+            logger.error('unitx-error: ', err);
             res.json({
                 ok: false,
                 error: err,
@@ -56,7 +57,7 @@ export function buildUnitxRouter(rb: RouterBuilder):Router {
         let {unit, face, to, from, fromQueueId, version, body:message} = body;
         let ret = await writeDataToBus(runner, face, unit, to, from, fromQueueId, version, message);
 		if (ret < 0) {
-			console.error('writeDataToBus message duplicated!', body, -ret);
+			logger.error('writeDataToBus message duplicated!', body, -ret);
 		}
 		return ret;
     }

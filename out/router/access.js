@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildAccessRouter = void 0;
+const tool_1 = require("../tool");
 const accessType = 'access';
 function buildAccessRouter(router, rb) {
     rb.entityGet(router, accessType, '', (unit, user, name, db, urlParams, runner, body, schema) => __awaiter(this, void 0, void 0, function* () {
@@ -21,12 +22,12 @@ function buildAccessRouter(router, rb) {
                 if (accs.length === 1 && accs[0].trim().length === 0)
                     accs = undefined;
             }
-            console.log('getAccesses: ' + runner.getDb());
+            tool_1.logger.log('getAccesses: ' + runner.getDb());
             let access = yield runner.getAccesses(unit, user, accs);
             return access;
         }
         catch (err) {
-            console.error('/access&name=', name, '&db=', db, err);
+            tool_1.logger.error('/access&name=', name, '&db=', db, err);
             debugger;
         }
     }));

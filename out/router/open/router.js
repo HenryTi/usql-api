@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildOpenRouter = void 0;
+const tool_1 = require("../../tool");
 function buildOpenRouter(router, rb) {
     rb.get(router, '/entities/:unit', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         return yield runner.getEntities(params.unit);
@@ -65,7 +66,7 @@ function buildOpenRouter(router, rb) {
     }));
     rb.post(router, '/tuid-main/:tuid', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         body.$ = 'open/tuid-main/';
-        console.log(body);
+        tool_1.logger.log(body);
         let { tuid } = params;
         let { unit, id, all } = body;
         if (runner.isTuidOpen(tuid) === false)
@@ -77,7 +78,7 @@ function buildOpenRouter(router, rb) {
     }));
     rb.post(router, '/tuid-div/:tuid/:div', (runner, body, params) => __awaiter(this, void 0, void 0, function* () {
         body.$ = 'open/tuid-div/';
-        console.log(body);
+        tool_1.logger.log(body);
         let { tuid, div } = params;
         let { unit, id, ownerId, all } = body;
         if (runner.isTuidOpen(tuid) === false)

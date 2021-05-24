@@ -1,5 +1,6 @@
 import * as crypto from 'crypto';
 import * as constants from 'constants';
+import { logger } from '../tool';
 
 //const algorithm = 'aes-128-cbc';
 //const algorithm = 'aes-48-cbc';
@@ -201,7 +202,7 @@ ${encoded.toString('base64')}
         return [ret];
     }
     catch (err) {
-        console.error(err);
+        logger.error(err);
     }
 }
 

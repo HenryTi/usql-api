@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ImportData = void 0;
 const fs = require("fs");
+const tool_1 = require("../../tool");
 const field_1 = require("./field");
 // 导入文件表头
 // $id  $owner  字段1    字段2   字段3@字段2
@@ -261,7 +262,7 @@ class ImportMap extends ImportData {
     saveItem(values) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.runner.mapSave(this.entity, this.unit, undefined, values);
-            console.log('import map ', values);
+            tool_1.logger.log('import map ', values);
         });
     }
 }

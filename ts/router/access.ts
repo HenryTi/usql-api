@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { logger } from '../tool';
 import { EntityRunner, RouterBuilder } from '../core';
 
 const accessType = 'access';
@@ -13,12 +14,12 @@ export function buildAccessRouter(router:Router, rb:RouterBuilder) {
                 accs = acc.split('|');
                 if (accs.length === 1 && accs[0].trim().length === 0) accs = undefined;
             }
-            console.log('getAccesses: ' + runner.getDb());
+            logger.log('getAccesses: ' + runner.getDb());
             let access = await runner.getAccesses(unit, user, accs);
             return access;
         }
         catch (err) {
-            console.error('/access&name=', name, '&db=', db,  err);
+            logger.error('/access&name=', name, '&db=', db,  err);
             debugger;
         }
     });

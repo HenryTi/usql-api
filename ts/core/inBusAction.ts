@@ -1,3 +1,4 @@
+import { logger } from '../tool';
 import { EntityRunner } from "./runner";
 import { packParam } from "./packParam";
 
@@ -188,13 +189,13 @@ export class SheetActionParametersBus extends ParametersBus {
 		let state = (this.schema.states as any[]).find(v => v.name === this.stateName);
 		//let state = this.run?.[this.stateName];
         if (state === undefined) {
-            console.error('Sheet %s 没有定义 State %s', this.entityName, this.stateName);
+            logger.error('Sheet %s 没有定义 State %s', this.entityName, this.stateName);
             return false;
         }
 		//let action = state[this.actionName]; 
 		let action = (state.actions as any[]).find(v => v.name === this.actionName);
         if (action === undefined) {
-            console.error('Sheet %s State %s 没有定义 Action %s', this.entityName, this.stateName, this.actionName);
+            logger.error('Sheet %s State %s 没有定义 Action %s', this.entityName, this.stateName, this.actionName);
             return false;
         }
 		this.schema.inBuses = action.inBuses;

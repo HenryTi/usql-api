@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.processBusMessage = exports.writeDataToBus = void 0;
+const tool_1 = require("../../tool");
 //let lastHour: number = 0;
 function writeDataToBus(runner, face, unit, to, from, fromQueueId, version, body) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -40,7 +41,7 @@ function processBusMessage(unitxRunner, msg) {
         let faceUrl = busOwner + '/' + bus + '/' + face;
         let ret = yield writeDataToBus(unitxRunner, faceUrl, unit, to, from, queueId, version, body);
         if (ret < 0) {
-            console.error('writeDataToBus message duplicated!', msg, -ret);
+            tool_1.logger.error('writeDataToBus message duplicated!', msg, -ret);
         }
     });
 }

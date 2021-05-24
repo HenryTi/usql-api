@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pullEntities = void 0;
+const tool_1 = require("../tool");
 const core_1 = require("../core");
 function pullEntities(runner) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -25,7 +26,7 @@ function pullEntities(runner) {
         catch (err) {
             debugger;
             if (err && err.message)
-                console.error(err.message);
+                tool_1.logger.error(err.message);
         }
     });
 }
@@ -40,13 +41,13 @@ function pullNew(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         let { net } = runner;
         let count = 0;
-        console.log(`== pullNew start ==`);
+        tool_1.logger.log(`== pullNew start ==`);
         for (; count < 200;) {
             let items = yield runner.tableFromProc('$from_new', undefined);
             if (items.length === 0) {
                 break;
             }
-            console.log(`== pullNew count=${items.length} ==`);
+            tool_1.logger.log(`== pullNew count=${items.length} ==`);
             for (let item of items) {
                 count++;
                 let { id, unit, entity, key, tries, update_time, now } = item;
@@ -81,18 +82,18 @@ function pullNew(runner) {
                     yield runner.call('$from_new_set', [unit, id, fns]);
                 }
             }
-            console.log(`## pullNew end ##`);
+            tool_1.logger.log(`## pullNew end ##`);
         }
     });
 }
 function pullModify(runner) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(`== pullModify start ==`);
+        tool_1.logger.log(`== pullModify start ==`);
         let { net } = runner;
         let items = yield runner.tableFromProc('$sync_from', undefined);
         if (items.length === 0)
             return;
-        console.log(`== pullModify count=${items.length} ==`);
+        tool_1.logger.log(`== pullModify count=${items.length} ==`);
         let unitOpenApiItems = {};
         // 把访问同一个openApi的整理到一起
         let promises = [];
@@ -196,10 +197,10 @@ function pullModify(runner) {
                     }
                 }
                 catch (err) {
-                    console.error(err);
+                    tool_1.logger.error(err);
                 }
             }
-            console.log(`## pullModify end ##`);
+            tool_1.logger.log(`## pullModify end ##`);
         }
     });
 }
@@ -266,7 +267,7 @@ function setTuid(runner, tuidName, schema, unit, values) {
             yield runner.tuidSave(tuidName, unit, user, paramMain);
         }
         catch (err) {
-            console.log(err.message);
+            tool_1.logger.log(err.message);
         }
     });
 }

@@ -11,11 +11,11 @@ export function startSync() {
 
 async function sync() {
     try {
-        console.log('sync at: ' + new Date().toLocaleTimeString());
+        logger.log('sync at: ' + new Date().toLocaleTimeString());
         await syncDbs();
     }
     catch (err) {
-        console.error('sync error: ', err);
+        logger.error('sync error: ', err);
     }
     finally {
         setTimeout(sync, 60*1000);

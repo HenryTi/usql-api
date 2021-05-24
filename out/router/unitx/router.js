@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildUnitxRouter = void 0;
 const express_1 = require("express");
+const tool_1 = require("../../tool");
 const core_1 = require("../../core");
 const messageProcesser_1 = require("./messageProcesser");
 const processBusMessage_1 = require("./processBusMessage");
@@ -39,7 +40,7 @@ function buildUnitxRouter(rb) {
         }
         catch (e) {
             let err = JSON.stringify(e);
-            console.error('unitx-error: ', err);
+            tool_1.logger.error('unitx-error: ', err);
             res.json({
                 ok: false,
                 error: err,
@@ -66,7 +67,7 @@ function buildUnitxRouter(rb) {
         let { unit, face, to, from, fromQueueId, version, body: message } = body;
         let ret = yield processBusMessage_1.writeDataToBus(runner, face, unit, to, from, fromQueueId, version, message);
         if (ret < 0) {
-            console.error('writeDataToBus message duplicated!', body, -ret);
+            tool_1.logger.error('writeDataToBus message duplicated!', body, -ret);
         }
         return ret;
     });

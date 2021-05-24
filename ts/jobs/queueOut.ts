@@ -1,3 +1,4 @@
+import { logger } from '../tool';
 import { EntityRunner, centerApi, SheetQueueData, BusMessage, env } from "../core";
 import { Finish } from "./finish";
 import { getErrorString } from "../tool";
@@ -14,7 +15,7 @@ export async function queueOut(runner: EntityRunner): Promise<void> {
             for (let row of ret) {
                 // 以后修正，表中没有$unit，这时候应该runner里面包含$unit的值。在$unit表中，应该有唯一的unit值
                 let {$unit, id, to, action, subject, content, tries, update_time, now} = row;
-                console.log('queueOut 1: ', action, subject, content, update_time);
+                logger.log('queueOut 1: ', action, subject, content, update_time);
                 start = id;
                 if (!$unit) $unit = runner.uniqueUnit;
                 if (tries > 0) {
@@ -73,7 +74,7 @@ export async function queueOut(runner: EntityRunner): Promise<void> {
     }
     catch (err) {
         await runner.log(0, 'jobs queueOut loop', getErrorString(err));
-        if (env.isDevelopment===true) console.error(err);
+        if (env.isDevelopment===true) logger.error(err);
     }
 }
 
@@ -84,7 +85,7 @@ async function processItem(runner:EntityRunner, unit:number, id:number, action:s
         let parts = item.split('\n');
         json[parts[0]] = parts[1];
     }
-    console.log('queue item: ', unit, id, action, subject, json);
+    logger.log('queue item: ', unit, id, action, subject, json);
 }
 
 function jsonValues(content:string):any {
@@ -140,7 +141,7 @@ async function bus(runner:EntityRunner, unit:number, id:number, to:number, bus:s
     let schema = runner.getSchema(busEntityName);
     if (schema === undefined) {
         let err = `schema ${busEntityName} not exists`;
-        console.error(err);
+        logger.error(err);
         debugger;
         throw err;
     }

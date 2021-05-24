@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MyDbServer = void 0;
 const mysql_1 = require("mysql");
 const _ = require("lodash");
+const tool_1 = require("../tool");
 const dbServer_1 = require("./dbServer");
 const db_1 = require("./db");
 const consts_1 = require("./consts");
@@ -126,11 +127,11 @@ class MyDbServer extends dbServer_1.DbServer {
                         case +ER_LOCK_TIMEOUT:
                         case +ER_LOCK_DEADLOCK:
                             if (isDevelopment === true)
-                                console.error(`ERROR - ${err.errno} ${err.message}`);
+                                tool_1.logger.error(`ERROR - ${err.errno} ${err.message}`);
                             ++retryCount;
                             if (retryCount > retries) {
                                 if (isDevelopment === true)
-                                    console.error(`Out of retries so just returning the error.`);
+                                    tool_1.logger.error(`Out of retries so just returning the error.`);
                                 if (log !== undefined) {
                                     log.tries = retryCount;
                                     log.error = err.sqlMessage;
@@ -141,7 +142,7 @@ class MyDbServer extends dbServer_1.DbServer {
                             }
                             let sleepMillis = Math.floor((Math.random() * maxMillis) + minMillis);
                             if (isDevelopment === true) {
-                                console.error(sql + ': ---- Retrying request with', retries - retryCount, 'retries left. Timeout', sleepMillis);
+                                tool_1.logger.error(sql + ': ---- Retrying request with', retries - retryCount, 'retries left. Timeout', sleepMillis);
                             }
                             return setTimeout(() => {
                                 debugger;
@@ -150,8 +151,8 @@ class MyDbServer extends dbServer_1.DbServer {
                         default:
                             if (isDevelopment === true) {
                                 debugger;
-                                console.error(err);
-                                console.error(sql);
+                                tool_1.logger.error(err);
+                                tool_1.logger.error(sql);
                             }
                             if (log !== undefined) {
                                 log.tries = retryCount;
@@ -166,7 +167,7 @@ class MyDbServer extends dbServer_1.DbServer {
                 /*
                 this.pool.getConnection(function(err, connection) {
                     if (err) {
-                        console.error(err);
+                        logger.error(err);
                         debugger;
                         reject(err);
                         return;

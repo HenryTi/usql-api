@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildLicense = void 0;
 const crypto = require("crypto");
 const constants = require("constants");
+const tool_1 = require("../tool");
 //const algorithm = 'aes-128-cbc';
 //const algorithm = 'aes-48-cbc';
 const algorithm = 'RSA-SHA384';
@@ -182,7 +183,7 @@ ${encoded.toString('base64')}
         return [ret];
     }
     catch (err) {
-        console.error(err);
+        tool_1.logger.error(err);
     }
 }
 exports.buildLicense = buildLicense;

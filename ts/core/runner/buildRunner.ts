@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { logger } from '../../tool';
 import { centerApi } from '../centerApi';
 import { Db } from '../db';
 
@@ -50,7 +51,7 @@ export class BuildRunner {
 			}
 		}
 		catch (err) {
-			console.error('set unit admin', err);
+			logger.error('set unit admin', err);
 		}
 	}
 
@@ -70,7 +71,7 @@ export class BuildRunner {
 			}
 			else {
 				let err = `ID Section unmatch: here_max:${section_max} center_max here: ${service_max}`;
-				console.error(err);
+				logger.error(err);
 				throw err;
 			}
 		}

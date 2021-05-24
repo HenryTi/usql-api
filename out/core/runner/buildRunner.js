@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BuildRunner = void 0;
+const tool_1 = require("../../tool");
 const centerApi_1 = require("../centerApi");
 class BuildRunner {
     constructor(db) {
@@ -66,7 +67,7 @@ class BuildRunner {
                 }
             }
             catch (err) {
-                console.error('set unit admin', err);
+                tool_1.logger.error('set unit admin', err);
             }
         });
     }
@@ -87,7 +88,7 @@ class BuildRunner {
                 }
                 else {
                     let err = `ID Section unmatch: here_max:${section_max} center_max here: ${service_max}`;
-                    console.error(err);
+                    tool_1.logger.error(err);
                     throw err;
                 }
             }

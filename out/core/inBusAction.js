@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SheetActionParametersBus = exports.SheetVerifyParametersBus = exports.AcceptParametersBus = exports.ActionParametersBus = exports.ParametersBus = void 0;
+const tool_1 = require("../tool");
 const packParam_1 = require("./packParam");
 class ParametersBus {
     constructor(runner, entityName) {
@@ -173,13 +174,13 @@ class SheetActionParametersBus extends ParametersBus {
         let state = this.schema.states.find(v => v.name === this.stateName);
         //let state = this.run?.[this.stateName];
         if (state === undefined) {
-            console.error('Sheet %s 没有定义 State %s', this.entityName, this.stateName);
+            tool_1.logger.error('Sheet %s 没有定义 State %s', this.entityName, this.stateName);
             return false;
         }
         //let action = state[this.actionName]; 
         let action = state.actions.find(v => v.name === this.actionName);
         if (action === undefined) {
-            console.error('Sheet %s State %s 没有定义 Action %s', this.entityName, this.stateName, this.actionName);
+            tool_1.logger.error('Sheet %s State %s 没有定义 Action %s', this.entityName, this.stateName, this.actionName);
             return false;
         }
         this.schema.inBuses = action.inBuses;

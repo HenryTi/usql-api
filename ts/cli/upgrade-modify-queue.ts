@@ -1,4 +1,5 @@
 import { createPool, MysqlError } from "mysql";
+import { logger } from '../tool';
 
 //process.env.NODE_ENV = 'development';
 //process.env.NODE_ENV = 'devdo';
@@ -23,7 +24,7 @@ import { createPool, MysqlError } from "mysql";
 	});
 	
 	if (!node_env && !process.env.NODE_ENV) {
-		console.error('node out/cli/upgrade-modify-queue node_env=???');
+		logger.error('node out/cli/upgrade-modify-queue node_env=???');
 		process.exit(0);
 	}
 
@@ -31,13 +32,13 @@ import { createPool, MysqlError } from "mysql";
 		process.env.NODE_ENV = node_env;
 	}
 
-	console.log('NODE_ENV ' + process.env.NODE_ENV);
+	logger.log('NODE_ENV ' + process.env.NODE_ENV);
 
 	const config:any = require('config');
 
 	const const_connection = 'connection';
 	const config_connection = config.get(const_connection);
-	console.log(config_connection);
+	logger.log(config_connection);
 	const pool = createPool(config_connection);
 
 	async function runSql(sql:string):Promise<any> {
@@ -54,8 +55,8 @@ import { createPool, MysqlError } from "mysql";
 	}
 		
 	try {
-		console.log('');
-		console.log('========================================');
+		logger.log('');
+		logger.log('========================================');
 
 		let sqlDbs = `select name from \`$uq\`.uq`;
 		let dbs:any[] = await runSql(sqlDbs);
@@ -66,15 +67,15 @@ import { createPool, MysqlError } from "mysql";
 				let sqlHasModifyQueueMax = `SELECT * FROM information_schema.COLUMNS WHERE table_SCHEMA='${dbName}' AND TABLE_NAME='tv_$unit' AND COLUMN_NAME='modifyQueueMax'`;
 				let colModifyQueue = await runSql(sqlHasModifyQueueMax);
 				if (colModifyQueue.length > 0) {
-					console.log(`${dbName} already upgraded`);
-					console.log('\n');
+					logger.log(`${dbName} already upgraded`);
+					logger.log('\n');
 					continue;
 				}
 
-				console.log(`== begin upgrade ${dbName}`);
+				logger.log(`== begin upgrade ${dbName}`);
 				let sqlAddCol = `ALTER TABLE ${dbName}.tv_$unit ADD modifyQueueMax BIGINT DEFAULT NULL;`;
 				await runSql(sqlAddCol);
-				console.log(`${dbName} tv_$unit add modifyQueueMax column`);
+				logger.log(`${dbName} tv_$unit add modifyQueueMax column`);
 
 				let sqlHasUnit = `SELECT * FROM information_schema.COLUMNS WHERE table_SCHEMA='${dbName}' AND TABLE_NAME='tv_$modify_queue' AND COLUMN_NAME='$unit'`;
 				let hasUnit = await runSql(sqlHasUnit);
@@ -82,24 +83,24 @@ import { createPool, MysqlError } from "mysql";
 					// 不带unit的表
 					let sqlAddIdIndex = `alter table ${dbName}.tv_$modify_queue add unique index $id_ix (id)`;
 					await runSql(sqlAddIdIndex);
-					console.log(`${dbName} tv_$modify_queue add unique index $id_ix`);
+					logger.log(`${dbName} tv_$modify_queue add unique index $id_ix`);
 
 					let sqlPrimaryKey = `alter table ${dbName}.tv_$modify_queue drop primary key, add primary key(entity, id);`;
 					await runSql(sqlPrimaryKey);
-					console.log(`${dbName} tv_$modify_queue primary key (entity, id)`);
+					logger.log(`${dbName} tv_$modify_queue primary key (entity, id)`);
 
 					let sqlSetModifyQueueMax = `
 					UPDATE ${dbName}.tv_$unit AS t1
 						SET t1.modifyQueueMax=(SELECT MAX(id) AS maxId FROM ${dbName}.tv_$modify_queue)
 						WHERE t1.unit=24;`;
 					await runSql(sqlSetModifyQueueMax);
-					console.log(`${dbName} set tv_$unit modifyQueueMax`);
+					logger.log(`${dbName} set tv_$unit modifyQueueMax`);
 				}
 				else {
 					// 带unit的表
 					let sqlPrimaryKey = `alter table ${dbName}.tv_$modify_queue drop primary key, add primary key($unit, entity, id);`;
 					await runSql(sqlPrimaryKey);
-					console.log(`${dbName} tv_$modify_queue primary key ($unit, entity, id)`);
+					logger.log(`${dbName} tv_$modify_queue primary key ($unit, entity, id)`);
 
 					let sqlSetModifyQueueMax = `
 					UPDATE ${dbName}.tv_$unit AS t1 INNER JOIN (SELECT $unit, MAX(id) AS maxId
@@ -108,20 +109,20 @@ import { createPool, MysqlError } from "mysql";
 					SET t1.modifyQueueMax=t2.maxId
 					WHERE t1.unit>0;`;
 					await runSql(sqlSetModifyQueueMax);
-					console.log(`${dbName} set tv_$unit modifyQueueMax`);
+					logger.log(`${dbName} set tv_$unit modifyQueueMax`);
 				}
-				console.log(`${dbName} done!`);
-				console.log('\n');
+				logger.log(`${dbName} done!`);
+				logger.log('\n');
 			}
 			catch (err) {
-				console.error(err);
+				logger.error(err);
 			}
 		}
 
-		console.log('=== Job done!');
+		logger.log('=== Job done!');
 	}
 	catch (err) {
-		console.error(err);
+		logger.error(err);
 	}
 	process.exit(0);
 })();

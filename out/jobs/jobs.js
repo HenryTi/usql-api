@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.startJobsLoop = void 0;
+const tool_1 = require("../tool");
 const core_1 = require("../core");
 const pullEntities_1 = require("./pullEntities");
 const pullBus_1 = require("./pullBus");
@@ -35,28 +36,28 @@ function startJobsLoop() {
         let $uqDb = core_1.Db.db(core_1.consts.$uq);
         if (core_1.env.isDevelopment === true) {
             // 只有在开发状态下，才可以屏蔽jobs
-            //console.log('jobs loop: developing, no loop!');
+            //logger.log('jobs loop: developing, no loop!');
             //return;
             if (core_1.env.isDevdo === true)
                 return;
-            console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
+            tool_1.logger.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
             yield $uqDb.setDebugJobs();
-            console.log('========= set debugging jobs =========');
+            tool_1.logger.log('========= set debugging jobs =========');
             yield sleep(waitForOtherStopJobs);
         }
         else {
             yield sleep(firstRun);
         }
-        console.log('\n');
-        console.log('\n');
-        console.error('====== Jobs loop started! ======');
+        tool_1.logger.log('\n');
+        tool_1.logger.log('\n');
+        tool_1.logger.error('====== Jobs loop started! ======');
         for (;;) {
-            console.log('\n');
-            console.info(`====== ${process.env.NODE_ENV} one loop at ${new Date().toLocaleString()} ======`);
+            tool_1.logger.log('\n');
+            tool_1.logger.info(`====== ${process.env.NODE_ENV} one loop at ${new Date().toLocaleString()} ======`);
             try {
                 let uqs = yield $uqDb.uqDbs();
                 if (uqs.length === 0) {
-                    console.error('debugging_jobs=yes, stop jobs loop');
+                    tool_1.logger.error('debugging_jobs=yes, stop jobs loop');
                 }
                 else
                     for (let uqRow of uqs) {
@@ -78,9 +79,9 @@ function startJobsLoop() {
                             return;
                             // if (dbName === 'pointshop') debugger;
                             yield $uqDb.setDebugJobs();
-                            console.info('========= set debugging jobs =========');
+                            tool_1.logger.info('========= set debugging jobs =========');
                         }
-                        console.info('====== loop for ' + uqDb + '======');
+                        tool_1.logger.info('====== loop for ' + uqDb + '======');
                         let runner = yield net.getRunner(dbName);
                         if (runner === undefined)
                             continue;
@@ -88,24 +89,24 @@ function startJobsLoop() {
                         if (buses !== undefined) {
                             let { outCount, faces } = buses;
                             if (outCount > 0 || runner.hasSheet === true) {
-                                console.info(`==== in loop ${uqDb}: queueOut out bus number=${outCount} ====`);
+                                tool_1.logger.info(`==== in loop ${uqDb}: queueOut out bus number=${outCount} ====`);
                                 yield queueOut_1.queueOut(runner);
                             }
                             if (faces !== undefined) {
-                                console.info(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
+                                tool_1.logger.info(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
                                 yield pullBus_1.pullBus(runner);
-                                console.info(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
+                                tool_1.logger.info(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
                                 yield queueIn_1.queueIn(runner);
                             }
                         }
-                        console.info(`==== in loop ${uqDb}: pullEntities ====`);
+                        tool_1.logger.info(`==== in loop ${uqDb}: pullEntities ====`);
                         yield pullEntities_1.pullEntities(runner);
-                        console.info(`###### end loop ${uqDb} ######`);
+                        tool_1.logger.info(`###### end loop ${uqDb} ######`);
                     }
             }
             catch (err) {
-                console.error('jobs loop error!!!!');
-                console.error(err);
+                tool_1.logger.error('jobs loop error!!!!');
+                tool_1.logger.error(err);
                 let errText = '';
                 if (err === null) {
                     errText = 'null';
@@ -136,17 +137,17 @@ function startJobsLoop() {
                         yield sleep(runGap);
                     }
                     catch (errSleep) {
-                        console.error('=========================');
-                        console.error('===== sleep error =======');
-                        console.error(errSleep);
-                        console.error('=========================');
+                        tool_1.logger.error('=========================');
+                        tool_1.logger.error('===== sleep error =======');
+                        tool_1.logger.error(errSleep);
+                        tool_1.logger.error('=========================');
                     }
                 }
                 else {
                     loopWait = true;
                 }
             }
-            console.info(`###### one loop end at ${new Date().toLocaleString()} ######`);
+            tool_1.logger.info(`###### one loop end at ${new Date().toLocaleString()} ######`);
         }
     });
 }

@@ -26,7 +26,7 @@ if (opName === '$') {
     let users:{to:number}[] = await runner.query(
         'getEntityAccess', unit, user, 
         [uq, entityName, opName]);
-    console.log({
+    logger.log({
         '$': 'saveEntityOpPost',
         '#': 'getEntityAccess',
         unit: unit, 

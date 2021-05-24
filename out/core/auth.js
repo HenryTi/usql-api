@@ -4,6 +4,7 @@ exports.authUpBuild = exports.setUqBuildSecret = exports.authJoint = exports.aut
 const jwt = require("jsonwebtoken");
 const config = require("config");
 const crypto = require("crypto");
+const tool_1 = require("../tool");
 class Auth {
     constructor(roles) {
         if (roles === undefined) {
@@ -40,13 +41,13 @@ class Auth {
         }
         if (token === undefined) {
             let err = 'not authorized request';
-            console.log(err);
+            tool_1.logger.log(err);
             if (res !== undefined)
                 res.end(err);
             return;
         }
         let secret = config.get('secret'); // .appSecret;
-        //console.log('auth check: secret=%s, token=%s', secret, token);
+        //logger.log('auth check: secret=%s, token=%s', secret, token);
         jwt.verify(token, secret, (err, decoded) => {
             if (err === null) {
                 decoded.db = req.params.db;
@@ -165,7 +166,7 @@ function middlewareUqBuild(req, res, next) {
     }
     if (token === undefined) {
         let err = 'not authorized request';
-        console.log(err);
+        tool_1.logger.log(err);
         if (res !== undefined)
             res.end(err);
         return;

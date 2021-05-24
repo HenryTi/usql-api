@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.testCompileNet = exports.prodCompileNet = exports.testNet = exports.prodNet = exports.Net = void 0;
+const tool_1 = require("../tool");
 const runner_1 = require("./runner");
 const db_1 = require("./db");
 const openApi_1 = require("./openApi");
@@ -78,11 +79,11 @@ class Net {
             for (let runner of runners) {
                 yield runner.buildTuidAutoId();
                 yield this.resetRunner(runner);
-                console.error('=== resetRunnerAfterCompile: ' + runner.name);
+                tool_1.logger.error('=== resetRunnerAfterCompile: ' + runner.name);
             }
             if (this.executingNet !== undefined) {
                 this.executingNet.resetRunnerAfterCompile(db);
-                console.error('=== executingNet resetRunnerAfterCompile: ' + db.getDbName());
+                tool_1.logger.error('=== executingNet resetRunnerAfterCompile: ' + db.getDbName());
             }
         });
     }
@@ -95,7 +96,7 @@ class Net {
                 let runner = this.runners[i];
                 if (runner) {
                     yield runner.reset();
-                    console.error('--- === --- === ' + runnerName + ' resetRunner ' + ' net is ' + this.id);
+                    tool_1.logger.error('--- === --- === ' + runnerName + ' resetRunner ' + ' net is ' + this.id);
                     this.runners[i] = undefined;
                 }
             }
@@ -131,12 +132,12 @@ class Net {
                 db.exists().then(isExists => {
                     let runner;
                     if (isExists === false) {
-                        //console.error('??? === ??? === ' + name + ' not exists in new Runner');
+                        //logger.error('??? === ??? === ' + name + ' not exists in new Runner');
                         this.runners[name] = null;
                         runner = undefined;
                     }
                     else {
-                        //console.error('+++ === +++ === ' + name + ' new Runner(name, db, this)');
+                        //logger.error('+++ === +++ === ' + name + ' new Runner(name, db, this)');
                         runner = new runner_1.EntityRunner(name, db, this);
                         this.runners[name] = runner;
                     }
@@ -183,14 +184,14 @@ class Net {
         return __awaiter(this, void 0, void 0, function* () {
             let openApi = this.getOpenApiFromCache(uqFullName, unit);
             if (openApi === null) {
-                console.error('openApiUnitUq null ', uqFullName, unit);
+                tool_1.logger.error('openApiUnitUq null ', uqFullName, unit);
                 return null;
             }
             if (openApi !== undefined)
                 return openApi;
             let uqUrl = yield centerApi_1.centerApi.urlFromUq(unit, uqFullName);
             if (!uqUrl) {
-                console.error('openApiUnitUq centerApi.urlFromUq not exists', uqFullName, unit);
+                tool_1.logger.error('openApiUnitUq centerApi.urlFromUq not exists', uqFullName, unit);
                 let openApis = this.uqOpenApis[uqFullName];
                 if (openApis) {
                     openApis[unit] = null;

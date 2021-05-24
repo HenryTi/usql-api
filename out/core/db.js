@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.dbLogger = exports.create$UqDb = exports.SpanLog = exports.UnitxTestDb = exports.UnitxProdDb = exports.UnitxDb = exports.UqDb = exports.Db = exports.env = void 0;
 const config = require("config");
 const _ = require("lodash");
+const tool_1 = require("../tool");
 const ms_1 = require("./ms");
 const my_1 = require("./my");
 const runner_1 = require("./runner");
@@ -120,7 +121,7 @@ class Db {
                 yield this.dbServer.call('$uq', 'performance', [tick, log, ms]);
             }
             catch (err) {
-                console.error(err);
+                tool_1.logger.error(err);
                 let { message, sqlMessage } = err;
                 let msg = '';
                 if (message)

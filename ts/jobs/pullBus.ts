@@ -1,4 +1,5 @@
-import { EntityRunner, Net } from "../core";
+import { logger } from '../tool';
+import { EntityRunner } from "../core";
 import { getErrorString } from "../tool";
 
 export async function pullBus(runner: EntityRunner) {
@@ -20,7 +21,7 @@ export async function pullBus(runner: EntityRunner) {
 				let {length: messagesLen} = messages;
 				if (messagesLen > 0) {
 					// 新版：bus读来，直接写入queue_in。然后在队列里面处理
-					console.log(`total ${messagesLen} arrived from unitx`);
+					logger.log(`total ${messagesLen} arrived from unitx`);
 					for (let row of messages) {
 						let {to, face:faceUrl, id:msgId, body, version} = row;
 						let face = coll[(faceUrl as string).toLowerCase()];
@@ -38,7 +39,7 @@ export async function pullBus(runner: EntityRunner) {
 						}
 						catch (toQueueInErr) {
 							hasError = buses.hasError = true;
-							console.error(toQueueInErr);
+							logger.error(toQueueInErr);
 							await runner.log(unit, 'jobs pullBus loop to QueueInErr msgId='+msgId, getErrorString(toQueueInErr));
 							break;
 						}
@@ -57,7 +58,7 @@ export async function pullBus(runner: EntityRunner) {
         }
     }
     catch (err) {
-        console.error(err);
+        logger.error(err);
         await runner.log(0, 'jobs pullBus loop error: ', getErrorString(err));
     }
 }

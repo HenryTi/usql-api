@@ -14,6 +14,7 @@ const express = require("express");
 const express_1 = require("express");
 const bodyParser = require("body-parser");
 const config = require("config");
+const tool_1 = require("./tool");
 const router_1 = require("./router");
 const res_1 = require("./res");
 const core_1 = require("./core");
@@ -26,21 +27,21 @@ function init() {
         return new Promise((resolve, reject) => {
             try {
                 process.on('uncaughtException', function (err) {
-                    console.error('uncaughtException', err);
+                    tool_1.logger.error('uncaughtException', err);
                     reject(err);
                 });
                 process.on('unhandledRejection', (err, promise) => {
-                    console.log('unhandledRejection', err);
+                    tool_1.logger.log('unhandledRejection', err);
                     reject(err);
                 });
                 if (!process.env.NODE_ENV) {
-                    console.error('NODE_ENV not defined, exit');
+                    tool_1.logger.error('NODE_ENV not defined, exit');
                     process.exit();
                 }
-                console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
+                tool_1.logger.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
                 let connection = config.get("connection");
                 if (connection === undefined || connection.host === '0.0.0.0') {
-                    console.log("mysql connection must defined in config/default.json or config/production.json");
+                    tool_1.logger.log("mysql connection must defined in config/default.json or config/production.json");
                     return;
                 }
                 res_1.initResPath();
@@ -70,12 +71,12 @@ function init() {
                             p = p.substr(0, 100);
                     }
                     let t = new Date();
-                    console.log('%s-%s %s:%s - %s %s %s', t.getMonth() + 1, t.getDate(), t.getHours(), t.getMinutes(), req.method, req.originalUrl, p);
+                    tool_1.logger.log('%s-%s %s:%s - %s %s %s', t.getMonth() + 1, t.getDate(), t.getHours(), t.getMinutes(), req.method, req.originalUrl, p);
                     try {
                         next();
                     }
                     catch (e) {
-                        console.error(e);
+                        tool_1.logger.error(e);
                     }
                 }));
                 app.use('/res', res_1.router);
@@ -90,16 +91,16 @@ function init() {
                 app.listen(port, () => __awaiter(this, void 0, void 0, function* () {
                     yield res_1.createResDb();
                     yield core_1.create$UqDb();
-                    console.log('UQ-API ' + uq_api_version + ' listening on port ' + port);
+                    tool_1.logger.log('UQ-API ' + uq_api_version + ' listening on port ' + port);
                     let connection = config.get("connection");
                     let { host, user } = connection;
-                    console.log('DB host: %s, user: %s', host, user);
-                    console.log('Tonva uq-api started!');
+                    tool_1.logger.log('DB host: %s, user: %s', host, user);
+                    tool_1.logger.log('Tonva uq-api started!');
                     resolve();
                 }));
             }
             catch (err) {
-                console.error(err);
+                tool_1.logger.error(err);
             }
         });
     });

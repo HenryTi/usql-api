@@ -2,6 +2,7 @@ import {Router, Request, Response, NextFunction} from 'express';
 import * as jwt from 'jsonwebtoken';
 import * as config from 'config';
 import * as crypto from 'crypto';
+import { logger } from '../tool';
 
 //export const debugUser = config.get<number>('debugUser');
 //export const debugUnit = config.get<number>('debugUnit');
@@ -50,12 +51,12 @@ export default class Auth {
         }
         if (token === undefined) {
             let err = 'not authorized request';
-            console.log(err);
+            logger.log(err);
             if (res !== undefined) res.end(err);
             return;
         }
         let secret = config.get<string>('secret'); // .appSecret;
-        //console.log('auth check: secret=%s, token=%s', secret, token);
+        //logger.log('auth check: secret=%s, token=%s', secret, token);
         jwt.verify(token, secret, 
             (err, decoded:AuthUser) => 
         {
@@ -180,7 +181,7 @@ function middlewareUqBuild(req:Request, res:Response, next:NextFunction) {
     }
     if (token === undefined) {
         let err = 'not authorized request';
-        console.log(err);
+        logger.log(err);
         if (res !== undefined) res.end(err);
         return;
     }

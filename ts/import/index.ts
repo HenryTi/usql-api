@@ -1,3 +1,4 @@
+import { logger } from '../tool';
 import { Net } from "../core";
 
 //import { getRunner } from "../db";
@@ -26,9 +27,9 @@ export async function importData(net: Net) {
             if (filePath === undefined) continue;
             await runner.importData(unit, user, source, entity, filePath);
         }
-        console.log('files imported!');
+        logger.log('files imported!');
     }
     catch (err) {
-        console.error(err);
+        logger.error(err);
     }
 }

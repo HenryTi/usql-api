@@ -1,3 +1,4 @@
+import { logger } from '../tool';
 import { EntityRunner } from "./runner";
 import { Db, env } from "./db";
 import { OpenApi } from "./openApi";
@@ -65,12 +66,12 @@ export abstract class Net {
 		for (let runner of runners) {
 			await runner.buildTuidAutoId();
 			await this.resetRunner(runner);
-			console.error('=== resetRunnerAfterCompile: ' + runner.name);
+			logger.error('=== resetRunnerAfterCompile: ' + runner.name);
 		}
 
 		if (this.executingNet !== undefined) {
 			this.executingNet.resetRunnerAfterCompile(db);
-			console.error('=== executingNet resetRunnerAfterCompile: ' + db.getDbName());
+			logger.error('=== executingNet resetRunnerAfterCompile: ' + db.getDbName());
 		}
 	}
 
@@ -81,7 +82,7 @@ export abstract class Net {
             let runner = this.runners[i];
             if (runner) {
 				await runner.reset();
-                console.error('--- === --- === ' + runnerName + ' resetRunner ' + ' net is ' + this.id);
+                logger.error('--- === --- === ' + runnerName + ' resetRunner ' + ' net is ' + this.id);
                 this.runners[i] = undefined;
             }
         }
@@ -114,12 +115,12 @@ export abstract class Net {
             db.exists().then(isExists => {
                 let runner: EntityRunner;
                 if (isExists === false) {
-                    //console.error('??? === ??? === ' + name + ' not exists in new Runner');
+                    //logger.error('??? === ??? === ' + name + ' not exists in new Runner');
                     this.runners[name] = null;
                     runner = undefined;
                 }
                 else {
-                    //console.error('+++ === +++ === ' + name + ' new Runner(name, db, this)');
+                    //logger.error('+++ === +++ === ' + name + ' new Runner(name, db, this)');
                     runner = new EntityRunner(name, db, this);
                     this.runners[name] = runner;
                 }
@@ -163,13 +164,13 @@ export abstract class Net {
     async openApiUnitUq(unit:number, uqFullName:string):Promise<OpenApi> {
 		let openApi = this.getOpenApiFromCache(uqFullName, unit);
 		if (openApi === null) {
-			console.error('openApiUnitUq null ', uqFullName, unit);
+			logger.error('openApiUnitUq null ', uqFullName, unit);
 			return null;
 		}
 		if (openApi !== undefined) return openApi;
 		let uqUrl = await centerApi.urlFromUq(unit, uqFullName);
 		if (!uqUrl) {
-			console.error('openApiUnitUq centerApi.urlFromUq not exists', uqFullName, unit);
+			logger.error('openApiUnitUq centerApi.urlFromUq not exists', uqFullName, unit);
 			let openApis = this.uqOpenApis[uqFullName];
 			if (openApis) {
 				openApis[unit] = null;

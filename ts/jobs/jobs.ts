@@ -1,4 +1,5 @@
 import * as _ from 'lodash';
+import { logger } from '../tool';
 import { Net, Db, prodNet, testNet, env, consts } from '../core';
 import { pullEntities } from './pullEntities';
 import { pullBus } from './pullBus';
@@ -27,28 +28,28 @@ export async function startJobsLoop(): Promise<void> {
 	let $uqDb = Db.db(consts.$uq);
     if (env.isDevelopment === true) {
 		// 只有在开发状态下，才可以屏蔽jobs
-		//console.log('jobs loop: developing, no loop!');
+		//logger.log('jobs loop: developing, no loop!');
 		//return;
 		if (env.isDevdo === true) return;
-        console.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
+        logger.log(`It's ${new Date().toLocaleTimeString()}, waiting 1 minutes for other jobs to stop.`);
 		await $uqDb.setDebugJobs();
-		console.log('========= set debugging jobs =========');
+		logger.log('========= set debugging jobs =========');
         await sleep(waitForOtherStopJobs);
     }
     else {
         await sleep(firstRun);
     }
 
-	console.log('\n');
-	console.log('\n');
-    console.error('====== Jobs loop started! ======');
+	logger.log('\n');
+	logger.log('\n');
+    logger.error('====== Jobs loop started! ======');
     for (;;) {
-        console.log('\n');
-        console.info(`====== ${process.env.NODE_ENV} one loop at ${new Date().toLocaleString()} ======`);
+        logger.log('\n');
+        logger.info(`====== ${process.env.NODE_ENV} one loop at ${new Date().toLocaleString()} ======`);
         try {
 			let uqs = await $uqDb.uqDbs();
 			if (uqs.length === 0) {
-				console.error('debugging_jobs=yes, stop jobs loop');
+				logger.error('debugging_jobs=yes, stop jobs loop');
 			}
 			else for (let uqRow of uqs) {
                 let {db:uqDb} = uqRow;
@@ -69,9 +70,9 @@ export async function startJobsLoop(): Promise<void> {
 					return;
 					// if (dbName === 'pointshop') debugger;
 					await $uqDb.setDebugJobs();
-					console.info('========= set debugging jobs =========');
+					logger.info('========= set debugging jobs =========');
                 }
-                console.info('====== loop for ' + uqDb + '======');
+                logger.info('====== loop for ' + uqDb + '======');
 
                 let runner = await net.getRunner(dbName);
 				if (runner === undefined) continue;
@@ -79,24 +80,24 @@ export async function startJobsLoop(): Promise<void> {
                 if (buses !== undefined) {
 					let {outCount, faces} = buses;
                     if (outCount > 0 || runner.hasSheet === true) {
-						console.info(`==== in loop ${uqDb}: queueOut out bus number=${outCount} ====`);
+						logger.info(`==== in loop ${uqDb}: queueOut out bus number=${outCount} ====`);
                         await queueOut(runner);
                     }
                     if (faces !== undefined) {
-						console.info(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
+						logger.info(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
                         await pullBus(runner);
-						console.info(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
+						logger.info(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
                         await queueIn(runner);
                     }
                 }
-				console.info(`==== in loop ${uqDb}: pullEntities ====`);
+				logger.info(`==== in loop ${uqDb}: pullEntities ====`);
                 await pullEntities(runner);
-				console.info(`###### end loop ${uqDb} ######`);
+				logger.info(`###### end loop ${uqDb} ######`);
             }
         }
         catch (err) {
-            console.error('jobs loop error!!!!');
-            console.error(err);
+            logger.error('jobs loop error!!!!');
+            logger.error(err);
             let errText:string = '';
             if (err === null) {
                 errText = 'null';
@@ -119,16 +120,16 @@ export async function startJobsLoop(): Promise<void> {
 					await sleep(runGap);
 				}
 				catch (errSleep) {
-					console.error('=========================');
-					console.error('===== sleep error =======');
-					console.error(errSleep);
-					console.error('=========================');
+					logger.error('=========================');
+					logger.error('===== sleep error =======');
+					logger.error(errSleep);
+					logger.error('=========================');
 				}
             }
             else {
                 loopWait = true;
             }
         }
-        console.info(`###### one loop end at ${new Date().toLocaleString()} ######`);
+        logger.info(`###### one loop end at ${new Date().toLocaleString()} ######`);
     }
 }

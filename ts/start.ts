@@ -2,6 +2,7 @@ import * as express from 'express';
 import { Request, Response, NextFunction, Router } from 'express';
 import * as bodyParser from 'body-parser';
 import * as config from 'config';
+import { logger } from './tool';
 import {buildOpenRouter, buildEntityRouter, buildUnitxRouter, buildBuildRouter} from './router';
 import {createResDb, router as resRouter, initResPath} from './res';
 import {authCheck, authUnitx, RouterBuilder, 
@@ -19,24 +20,24 @@ export async function init():Promise<void> {
     return new Promise<void>((resolve, reject) => {
         try {
 			process.on('uncaughtException', function(err:any) {				
-				console.error('uncaughtException', err);
+				logger.error('uncaughtException', err);
 				reject(err);
 			});
 			process.on('unhandledRejection', (err:any, promise:any) => {
-				console.log('unhandledRejection', err);
+				logger.log('unhandledRejection', err);
 				reject(err);
 			});
 
 			if (!process.env.NODE_ENV) {
-				console.error('NODE_ENV not defined, exit');
+				logger.error('NODE_ENV not defined, exit');
 				process.exit();
 			}
 
-            console.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
+            logger.log('process.env.NODE_ENV: ', process.env.NODE_ENV);
             
             let connection = config.get<any>("connection");
             if (connection === undefined || connection.host === '0.0.0.0') {
-                console.log("mysql connection must defined in config/default.json or config/production.json");
+                logger.log("mysql connection must defined in config/default.json or config/production.json");
                 return;
             }
             initResPath();
@@ -66,13 +67,13 @@ export async function init():Promise<void> {
 					if (p.length > 100) p = p.substr(0, 100);
 				}
                 let t = new Date();
-                console.log('%s-%s %s:%s - %s %s %s', 
+                logger.log('%s-%s %s:%s - %s %s %s', 
                     t.getMonth()+1, t.getDate(), t.getHours(), t.getMinutes(), req.method, req.originalUrl, p);
                 try {
                     next();
                 }
                 catch (e) {
-                    console.error(e);
+                    logger.error(e);
                 }
             });
 
@@ -91,16 +92,16 @@ export async function init():Promise<void> {
             app.listen(port, async ()=>{
                 await createResDb();
                 await create$UqDb();
-                console.log('UQ-API ' + uq_api_version + ' listening on port ' + port);
+                logger.log('UQ-API ' + uq_api_version + ' listening on port ' + port);
                 let connection = config.get<any>("connection");
                 let {host, user} = connection;
-                console.log('DB host: %s, user: %s', host, user);
-				console.log('Tonva uq-api started!');
+                logger.log('DB host: %s, user: %s', host, user);
+				logger.log('Tonva uq-api started!');
                 resolve();
             });
         }
         catch (err) {
-            console.error(err);
+            logger.error(err);
         }
     });
 }

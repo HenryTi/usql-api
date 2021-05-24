@@ -1,3 +1,4 @@
+import { logger } from '../../tool';
 import { centerApi, CenterUnitxUrls, UnitxUrlServer } from '../centerApi';
 import { consts } from '../consts';
 import { env, UnitxDb, UnitxProdDb, UnitxTestDb } from "../db";
@@ -78,16 +79,16 @@ export abstract class Unitx {
 	}
 	
     async sendToUnitx(unit:number, msg:Message):Promise<number[]|string> {
-		console.error('sendToUnitx', unit, msg);
+		logger.error('sendToUnitx', unit, msg);
         let unitxApi = await this.getPushUnitxApi(unit);
         if (!unitxApi) {
             let err = `Center unit ${unit} not binding $unitx service!!!`;
             //return ret;
-            console.error(err);
+            logger.error(err);
             throw new Error(err);
 		}
 		else {
-			console.error('get unitx push url in sendToUnitx: ',  unitxApi.url);
+			logger.error('get unitx push url in sendToUnitx: ',  unitxApi.url);
 		}
         let toArr:number[] = await unitxApi.send(msg);
         return toArr;
@@ -96,12 +97,12 @@ export abstract class Unitx {
 	async pullBus(unit:number, maxId:number, faces:string): Promise<any[][]> {
 		let unitxApi = await this.getPullUnitxApi(unit);
 		if (!unitxApi) {
-			console.error(`getUnitxApi unit=${unit}, pull return nothing`);
+			logger.error(`getUnitxApi unit=${unit}, pull return nothing`);
 			return;
 		}
 		let ret = await unitxApi.fetchBus(unit, maxId, faces);
 		if (ret === undefined) {
-			console.error(`unitxApi.fetchBus  url=${unitxApi.url} unit=${unit}`);
+			logger.error(`unitxApi.fetchBus  url=${unitxApi.url} unit=${unit}`);
 			return;
 		}
 		return ret;

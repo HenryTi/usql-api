@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mysql_1 = require("mysql");
+const tool_1 = require("../tool");
 //process.env.NODE_ENV = 'development';
 //process.env.NODE_ENV = 'devdo';
 (function () {
@@ -31,17 +32,17 @@ const mysql_1 = require("mysql");
             }
         });
         if (!node_env && !process.env.NODE_ENV) {
-            console.error('node out/cli/upgrade-modify-queue node_env=???');
+            tool_1.logger.error('node out/cli/upgrade-modify-queue node_env=???');
             process.exit(0);
         }
         if (node_env) {
             process.env.NODE_ENV = node_env;
         }
-        console.log('NODE_ENV ' + process.env.NODE_ENV);
+        tool_1.logger.log('NODE_ENV ' + process.env.NODE_ENV);
         const config = require('config');
         const const_connection = 'connection';
         const config_connection = config.get(const_connection);
-        console.log(config_connection);
+        tool_1.logger.log(config_connection);
         const pool = mysql_1.createPool(config_connection);
         function runSql(sql) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -58,8 +59,8 @@ const mysql_1 = require("mysql");
             });
         }
         try {
-            console.log('');
-            console.log('========================================');
+            tool_1.logger.log('');
+            tool_1.logger.log('========================================');
             let sqlDbs = `select name from \`$uq\`.uq`;
             let dbs = yield runSql(sqlDbs);
             for (let db of dbs) {
@@ -69,36 +70,36 @@ const mysql_1 = require("mysql");
                     let sqlHasModifyQueueMax = `SELECT * FROM information_schema.COLUMNS WHERE table_SCHEMA='${dbName}' AND TABLE_NAME='tv_$unit' AND COLUMN_NAME='modifyQueueMax'`;
                     let colModifyQueue = yield runSql(sqlHasModifyQueueMax);
                     if (colModifyQueue.length > 0) {
-                        console.log(`${dbName} already upgraded`);
-                        console.log('\n');
+                        tool_1.logger.log(`${dbName} already upgraded`);
+                        tool_1.logger.log('\n');
                         continue;
                     }
-                    console.log(`== begin upgrade ${dbName}`);
+                    tool_1.logger.log(`== begin upgrade ${dbName}`);
                     let sqlAddCol = `ALTER TABLE ${dbName}.tv_$unit ADD modifyQueueMax BIGINT DEFAULT NULL;`;
                     yield runSql(sqlAddCol);
-                    console.log(`${dbName} tv_$unit add modifyQueueMax column`);
+                    tool_1.logger.log(`${dbName} tv_$unit add modifyQueueMax column`);
                     let sqlHasUnit = `SELECT * FROM information_schema.COLUMNS WHERE table_SCHEMA='${dbName}' AND TABLE_NAME='tv_$modify_queue' AND COLUMN_NAME='$unit'`;
                     let hasUnit = yield runSql(sqlHasUnit);
                     if (hasUnit.length === 0) {
                         // 不带unit的表
                         let sqlAddIdIndex = `alter table ${dbName}.tv_$modify_queue add unique index $id_ix (id)`;
                         yield runSql(sqlAddIdIndex);
-                        console.log(`${dbName} tv_$modify_queue add unique index $id_ix`);
+                        tool_1.logger.log(`${dbName} tv_$modify_queue add unique index $id_ix`);
                         let sqlPrimaryKey = `alter table ${dbName}.tv_$modify_queue drop primary key, add primary key(entity, id);`;
                         yield runSql(sqlPrimaryKey);
-                        console.log(`${dbName} tv_$modify_queue primary key (entity, id)`);
+                        tool_1.logger.log(`${dbName} tv_$modify_queue primary key (entity, id)`);
                         let sqlSetModifyQueueMax = `
 					UPDATE ${dbName}.tv_$unit AS t1
 						SET t1.modifyQueueMax=(SELECT MAX(id) AS maxId FROM ${dbName}.tv_$modify_queue)
 						WHERE t1.unit=24;`;
                         yield runSql(sqlSetModifyQueueMax);
-                        console.log(`${dbName} set tv_$unit modifyQueueMax`);
+                        tool_1.logger.log(`${dbName} set tv_$unit modifyQueueMax`);
                     }
                     else {
                         // 带unit的表
                         let sqlPrimaryKey = `alter table ${dbName}.tv_$modify_queue drop primary key, add primary key($unit, entity, id);`;
                         yield runSql(sqlPrimaryKey);
-                        console.log(`${dbName} tv_$modify_queue primary key ($unit, entity, id)`);
+                        tool_1.logger.log(`${dbName} tv_$modify_queue primary key ($unit, entity, id)`);
                         let sqlSetModifyQueueMax = `
 					UPDATE ${dbName}.tv_$unit AS t1 INNER JOIN (SELECT $unit, MAX(id) AS maxId
 					FROM ${dbName}.tv_$modify_queue
@@ -106,19 +107,19 @@ const mysql_1 = require("mysql");
 					SET t1.modifyQueueMax=t2.maxId
 					WHERE t1.unit>0;`;
                         yield runSql(sqlSetModifyQueueMax);
-                        console.log(`${dbName} set tv_$unit modifyQueueMax`);
+                        tool_1.logger.log(`${dbName} set tv_$unit modifyQueueMax`);
                     }
-                    console.log(`${dbName} done!`);
-                    console.log('\n');
+                    tool_1.logger.log(`${dbName} done!`);
+                    tool_1.logger.log('\n');
                 }
                 catch (err) {
-                    console.error(err);
+                    tool_1.logger.error(err);
                 }
             }
-            console.log('=== Job done!');
+            tool_1.logger.log('=== Job done!');
         }
         catch (err) {
-            console.error(err);
+            tool_1.logger.error(err);
         }
         process.exit(0);
     });

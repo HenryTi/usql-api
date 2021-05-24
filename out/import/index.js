@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.importData = void 0;
+const tool_1 = require("../tool");
 //import { getRunner } from "../db";
 //import { prodRouterBuilder } from "../core";
 function importData(net) {
@@ -37,10 +38,10 @@ function importData(net) {
                     continue;
                 yield runner.importData(unit, user, source, entity, filePath);
             }
-            console.log('files imported!');
+            tool_1.logger.log('files imported!');
         }
         catch (err) {
-            console.error(err);
+            tool_1.logger.error(err);
         }
     });
 }

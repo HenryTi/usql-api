@@ -1,3 +1,4 @@
+import { logger } from '../../tool';
 import { centerApi, EntityRunner, ClientMessage } from "../../core";
 
 // 现在简单的把client message推送给center，由center来分发给client
@@ -7,6 +8,6 @@ export async function pushToClient(unitxRunner:EntityRunner, msg: ClientMessage)
         await centerApi.pushTo(msg);
     }
     catch (err) {
-        console.error(err);
+        logger.error(err);
     }
 }

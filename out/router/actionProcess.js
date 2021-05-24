@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.actionConvert = exports.actionReturns = exports.actionProcess = void 0;
 const _ = require("lodash");
+const tool_1 = require("../tool");
 const core_1 = require("../core");
 const convert_1 = require("../convert");
 function actionProcess(unit, user, name, db, urlParams, runner, body, schema, run) {
@@ -28,10 +29,10 @@ function actionReturns(unit, user, name, db, urlParams, runner, body, schema, ru
     return __awaiter(this, void 0, void 0, function* () {
         let { data } = body;
         if (typeof data === 'object') {
-            console.log('action process data: ', body);
+            tool_1.logger.log('action process data: ', body);
             data = core_1.packParam(schema, data);
         }
-        console.log('action process param: ', data);
+        tool_1.logger.log('action process param: ', data);
         let result = yield runner.action(name, unit, user, data);
         return result;
     });

@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.pullBus = void 0;
 const tool_1 = require("../tool");
+const tool_2 = require("../tool");
 function pullBus(runner) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -32,7 +33,7 @@ function pullBus(runner) {
                     let { length: messagesLen } = messages;
                     if (messagesLen > 0) {
                         // 新版：bus读来，直接写入queue_in。然后在队列里面处理
-                        console.log(`total ${messagesLen} arrived from unitx`);
+                        tool_1.logger.log(`total ${messagesLen} arrived from unitx`);
                         for (let row of messages) {
                             let { to, face: faceUrl, id: msgId, body, version } = row;
                             let face = coll[faceUrl.toLowerCase()];
@@ -51,8 +52,8 @@ function pullBus(runner) {
                             }
                             catch (toQueueInErr) {
                                 hasError = buses.hasError = true;
-                                console.error(toQueueInErr);
-                                yield runner.log(unit, 'jobs pullBus loop to QueueInErr msgId=' + msgId, tool_1.getErrorString(toQueueInErr));
+                                tool_1.logger.error(toQueueInErr);
+                                yield runner.log(unit, 'jobs pullBus loop to QueueInErr msgId=' + msgId, tool_2.getErrorString(toQueueInErr));
                                 break;
                             }
                             ++msgCount;
@@ -72,8 +73,8 @@ function pullBus(runner) {
             }
         }
         catch (err) {
-            console.error(err);
-            yield runner.log(0, 'jobs pullBus loop error: ', tool_1.getErrorString(err));
+            tool_1.logger.error(err);
+            yield runner.log(0, 'jobs pullBus loop error: ', tool_2.getErrorString(err));
         }
     });
 }

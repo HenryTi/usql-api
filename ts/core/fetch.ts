@@ -1,4 +1,5 @@
 import fetch, {Headers} from 'node-fetch';
+import { logger } from '../tool';
 
 export abstract class Fetch {
     protected readonly baseUrl:string;
@@ -28,7 +29,7 @@ export abstract class Fetch {
     }
 
     private async innerFetch(url: string, method:string, body?:any): Promise<any> {
-        console.log('innerFetch ' + method + '  ' + this.baseUrl + url);
+        logger.log('innerFetch ' + method + '  ' + this.baseUrl + url);
         var headers = new Headers();
         headers.append('Accept', 'application/json'); // This one is enough for GET requests
         headers.append('Content-Type', 'application/json'); // This one sends body
@@ -46,13 +47,13 @@ export abstract class Fetch {
             }
         );
         if (res.status !== 200) {
-            console.error(this.baseUrl + url, res.statusText, res.status);
+            logger.error(this.baseUrl + url, res.statusText, res.status);
             throw {
                 error: res.statusText,
                 code: res.status,
             };
-            //console.log('statusCode=', response.statusCode);
-            //console.log('statusMessage=', response.statusMessage);
+            //logger.log('statusCode=', response.statusCode);
+            //logger.log('statusMessage=', response.statusMessage);
         }
         let json = await res.json();
         if (json.error !== undefined) {

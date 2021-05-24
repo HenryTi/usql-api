@@ -1,3 +1,4 @@
+import { logger } from '../tool';
 import { EntityRunner, packParam } from '../core';
 import { OpenApi } from '../core/openApi';
 
@@ -11,7 +12,7 @@ export async function pullEntities(runner:EntityRunner):Promise<void> {
     }
     catch (err) {
         debugger;
-        if (err && err.message) console.error(err.message);
+        if (err && err.message) logger.error(err.message);
     }
 }
 
@@ -20,13 +21,13 @@ enum FromNewSet {ok=1, bad=2, moreTry=3}
 async function pullNew(runner:EntityRunner) {
     let {net} = runner;
 	let count = 0;
-	console.log(`== pullNew start ==`);
+	logger.log(`== pullNew start ==`);
     for (;count<200;) {
         let items = await runner.tableFromProc('$from_new', undefined);
         if (items.length === 0) {
             break;
         }
-		console.log(`== pullNew count=${items.length} ==`);
+		logger.log(`== pullNew count=${items.length} ==`);
         for (let item of items) {
             count++;
             let {id, unit, entity, key, tries, update_time, now} = item;
@@ -56,7 +57,7 @@ async function pullNew(runner:EntityRunner) {
                 await runner.call('$from_new_set', [unit, id, fns]);
             }
         }
-		console.log(`## pullNew end ##`);
+		logger.log(`## pullNew end ##`);
     }
 }
 
@@ -70,11 +71,11 @@ interface UnitOpenApiItems {
 }
 
 async function pullModify(runner:EntityRunner) {
-	console.log(`== pullModify start ==`);
+	logger.log(`== pullModify start ==`);
     let {net} = runner;
     let items = await runner.tableFromProc('$sync_from', undefined);
     if (items.length === 0) return;
-	console.log(`== pullModify count=${items.length} ==`);
+	logger.log(`== pullModify count=${items.length} ==`);
     let unitOpenApiItems:UnitOpenApiItems = {};
     // 把访问同一个openApi的整理到一起
     let promises:Promise<OpenApi>[] = [];
@@ -178,10 +179,10 @@ async function pullModify(runner:EntityRunner) {
                 }
             }
             catch (err) {
-                console.error(err);
+                logger.error(err);
             }
         }
-		console.log(`## pullModify end ##`);
+		logger.log(`## pullModify end ##`);
     }
 }
 
@@ -243,6 +244,6 @@ async function setTuid(runner:EntityRunner, tuidName:string, schema:any, unit:nu
         await runner.tuidSave(tuidName, unit as any, user, paramMain);
     }
     catch (err) {
-        console.log(err.message);
+        logger.log(err.message);
     }
 }
