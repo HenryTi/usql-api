@@ -13,7 +13,7 @@ export class SqlIDDetail extends MySqlBuilder {
 	build():string {
 		let {id, main, detail, detail2, detail3} = this.param;
 		let sql = this.buildDetailSelect(main, '`id`='+id);
-		let whereMain = '`parent`=' + id;
+		let whereMain = '`main`=' + id;
 		sql += this.buildDetailSelect(detail, whereMain);
 		sql += this.buildDetailSelect(detail2, whereMain);
 		sql += this.buildDetailSelect(detail3, whereMain);

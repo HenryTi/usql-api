@@ -63,17 +63,17 @@ class MySqlBuilder {
         if (!override)
             override = {};
         let sql = 'set @row=0;\n';
-        let cols, vals;
+        let cols, valsInit, valsFirst;
         let first;
         if (this.hasUnit === true) {
             cols = '`$unit`';
-            vals = '@unit';
-            first = false;
+            valsInit = '@unit';
+            valsFirst = first = false;
         }
         else {
             cols = '';
-            vals = '';
-            first = true;
+            valsInit = '';
+            valsFirst = first = true;
         }
         for (let f of fields) {
             let { name } = f;
@@ -96,12 +96,12 @@ class MySqlBuilder {
         }
         for (let value of values) {
             sql += `insert into \`tv_${name}\`\n\t(${cols})\n\tvalues\n\t`;
-            first = true;
-            vals = '';
+            let fieldFirst = valsFirst;
+            let vals = valsInit;
             for (let f of fields) {
                 let { name, type } = f;
-                if (first === true) {
-                    first = false;
+                if (fieldFirst === true) {
+                    fieldFirst = false;
                 }
                 else {
                     vals += ',';

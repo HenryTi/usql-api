@@ -9,16 +9,16 @@ class SqlActDetail extends mySqlBuilder_1.MySqlBuilder {
     }
     build() {
         let { main, detail, detail2, detail3 } = this.param;
-        let { values } = main;
+        //let {values} = main;
         let mainOverride = {
             id: `(@main:=@id:=tv_$id(${main.schema.typeId}))`,
-            no: `tv_$no(@unit, '${main.name}')`,
+            no: `(@no:=tv_$no(@unit, '${main.name}'))`,
         };
         let sql = 'SET @ret=\'\';\n';
         sql += this.buildInsert(main, mainOverride);
         let detailOverride = {
             id: `(@id:=tv_$id(${detail.schema.typeId}))`,
-            master: '@main',
+            main: '@main',
             row: '(@row:=@row+1)',
         };
         sql += this.buildInsert(detail, detailOverride);

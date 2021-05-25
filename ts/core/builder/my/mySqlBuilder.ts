@@ -73,17 +73,17 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		let {fields, owner} = schema;
 		if (!override) override = {};
 		let sql = 'set @row=0;\n';
-		let cols:string, vals:string;
+		let cols:string, valsInit:string, valsFirst: boolean;
 		let first:boolean;
 		if (this.hasUnit === true) {
 			cols = '`$unit`';
-			vals = '@unit';
-			first = false;
+			valsInit = '@unit';
+			valsFirst = first = false;
 		}
 		else {
 			cols = '';
-			vals = '';
-			first = true;
+			valsInit = '';
+			valsFirst = first = true;
 		}
 		for (let f of fields) {
 			let {name} = f;
@@ -105,12 +105,12 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 		}
 		for (let value of values) {
 			sql += `insert into \`tv_${name}\`\n\t(${cols})\n\tvalues\n\t`;
-			first = true;
-			vals = '';
+			let fieldFirst = valsFirst;
+			let vals = valsInit;
 			for (let f of fields) {
 				let {name, type} = f;
-				if (first === true) {
-					first = false;
+				if (fieldFirst === true) {
+					fieldFirst = false;
 				}
 				else {
 					vals += ',';
