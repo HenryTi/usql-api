@@ -8,7 +8,7 @@ class MySqlBuilder {
     constructor(builder) {
         let { dbName, hasUnit } = builder;
         this.dbName = dbName;
-        this.hasUnit = hasUnit;
+        this.hasUnit = false; // hasUnit; ID, IDX, IX表，都没有$unit字段，所以当hasUnit=false处理
     }
     buildSumSelect(param) {
         let { IDX, far, near, field } = param;

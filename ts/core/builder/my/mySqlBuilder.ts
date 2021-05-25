@@ -13,7 +13,7 @@ export abstract class MySqlBuilder implements ISqlBuilder {
 	constructor(builder: Builders) {
 		let {dbName, hasUnit} = builder;
 		this.dbName = dbName;
-		this.hasUnit = hasUnit;
+		this.hasUnit = false; // hasUnit; ID, IDX, IX表，都没有$unit字段，所以当hasUnit=false处理
 	}
 
 	abstract build():string;
