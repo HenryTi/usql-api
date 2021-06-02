@@ -1,29 +1,30 @@
 import { Router, Request, Response } from 'express';
+import { logger } from '../../tool';
 import { EntityRunner, RouterBuilder, setUqBuildSecret, Db, prodNet, testNet, centerApi } from '../../core';
 import { BuildRunner } from '../../core';
 
 export function buildBuildRouter(router:Router, rb: RouterBuilder) {
     router.post('/start', async (req:Request, res:Response) => {
         try {
-			console.log('buildBuildRouter step 1');
+			logger.log('buildBuildRouter step 1');
             let dbName:string = req.params.db;
 			let db = Db.db(rb.getDbName(dbName));
 			await prodNet.runnerCompiling(db);
-			console.log('buildBuildRouter step 2');
+			logger.log('buildBuildRouter step 2');
 			await testNet.runnerCompiling(db);
-			console.log('buildBuildRouter step 3');
+			logger.log('buildBuildRouter step 3');
 			let {enc} = req.body;
 			setUqBuildSecret(enc);
 			let runner = new BuildRunner(db);
 			let exists = await runner.buildDatabase();
-			console.log('buildBuildRouter step 4');
+			logger.log('buildBuildRouter step 4');
             res.json({
                 ok: true,
                 res: exists
             });
         }
         catch (err) {
-			console.error(err);
+			logger.error(err);
             res.json({
 				error: err,
 			});

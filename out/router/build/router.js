@@ -10,30 +10,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildBuildRouter = void 0;
+const tool_1 = require("../../tool");
 const core_1 = require("../../core");
 const core_2 = require("../../core");
 function buildBuildRouter(router, rb) {
     router.post('/start', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
-            console.log('buildBuildRouter step 1');
+            tool_1.logger.log('buildBuildRouter step 1');
             let dbName = req.params.db;
             let db = core_1.Db.db(rb.getDbName(dbName));
             yield core_1.prodNet.runnerCompiling(db);
-            console.log('buildBuildRouter step 2');
+            tool_1.logger.log('buildBuildRouter step 2');
             yield core_1.testNet.runnerCompiling(db);
-            console.log('buildBuildRouter step 3');
+            tool_1.logger.log('buildBuildRouter step 3');
             let { enc } = req.body;
             core_1.setUqBuildSecret(enc);
             let runner = new core_2.BuildRunner(db);
             let exists = yield runner.buildDatabase();
-            console.log('buildBuildRouter step 4');
+            tool_1.logger.log('buildBuildRouter step 4');
             res.json({
                 ok: true,
                 res: exists
             });
         }
         catch (err) {
-            console.error(err);
+            tool_1.logger.error(err);
             res.json({
                 error: err,
             });
