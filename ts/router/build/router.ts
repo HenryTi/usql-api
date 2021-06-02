@@ -19,6 +19,7 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
             });
         }
         catch (err) {
+			console.error(err);
             res.json({
 				error: err,
 			});

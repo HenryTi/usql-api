@@ -29,6 +29,7 @@ function buildBuildRouter(router, rb) {
             });
         }
         catch (err) {
+            console.error(err);
             res.json({
                 error: err,
             });
