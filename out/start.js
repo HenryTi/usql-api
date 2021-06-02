@@ -71,6 +71,7 @@ function init() {
                             p = p.substr(0, 100);
                     }
                     let t = new Date();
+                    tool_1.logger.log(req.method, req.originalUrl, p);
                     tool_1.logger.log('%s %s %s', req.method, req.originalUrl, p);
                     try {
                         next();

@@ -67,8 +67,8 @@ export async function init():Promise<void> {
 					if (p.length > 100) p = p.substr(0, 100);
 				}
                 let t = new Date();
-                logger.log('%s %s %s', 
-                    req.method, req.originalUrl, p);
+				logger.log(req.method, req.originalUrl, p);
+                logger.log('%s %s %s', req.method, req.originalUrl, p);
                 try {
                     next();
                 }
