@@ -71,7 +71,7 @@ function init() {
                             p = p.substr(0, 100);
                     }
                     let t = new Date();
-                    tool_1.logger.log('%s-%s %s:%s - %s %s %s', t.getMonth() + 1, t.getDate(), t.getHours(), t.getMinutes(), req.method, req.originalUrl, p);
+                    tool_1.logger.log('%s %s %s', req.method, req.originalUrl, p);
                     try {
                         next();
                     }
