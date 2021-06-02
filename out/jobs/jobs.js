@@ -76,10 +76,11 @@ function startJobsLoop() {
                         // 2020-7-1：我太蠢了。居然带着这一句发布了 ？！！！
                         // if (dbName !== 'bi') continue;
                         if (core_1.env.isDevelopment === true) {
-                            return;
-                            // if (dbName === 'pointshop') debugger;
+                            //return;
+                            //if (dbName === 'deliver') debugger;					
                             yield $uqDb.setDebugJobs();
                             tool_1.logger.info('========= set debugging jobs =========');
+                            //if (dbName !== 'collectpayment') continue;
                         }
                         tool_1.logger.info('====== loop for ' + uqDb + '======');
                         let runner = yield net.getRunner(dbName);
