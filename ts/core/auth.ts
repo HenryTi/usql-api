@@ -172,6 +172,7 @@ export function setUqBuildSecret(ubs: string) {
 
 function middlewareUqBuild(req:Request, res:Response, next:NextFunction) {
     if (req.url === '/start') {
+        logger.log('middlewareUqBuild req.uql /start');
         next();
         return;
     }

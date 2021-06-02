@@ -157,6 +157,7 @@ function setUqBuildSecret(ubs) {
 exports.setUqBuildSecret = setUqBuildSecret;
 function middlewareUqBuild(req, res, next) {
     if (req.url === '/start') {
+        tool_1.logger.log('middlewareUqBuild req.uql /start');
         next();
         return;
     }
