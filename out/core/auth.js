@@ -159,6 +159,7 @@ function middlewareUqBuild(req, res, next) {
     tool_1.logger.log('middlewareUqBuild req.uql /start');
     if (req.url === '/start') {
         tool_1.logger.log('middlewareUqBuild req.uql /start');
+        tool_1.logger.log('middlewareUqBuild req.uql /start');
         next();
         return;
     }

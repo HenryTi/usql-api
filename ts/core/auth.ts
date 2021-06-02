@@ -174,6 +174,7 @@ function middlewareUqBuild(req:Request, res:Response, next:NextFunction) {
 	logger.log('middlewareUqBuild req.uql /start');
     if (req.url === '/start') {
         logger.log('middlewareUqBuild req.uql /start');
+        logger.log('middlewareUqBuild req.uql /start');
         next();
         return;
     }
