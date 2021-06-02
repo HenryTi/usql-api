@@ -15,14 +15,18 @@ const core_2 = require("../../core");
 function buildBuildRouter(router, rb) {
     router.post('/start', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
+            console.log('buildBuildRouter step 1');
             let dbName = req.params.db;
             let db = core_1.Db.db(rb.getDbName(dbName));
             yield core_1.prodNet.runnerCompiling(db);
+            console.log('buildBuildRouter step 2');
             yield core_1.testNet.runnerCompiling(db);
+            console.log('buildBuildRouter step 3');
             let { enc } = req.body;
             core_1.setUqBuildSecret(enc);
             let runner = new core_2.BuildRunner(db);
             let exists = yield runner.buildDatabase();
+            console.log('buildBuildRouter step 4');
             res.json({
                 ok: true,
                 res: exists
