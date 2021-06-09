@@ -886,11 +886,11 @@ class EntityRunner {
                 }
             }
             let faces = [];
-            let outCount = 0;
+            let busOutCount = 0;
             let coll = {};
             for (let busSchema of this.busArr) {
-                let { name: bus, busOwner, busName, schema } = busSchema;
-                let hasAccept = false;
+                let { name: bus, busOwner, busName, schema, outCount } = busSchema;
+                //let hasAccept:boolean = false;
                 for (let i in schema) {
                     let { version, accept, query } = schema[i];
                     let faceName = i.toLowerCase();
@@ -899,33 +899,29 @@ class EntityRunner {
                         continue;
                     if (accept !== undefined) {
                         faces.push(url);
-                        coll[url] = {
-                            bus: bus,
-                            faceName: faceName,
-                            version: version,
-                            accept: accept,
-                        };
-                        hasAccept = true;
+                        coll[url] = { bus, faceName, version, accept, };
+                        //hasAccept = true;
                     }
                     else if (query === true) {
                         coll[url] = {
-                            bus: bus,
-                            faceName: faceName,
-                            version: version,
+                            bus,
+                            faceName,
+                            version,
                             query: true,
                         };
                     }
                 }
-                if (hasAccept === false)
-                    ++outCount;
+                //if (hasAccept === false) ++outCount;
+                //if (hasOut === true) ++outCount;
+                busOutCount += (outCount !== null && outCount !== void 0 ? outCount : 0);
             }
             let faceText;
             if (faces.length > 0)
                 faceText = faces.join('\n');
             this.buses = {
                 faces: faceText,
-                outCount: outCount,
-                coll: coll,
+                outCount: busOutCount,
+                coll,
                 hasError: false,
             };
             this.buildAccesses();

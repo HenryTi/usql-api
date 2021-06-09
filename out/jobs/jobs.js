@@ -73,11 +73,21 @@ function startJobsLoop() {
                             dbName = uqDb;
                             net = core_1.prodNet;
                         }
+                        /*
+                        switch (dbName) {
+                            case 'deliver':
+                            case 'collectpayment':
+                                break;
+                        
+                            default:
+                                continue;
+                        }
+                        */
                         // 2020-7-1：我太蠢了。居然带着这一句发布了 ？！！！
                         // if (dbName !== 'bi') continue;
                         if (core_1.env.isDevelopment === true) {
                             //return;
-                            //if (dbName === 'deliver') debugger;					
+                            //if (dbName === 'deliver') debugger;
                             yield $uqDb.setDebugJobs();
                             tool_1.logger.info('========= set debugging jobs =========');
                             //if (dbName !== 'collectpayment') continue;
