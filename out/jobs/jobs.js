@@ -58,62 +58,63 @@ function startJobsLoop() {
                 let uqs = yield $uqDb.uqDbs();
                 if (uqs.length === 0) {
                     tool_1.logger.error('debugging_jobs=yes, stop jobs loop');
+                    continue;
                 }
-                else
-                    for (let uqRow of uqs) {
-                        let { db: uqDb } = uqRow;
-                        let net;
-                        let dbName;
-                        ;
-                        if (uqDb.endsWith($test) === true) {
-                            dbName = uqDb.substr(0, uqDb.length - $test.length);
-                            net = core_1.testNet;
-                        }
-                        else {
-                            dbName = uqDb;
-                            net = core_1.prodNet;
-                        }
-                        /*
-                        switch (dbName) {
-                            case 'deliver':
-                            case 'collectpayment':
-                                break;
-                        
-                            default:
-                                continue;
-                        }
-                        */
-                        // 2020-7-1：我太蠢了。居然带着这一句发布了 ？！！！
-                        // if (dbName !== 'bi') continue;
-                        if (core_1.env.isDevelopment === true) {
-                            //return;
-                            //if (dbName === 'deliver') debugger;
-                            yield $uqDb.setDebugJobs();
-                            tool_1.logger.info('========= set debugging jobs =========');
-                            //if (dbName !== 'collectpayment') continue;
-                        }
-                        tool_1.logger.info('====== loop for ' + uqDb + '======');
-                        let runner = yield net.getRunner(dbName);
-                        if (runner === undefined)
-                            continue;
-                        let { buses } = runner;
-                        if (buses !== undefined) {
-                            let { outCount, faces } = buses;
-                            if (outCount > 0 || runner.hasSheet === true) {
-                                tool_1.logger.info(`==== in loop ${uqDb}: queueOut out bus number=${outCount} ====`);
-                                yield queueOut_1.queueOut(runner);
-                            }
-                            if (faces !== undefined) {
-                                tool_1.logger.info(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
-                                yield pullBus_1.pullBus(runner);
-                                tool_1.logger.info(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
-                                yield queueIn_1.queueIn(runner);
-                            }
-                        }
-                        tool_1.logger.info(`==== in loop ${uqDb}: pullEntities ====`);
-                        yield pullEntities_1.pullEntities(runner);
-                        tool_1.logger.info(`###### end loop ${uqDb} ######`);
+                for (let uqRow of uqs) {
+                    let { db: uqDb } = uqRow;
+                    let net;
+                    let dbName;
+                    ;
+                    if (uqDb.endsWith($test) === true) {
+                        dbName = uqDb.substr(0, uqDb.length - $test.length);
+                        net = core_1.testNet;
                     }
+                    else {
+                        dbName = uqDb;
+                        net = core_1.prodNet;
+                    }
+                    /*
+                    switch (dbName) {
+                        case 'deliver':
+                        case 'collectpayment':
+                        case 'order':
+                            break;
+                    
+                        default:
+                            continue;
+                    }
+                    */
+                    // 2020-7-1：我太蠢了。居然带着这一句发布了 ？！！！
+                    // if (dbName !== 'bi') continue;
+                    if (core_1.env.isDevelopment === true) {
+                        //return;
+                        //if (dbName === 'deliver') debugger;
+                        yield $uqDb.setDebugJobs();
+                        tool_1.logger.info('========= set debugging jobs =========');
+                        //if (dbName !== 'collectpayment') continue;
+                    }
+                    tool_1.logger.info('====== loop for ' + uqDb + '======');
+                    let runner = yield net.getRunner(dbName);
+                    if (runner === undefined)
+                        continue;
+                    let { buses } = runner;
+                    if (buses !== undefined) {
+                        let { outCount, faces } = buses;
+                        if (outCount > 0 || runner.hasSheet === true) {
+                            tool_1.logger.info(`==== in loop ${uqDb}: queueOut out bus number=${outCount} ====`);
+                            yield queueOut_1.queueOut(runner);
+                        }
+                        if (faces !== undefined) {
+                            tool_1.logger.info(`==== in loop ${uqDb}: pullBus faces: ${faces} ====`);
+                            yield pullBus_1.pullBus(runner);
+                            tool_1.logger.info(`==== in loop ${uqDb}: queueIn faces: ${faces} ====`);
+                            yield queueIn_1.queueIn(runner);
+                        }
+                    }
+                    tool_1.logger.info(`==== in loop ${uqDb}: pullEntities ====`);
+                    yield pullEntities_1.pullEntities(runner);
+                    tool_1.logger.info(`###### end loop ${uqDb} ######`);
+                }
             }
             catch (err) {
                 tool_1.logger.error('jobs loop error!!!!');

@@ -50,8 +50,9 @@ export async function startJobsLoop(): Promise<void> {
 			let uqs = await $uqDb.uqDbs();
 			if (uqs.length === 0) {
 				logger.error('debugging_jobs=yes, stop jobs loop');
+				continue;
 			}
-			else for (let uqRow of uqs) {
+			for (let uqRow of uqs) {
                 let {db:uqDb} = uqRow;
                 let net:Net;
                 let dbName:string;;
@@ -67,6 +68,7 @@ export async function startJobsLoop(): Promise<void> {
 				switch (dbName) {
 					case 'deliver':
 					case 'collectpayment':
+					case 'order':
 						break;
 				
 					default:
