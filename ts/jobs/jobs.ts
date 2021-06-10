@@ -64,22 +64,20 @@ export async function startJobsLoop(): Promise<void> {
                     dbName = uqDb;
                     net = prodNet;
 				}
-				/*
-				switch (dbName) {
-					case 'deliver':
-					case 'collectpayment':
-					case 'order':
-						break;
-				
-					default:
-						continue;
-				}
-				*/
 				// 2020-7-1：我太蠢了。居然带着这一句发布了 ？！！！
 				// if (dbName !== 'bi') continue;
 
                 if (env.isDevelopment === true) {
-					//return;
+					switch (dbName) {
+						case 'deliver':
+						case 'collectpayment':
+						case 'order':
+							break;
+					
+						default:
+							continue;
+					}
+						//return;
 					//if (dbName === 'deliver') debugger;
 					await $uqDb.setDebugJobs();
 					logger.info('========= set debugging jobs =========');
