@@ -21,6 +21,8 @@ class BuildRunner {
     initSetting() {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.db.call('tv_$init_setting', []);
+            let updateCompileTick = `update $uq.uq set compile_tick=unix_timestamp() where name='${this.db.getDbName()}'`;
+            yield this.db.sql(updateCompileTick, undefined);
         });
     }
     setSetting(unit, name, value) {

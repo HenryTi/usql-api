@@ -58,6 +58,7 @@ export class EntityRunner {
     private readonly modifyMaxes: {[unit:number]: number};
     private readonly roleVersions: {[unit:number]: {[app:number]: {version:number, tick:number}}} = {};
 	private ixOfUsers: string;
+	private compileTick: number = 0;
 
     name: string;
     uqOwner: string;
@@ -76,6 +77,7 @@ export class EntityRunner {
     net: Net;
     hasSheet: boolean = false;
 	isCompiling:boolean = false;
+	execQueueActError:boolean = false;
 
     constructor(name:string, db:Db, net:Net = undefined) {
         this.name = name;
@@ -89,9 +91,16 @@ export class EntityRunner {
 
 	async reset() {
 		this.isCompiling = false;
+		this.execQueueActError = false;
 		this.db.reset();
 		this.schemas = undefined;
 		await this.init();
+	}
+
+	async setCompileTick(compileTick: number) {
+		if (this.compileTick === compileTick) return;
+		this.compileTick = compileTick;
+		await this.reset();
 	}
 
 	getEntityNameList() {

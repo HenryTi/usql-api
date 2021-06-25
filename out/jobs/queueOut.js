@@ -153,10 +153,8 @@ function email(runner, unit, id, content) {
 // bus参数，调用的时候，就是project
 function bus(runner, unit, id, to, bus, content) {
     return __awaiter(this, void 0, void 0, function* () {
-        tool_1.logger.error('bus out step0', bus, content, unit, to);
         if (!unit && !to)
             return;
-        tool_1.logger.error('bus out step1');
         let parts = bus.split('/');
         let busEntityName = parts[0];
         let face = parts[1];
@@ -185,7 +183,6 @@ function bus(runner, unit, id, to, bus, content) {
             };
             return message;
         }
-        tool_1.logger.error('bus out step2');
         if (to > 0) {
             let unitXArr = yield unitx_1.getUserX(runner, to, bus, busOwner, busName, face);
             if (!unitXArr || unitXArr.length === 0)
@@ -195,12 +192,10 @@ function bus(runner, unit, id, to, bus, content) {
                 runner.net.sendToUnitx(v, message);
             });
             yield Promise.all(promises);
-            tool_1.logger.error('bus out step3');
         }
         else {
             let message = buildMessage(unit);
             yield runner.net.sendToUnitx(unit, message);
-            tool_1.logger.error('bus out step4');
         }
     });
 }

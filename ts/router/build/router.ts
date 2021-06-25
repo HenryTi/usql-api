@@ -56,7 +56,7 @@ export function buildBuildRouter(router:Router, rb: RouterBuilder) {
 			let {uqId:paramUqId, uqVersion} = req.body;
 			await Promise.all([
 				runner.setSetting(0, 'uqId', String(paramUqId)),
-				runner.setSetting(0, 'uqVersion', String(uqVersion))
+				runner.setSetting(0, 'uqVersion', String(uqVersion)),
 			]);
 			await runner.initSetting();
 

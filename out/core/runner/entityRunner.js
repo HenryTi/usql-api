@@ -20,9 +20,11 @@ const centerApi_1 = require("../centerApi");
 class EntityRunner {
     constructor(name, db, net = undefined) {
         this.roleVersions = {};
+        this.compileTick = 0;
         this.hasPullEntities = false;
         this.hasSheet = false;
         this.isCompiling = false;
+        this.execQueueActError = false;
         this.parametersBusCache = {};
         this.actionConvertSchemas = {};
         this.name = name;
@@ -35,9 +37,18 @@ class EntityRunner {
     reset() {
         return __awaiter(this, void 0, void 0, function* () {
             this.isCompiling = false;
+            this.execQueueActError = false;
             this.db.reset();
             this.schemas = undefined;
             yield this.init();
+        });
+    }
+    setCompileTick(compileTick) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this.compileTick === compileTick)
+                return;
+            this.compileTick = compileTick;
+            yield this.reset();
         });
     }
     getEntityNameList() {

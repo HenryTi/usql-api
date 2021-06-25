@@ -65,7 +65,7 @@ function buildBuildRouter(router, rb) {
             let { uqId: paramUqId, uqVersion } = req.body;
             yield Promise.all([
                 runner.setSetting(0, 'uqId', String(paramUqId)),
-                runner.setSetting(0, 'uqVersion', String(uqVersion))
+                runner.setSetting(0, 'uqVersion', String(uqVersion)),
             ]);
             yield runner.initSetting();
             yield core_1.prodNet.resetRunnerAfterCompile(db);

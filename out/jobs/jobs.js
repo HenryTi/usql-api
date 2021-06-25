@@ -16,6 +16,7 @@ const pullEntities_1 = require("./pullEntities");
 const pullBus_1 = require("./pullBus");
 const queueIn_1 = require("./queueIn");
 const queueOut_1 = require("./queueOut");
+const execQueueAct_1 = require("./execQueueAct");
 const firstRun = core_1.env.isDevelopment === true ? 3000 : 30 * 1000;
 const runGap = core_1.env.isDevelopment === true ? 15 * 1000 : 30 * 1000;
 const waitForOtherStopJobs = 1 * 1000; // 等1分钟，等其它服务器uq-api停止jobs
@@ -61,7 +62,7 @@ function startJobsLoop() {
                     continue;
                 }
                 for (let uqRow of uqs) {
-                    let { db: uqDb } = uqRow;
+                    let { db: uqDb, compile_tick } = uqRow;
                     let net;
                     let dbName;
                     ;
@@ -80,6 +81,7 @@ function startJobsLoop() {
                             case 'deliver':
                             case 'collectpayment':
                             case 'order':
+                            case 'warehouse':
                                 break;
                             default:
                                 continue;
@@ -94,6 +96,7 @@ function startJobsLoop() {
                     let runner = yield net.getRunner(dbName);
                     if (runner === undefined)
                         continue;
+                    yield runner.setCompileTick(compile_tick);
                     let { buses } = runner;
                     if (buses !== undefined) {
                         let { outCount, faces } = buses;
@@ -109,7 +112,14 @@ function startJobsLoop() {
                         }
                     }
                     tool_1.logger.info(`==== in loop ${uqDb}: pullEntities ====`);
-                    yield pullEntities_1.pullEntities(runner);
+                    if (core_1.env.isDevelopment === false) {
+                        yield pullEntities_1.pullEntities(runner);
+                    }
+                    else {
+                        tool_1.logger.error('为了调试程序，pullEntities暂时屏蔽');
+                    }
+                    tool_1.logger.info(`==== in loop ${uqDb}: execQueueAct ====`);
+                    yield execQueueAct_1.execQueueAct(runner);
                     tool_1.logger.info(`###### end loop ${uqDb} ######`);
                 }
             }

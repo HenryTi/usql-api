@@ -5,6 +5,7 @@ import { pullEntities } from './pullEntities';
 import { pullBus } from './pullBus';
 import { queueIn } from './queueIn';
 import { queueOut } from './queueOut';
+import { execQueueAct } from './execQueueAct';
 
 const firstRun: number = env.isDevelopment === true? 3000 : 30*1000;
 const runGap: number = env.isDevelopment === true? 15*1000 : 30*1000;
@@ -53,7 +54,7 @@ export async function startJobsLoop(): Promise<void> {
 				continue;
 			}
 			for (let uqRow of uqs) {
-                let {db:uqDb} = uqRow;
+                let {db:uqDb, compile_tick} = uqRow;
                 let net:Net;
                 let dbName:string;;
                 if (uqDb.endsWith($test) === true) {
@@ -72,6 +73,7 @@ export async function startJobsLoop(): Promise<void> {
 						case 'deliver':
 						case 'collectpayment':
 						case 'order':
+						case 'warehouse':
 							break;
 					
 						default:
@@ -87,6 +89,7 @@ export async function startJobsLoop(): Promise<void> {
 
                 let runner = await net.getRunner(dbName);
 				if (runner === undefined) continue;
+				await runner.setCompileTick(compile_tick);
 				let {buses} = runner;
                 if (buses !== undefined) {
 					let {outCount, faces} = buses;
@@ -102,7 +105,14 @@ export async function startJobsLoop(): Promise<void> {
                     }
                 }
 				logger.info(`==== in loop ${uqDb}: pullEntities ====`);
-                await pullEntities(runner);
+				if (env.isDevelopment === false) {
+					await pullEntities(runner);
+				}
+				else {
+					logger.error('为了调试程序，pullEntities暂时屏蔽');
+				}
+				logger.info(`==== in loop ${uqDb}: execQueueAct ====`);
+				await execQueueAct(runner);
 				logger.info(`###### end loop ${uqDb} ######`);
             }
         }

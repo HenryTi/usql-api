@@ -15,6 +15,8 @@ export class BuildRunner {
 
     async initSetting():Promise<void> {
         await this.db.call('tv_$init_setting', []);
+		let updateCompileTick = `update $uq.uq set compile_tick=unix_timestamp() where name='${this.db.getDbName()}'`;
+		await this.db.sql(updateCompileTick, undefined);
     }
     async setSetting(unit:number, name: string, value: string): Promise<void> {
         name = name.toLowerCase();

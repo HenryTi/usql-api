@@ -429,8 +429,13 @@ END
             let sql = 'CREATE DATABASE IF NOT EXISTS $uq'; // default CHARACTER SET utf8 COLLATE utf8_unicode_ci';
             await this.exec(sql, undefined);
         }
-        let createUqTable = 'CREATE TABLE IF NOT EXISTS $uq.uq (id int not null auto_increment, `name` varchar(50), create_time timestamp not null default current_timestamp, uid bigint not null default 0, primary key(`name`), unique key unique_id (id))';
+        let createUqTable = 'CREATE TABLE IF NOT EXISTS $uq.uq (id int not null auto_increment, `name` varchar(50), compile_tick INT, create_time timestamp not null default current_timestamp, uid bigint not null default 0, primary key(`name`), unique key unique_id (id))';
         await this.exec(createUqTable, undefined);
+		let existsCompileTick = `SELECT NULL FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = 'uq' AND table_schema = '$uq' AND column_name = 'compile_tick'`;
+		let compileTickColumns = await this.exec(existsCompileTick, undefined);
+		if (compileTickColumns.length === 0) {
+			await this.exec(`ALTER TABLE $uq.uq ADD compile_tick int NOT NULL default '0';`, undefined);
+		}
         let createLog = 'CREATE TABLE IF NOT EXISTS $uq.log (`time` timestamp(6) not null, uq int, unit int, subject varchar(100), content text, primary key(`time`))';
         await this.exec(createLog, undefined);
         let createSetting = 'CREATE TABLE IF NOT EXISTS $uq.setting (`name` varchar(100) not null, `value` varchar(100), update_time timestamp default current_timestamp on update current_timestamp, primary key(`name`))';
@@ -612,7 +617,7 @@ END
     async uqDbs():Promise<any[]> {
         let sql = env.isDevelopment===true?
         `select name as db from $uq.uq WHERE name<>'$uid';` :
-        `select name as db 
+        `select name as db, compile_tick
 	            from $uq.uq 
 				where name<>'$uid' AND
 					not exists(SELECT \`name\` FROM $uq.setting WHERE \`name\`='debugging_jobs' AND \`value\`='yes' AND UNIX_TIMESTAMP()-unix_timestamp(update_time)<600);`;
