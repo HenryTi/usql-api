@@ -616,7 +616,7 @@ END
     }
     async uqDbs():Promise<any[]> {
         let sql = env.isDevelopment===true?
-        `select name as db from $uq.uq WHERE name<>'$uid';` :
+        `select name as db, compile_tick from $uq.uq WHERE name<>'$uid';` :
         `select name as db, compile_tick
 	            from $uq.uq 
 				where name<>'$uid' AND

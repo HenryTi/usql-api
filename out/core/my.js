@@ -654,7 +654,7 @@ END
     uqDbs() {
         return __awaiter(this, void 0, void 0, function* () {
             let sql = db_1.env.isDevelopment === true ?
-                `select name as db from $uq.uq WHERE name<>'$uid';` :
+                `select name as db, compile_tick from $uq.uq WHERE name<>'$uid';` :
                 `select name as db, compile_tick
 	            from $uq.uq 
 				where name<>'$uid' AND
