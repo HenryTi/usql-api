@@ -53,6 +53,8 @@ class Fetch {
                 headers: {
                     "Content-Type": 'application/json',
                     "Accept": 'application/json',
+                    //"Authorization": 'this.apiToken',
+                    //"Access-Control-Allow-Origin": '*'
                 },
                 method: method,
                 body: JSON.stringify(body),

@@ -45,7 +45,11 @@ function encrypt(data, key) {
     let ret = crypto.publicEncrypt({
         key: key,
         //padding: constants.RSA_PKCS1_OAEP_PADDING
-        padding: constants.RSA_PKCS1_PADDING,
+        padding: constants.RSA_PKCS1_PADDING, //-- 384， 512 已经通过
+        //padding: constants.RSA_PKCS1_PSS_PADDING,
+        //padding: constants.RSA_NO_PADDING,
+        //padding: constants.RSA_SSLV23_PADDING,
+        //padding: constants.RSA_X931_PADDING
     }, data);
     return ret;
 }
